@@ -2,19 +2,19 @@ import { defaults } from './defaults.js'
 
 export const g22mars = {
   ...defaults,
-  titleId: 'g22mars', title: '22Mars', subtitle: 'Convict Camps, Mining, and Space Tourism', designer: 'Örjan Wennman', wip: true,
-  location: 'Mars', minPlayers: 2, maxPlayers: 4,
+  titleId: 'g22mars', title: '22Mars', subtitle: 'Convict Camps, Mining, and Space Tourism', designer: 'Jonas Jones', wip: true,
+  location: 'Mars', minPlayers: 3, maxPlayers: 5,
 
-  bankCash: 6000,
-  startingCash: { 2: 350, 3: 260, 4: 225 },
-  certLimit: { 2: 15, 3: 12, 4: 9 },
+  bankCash: 99999,
+  startingCash: { 2: 450, 3: 300, 4: 225, 5: 180 },
+  certLimit: { 2: 15, 3: 12, 4: 9, 5: 7 },
   currencyFormat: 'c',
 
   capitalization: 'incremental',
   floatPercent: 20, // Floats on CEO share purchase
   sellBuyOrder: 'sell_buy',
   sellMovement: 'down_share',
-  marketShareLimit: 100,
+  marketShareLimit: 80,
 
   // Dividend: >0 and <2x price = right 1, >=2x price = right 2
   // Withhold: left 1 (down if at left edge). Not allowed at 35.
@@ -45,17 +45,17 @@ export const g22mars = {
     { name: '3', on: '3', trainLimit: 3, tiles: ['yellow','green'], operatingRounds: 2 },
     { name: '4', on: '4', trainLimit: 3, tiles: ['yellow','green'], operatingRounds: 2 },
     { name: '5', on: '5', trainLimit: 3, tiles: ['yellow','green','brown'], operatingRounds: 2 },
-    { name: '7', on: '7', trainLimit: 3, tiles: ['yellow','green','brown','gray'], operatingRounds: 2 },
-    { name: '8', on: '8', trainLimit: 3, tiles: ['yellow','green','brown','gray'], operatingRounds: 2 },
+    { name: '7', on: '7*', trainLimit: 3, tiles: ['yellow','green','brown','gray'], operatingRounds: 2 },
+    { name: '8', on: '8*', trainLimit: 3, tiles: ['yellow','green','brown','gray'], operatingRounds: 2 },
   ],
 
   trains: [
-    { name: '2', distance: 2, price: 110, rustsOn: '4', num: 6 },
-    { name: '3', distance: 3, price: 180, rustsOn: '5', num: 4 },
-    { name: '4', distance: 4, price: 280, rustsOn: '7', num: 3 },
-    { name: '5', distance: 5, price: 400, rustsOn: '8', num: 3 },
-    { name: '7', distance: 6, price: 520, num: 4, desc: 'Runs 6 stops, doubles first OR last stop value.' },
-    { name: '8', distance: 6, price: 660, num: 5, desc: 'Runs 6 stops, doubles BOTH first and last stop.' },
+    { name: '2', distance: 2, price: 100, rustsOn: '4', num: 6 },
+    { name: '3', distance: 3, price: 170, rustsOn: '5', num: 4 },
+    { name: '4', distance: 4, price: 250, rustsOn: '7*', num: 3 },
+    { name: '5', distance: 5, price: 340, rustsOn: '8*', num: 3 },
+    { name: '7*', distance: 6, price: 440, num: 4, desc: 'Runs 6 stops, doubles first OR last stop value.' },
+    { name: '8*', distance: 6, price: 560, num: 5, desc: 'Runs 6 stops, doubles BOTH first and last stop.' },
   ],
 
   corporations: [

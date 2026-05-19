@@ -7,6 +7,7 @@ export function createPlayer(id, name, startingCash) {
     cash: startingCash,
     shares: [],    // [{ corpSym, percent, isPresident }]
     privates: [],  // [companySym]
+    cards: [],     // [{ id, name, color, used }] — PTG strategy cards, player-held
   }
 }
 

@@ -33,4 +33,8 @@ export const defaults = {
 
   // Market share limit (percent in pool before no more can be sold)
   marketShareLimit: 50,
+
+  // Corp-to-corp share purchasing (disabled by default)
+  corpCanBuyShares: false,
+  corpCanSellShares: false,
 }

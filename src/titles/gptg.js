@@ -81,16 +81,63 @@ export const gptg = {
 
   pregame: [{ id: 'priority', label: 'Priority Auction', type: 'priority' }],
 
-  // No private companies in PTG — strategy cards are player-held, not tracked as companies
+  // No private companies in PTG — strategy cards are player-held
   companies: [],
 
+  // Strategy cards: assigned to player when buying CEO share. Can use unique action OR assign as station permit to train.
+  strategyCards: [
+    { id: 'central_station', name: 'Central Station', color: 'blue',
+      permit: 'Train not blocked by blue stations',
+      unique: 'Place $20 token on non-city tile. Route gains +$20.' },
+    { id: 'end_of_line', name: 'End of the Line', color: 'white',
+      permit: 'Train not blocked by white stations',
+      unique: 'Place barricade to permanently block rail connection between two tiles (rounds 3-7).' },
+    { id: 'infrastructure_push', name: 'Infrastructure Push', color: 'green',
+      permit: 'Train not blocked by green stations',
+      unique: 'Place green tile in yellow phase or brown tile in green phase.' },
+    { id: 'railroad_bridge', name: 'Railroad Bridge', color: 'red',
+      permit: 'Train not blocked by red stations',
+      unique: 'Place yellow tile adjacent to water edge of port tile (cannot be upgraded).' },
+    { id: 'insider_affair', name: 'Insider Affair', color: 'purple',
+      permit: 'Train not blocked by purple stations',
+      unique: 'Buy one share from open market at any time.' },
+    { id: 'neutral_station', name: 'Neutral Station', color: 'black',
+      permit: 'Train not blocked by black stations',
+      unique: 'Place neutral station in any open city. Adds +$10 to routes stopping there.' },
+    { id: 'station_relocation', name: 'Station Relocation', color: 'yellow',
+      permit: 'Train not blocked by yellow stations',
+      unique: 'Relocate one placed station to any open city at no cost.' },
+    { id: 'rail_contractor', name: 'Rail Contractor', color: 'grey',
+      permit: 'Train not blocked by grey stations',
+      unique: 'Reserve one tile for the duration of a round (only you can place it).' },
+  ],
+
+  // Corp share trading: step 3.1 sell, step 3.7 buy one share per turn
+  corpCanBuyShares: true,
+  corpCanSellShares: true,
+  corpBuyLimit: 1,            // max 1 purchase per company turn
+  corpCanBuyOwnShares: false, // cannot repurchase shares sold in same round (tracked at UI level)
+  corpCanBuyPresident: true,  // can buy CEO share to start a new company
+  corpCanStartCorps: true,    // can start new corps via CEO purchase
+  corpNoCertLimit: true,      // unlimited share ownership
+
   // PTG-specific rules
+  // halfPay defaults to false — PTG only has pay out or withhold
   ceoIncome: 10, // $10 per round per CEO share
   taxThresholds: [
     { minPercent: 60, maxPercent: 70, tax: 20 },
     { minPercent: 80, maxPercent: 90, tax: 40 },
     { minPercent: 100, maxPercent: 100, tax: 60 },
   ],
-  mergerAllowed: true, // From brown phase onwards
+  // Merger: two equal companies combine into one. From brown phase, both must have operated once.
+  merger: {
+    type: 'ptg_combine',       // Two peers → composite
+    fromPhase: 'Brown',        // Available from brown phase
+    requireOperated: true,     // Both must have completed at least one train operation
+    canReMerge: false,         // Merged company cannot merge again
+    priceFormula: 'average',   // (priceA + priceB) / 2 rounded down to nearest market price
+    shareConversion: '20_to_10', // 5x20% → 10x10%
+    trainLimit: 2,
+  },
   topBonusRounds: { 6: 30, 7: 50 }, // Extra dividend per share if in green box during rounds 6-7
 }

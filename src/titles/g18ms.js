@@ -30,13 +30,13 @@ export const g18ms = {
   ],
 
   trains: [
-    { name: '2+', distance: 2, price: 80, num: 5, desc: 'Salvage $20 on rust.' },
-    { name: '3+', distance: 3, price: 180, num: 4, desc: 'Salvage $30 on rust.' },
-    { name: '4+', distance: 4, price: 300, num: 3, desc: 'Salvage $60 on rust.' },
+    { name: '2+', distance: 2, price: 80, num: 5, salvageValue: 20 },
+    { name: '3+', distance: 3, price: 180, num: 4, salvageValue: 30 },
+    { name: '4+', distance: 4, price: 300, num: 3, salvageValue: 60 },
     { name: '5', distance: 5, price: 500, num: 2 },
     { name: '6', distance: 6, price: 550, num: 2, events: ['close_companies','remove_tokens'] },
-    { name: '2D', distance: 2, price: 500, num: 4, availableOn: '6', desc: 'Multiplier: runs route value x2. Variant: 4D at $750.' },
-    { name: '5D', distance: 5, price: 850, num: 1, availableOn: '6', desc: 'Multiplier: runs route value x2.' },
+    { name: '2D', distance: 2, price: 500, num: 4, availableOn: '6', multiplier: 2 },
+    { name: '5D', distance: 5, price: 850, num: 1, availableOn: '6', multiplier: 2 },
   ],
 
   corporations: [

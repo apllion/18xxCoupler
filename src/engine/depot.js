@@ -17,9 +17,12 @@ export function createDepot(trainDefs, playerCount) {
         distance: def.distance,
         price: def.price,
         rustsOn: def.rustsOn || null,
+        obsoleteOn: def.obsoleteOn || null,
         availableOn: def.availableOn || null,
         discount: def.discount || null,
         events: def.events || [],
+        salvageValue: def.salvageValue || 0,
+        multiplier: def.multiplier || 1,
       })
     }
   }
@@ -59,6 +62,17 @@ export function rustTrains(state, triggerTrainName) {
     const toRust = corp.trains.filter((t) => t.rustsOn === triggerTrainName)
     if (toRust.length > 0) {
       corp.trains = corp.trains.filter((t) => t.rustsOn !== triggerTrainName)
+      // Pay salvage value to corp treasury
+      for (const t of toRust) {
+        if (t.salvageValue > 0) {
+          corp.cash += t.salvageValue
+          state.bank.cash -= t.salvageValue
+        }
+        // Return attachment (executive car) to supply on rust
+        if (t.attachment?.type === 'executive_car') {
+          if (typeof state.executiveCarSupply === 'number') state.executiveCarSupply++
+        }
+      }
       rusted.push(...toRust.map((t) => ({ ...t, corpSym: corp.sym })))
     }
   }

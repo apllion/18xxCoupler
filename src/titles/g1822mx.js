@@ -105,4 +105,13 @@ export const g1822mx = {
     { sym: 'P14', name: 'Mail Contract', value: 0, revenue: 10, desc: '$10 per city visited.' },
     { sym: 'P15', name: 'Mail Contract', value: 0, revenue: 10, desc: '$10 per city visited.' },
   ],
+
+  // Merger: same as 1822 — major acquires minor during OR.
+  merger: {
+    type: '1822_acquire',
+    requireMajorOperated: 2,
+    requireMinorOperated: 1,
+    bidboxPrice: 200,
+    paymentOptions: [0, 1, 2],
+  },
 }

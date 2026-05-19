@@ -35,11 +35,11 @@ export const g1862 = {
     { name: 'H', distance: 99, price: 800, num: 99, events: ['lner_trigger'] },
   ],
   corporations: [
-    { sym: 'E&H', name: 'Ely & Huntingdon', tokens: [0,0,0], color: '#d81e3e', coordinates: 'C8' },
+    { sym: 'E&H', name: 'Ely & Huntingdon', tokens: [0,0,0], color: '#FFFF00', textColor: '#000', coordinates: 'C8' },
     { sym: 'ECR', name: 'Eastern Counties Railway', tokens: [0,0,0], color: '#237333', coordinates: 'D13' },
     { sym: 'ENR', name: 'East Norfolk Railway', tokens: [0,0,0], color: '#f48221', coordinates: 'F3' },
     { sym: 'ESR', name: 'East Suffolk Railway', tokens: [0,0,0], color: '#025aaa', coordinates: 'F11' },
-    { sym: 'EUR', name: 'Eastern Union Railway', tokens: [0,0,0], color: '#FFF500', textColor: '#000', coordinates: 'E12' },
+    { sym: 'EUR', name: 'Eastern Union Railway', tokens: [0,0,0], color: '#FF3030', coordinates: 'E12' },
     { sym: 'FDR', name: 'Felixstowe Dock & Railway', tokens: [0,0,0], color: '#800080', coordinates: 'G12' },
     { sym: 'I&B', name: 'Ipswich & Bury Railway', tokens: [0,0,0], color: '#ADD8E6', textColor: '#000', coordinates: 'D9' },
     { sym: 'L&D', name: 'Lynn & Dereham Railway', tokens: [0,0,0], color: '#474548', coordinates: 'D5' },
@@ -88,6 +88,14 @@ export const g1862 = {
         { name: 'H', distance: 99, price: 800, num: 99, events: ['lner_trigger'] },
       ],
     },
+  },
+
+  // Merger: two peer corps, pick survivor. During OR.
+  merger: {
+    type: '1862_peer',          // Two equal corps, one survives
+    priceFormula: '1862',       // survivor_price + (nonsurvivor_price / 2)
+    shareHandling: 'return_half', // Return half of holdings to market
+    presidentThreshold: 30,     // Need ≥30% to be president after merge
   },
 
   companies: [],

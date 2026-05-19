@@ -10,6 +10,12 @@ export function createPrivateCompany(def) {
     ownerId: null,      // player id or corp sym
     ownerType: null,     // 'player' or 'corporation'
     closed: false,
+
+    // Enriched fields (optional, from title def)
+    activeInPhase: def.activeInPhase || null,   // phase name when revenue activates (null = always)
+    canSellToCorp: def.canSellToCorp !== false,  // default true; false = player-only
+    sharesGranted: def.sharesGranted || null,     // [{ corpSym, percent }] — share-proxy privates
+    neverCloses: def.neverCloses || false,        // immune to close_companies events
   }
 }
 
@@ -28,7 +34,15 @@ export function collectRevenue(state, companySym) {
   const company = state.companies.find((c) => c.sym === companySym)
   if (!company || company.closed || !company.ownerId) return null
 
+  // Phase-gated: only collect if current phase matches
+  if (company.activeInPhase && state.phaseManager) {
+    const currentPhase = state.phaseManager.phases[state.phaseManager.currentIndex]
+    if (!currentPhase || currentPhase.name !== company.activeInPhase) return null
+  }
+
   const amount = company.revenue
+  if (amount <= 0) return null
+
   if (company.ownerType === 'player') {
     const player = state.players.find((p) => p.id === company.ownerId)
     if (player) {
@@ -60,12 +74,13 @@ export function collectAllRevenue(state) {
 
 export function closeAllCompanies(state) {
   for (const company of state.companies) {
-    if (!company.closed) {
+    if (!company.closed && !company.neverCloses) {
       closePrivate(company)
     }
   }
-  // Also remove from player holdings
+  // Remove closed privates from player holdings
+  const closedSyms = new Set(state.companies.filter((c) => c.closed).map((c) => c.sym))
   for (const player of state.players) {
-    player.privates = []
+    player.privates = player.privates.filter((sym) => !closedSyms.has(sym))
   }
 }

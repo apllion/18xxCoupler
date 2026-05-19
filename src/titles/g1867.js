@@ -19,6 +19,7 @@ export const g1867 = {
   capitalization: 'incremental',
   floatPercent: 20,
   sellBuyOrder: 'sell_buy',
+  halfPay: true,
   sellMovement: 'down_block_pres',
   sellAfter: 'operate',
   mustSellInBlocks: false,
@@ -125,4 +126,16 @@ export const g1867 = {
     { sym: 'SCT', name: 'St. Clair Tunnel', value: 90, revenue: 30,
       desc: 'Corp gains $10 extra revenue for each route through Detroit.' },
   ],
+
+  // Merger: minors convert/merge into majors. Dedicated Merger Round between ORs (phases 3-7).
+  merger: {
+    type: '1867_minor_major',
+    mergerRound: true,           // Has dedicated Merger Round between ORs
+    fromPhase: '3',              // Available from phase 3
+    toPhase: '7',                // No longer available after phase 7
+    maxCorpsInMerge: 10,
+    convertAtRange: true,        // Minors at convert_range price can convert solo
+    priceFormula: '1867',        // Capped (min+max)/2 between 100-200
+    minorOwnerGetsShare: true,   // Each minor owner gets 10% of major
+  },
 }

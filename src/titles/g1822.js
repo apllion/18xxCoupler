@@ -6,7 +6,7 @@ export const g1822 = {
   location: 'Great Britain', minPlayers: 2, maxPlayers: 7,
   bankCash: 12000, startingCash: { 2: 900, 3: 700, 4: 525, 5: 420, 6: 350, 7: 300 },
   certLimit: { 2: 33, 3: 26, 4: 20, 5: 16, 6: 13, 7: 11 },
-  currencyFormat: '£', capitalization: 'incremental', floatPercent: 20, sellBuyOrder: 'sell_buy', mustSellInBlocks: true, nextSRPlayerOrder: 'most_cash',
+  currencyFormat: '£', capitalization: 'incremental', floatPercent: 20, sellBuyOrder: 'sell_buy', mustSellInBlocks: false, nextSRPlayerOrder: 'most_cash', halfPay: true,
   market: [
     ['','','','','','','','','','','','','','','','','','550','600','650','700e'],
     ['','','','','','','','','','','','','','330','360','400','450','500','550','600','650'],
@@ -26,7 +26,7 @@ export const g1822 = {
   ],
   phases: [
     { name: '1', trainLimit: { minor: 2, major: 4 }, tiles: ['yellow'], operatingRounds: 1 },
-    { name: '2', on: '2', trainLimit: { minor: 2, major: 4 }, tiles: ['yellow'], operatingRounds: 2 },
+    { name: '2', on: ['2','3'], trainLimit: { minor: 2, major: 4 }, tiles: ['yellow'], operatingRounds: 2 },
     { name: '3', on: '3', trainLimit: { minor: 2, major: 4 }, tiles: ['yellow','green'], operatingRounds: 2 },
     { name: '4', on: '4', trainLimit: { minor: 1, major: 3 }, tiles: ['yellow','green'], operatingRounds: 2 },
     { name: '5', on: '5', trainLimit: { minor: 1, major: 2 }, tiles: ['yellow','green','brown'], operatingRounds: 2, events: ['close_concessions'] },
@@ -34,8 +34,8 @@ export const g1822 = {
     { name: '7', on: '7', trainLimit: { minor: 1, major: 2 }, tiles: ['yellow','green','brown','gray'], operatingRounds: 2 },
   ],
   trains: [
-    { name: 'L', distance: 1, price: 60, rustsOn: '3', num: 22 },
-    { name: '2', distance: 2, price: 120, rustsOn: '4', num: 22 },
+    { name: 'L', distance: 1, price: 60, rustsOn: '3', num: 22,
+      variants: [{ name: '2', distance: 2, price: 120, rustsOn: '4' }] },
     { name: '3', distance: 3, price: 200, rustsOn: '6', num: 9 },
     { name: '4', distance: 4, price: 300, rustsOn: '7', num: 6 },
     { name: '5', distance: 5, price: 500, num: 3, events: ['close_concessions'] },
@@ -80,4 +80,13 @@ export const g1822 = {
     { sym: 'P14', name: 'K&TR (Pullman)', value: 0, revenue: 10, desc: 'Pullman car.' },
     { sym: 'P16', name: 'TH (Tax Haven)', value: 0, revenue: 0, desc: 'Tax haven — cannot be acquired.' },
   ],
+
+  // Merger: major acquires minor during OR (after dividends).
+  merger: {
+    type: '1822_acquire',       // Major absorbs minor
+    requireMajorOperated: 2,    // Major must have operated ≥2 rounds
+    requireMinorOperated: 1,    // Minor must have operated ≥1 round
+    bidboxPrice: 200,           // Cost to acquire unowned bidbox minor
+    paymentOptions: [0, 1, 2],  // Number of major IPO shares offered (+ cash difference)
+  },
 }

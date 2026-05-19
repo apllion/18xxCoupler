@@ -1,7 +1,7 @@
 // Actions — every user input is an action appended to the log.
 // applyAction mutates state and returns a log entry.
 
-import { buyShareFromIPO, buyShareFromMarket, sellShares } from './sharePool.js'
+import { buyShareFromIPO, buyShareFromMarket, sellShares, corpBuyShareFromIPO, corpBuyShareFromMarket, corpSellShares } from './sharePool.js'
 import { placeCorpOnMarket, moveDividend, moveSell, moveRight, moveLeft, moveSoldOutCorps, corpPrice } from './stockMarket.js'
 import { buyAvailableTrain, rustTrains } from './depot.js'
 import { addTrain } from './corporation.js'
@@ -10,6 +10,10 @@ import { collectRevenue, collectAllRevenue, closeAllCompanies, assignPrivate, cl
 import { transferFromBank, transferToBank } from './bank.js'
 import { deliverToSegment, deliverToExport, advanceBeerMarket, removeNoDemand, placeNoDemand } from './beerMarket.js'
 import { advanceRound, setRound, setFixedIndex, roundLabel } from './roundTracker.js'
+import { ptgMerge, merge1862, acquireMinor1822, convertMinor1867, mergeMinors1867, rlaMerge } from './merger.js'
+import { takeLoan, repayLoan, payInterest, interestDue } from './loans.js'
+import { convertTo5Share, convertTo10Share } from './corpConversion.js'
+import { shortSell, closeShort } from './shorts.js'
 
 let actionSeq = 0
 
@@ -34,6 +38,12 @@ export function applyAction(state, action) {
       break
     case 'SELL_SHARES':
       handleSellShares(state, action)
+      break
+    case 'CORP_BUY_SHARE':
+      handleCorpBuyShare(state, action)
+      break
+    case 'CORP_SELL_SHARES':
+      handleCorpSellShares(state, action)
       break
     case 'PAY_DIVIDEND':
       handlePayDividend(state, action)
@@ -124,6 +134,203 @@ export function applyAction(state, action) {
         state.corporations = state.corporations.filter((c) => c.sym !== action.corpSym)
       }
       break
+    // Merger actions
+    case 'MERGE_CORPS':
+      handleMerge(state, action)
+      break
+    case 'ACQUIRE_MINOR':
+      handleAcquireMinor(state, action)
+      break
+    case 'CONVERT_MINOR':
+      handleConvertMinor(state, action)
+      break
+    case 'MERGE_MINORS':
+      handleMergeMinors(state, action)
+      break
+    // Train attachment actions (strategy cards, executive cars)
+    case 'GIVE_CARD':
+      handleGiveCard(state, action)
+      break
+    case 'ASSIGN_CARD_TO_TRAIN':
+      handleAssignCardToTrain(state, action)
+      break
+    case 'USE_CARD_ACTION':
+      handleUseCardAction(state, action)
+      break
+    case 'BUY_EXECUTIVE_CAR':
+      handleBuyExecutiveCar(state, action)
+      break
+    // Loan actions (1817, 1867)
+    case 'TAKE_LOAN':
+      takeLoan(state, action.corpSym)
+      break
+    case 'REPAY_LOAN':
+      repayLoan(state, action.corpSym)
+      break
+    case 'PAY_INTEREST': {
+      const result = payInterest(state, action.corpSym)
+      if (result < 0) {
+        // Corp can't pay — mark as liquidated
+        const c = state.corporations.find((co) => co.sym === action.corpSym)
+        if (c) c.liquidated = true
+        state.pendingEvents = (state.pendingEvents || []).concat([`${action.corpSym}_liquidated`])
+      }
+      break
+    }
+    // Corp conversion (1817: 2→5→10)
+    case 'CONVERT_CORP':
+      if (action.targetSize === '5share') convertTo5Share(state, action.corpSym)
+      else if (action.targetSize === '10share') convertTo10Share(state, action.corpSym)
+      break
+    // Short selling (1817)
+    case 'SHORT_SELL':
+      shortSell(state, action.playerId, action.corpSym)
+      break
+    case 'CLOSE_SHORT':
+      closeShort(state, action.playerId, action.corpSym)
+      break
+    // Train export
+    case 'EXPORT_TRAIN': {
+      const exported = state.depot?.upcoming?.[0]
+      if (exported) {
+        state.depot.upcoming.shift()
+        state.depot.discarded.push(exported)
+        // Check phase advancement
+        const newPhase = phaseForTrain(state.phaseManager, exported.name)
+        if (newPhase && state.phaseManager.currentIndex < state.phaseManager.phases.indexOf(newPhase)) {
+          advanceToPhase(state.phaseManager, newPhase.name)
+          rustTrains(state, exported.name)
+        }
+      }
+      break
+    }
+    // Liquidation
+    case 'LIQUIDATE_CORP': {
+      const lc = state.corporations.find((co) => co.sym === action.corpSym)
+      if (lc) lc.liquidated = true
+      break
+    }
+    // Acquisition (simplified: corp buys another corp)
+    case 'ACQUIRE_CORP': {
+      const acquirer = state.corporations.find((co) => co.sym === action.acquirerSym)
+      const target = state.corporations.find((co) => co.sym === action.targetSym)
+      if (acquirer && target) {
+        const price = action.price || 0
+        acquirer.cash -= price
+        // Transfer assets
+        acquirer.cash += target.cash
+        acquirer.trains.push(...target.trains)
+        acquirer.loans = (acquirer.loans || 0) + (target.loans || 0)
+        // Pay shareholders
+        if (price > 0 && target.totalShares) {
+          const perShare = Math.floor(price / target.totalShares)
+          for (const player of state.players) {
+            const pct = player.shares
+              .filter((s) => s.corpSym === action.targetSym && !s.isShort)
+              .reduce((sum, s) => sum + s.percent, 0)
+            if (pct > 0) {
+              const payout = Math.floor(perShare * pct / 10)
+              player.cash += payout
+            }
+          }
+        }
+        // Remove target from game (inline — can't dynamic import in action handler)
+        state.corporations = state.corporations.filter((co) => co.sym !== action.targetSym)
+        if (state.stockMarket?.corpPositions?.[action.targetSym]) {
+          delete state.stockMarket.corpPositions[action.targetSym]
+        }
+        for (const player of state.players) {
+          player.shares = player.shares.filter((s) => s.corpSym !== action.targetSym)
+        }
+        if (state.turnQueue) {
+          state.turnQueue = state.turnQueue.filter((s) => s !== action.targetSym)
+        }
+      }
+      break
+    }
+    // Nationalization: close a corp and transfer assets to national entity
+    // Change float percent (1880: event-driven 20→30→40→60)
+    case 'SET_FLOAT_PERCENT': {
+      const newFloat = action.percent
+      if (newFloat) {
+        for (const c of state.corporations) {
+          if (!c.floated) c.floatPercent = newFloat
+        }
+      }
+      break
+    }
+    // Concession conversion: private concession → president cert of matching corp
+    case 'CONVERT_CONCESSION': {
+      const player = state.players.find((p) => p.id === action.playerId)
+      const company = state.companies?.find((c) => c.sym === action.companySym)
+      const corp = state.corporations.find((c) => c.sym === action.corpSym)
+      if (player && company && corp) {
+        // Remove concession from player
+        player.privates = player.privates.filter((s) => s !== action.companySym)
+        company.closed = true
+        // Give president cert
+        const presPercent = state.title.shares?.[0] ?? 20
+        player.shares.push({ corpSym: action.corpSym, percent: presPercent, isPresident: true })
+        corp.ipoShares -= presPercent
+        corp.ipoed = true
+        // Set par if provided
+        if (action.parPrice != null) {
+          corp.parPrice = action.parPrice
+          if (action.row != null && action.col != null) {
+            placeCorpOnMarket(state.stockMarket, action.corpSym, action.row, action.col)
+          }
+        }
+      }
+      break
+    }
+    case 'NATIONALIZE_CORP': {
+      const nc = state.corporations.find((co) => co.sym === action.corpSym)
+      const national = state.corporations.find((co) => co.sym === action.nationalSym)
+      if (nc && national) {
+        // Transfer assets
+        national.cash += nc.cash
+        national.trains.push(...nc.trains)
+        nc.cash = 0
+        nc.trains = []
+        // Compensate shareholders at current price
+        const price = corpPrice(state.stockMarket, action.corpSym) || 0
+        for (const player of state.players) {
+          const pct = player.shares
+            .filter((s) => s.corpSym === action.corpSym && !s.isShort)
+            .reduce((sum, s) => sum + s.percent, 0)
+          if (pct > 0) {
+            player.cash += Math.floor(price * pct / 10)
+            state.bank.cash -= Math.floor(price * pct / 10)
+          }
+        }
+        // Remove nationalized corp
+        state.corporations = state.corporations.filter((co) => co.sym !== action.corpSym)
+        if (state.stockMarket?.corpPositions?.[action.corpSym]) {
+          delete state.stockMarket.corpPositions[action.corpSym]
+        }
+        for (const player of state.players) {
+          player.shares = player.shares.filter((s) => s.corpSym !== action.corpSym)
+        }
+        if (state.turnQueue) {
+          state.turnQueue = state.turnQueue.filter((s) => s !== action.corpSym)
+        }
+      }
+      break
+    }
+    // Player bankruptcy
+    case 'PLAYER_BANKRUPT': {
+      const bp = state.players.find((p) => p.id === action.playerId)
+      if (bp) {
+        bp.bankrupt = true
+        bp.cash = 0
+        bp.shares = []
+        bp.privates = []
+        if (state.turnQueue) {
+          state.turnQueue = state.turnQueue.filter((s) => s !== action.playerId)
+        }
+      }
+      break
+    }
     case 'SET_CORP_ORDER':
       if (action.order && Array.isArray(action.order)) {
         state.corpOrder = action.order
@@ -205,12 +412,25 @@ function handlePar(state, { playerId, corpSym, parPrice, row, col }) {
   const cost = (parPrice * presPercent) / 10
   player.cash -= cost
   corp.ipoShares -= presPercent
-  corp.cash += cost
+
+  if (state.title.capitalization === 'incremental') {
+    // Incremental: player pays bank; corp receives par * 10 on float
+    state.bank.cash += cost
+  } else {
+    // Full: player pays corp directly
+    corp.cash += cost
+  }
+
   player.shares.push({ corpSym, percent: presPercent, isPresident: true })
 
   const soldPercent = 100 - corp.ipoShares
   if (soldPercent >= corp.floatPercent) {
     corp.floated = true
+    if (state.title.capitalization === 'incremental') {
+      const capitalization = parPrice * 10
+      corp.cash += capitalization
+      state.bank.cash -= capitalization
+    }
   }
 }
 
@@ -220,6 +440,20 @@ function handleBuyShare(state, { playerId, corpSym, source, percent = 10 }) {
   } else if (source === 'market') {
     buyShareFromMarket(state, playerId, corpSym, percent)
   }
+}
+
+function handleCorpBuyShare(state, { buyerCorpSym, targetCorpSym, source, percent = 10 }) {
+  if (source === 'ipo') {
+    corpBuyShareFromIPO(state, buyerCorpSym, targetCorpSym, percent)
+  } else if (source === 'market') {
+    corpBuyShareFromMarket(state, buyerCorpSym, targetCorpSym, percent)
+  }
+}
+
+function handleCorpSellShares(state, { sellerCorpSym, targetCorpSym, percent = 10 }) {
+  corpSellShares(state, sellerCorpSym, targetCorpSym, percent)
+  const sellMovement = state.title.sellMovement || 'down_share'
+  moveSell(state.stockMarket, targetCorpSym, percent, sellMovement)
 }
 
 function handleSellShares(state, { playerId, corpSym, percent = 10 }) {
@@ -243,6 +477,19 @@ function handlePayDividend(state, { corpSym, totalRevenue }) {
     if (pct > 0) {
       const payout = perShare * (pct / 10)
       player.cash += payout
+      state.bank.cash -= payout
+    }
+  }
+
+  // Pay corps that hold shares in this corp
+  for (const holder of state.corporations) {
+    if (holder.sharesHeld.length === 0) continue
+    const pct = holder.sharesHeld
+      .filter((s) => s.corpSym === corpSym)
+      .reduce((sum, s) => sum + s.percent, 0)
+    if (pct > 0) {
+      const payout = perShare * (pct / 10)
+      holder.cash += payout
       state.bank.cash -= payout
     }
   }
@@ -287,6 +534,19 @@ function handleHalfDividend(state, { corpSym, totalRevenue }) {
     if (pct > 0) {
       const payout = perShare * (pct / 10)
       player.cash += payout
+      state.bank.cash -= payout
+    }
+  }
+
+  // Pay corps that hold shares in this corp
+  for (const holder of state.corporations) {
+    if (holder.sharesHeld.length === 0) continue
+    const pct = holder.sharesHeld
+      .filter((s) => s.corpSym === corpSym)
+      .reduce((sum, s) => sum + s.percent, 0)
+    if (pct > 0) {
+      const payout = perShare * (pct / 10)
+      holder.cash += payout
       state.bank.cash -= payout
     }
   }
@@ -370,6 +630,7 @@ function handleSellPrivate(state, { companySym, fromPlayerId, toCorpSym, price }
   const fromPlayer = state.players.find((p) => p.id === fromPlayerId)
   const toCorp = state.corporations.find((c) => c.sym === toCorpSym)
   if (!company || !fromPlayer || !toCorp) return
+  if (company.canSellToCorp === false) return // cannot sell to corp
 
   fromPlayer.cash += price
   toCorp.cash -= price
@@ -437,6 +698,84 @@ function handlePlaceNoDemand(state, { segmentId }) {
   placeNoDemand(state.beerMarket, segmentId)
 }
 
+// --- Merger handlers ---
+
+function handleMerge(state, action) {
+  const mergerType = state.title.merger?.type
+  if (mergerType === 'ptg_combine') {
+    ptgMerge(state, action.topCorpSym, action.bottomCorpSym)
+  } else if (mergerType === '1862_peer') {
+    merge1862(state, action.survivorSym, action.nonsurvivorSym)
+  } else if (mergerType === 'rla_merge') {
+    rlaMerge(state, action.minorSymA, action.minorSymB, action.majorCorpSym, action.chosenIdentity)
+  }
+}
+
+function handleAcquireMinor(state, { majorSym, minorSym, paymentShares, cashDifference }) {
+  acquireMinor1822(state, majorSym, minorSym, paymentShares, cashDifference)
+}
+
+function handleConvertMinor(state, { minorSym, majorSym }) {
+  convertMinor1867(state, minorSym, majorSym)
+}
+
+function handleMergeMinors(state, { minorSyms, majorSym }) {
+  mergeMinors1867(state, minorSyms, majorSym)
+}
+
+// --- Train attachment handlers (cards, executive cars) ---
+
+function handleGiveCard(state, { playerId, card }) {
+  const player = state.players.find((p) => p.id === playerId)
+  if (!player || !card) return
+  player.cards.push({ ...card, used: false })
+}
+
+function handleAssignCardToTrain(state, { playerId, cardId, corpSym, trainId }) {
+  const player = state.players.find((p) => p.id === playerId)
+  const corp = state.corporations.find((c) => c.sym === corpSym)
+  if (!player || !corp) return
+
+  const cardIdx = player.cards.findIndex((c) => c.id === cardId && !c.used)
+  const train = corp.trains.find((t) => t.id === trainId)
+  if (cardIdx < 0 || !train) return
+
+  const card = player.cards[cardIdx]
+  train.attachment = { type: 'card', id: card.id, name: card.name, color: card.color, permit: card.permit }
+  player.cards[cardIdx].used = true
+  player.cards[cardIdx].assignedTo = { corpSym, trainId }
+}
+
+function handleUseCardAction(state, { playerId, cardId }) {
+  const player = state.players.find((p) => p.id === playerId)
+  if (!player) return
+
+  const cardIdx = player.cards.findIndex((c) => c.id === cardId && !c.used)
+  if (cardIdx < 0) return
+
+  // Mark as used (unique action consumed — actual effect is tracked on the board, not in engine)
+  player.cards[cardIdx].used = true
+  player.cards[cardIdx].usedAs = 'unique_action'
+}
+
+function handleBuyExecutiveCar(state, { corpSym, trainId, price }) {
+  const corp = state.corporations.find((c) => c.sym === corpSym)
+  if (!corp) return
+
+  const train = corp.trains.find((t) => t.id === trainId)
+  if (!train || train.attachment) return // already has attachment
+
+  const cost = price ?? 0
+  corp.cash -= cost
+  state.bank.cash += cost
+
+  train.attachment = { type: 'executive_car', name: 'Executive Car' }
+
+  // Track remaining supply
+  if (!state.executiveCarSupply) state.executiveCarSupply = state.title.executiveCars?.count ?? 0
+  if (typeof state.executiveCarSupply === 'number') state.executiveCarSupply--
+}
+
 function handleAdjustCash(state, { entityId, entityType, amount }) {
   if (entityType === 'player') {
     const player = state.players.find((p) => p.id === entityId)
@@ -461,6 +800,10 @@ function describeAction(state, action) {
       return `${playerName(action.playerId)} buys ${action.percent ?? 10}% ${action.corpSym} from ${action.source}`
     case 'SELL_SHARES':
       return `${playerName(action.playerId)} sells ${action.percent ?? 10}% ${action.corpSym}`
+    case 'CORP_BUY_SHARE':
+      return `${action.buyerCorpSym} buys ${action.percent ?? 10}% ${action.targetCorpSym} from ${action.source}`
+    case 'CORP_SELL_SHARES':
+      return `${action.sellerCorpSym} sells ${action.percent ?? 10}% ${action.targetCorpSym}`
     case 'PAY_DIVIDEND': {
       const ps = Math.floor(action.totalRevenue / 10)
       const price = corpPrice(state.stockMarket, action.corpSym)
@@ -483,6 +826,48 @@ function describeAction(state, action) {
       return 'All private revenue collected'
     case 'SOLD_OUT_ADJUST':
       return 'Sold-out corporations move up'
+    case 'MERGE_CORPS':
+      return `${action.topCorpSym || action.survivorSym} merges with ${action.bottomCorpSym || action.nonsurvivorSym}`
+    case 'ACQUIRE_MINOR':
+      return `${action.majorSym} acquires ${action.minorSym} (${action.paymentShares} shares + ${fmt(action.cashDifference)})`
+    case 'CONVERT_MINOR':
+      return `${action.minorSym} converts to ${action.majorSym}`
+    case 'MERGE_MINORS':
+      return `${(action.minorSyms || []).join(', ')} merge into ${action.majorSym}`
+    case 'GIVE_CARD':
+      return `${playerName(action.playerId)} receives ${action.card?.name ?? 'card'}`
+    case 'ASSIGN_CARD_TO_TRAIN':
+      return `${playerName(action.playerId)} assigns ${action.cardId} to ${action.corpSym} ${action.trainId}`
+    case 'USE_CARD_ACTION':
+      return `${playerName(action.playerId)} uses ${action.cardId} unique action`
+    case 'BUY_EXECUTIVE_CAR':
+      return `${action.corpSym} buys executive car for ${action.trainId}${action.price ? ` (${fmt(action.price)})` : ''}`
+    case 'TAKE_LOAN':
+      return `${action.corpSym} takes loan (+${fmt(state.title.loans?.loanValue || 100)})`
+    case 'REPAY_LOAN':
+      return `${action.corpSym} repays loan (-${fmt(state.title.loans?.loanValue || 100)})`
+    case 'PAY_INTEREST':
+      return `${action.corpSym} pays ${fmt(interestDue(state, action.corpSym))} interest`
+    case 'CONVERT_CORP':
+      return `${action.corpSym} converts to ${action.targetSize}`
+    case 'SHORT_SELL':
+      return `${playerName(action.playerId)} shorts ${action.corpSym}`
+    case 'CLOSE_SHORT':
+      return `${playerName(action.playerId)} closes short on ${action.corpSym}`
+    case 'EXPORT_TRAIN':
+      return `Train exported from depot`
+    case 'LIQUIDATE_CORP':
+      return `${action.corpSym} liquidated`
+    case 'ACQUIRE_CORP':
+      return `${action.acquirerSym} acquires ${action.targetSym} for ${fmt(action.price || 0)}`
+    case 'SET_FLOAT_PERCENT':
+      return `Float requirement changed to ${action.percent}%`
+    case 'CONVERT_CONCESSION':
+      return `${playerName(action.playerId)} converts ${action.companySym} to ${action.corpSym} president`
+    case 'NATIONALIZE_CORP':
+      return `${action.corpSym} nationalized into ${action.nationalSym}`
+    case 'PLAYER_BANKRUPT':
+      return `${playerName(action.playerId)} declares bankruptcy`
     case 'DELIVER_BEER':
       return `${action.brewerySym} delivers ${action.count ?? 1} beer to segment ${action.segmentId}`
     case 'DELIVER_EXPORT':

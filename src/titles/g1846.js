@@ -25,6 +25,7 @@ export const g1846 = {
   capitalization: 'incremental',
   floatPercent: 20,
   sellBuyOrder: 'sell_buy',
+  halfPay: true,
   sellMovement: 'left_block_pres',
   poolShareDrop: 'down_block',
   sellAfter: 'p_any_operate',
@@ -52,8 +53,8 @@ export const g1846 = {
   ],
 
   trains: [
-    { name: '2', distance: 2, price: 80, rustsOn: '6', num: 7 },
-    { name: '4', distance: 4, price: 180, num: 6, variants: [{ name: '3/5', price: 160 }] },
+    { name: '2', distance: 2, price: 80, rustsOn: '6', num: 7, obsoleteOn: '5' },
+    { name: '4', distance: 4, price: 180, num: { 2: 5, 3: 4, 4: 5, 5: 6 }, variants: [{ name: '3/5', price: 160 }] },
     { name: '5', distance: 5, price: 500, num: 5, variants: [{ name: '4/6', price: 450 }], events: ['close_companies'] },
     { name: '6', distance: 6, price: 800, num: 9, variants: [{ name: '7/8', price: 900 }], events: ['remove_bonuses','remove_reservations'] },
   ],

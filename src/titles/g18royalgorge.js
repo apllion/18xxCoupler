@@ -42,12 +42,16 @@ export const g18royalgorge = {
 
   companies: [
     { sym: 'Y1', name: 'St. Cloud Hotel', value: 50, revenue: 5, desc: 'Hotel token. $20 revenue per stop.' },
-    { sym: 'Y4', name: 'William Palmer', value: 75, revenue: 5, desc: '10% Rio Grande + 10% CF&I. Cannot sell to corp.' },
+    { sym: 'Y4', name: 'William Palmer', value: 75, revenue: 5, desc: '10% Rio Grande + 10% CF&I. Cannot sell to corp.',
+      canSellToCorp: false, sharesGranted: [{ corpSym: 'RG', percent: 10 }, { corpSym: 'CFI', percent: 10 }] },
     { sym: 'Y5', name: 'Colorado State Prison', value: 70, revenue: 10, desc: 'Build in terrain at 1/2 price.' },
     { sym: 'G1', name: 'Doc Holliday', value: 55, revenue: 10, desc: 'Acquires 2 debt tokens during Treaty of Boston.' },
     { sym: 'G3', name: 'Hanging Bridge Lease', value: 50, revenue: 10, desc: 'Run through Royal Gorge by paying 10% dividend to Rio Grande.' },
-    { sym: 'G4', name: 'Florence Oil Fields', value: 75, revenue: 0, desc: 'Green Phase: $25 revenue per OR. Cannot close.' },
-    { sym: 'B1', name: 'Silver Mines', value: 70, revenue: 0, desc: 'Brown Phase: $25 revenue per OR. Never closes.' },
-    { sym: 'B4', name: 'Gold Miner', value: 20, revenue: 0, desc: 'Acts as 20% share of Victor Gold Company.' },
+    { sym: 'G4', name: 'Florence Oil Fields', value: 75, revenue: 25, desc: 'Green Phase: $25 revenue per OR. Cannot close.',
+      activeInPhase: 'Green', neverCloses: true },
+    { sym: 'B1', name: 'Silver Mines', value: 70, revenue: 25, desc: 'Brown Phase: $25 revenue per OR. Never closes.',
+      activeInPhase: 'Brown', neverCloses: true },
+    { sym: 'B4', name: 'Gold Miner', value: 20, revenue: 0, desc: 'Acts as 20% share of Victor Gold Company.',
+      sharesGranted: [{ corpSym: 'VGC', percent: 20 }] },
   ],
 }

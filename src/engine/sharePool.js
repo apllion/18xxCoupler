@@ -16,9 +16,13 @@ export function buyShareFromIPO(state, playerId, corpSym, percent = 10) {
   player.cash -= cost
   corp.ipoShares -= percent
 
-  // Capitalization: full = money goes to corp treasury on float
+  // Capitalization: full = money goes to corp treasury from each IPO sale
+  // Incremental = money goes to bank; corp gets par * 10 when it floats
   if (state.title.capitalization === 'full') {
     corp.cash += cost
+  } else {
+    // Incremental: player pays bank
+    state.bank.cash += cost
   }
 
   player.shares.push({ corpSym, percent, isPresident })
@@ -27,13 +31,13 @@ export function buyShareFromIPO(state, playerId, corpSym, percent = 10) {
   const soldPercent = 100 - corp.ipoShares
   if (!corp.floated && soldPercent >= corp.floatPercent) {
     corp.floated = true
-    if (state.title.capitalization === 'full') {
-      // Corp gets full capitalization: par * 10 shares
-      // Already accumulated from individual sales, so nothing extra needed
+    if (state.title.capitalization === 'incremental') {
+      // Corp receives par * 10 from the bank on float
+      const capitalization = corp.parPrice * 10
+      corp.cash += capitalization
+      state.bank.cash -= capitalization
     }
   }
-
-  state.bank.cash -= 0 // money came from player, went to corp — bank not involved for IPO buys
 }
 
 export function buyShareFromMarket(state, playerId, corpSym, percent = 10) {
@@ -73,6 +77,73 @@ export function sellShares(state, playerId, corpSym, percent = 10) {
   })
 
   corp.marketShares += percent
+}
+
+// --- Corp-to-corp share operations ---
+
+export function corpBuyShareFromIPO(state, buyerCorpSym, targetCorpSym, percent = 10) {
+  const buyer = state.corporations.find((c) => c.sym === buyerCorpSym)
+  const target = state.corporations.find((c) => c.sym === targetCorpSym)
+  const price = state.stockMarket.corpPositions[targetCorpSym]
+    ? priceForCorp(state, targetCorpSym)
+    : target.parPrice
+
+  if (!buyer || !target || !price) return
+
+  const cost = (price * percent) / 10
+  buyer.cash -= cost
+
+  if (state.title.capitalization === 'full') {
+    target.cash += cost
+  }
+
+  target.ipoShares -= percent
+  buyer.sharesHeld.push({ corpSym: targetCorpSym, percent, isPresident: false })
+
+  // Check float
+  const soldPercent = 100 - target.ipoShares
+  if (!target.floated && soldPercent >= target.floatPercent) {
+    target.floated = true
+  }
+}
+
+export function corpBuyShareFromMarket(state, buyerCorpSym, targetCorpSym, percent = 10) {
+  const buyer = state.corporations.find((c) => c.sym === buyerCorpSym)
+  const target = state.corporations.find((c) => c.sym === targetCorpSym)
+  const price = priceForCorp(state, targetCorpSym)
+
+  if (!buyer || !target || !price) return
+
+  const cost = (price * percent) / 10
+  buyer.cash -= cost
+  target.marketShares -= percent
+  state.bank.cash += cost
+
+  buyer.sharesHeld.push({ corpSym: targetCorpSym, percent, isPresident: false })
+}
+
+export function corpSellShares(state, sellerCorpSym, targetCorpSym, percent = 10) {
+  const seller = state.corporations.find((c) => c.sym === sellerCorpSym)
+  const target = state.corporations.find((c) => c.sym === targetCorpSym)
+  const price = priceForCorp(state, targetCorpSym)
+
+  if (!seller || !target || !price) return
+
+  const revenue = (price * percent) / 10
+  seller.cash += revenue
+  state.bank.cash -= revenue
+
+  // Remove shares from corp's holdings
+  let remaining = percent
+  seller.sharesHeld = seller.sharesHeld.filter((s) => {
+    if (s.corpSym === targetCorpSym && remaining > 0) {
+      remaining -= s.percent
+      return false
+    }
+    return true
+  })
+
+  target.marketShares += percent
 }
 
 function priceForCorp(state, corpSym) {

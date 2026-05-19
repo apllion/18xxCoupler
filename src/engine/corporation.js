@@ -25,6 +25,19 @@ export function createCorporation(def, title) {
     ipoShares: shares.reduce((s, p) => s + p, 0),  // starts at 100
     marketShares: 0,
     treasuryShares: 0,
+
+    // Shares this corp holds in other corps (corp-to-corp ownership)
+    sharesHeld: [],  // [{ corpSym, percent }]
+
+    // Corp sizing (1817): 2-share, 5-share, or 10-share
+    totalShares: shares.length,
+    corpSize: def.corpSize || null,  // '2share' | '5share' | '10share' | null (standard)
+
+    // Loans (1817, 1867)
+    loans: 0,
+
+    // Liquidation state
+    liquidated: false,
   }
 }
 

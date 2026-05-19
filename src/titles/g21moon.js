@@ -4,7 +4,7 @@ export const g21moon = {
   ...defaults,
   titleId: 'g21moon', title: '21 Moon', subtitle: 'Lunar Railways', designer: 'Jonas Jones and Scott Petersen',
   location: 'The Moon', minPlayers: 2, maxPlayers: 5,
-  bankCash: 12000, startingCash: { 2: 600, 3: 540, 4: 410, 5: 340 }, certLimit: { 2: 18, 3: 15, 4: 12, 5: 10 },
+  bankCash: 99999, startingCash: { 2: 600, 3: 540, 4: 410, 5: 340 }, certLimit: { 2: 15, 3: 15, 4: 12, 5: 10 },
   currencyFormat: '₡', capitalization: 'incremental', floatPercent: 50, sellBuyOrder: 'sell_buy',
   market: [
     ['','','','','','','','','','','','','','','330','360','395','430'],
@@ -29,7 +29,7 @@ export const g21moon = {
     { name: '4', distance: 4, price: 240, rustsOn: '10', num: 3 },
     { name: '5', distance: 5, price: 500, num: 2 },
     { name: '6', distance: 6, price: 540, num: 2 },
-    { name: '10', distance: 10, price: 730, num: 14 },
+    { name: '10', distance: 10, price: 730, num: 99 },
   ],
   corporations: [
     { sym: 'SSF', name: 'Shamsum Solar Farms', tokens: [0,25,50], color: '#f7955b', coordinates: 'D12' },
@@ -40,6 +40,15 @@ export const g21moon = {
     { sym: 'LG', name: 'Lunar Geodynamics', tokens: [0,25,50,75], color: '#57bd7d', coordinates: 'I11' },
     { sym: 'KR', name: 'Kiviuq Rovertech', tokens: [0,25,50,75,100], color: '#b59588', coordinates: 'K9' },
   ],
+
+  // Corporate Round: corps sell from treasury, issue from IPO, buy one cert from other corps' IPOs or bank pool
+  corpCanBuyShares: true,
+  corpCanSellShares: true,
+  corpBuyLimit: 1,           // max 1 purchase per CR turn
+  corpCanBuyOwnShares: true, // can buy own shares from bank pool
+  corpCanBuyPresident: false, // cannot buy president's certs
+  corpCanStartCorps: false,  // cannot start new corps
+  corpNoCertLimit: true,     // no cert limit for corps
 
   pregame: [],
 

@@ -25,6 +25,12 @@ import { g18do_hsb } from './g18do_hsb.js'
 import { g21moon } from './g21moon.js'
 import { g22mars } from './g22mars.js'
 import { gptg } from './gptg.js'
+import { grla } from './grla.js'
+import { g18mex } from './g18mex.js'
+import { g18ireland } from './g18ireland.js'
+import { g18gb } from './g18gb.js'
+import { g1817 } from './g1817.js'
+import { g1822ca } from './g1822ca.js'
 
 export const titles = {
   g1822,
@@ -54,6 +60,12 @@ export const titles = {
   g21moon,
   g22mars,
   gptg,
+  grla,
+  g18mex,
+  g18ireland,
+  g18gb,
+  g1817,
+  g1822ca,
 }
 
 export function getTitle(titleId) {

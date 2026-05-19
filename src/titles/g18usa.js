@@ -6,7 +6,7 @@ export const g18usa = {
   location: 'United States', minPlayers: 2, maxPlayers: 7,
   bankCash: 99999, startingCash: { 2: 630, 3: 420, 4: 315, 5: 300, 6: 250, 7: 225 },
   certLimit: { 2: 32, 3: 21, 4: 16, 5: 16, 6: 13, 7: 11 },
-  currencyFormat: '$', capitalization: 'incremental', floatPercent: 20, sellBuyOrder: 'sell_buy',
+  currencyFormat: '$', capitalization: 'incremental', floatPercent: 20, sellBuyOrder: 'sell_buy', halfPay: true,
   market: [
     ['0l','0a','0a','0a','42','44','46','48','50p','53s','56p','59p','62p','66p','70p','74s','78p','82p','86p','90p','95p','100p','105p','110p','115p','120s','127p','135p','142p','150p','157p','165p','172p','180p','190p','200p','210','220','230','240','250','260','270','285','300','315','330','345','360','375','390','405','420','440','460','480','500','520','540','560','580','600','625','650','675','700','725','750','775','800'],
   ],
@@ -21,8 +21,11 @@ export const g18usa = {
   ],
   trains: [
     { name: '2', distance: 2, price: 100, rustsOn: '4', num: 40 },
+    { name: '2+', distance: 2, price: 100, obsoleteOn: '4', num: 5 },
     { name: '3', distance: 3, price: 250, rustsOn: '6', num: 12 },
+    { name: '3+', distance: 3, price: 250, obsoleteOn: '6', num: 2 },
     { name: '4', distance: 4, price: 400, rustsOn: '8', num: 8 },
+    { name: '4+', distance: 4, price: 400, obsoleteOn: '8', num: 1 },
     { name: '5', distance: 5, price: 600, num: 6 },
     { name: '6', distance: 6, price: 750, num: 5 },
     { name: '7', distance: 7, price: 900, num: 3 },
