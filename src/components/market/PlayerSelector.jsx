@@ -9,21 +9,30 @@ export default function PlayerSelector() {
   const activePlayerId = useUIStore((s) => s.activePlayerId)
   const setActivePlayer = useUIStore((s) => s.setActivePlayer)
   const turnTracking = useUIStore((s) => s.turnTracking)
+  const isWhatIf = !!useGameStore((s) => s.whatIfSnapshot)
   const turnQueue = game?.turnQueue || []
   const turnIndex = game?.turnIndex || 0
   const srPassed = game?.srPassed || []
 
-  // Auto-sync active player with turn tracking in SR
+  const isGuided = turnTracking === 'on' && !isWhatIf
   const isSR = game?.roundTracker?.type === 'stock' && !game?.roundTracker?.inPregame
-  const currentTurnPlayer = isSR && turnTracking === 'on' && turnQueue.length > 0
-    ? turnQueue[turnIndex]
+  const isOR = game?.roundTracker?.type === 'operating' && !game?.roundTracker?.inPregame
+
+  // In guided mode, derive active player from turn queue
+  const currentTurnEntity = isGuided && turnQueue.length > 0 ? turnQueue[turnIndex] : null
+
+  // In SR, the turn entity IS the player. In OR, find the president of the operating corp.
+  const guidedPlayerId = isSR ? currentTurnEntity
+    : isOR ? game?.players.find((p) =>
+        p.shares.some((s) => s.corpSym === currentTurnEntity && s.isPresident)
+      )?.id
     : null
 
   useEffect(() => {
-    if (currentTurnPlayer && currentTurnPlayer !== activePlayerId) {
-      setActivePlayer(currentTurnPlayer)
+    if (isGuided && guidedPlayerId && guidedPlayerId !== activePlayerId) {
+      setActivePlayer(guidedPlayerId)
     }
-  }, [currentTurnPlayer])
+  }, [guidedPlayerId, isGuided])
 
   if (!game) return null
 
@@ -33,22 +42,26 @@ export default function PlayerSelector() {
     <div className="flex gap-2 overflow-x-auto pb-1">
       {game.players.map((p) => {
         const isActive = activePlayerId === p.id
-        const isTurn = currentTurnPlayer === p.id
+        const isTurn = guidedPlayerId === p.id
         const isPassed = srPassed.includes(p.id)
         const certs = playerCertCount(p)
         const overLimit = typeof game.certLimit === 'number' && certs > game.certLimit
+        // In guided mode, only the active turn player is clickable
+        const locked = isGuided && guidedPlayerId && p.id !== guidedPlayerId
 
         return (
           <button
             key={p.id}
-            onClick={() => setActivePlayer(isActive ? null : p.id)}
+            onClick={() => !locked && setActivePlayer(isActive ? null : p.id)}
             className={`flex-shrink-0 rounded-lg px-3 py-2 text-sm transition-colors border ${
               isActive
                 ? 'bg-broker-green border-broker-gold text-white'
                 : isPassed
                   ? 'bg-broker-surface border-broker-border text-broker-text opacity-40'
-                  : 'bg-broker-surface border-broker-border text-broker-text hover:border-broker-gold-dim'
-            } ${isTurn ? 'ring-2 ring-blue-400' : ''}`}
+                  : locked
+                    ? 'bg-broker-surface border-broker-border text-broker-text opacity-30'
+                    : 'bg-broker-surface border-broker-border text-broker-text hover:border-broker-gold-dim'
+            } ${isTurn && isGuided ? 'ring-2 ring-blue-400' : ''}`}
           >
             <div className="font-medium">{p.name}</div>
             <div className="text-xs opacity-70">

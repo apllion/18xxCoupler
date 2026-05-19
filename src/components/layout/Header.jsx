@@ -15,6 +15,12 @@ export default function Header() {
   const canUndo = useGameStore((s) => s.canUndo)
   const toggleLog = useUIStore((s) => s.toggleLog)
 
+  // What-if mode
+  const whatIfSnapshot = useGameStore((s) => s.whatIfSnapshot)
+  const enterWhatIf = useGameStore((s) => s.enterWhatIf)
+  const exitWhatIf = useGameStore((s) => s.exitWhatIf)
+  const isWhatIf = !!whatIfSnapshot
+
   // Turn tracking
   const turnTracking = useUIStore((s) => s.turnTracking)
   const toggleTurnTracking = useUIStore((s) => s.toggleTurnTracking)
@@ -137,8 +143,22 @@ export default function Header() {
               Bank: {fmt(game.bank.cash)}
             </span>
 
-            {/* Guided / Manual toggle */}
+            {/* What-if toggle */}
             {!inPregame && (
+              <button
+                onClick={() => isWhatIf ? exitWhatIf(true) : enterWhatIf()}
+                className={`text-xs px-2.5 py-0.5 rounded transition-colors ${
+                  isWhatIf
+                    ? 'bg-purple-700 text-purple-100 ring-1 ring-purple-400'
+                    : 'bg-broker-surface-hover text-broker-text-muted hover:text-broker-text'
+                }`}
+              >
+                {isWhatIf ? 'Exit' : 'What-if'}
+              </button>
+            )}
+
+            {/* Guided / Open toggle */}
+            {!inPregame && !isWhatIf && (
               <button
                 onClick={toggleTurnTracking}
                 className={`text-xs px-2.5 py-0.5 rounded transition-colors ${
@@ -147,7 +167,7 @@ export default function Header() {
                     : 'bg-amber-800 text-amber-200'
                 }`}
               >
-                {turnTracking === 'on' ? 'Guided' : 'Manual'}
+                {turnTracking === 'on' ? 'Guided' : 'Open'}
               </button>
             )}
 
@@ -164,6 +184,27 @@ export default function Header() {
           </div>
         </div>
       </header>
+
+      {/* What-if mode banner */}
+      {isWhatIf && (
+        <div className="bg-purple-900/80 border-b border-purple-600 px-3 py-2 flex items-center justify-between">
+          <span className="text-sm text-purple-200 font-medium">What-if mode — changes are local only</span>
+          <div className="flex gap-2">
+            <button
+              onClick={() => exitWhatIf(true)}
+              className="bg-purple-700 hover:bg-purple-600 text-white px-3 py-1 rounded text-xs font-medium"
+            >
+              Discard
+            </button>
+            <button
+              onClick={() => exitWhatIf(false)}
+              className="text-purple-300 hover:text-purple-100 text-xs px-2"
+            >
+              Keep
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Prominent undo banner after advancing */}
       {showUndoBanner && !inPregame && (

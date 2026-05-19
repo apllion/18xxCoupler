@@ -45,8 +45,9 @@ export const useGameStore = create(
         if (!state.game) return
         applyAction(state.game, action)
       })
-      const { game } = get()
-      if (game) saveGame(game)
+      // Don't persist during what-if — changes are exploratory
+      const { game, whatIfSnapshot } = get()
+      if (game && !whatIfSnapshot) saveGame(game)
     },
 
     undo: () => {
@@ -75,6 +76,58 @@ export const useGameStore = create(
 
     endGame: () => {
       set({ game: null, saveKey: null })
+    },
+
+    // What-if mode — snapshot state, explore freely, revert on exit
+    whatIfSnapshot: null,
+
+    enterWhatIf: () => {
+      const { game } = get()
+      if (!game) return
+      // Snapshot: store the bare actions + metadata needed to rebuild
+      set({
+        whatIfSnapshot: {
+          titleId: game.title.titleId,
+          playerNames: game.originalPlayerNames || game.players.map((p) => p.name),
+          userVariant: game.title.activeVariant?.id || null,
+          actionLog: game.actionLog.map((e) => e.action),
+          createdAt: game.createdAt,
+          turnQueue: game.turnQueue,
+          turnIndex: game.turnIndex,
+          srPassed: game.srPassed,
+          orStep: game.orStep,
+          priorityDeal: game.priorityDeal,
+        },
+      })
+    },
+
+    exitWhatIf: (discard = true) => {
+      const { whatIfSnapshot } = get()
+      if (!whatIfSnapshot) { set({ whatIfSnapshot: null }); return }
+
+      if (discard) {
+        // Restore: rebuild game from snapshot
+        const title = getTitle(whatIfSnapshot.titleId)
+        const freshGame = createGame(title, whatIfSnapshot.playerNames, whatIfSnapshot.userVariant)
+        freshGame.createdAt = whatIfSnapshot.createdAt
+        for (const action of whatIfSnapshot.actionLog) {
+          applyAction(freshGame, action)
+        }
+        // Restore turn state
+        freshGame.turnQueue = whatIfSnapshot.turnQueue
+        freshGame.turnIndex = whatIfSnapshot.turnIndex
+        freshGame.srPassed = whatIfSnapshot.srPassed
+        freshGame.orStep = whatIfSnapshot.orStep
+        freshGame.priorityDeal = whatIfSnapshot.priorityDeal
+
+        set({ game: freshGame, whatIfSnapshot: null })
+        saveGame(freshGame)
+      } else {
+        // Keep: commit what-if changes as real
+        set({ whatIfSnapshot: null })
+        const { game } = get()
+        if (game) saveGame(game)
+      }
     },
 
     // Replay — rebuild game at a specific action index

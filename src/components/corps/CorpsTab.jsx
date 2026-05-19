@@ -7,12 +7,14 @@ import { corpPrice } from '../../engine/stockMarket.js'
 import { currentPhase, trainLimit, operatingRounds } from '../../engine/phase.js'
 import { nextAvailableTrains, remainingCount } from '../../engine/depot.js'
 import { calculateDividend } from '../../engine/rules/dividend.js'
+import { currentInterestRate, interestDue, maxLoansForCorp } from '../../engine/loans.js'
 
 export default function CorpsTab() {
   const game = useGameStore((s) => s.game)
   const dispatch = useDispatch()
   const [corpIndex, setCorpIndex] = useState(0)
   const turnTracking = useUIStore((s) => s.turnTracking)
+  const isWhatIf = !!useGameStore((s) => s.whatIfSnapshot)
   const turnQueue = game?.turnQueue || []
   const turnIndex = game?.turnIndex || 0
 
@@ -30,9 +32,9 @@ export default function CorpsTab() {
       .sort((a, b) => b.price - a.price)
   }, [game.corporations, game.stockMarket])
 
-  // Auto-sync with turn tracking in OR
+  // Auto-sync with turn tracking in OR (disabled in what-if mode)
   const isOR = game.roundTracker?.type === 'operating' && !game.roundTracker?.inPregame
-  const currentTurnCorp = isOR && turnTracking === 'on' && turnQueue.length > 0
+  const currentTurnCorp = isOR && turnTracking === 'on' && !isWhatIf && turnQueue.length > 0
     ? turnQueue[turnIndex]
     : null
 
@@ -79,12 +81,14 @@ export default function CorpsTab() {
           {' · '}Train limit: {typeof phase.trainLimit === 'number' ? phase.trainLimit : '—'}
         </div>
         <div className="flex gap-2">
-          <button
-            onClick={handleCollectAll}
-            className="text-xs bg-green-900 hover:bg-green-800 text-green-200 px-2 py-1 rounded"
-          >
-            Collect Privates
-          </button>
+          {game.companies?.length > 0 && (
+            <button
+              onClick={handleCollectAll}
+              className="text-xs bg-green-900 hover:bg-green-800 text-green-200 px-2 py-1 rounded"
+            >
+              Collect Privates
+            </button>
+          )}
           <button
             onClick={handleSoldOutAdjust}
             className="text-xs bg-broker-green hover:bg-broker-green-light text-broker-gold px-2 py-1 rounded"
@@ -107,7 +111,10 @@ export default function CorpsTab() {
                   ? 'ring-2 ring-white'
                   : i < safeIndex ? 'opacity-40' : 'opacity-80'
               }`}
-              style={{ backgroundColor: c.color, color: c.textColor || '#fff' }}
+              style={c.stripeColor
+                ? { background: `linear-gradient(135deg, ${c.color} 50%, ${c.stripeColor} 50%)`, color: c.textColor || '#fff' }
+                : { backgroundColor: c.color, color: c.textColor || '#fff' }
+              }
             >
               {c.sym}
             </button>
@@ -193,6 +200,9 @@ function CorpDetail({ game, corp, dispatch, fmt, onNext }) {
           <div>Treasury: <span className="font-medium text-white">{fmt(corp.cash)}</span></div>
           <div>President: <span className="font-medium">{president?.name ?? '—'}</span></div>
           <div>Tokens: {corp.tokensPlaced}/{corp.tokens.length}</div>
+          {corp.loans > 0 && <div>Loans: <span className="text-red-300 font-medium">{corp.loans}</span></div>}
+          {corp.corpSize && <div className="text-xs text-broker-text-muted">{corp.corpSize}</div>}
+          {corp.liquidated && <span className="text-xs bg-red-900 text-red-300 px-1 rounded">LIQUIDATED</span>}
         </div>
       </div>
 
@@ -202,17 +212,46 @@ function CorpDetail({ game, corp, dispatch, fmt, onNext }) {
         <div className="text-xs text-broker-text-muted mb-2 font-medium uppercase">
           Trains ({corp.trains.length}/{limit})
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {corp.trains.length === 0 ? (
             <span className="text-broker-text-muted text-sm">No trains</span>
           ) : (
             corp.trains.map((t) => (
               <span key={t.id} className="bg-broker-surface-hover px-3 py-1 rounded text-sm font-medium">
                 {t.name}
+                {t.multiplier > 1 && (
+                  <span className="text-xs ml-1 text-green-300">×{t.multiplier}</span>
+                )}
+                {t.attachment && (
+                  <span className="text-xs ml-1 text-yellow-300" title={t.attachment.permit || t.attachment.name}>
+                    +{t.attachment.type === 'card' ? t.attachment.color : 'EC'}
+                  </span>
+                )}
               </span>
             ))
           )}
         </div>
+
+        {/* Executive Car purchase (DaiHan) */}
+        {game.title.executiveCars && corp.trains.some((t) => !t.attachment) && (
+          <div className="mt-2 space-y-1">
+            <div className="text-xs text-broker-text-muted">Attach Executive Car:</div>
+            {corp.trains.filter((t) => !t.attachment).map((t) => (
+              <button
+                key={t.id}
+                onClick={() => dispatch({
+                  type: 'BUY_EXECUTIVE_CAR',
+                  corpSym: corp.sym,
+                  trainId: t.id,
+                  price: game.title.executiveCars.price ?? 0,
+                })}
+                className="text-xs bg-yellow-900 hover:bg-yellow-800 text-yellow-200 px-2 py-1 rounded mr-1"
+              >
+                {t.name} +EC
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Revenue & Dividends */}
@@ -258,14 +297,16 @@ function CorpDetail({ game, corp, dispatch, fmt, onNext }) {
               {isDoubleJump ? 'price ↗↗' : 'price ↗'}
             </div>
           </button>
-          <button
-            onClick={handleHalfPay}
-            disabled={revNum <= 0}
-            className="flex-1 bg-yellow-900 hover:bg-yellow-800 disabled:opacity-30 disabled:cursor-not-allowed text-white py-3 rounded-lg font-medium transition-colors"
-          >
-            <div>Half</div>
-            <div className="text-xs opacity-70">½ each</div>
-          </button>
+          {game.title.halfPay && (
+            <button
+              onClick={handleHalfPay}
+              disabled={revNum <= 0}
+              className="flex-1 bg-yellow-900 hover:bg-yellow-800 disabled:opacity-30 disabled:cursor-not-allowed text-white py-3 rounded-lg font-medium transition-colors"
+            >
+              <div>Half</div>
+              <div className="text-xs opacity-70">½ each</div>
+            </button>
+          )}
           <button
             onClick={handleWithhold}
             disabled={revNum <= 0}
@@ -317,6 +358,26 @@ function CorpDetail({ game, corp, dispatch, fmt, onNext }) {
         />
       )}
 
+      {/* Corp share buy/sell (21Moon, PTG, 18India) */}
+      {game.title.corpCanBuyShares && (
+        <CorpSharePanel game={game} corp={corp} dispatch={dispatch} fmt={fmt} />
+      )}
+
+      {/* Merger panel */}
+      {game.title.merger && (
+        <MergerPanel game={game} corp={corp} dispatch={dispatch} fmt={fmt} />
+      )}
+
+      {/* Loans panel (1817, 1867) */}
+      {game.title.loans && (
+        <LoanPanel game={game} corp={corp} dispatch={dispatch} fmt={fmt} />
+      )}
+
+      {/* Corp conversion panel (1817) */}
+      {game.title.corpSizing?.enabled && (
+        <ConversionPanel game={game} corp={corp} dispatch={dispatch} />
+      )}
+
       {/* Next corp button */}
       <button
         onClick={onNext}
@@ -324,6 +385,559 @@ function CorpDetail({ game, corp, dispatch, fmt, onNext }) {
       >
         Done — Next Corp ▶
       </button>
+    </div>
+  )
+}
+
+function CorpSharePanel({ game, corp, dispatch, fmt }) {
+  const title = game.title
+
+  // Shares this corp currently holds
+  const holdings = {}
+  for (const s of (corp.sharesHeld || [])) {
+    holdings[s.corpSym] = (holdings[s.corpSym] || 0) + s.percent
+  }
+
+  // Available shares to buy: from IPO and market of other (or own) corps
+  const buyOptions = game.corporations
+    .filter((c) => c.ipoed)
+    .map((c) => {
+      const price = corpPrice(game.stockMarket, c.sym)
+      const hasIPO = c.ipoShares > 0
+      const hasMarket = c.marketShares > 0
+      const isSelf = c.sym === corp.sym
+      if (!price) return null
+      if (isSelf && !title.corpCanBuyOwnShares) return hasMarket || hasIPO ? null : null
+      // Filter out president-only shares if not allowed
+      return { corp: c, price, hasIPO, hasMarket, isSelf }
+    })
+    .filter(Boolean)
+    // Filter self shares based on title rules
+    .filter((o) => !o.isSelf || title.corpCanBuyOwnShares)
+
+  // Holdings this corp can sell
+  const sellOptions = Object.entries(holdings).map(([sym, pct]) => {
+    const target = game.corporations.find((c) => c.sym === sym)
+    const price = corpPrice(game.stockMarket, sym)
+    return { sym, pct, price, color: target?.color, textColor: target?.textColor }
+  }).filter((o) => o.price)
+
+  function handleCorpBuy(targetCorpSym, source) {
+    const shareSize = title.shares?.[1] ?? 10
+    dispatch({
+      type: 'CORP_BUY_SHARE',
+      buyerCorpSym: corp.sym,
+      targetCorpSym,
+      source,
+      percent: shareSize,
+    })
+  }
+
+  function handleCorpSell(targetCorpSym) {
+    const shareSize = title.shares?.[1] ?? 10
+    dispatch({
+      type: 'CORP_SELL_SHARES',
+      sellerCorpSym: corp.sym,
+      targetCorpSym,
+      percent: shareSize,
+    })
+  }
+
+  return (
+    <div className="bg-broker-surface rounded-lg p-3">
+      <div className="text-xs text-broker-text-muted mb-2 font-medium uppercase">
+        Corp Share Trading
+      </div>
+
+      {/* Current holdings */}
+      {Object.keys(holdings).length > 0 && (
+        <div className="mb-3">
+          <div className="text-xs text-broker-text-muted mb-1">Holdings:</div>
+          <div className="flex flex-wrap gap-1">
+            {Object.entries(holdings).map(([sym, pct]) => (
+              <span key={sym} className="text-xs bg-broker-surface-hover px-2 py-1 rounded">
+                {sym}: {pct}%
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Buy shares */}
+      {buyOptions.length > 0 && (
+        <div className="mb-2">
+          <div className="text-xs text-broker-text-muted mb-1">Buy Share:</div>
+          <div className="space-y-1">
+            {buyOptions.map(({ corp: c, price, hasIPO, hasMarket, isSelf }) => {
+              const shareSize = title.shares?.[1] ?? 10
+              const cost = (price * shareSize) / 10
+              const canAfford = corp.cash >= cost
+              return (
+                <div key={c.sym} className="flex items-center gap-2">
+                  <span
+                    className="w-3 h-3 rounded-full flex-shrink-0"
+                    style={{ backgroundColor: c.color }}
+                  />
+                  <span className="text-sm font-medium w-12">
+                    {c.sym}{isSelf ? '*' : ''}
+                  </span>
+                  {hasIPO && (
+                    <button
+                      onClick={() => canAfford && handleCorpBuy(c.sym, 'ipo')}
+                      disabled={!canAfford}
+                      className={`text-xs px-2 py-1 rounded ${
+                        canAfford
+                          ? 'bg-blue-800 hover:bg-blue-700 text-blue-200'
+                          : 'bg-broker-surface-hover text-broker-text-muted cursor-not-allowed'
+                      }`}
+                    >
+                      IPO {fmt(c.parPrice ?? price)}
+                    </button>
+                  )}
+                  {hasMarket && (
+                    <button
+                      onClick={() => canAfford && handleCorpBuy(c.sym, 'market')}
+                      disabled={!canAfford}
+                      className={`text-xs px-2 py-1 rounded ${
+                        canAfford
+                          ? 'bg-blue-800 hover:bg-blue-700 text-blue-200'
+                          : 'bg-broker-surface-hover text-broker-text-muted cursor-not-allowed'
+                      }`}
+                    >
+                      Mkt {fmt(price)}
+                    </button>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Sell shares */}
+      {title.corpCanSellShares && sellOptions.length > 0 && (
+        <div>
+          <div className="text-xs text-broker-text-muted mb-1">Sell Share:</div>
+          <div className="space-y-1">
+            {sellOptions.map(({ sym, pct, price, color, textColor }) => (
+              <div key={sym} className="flex items-center gap-2">
+                <span
+                  className="w-3 h-3 rounded-full flex-shrink-0"
+                  style={{ backgroundColor: color }}
+                />
+                <span className="text-sm font-medium w-12">{sym}</span>
+                <span className="text-xs text-broker-text-muted">{pct}%</span>
+                <button
+                  onClick={() => handleCorpSell(sym)}
+                  className="text-xs px-2 py-1 rounded bg-red-900 hover:bg-red-800 text-red-200"
+                >
+                  Sell → +{fmt(price)}
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {buyOptions.length === 0 && sellOptions.length === 0 && (
+        <div className="text-xs text-broker-text-muted">No shares available to trade</div>
+      )}
+    </div>
+  )
+}
+
+function MergerPanel({ game, corp, dispatch, fmt }) {
+  const [mergeTarget, setMergeTarget] = useState(null)
+  const [paymentShares, setPaymentShares] = useState(0)
+  const [cashDiff, setCashDiff] = useState('')
+  const [selectedMajor, setSelectedMajor] = useState(null)
+  const [selectedIdentity, setSelectedIdentity] = useState(null)
+
+  const merger = game.title.merger
+  if (!merger) return null
+
+  // Check phase eligibility
+  const phase = currentPhase(game.phaseManager)
+  if (merger.fromPhase) {
+    const phaseNames = game.phaseManager.phases.map((p) => p.name)
+    const currentIdx = phaseNames.indexOf(phase.name)
+    const fromIdx = phaseNames.indexOf(merger.fromPhase)
+    if (currentIdx < fromIdx) return null
+  }
+
+  // Can't merge if already merged (PTG)
+  if (corp.isMerged && !merger.canReMerge) return null
+
+  const mergerType = merger.type
+
+  // Eligible merge targets
+  let targets = []
+  if (mergerType === 'ptg_combine') {
+    // Other floated, non-merged companies
+    targets = game.corporations.filter((c) =>
+      c.sym !== corp.sym && c.floated && !c.isMerged
+    )
+  } else if (mergerType === '1862_peer') {
+    // Other floated corps
+    targets = game.corporations.filter((c) =>
+      c.sym !== corp.sym && c.floated
+    )
+  } else if (mergerType === '1822_acquire') {
+    // Minors that the major can acquire
+    targets = game.corporations.filter((c) =>
+      c.type === 'minor' && c.floated && c.sym !== corp.sym
+    )
+    // Only show if current corp is a major
+    if (corp.type === 'minor') return null
+  } else if (mergerType === '1867_minor_major') {
+    // Majors available for conversion (current corp must be a minor)
+    if (corp.type !== 'minor') return null
+    targets = game.corporations.filter((c) =>
+      c.type === 'major' && !c.floated
+    )
+  } else if (mergerType === 'rla_merge') {
+    // Other floated minors (current corp must be a minor)
+    if (corp.type !== 'minor') return null
+    targets = game.corporations.filter((c) =>
+      c.sym !== corp.sym && c.type === 'minor' && c.floated
+    )
+  }
+
+  if (targets.length === 0 && !mergeTarget) return null
+
+  function handlePTGMerge(targetSym) {
+    dispatch({
+      type: 'MERGE_CORPS',
+      topCorpSym: corp.sym,
+      bottomCorpSym: targetSym,
+    })
+    setMergeTarget(null)
+  }
+
+  function handle1862Merge(nonsurvivorSym) {
+    dispatch({
+      type: 'MERGE_CORPS',
+      survivorSym: corp.sym,
+      nonsurvivorSym,
+    })
+    setMergeTarget(null)
+  }
+
+  function handle1822Acquire() {
+    if (!mergeTarget) return
+    const diff = parseInt(cashDiff, 10) || 0
+    dispatch({
+      type: 'ACQUIRE_MINOR',
+      majorSym: corp.sym,
+      minorSym: mergeTarget,
+      paymentShares,
+      cashDifference: diff,
+    })
+    setMergeTarget(null)
+    setPaymentShares(0)
+    setCashDiff('')
+  }
+
+  function handle1867Convert(majorSym) {
+    dispatch({
+      type: 'CONVERT_MINOR',
+      minorSym: corp.sym,
+      majorSym,
+    })
+    setMergeTarget(null)
+  }
+
+  // Label for the panel
+  const panelLabel = mergerType === '1822_acquire' ? 'Acquire Minor' :
+    mergerType === '1867_minor_major' ? 'Convert to Major' : 'Merge'
+
+  return (
+    <div className="bg-broker-surface rounded-lg p-3">
+      <div className="text-xs text-broker-text-muted mb-2 font-medium uppercase">{panelLabel}</div>
+
+      {/* Target selection */}
+      {!mergeTarget && (
+        <div className="space-y-1">
+          {targets.map((t) => {
+            const tPrice = corpPrice(game.stockMarket, t.sym)
+            return (
+              <div key={t.sym} className="flex items-center gap-2">
+                <span
+                  className="w-3 h-3 rounded-full flex-shrink-0"
+                  style={{ backgroundColor: t.color }}
+                />
+                <span className="text-sm font-medium w-12">{t.sym}</span>
+                <span className="text-xs text-broker-text-muted">
+                  {t.name} {tPrice ? fmt(tPrice) : ''}
+                </span>
+                {(mergerType === 'ptg_combine') && (
+                  <button
+                    onClick={() => handlePTGMerge(t.sym)}
+                    className="ml-auto text-xs bg-purple-800 hover:bg-purple-700 px-2 py-1 rounded text-purple-200"
+                  >
+                    Merge
+                  </button>
+                )}
+                {(mergerType === '1862_peer') && (
+                  <button
+                    onClick={() => handle1862Merge(t.sym)}
+                    className="ml-auto text-xs bg-purple-800 hover:bg-purple-700 px-2 py-1 rounded text-purple-200"
+                  >
+                    Merge (absorb)
+                  </button>
+                )}
+                {(mergerType === '1822_acquire') && (
+                  <button
+                    onClick={() => setMergeTarget(t.sym)}
+                    className="ml-auto text-xs bg-purple-800 hover:bg-purple-700 px-2 py-1 rounded text-purple-200"
+                  >
+                    Acquire
+                  </button>
+                )}
+                {(mergerType === '1867_minor_major') && (
+                  <button
+                    onClick={() => handle1867Convert(t.sym)}
+                    className="ml-auto text-xs bg-purple-800 hover:bg-purple-700 px-2 py-1 rounded text-purple-200"
+                  >
+                    Convert
+                  </button>
+                )}
+                {(mergerType === 'rla_merge') && (
+                  <button
+                    onClick={() => setMergeTarget(t.sym)}
+                    className="ml-auto text-xs bg-purple-800 hover:bg-purple-700 px-2 py-1 rounded text-purple-200"
+                  >
+                    Merge
+                  </button>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      )}
+
+      {/* 1822 payment options */}
+      {mergeTarget && mergerType === '1822_acquire' && (
+        <div className="mt-2 space-y-2">
+          <div className="text-sm text-broker-text">
+            Acquiring <span className="font-medium">{mergeTarget}</span>
+          </div>
+          <div className="flex gap-2 items-center">
+            <label className="text-xs text-broker-text-muted">Shares:</label>
+            {(merger.paymentOptions || [0, 1, 2]).map((n) => (
+              <button
+                key={n}
+                onClick={() => setPaymentShares(n)}
+                className={`text-xs px-2 py-1 rounded ${
+                  paymentShares === n
+                    ? 'bg-purple-700 text-white'
+                    : 'bg-broker-surface-hover text-broker-text-muted'
+                }`}
+              >
+                {n} share{n !== 1 ? 's' : ''}
+              </button>
+            ))}
+          </div>
+          <div className="flex gap-2 items-center">
+            <label className="text-xs text-broker-text-muted">Cash difference:</label>
+            <input
+              type="number"
+              value={cashDiff}
+              onChange={(e) => setCashDiff(e.target.value)}
+              placeholder="0"
+              className="w-24 bg-broker-bg border border-broker-border rounded px-2 py-1 text-sm text-white"
+            />
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={handle1822Acquire}
+              className="text-xs bg-purple-800 hover:bg-purple-700 px-3 py-1 rounded text-white"
+            >
+              Confirm Acquisition
+            </button>
+            <button
+              onClick={() => { setMergeTarget(null); setPaymentShares(0); setCashDiff('') }}
+              className="text-xs text-broker-text-muted hover:text-broker-text px-2 py-1"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* RLA merge: choose Major Corp + identity */}
+      {mergeTarget && mergerType === 'rla_merge' && (
+        <div className="mt-2 space-y-2">
+          <div className="text-sm text-broker-text">
+            Merging <span className="font-medium">{corp.sym}</span> + <span className="font-medium">{mergeTarget}</span>
+          </div>
+
+          {/* Step 1: Choose Major Corporation */}
+          <div className="text-xs text-broker-text-muted">Choose Corporation:</div>
+          <div className="space-y-1">
+            {game.corporations
+              .filter((c) => c.type === 'major' && !c.floated)
+              .map((c) => (
+                <button
+                  key={c.sym}
+                  onClick={() => { setSelectedMajor(c.sym); setSelectedIdentity(null) }}
+                  className={`w-full text-left text-xs px-2 py-1 rounded flex items-center gap-2 ${
+                    selectedMajor === c.sym
+                      ? 'bg-purple-700 text-white'
+                      : 'bg-broker-surface-hover text-broker-text-muted hover:text-white'
+                  }`}
+                  style={{ borderLeft: `3px solid ${c.color}` }}
+                >
+                  <span className="font-medium">{c.sym}</span>
+                  {c.identityOptions && (
+                    <span className="opacity-70">{c.identityOptions.join(' / ')}</span>
+                  )}
+                </button>
+              ))}
+          </div>
+
+          {/* Step 2: Choose identity (if applicable) */}
+          {selectedMajor && (() => {
+            const majorCorp = game.corporations.find((c) => c.sym === selectedMajor)
+            if (!majorCorp?.identityOptions) return null
+            return (
+              <div>
+                <div className="text-xs text-broker-text-muted">Choose Identity:</div>
+                <div className="flex gap-2 mt-1">
+                  {majorCorp.identityOptions.map((name) => (
+                    <button
+                      key={name}
+                      onClick={() => setSelectedIdentity(name)}
+                      className={`text-xs px-2 py-1 rounded ${
+                        selectedIdentity === name
+                          ? 'bg-purple-700 text-white'
+                          : 'bg-broker-surface-hover text-broker-text-muted hover:text-white'
+                      }`}
+                    >
+                      {name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )
+          })()}
+
+          {/* Confirm */}
+          <div className="flex gap-2">
+            <button
+              onClick={() => {
+                if (!selectedMajor) return
+                dispatch({
+                  type: 'MERGE_CORPS',
+                  minorSymA: corp.sym,
+                  minorSymB: mergeTarget,
+                  majorCorpSym: selectedMajor,
+                  chosenIdentity: selectedIdentity,
+                })
+                setMergeTarget(null)
+                setSelectedMajor(null)
+                setSelectedIdentity(null)
+              }}
+              disabled={!selectedMajor}
+              className="text-xs bg-purple-800 hover:bg-purple-700 disabled:opacity-30 px-3 py-1 rounded text-white"
+            >
+              Confirm Merger
+            </button>
+            <button
+              onClick={() => { setMergeTarget(null); setSelectedMajor(null); setSelectedIdentity(null) }}
+              className="text-xs text-broker-text-muted hover:text-broker-text px-2 py-1"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function LoanPanel({ game, corp, dispatch, fmt }) {
+  const config = game.title.loans || {}
+  const loanValue = config.loanValue || 100
+  const max = maxLoansForCorp(corp, game.title)
+  const loans = corp.loans || 0
+  const rate = currentInterestRate(game)
+  const interest = interestDue(game, corp.sym)
+  const canTake = loans < max
+  const canRepay = loans > 0 && corp.cash >= loanValue
+
+  return (
+    <div className="bg-broker-surface rounded-lg p-3">
+      <div className="text-xs text-broker-text-muted mb-2 font-medium uppercase">Loans</div>
+      <div className="flex gap-4 text-sm mb-2">
+        <div>Loans: <span className="font-medium text-white">{loans}/{max}</span></div>
+        <div>Rate: <span className="font-medium text-yellow-300">{rate}%</span></div>
+        {interest > 0 && <div>Interest due: <span className="font-medium text-red-300">{fmt(interest)}</span></div>}
+      </div>
+      <div className="flex gap-2">
+        <button
+          onClick={() => dispatch({ type: 'TAKE_LOAN', corpSym: corp.sym })}
+          disabled={!canTake}
+          className="text-xs bg-blue-800 hover:bg-blue-700 disabled:opacity-30 disabled:cursor-not-allowed text-white px-3 py-1.5 rounded"
+        >
+          Take Loan (+{fmt(loanValue)})
+        </button>
+        <button
+          onClick={() => dispatch({ type: 'REPAY_LOAN', corpSym: corp.sym })}
+          disabled={!canRepay}
+          className="text-xs bg-green-800 hover:bg-green-700 disabled:opacity-30 disabled:cursor-not-allowed text-white px-3 py-1.5 rounded"
+        >
+          Repay Loan (-{fmt(loanValue)})
+        </button>
+        {interest > 0 && (
+          <button
+            onClick={() => dispatch({ type: 'PAY_INTEREST', corpSym: corp.sym })}
+            className="text-xs bg-red-800 hover:bg-red-700 text-white px-3 py-1.5 rounded"
+          >
+            Pay Interest ({fmt(interest)})
+          </button>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function ConversionPanel({ game, corp, dispatch }) {
+  const sizing = game.title.corpSizing
+  if (!sizing?.enabled) return null
+
+  const phase = currentPhase(game.phaseManager)
+  const allowedSizes = phase.corpSizes || []
+  const currentSize = corp.corpSize || '2share'
+
+  const canConvertTo5 = currentSize === '2share' && allowedSizes.includes('5share')
+  const canConvertTo10 = currentSize === '5share' && allowedSizes.includes('10share')
+
+  if (!canConvertTo5 && !canConvertTo10) return null
+
+  return (
+    <div className="bg-broker-surface rounded-lg p-3">
+      <div className="text-xs text-broker-text-muted mb-2 font-medium uppercase">
+        Corp Conversion ({currentSize})
+      </div>
+      <div className="flex gap-2">
+        {canConvertTo5 && (
+          <button
+            onClick={() => dispatch({ type: 'CONVERT_CORP', corpSym: corp.sym, targetSize: '5share' })}
+            className="text-xs bg-purple-800 hover:bg-purple-700 text-white px-3 py-1.5 rounded"
+          >
+            Convert to 5-share
+          </button>
+        )}
+        {canConvertTo10 && (
+          <button
+            onClick={() => dispatch({ type: 'CONVERT_CORP', corpSym: corp.sym, targetSize: '10share' })}
+            className="text-xs bg-purple-800 hover:bg-purple-700 text-white px-3 py-1.5 rounded"
+          >
+            Convert to 10-share
+          </button>
+        )}
+      </div>
     </div>
   )
 }
