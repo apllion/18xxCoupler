@@ -9,9 +9,13 @@ import { useThemeStore, themes } from '../../store/themeStore.js'
 export default function GameSelector() {
   const navigate = useNavigate()
   const loadGame = useGameStore((s) => s.loadGame)
+  const importFrom18xxGames = useGameStore((s) => s.importFrom18xxGames)
   const sync = useSyncContext()
   const titles = allTitles()
   const [savedGames, setSavedGames] = useState(() => loadAllGames())
+  const [importId, setImportId] = useState('')
+  const [importError, setImportError] = useState(null)
+  const [importing, setImporting] = useState(false)
 
   const savedList = Object.entries(savedGames)
     .map(([key, game]) => ({ key, game }))
@@ -94,6 +98,44 @@ export default function GameSelector() {
             </div>
           </button>
         ))}
+      </div>
+
+      {/* Import from 18xx.games */}
+      <div className="w-full max-w-md mt-6">
+        <div className="bg-broker-surface border border-broker-border rounded-lg p-3">
+          <div className="text-xs text-broker-text-muted mb-2 font-medium uppercase">Import from 18xx.games</div>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={importId}
+              onChange={(e) => { setImportId(e.target.value.replace(/\D/g, '')); setImportError(null) }}
+              placeholder="Game ID"
+              className="flex-1 bg-broker-bg border border-broker-border rounded px-3 py-2 text-sm text-white placeholder-broker-text-muted font-mono"
+            />
+            <button
+              onClick={async () => {
+                if (!importId || importing) return
+                setImporting(true)
+                setImportError(null)
+                try {
+                  await importFrom18xxGames(parseInt(importId, 10))
+                  navigate('/')
+                } catch (err) {
+                  setImportError(err.message)
+                } finally {
+                  setImporting(false)
+                }
+              }}
+              disabled={!importId || importing}
+              className="bg-purple-800 hover:bg-purple-700 text-white px-4 py-2 rounded text-sm disabled:opacity-40"
+            >
+              {importing ? 'Loading...' : 'Import'}
+            </button>
+          </div>
+          {importError && (
+            <div className="text-xs text-red-400 mt-2">{importError}</div>
+          )}
+        </div>
       </div>
 
       {/* Load from file */}

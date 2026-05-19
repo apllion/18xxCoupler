@@ -7,6 +7,7 @@ import { createGame } from '../engine/setup.js'
 import { applyAction } from '../engine/actions.js'
 import { getTitle } from '../titles/index.js'
 import { saveGame } from '../utils/persistence.js'
+import { importGame as importFrom18xxGamesEngine } from '../engine/import18xxGames.js'
 
 export const useGameStore = create(
   immer((set, get) => ({
@@ -38,6 +39,18 @@ export const useGameStore = create(
 
       const saveKey = `${titleId}_${savedGame.createdAt}`
       set({ game: freshGame, saveKey })
+    },
+
+    // Import from 18xx.games by game ID — fetches, replays, enters replay mode
+    importFrom18xxGames: async (gameId) => {
+      const resp = await fetch(`https://18xx.games/api/v1/game/${gameId}`)
+      if (!resp.ok) throw new Error(`Game ${gameId} not found (${resp.status})`)
+      const gameJson = await resp.json()
+      const game = importFrom18xxGamesEngine(gameJson)
+      const saveKey = `import_${gameId}`
+      set({ game, saveKey })
+      // Auto-enter replay mode so user can scrub through the game
+      set({ fullLog: game.actionLog.map((e) => e.action) })
     },
 
     dispatch: (action) => {

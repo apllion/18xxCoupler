@@ -80,6 +80,27 @@ export default function SummaryTab() {
         <div className="text-xs text-broker-text-muted mt-1">{bankPct}% remaining</div>
       </div>
 
+      {/* Import source info */}
+      {game.importSource && (
+        <div className="bg-purple-900/20 border border-purple-800/50 rounded-lg p-3 text-sm">
+          <div className="text-xs text-purple-300 font-medium uppercase mb-1">Imported from 18xx.games</div>
+          <div className="text-broker-text-muted">
+            Game #{game.importSource.gameId} · {game.importSource.status} · {game.importSource.stats.applied} actions replayed
+          </div>
+          {game.importSource.result && (
+            <div className="text-xs text-broker-text-muted mt-1">
+              Final scores: {Object.entries(game.importSource.result)
+                .map(([id, score]) => {
+                  const pId = game.importSource.playerMap[id]
+                  const player = game.players.find(p => p.id === pId)
+                  return `${player?.name || id}: ${formatCurrency(score, game.title.currencyFormat)}`
+                })
+                .join(', ')}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Game Info + Download/Upload */}
       <GameInfo game={game} phase={phase} />
 
@@ -174,6 +195,8 @@ function ActionLog({ game, showLog, toggleLog }) {
   const enterReplay = useGameStore((s) => s.enterReplay)
   const exitReplay = useGameStore((s) => s.exitReplay)
   const replayTo = useGameStore((s) => s.replayTo)
+  const enterWhatIf = useGameStore((s) => s.enterWhatIf)
+  const whatIfSnapshot = useGameStore((s) => s.whatIfSnapshot)
 
   const inReplay = fullLog !== null
   const totalActions = inReplay ? fullLog.length : game.actionLog.length
@@ -197,12 +220,22 @@ function ActionLog({ game, showLog, toggleLog }) {
           </button>
         )}
         {inReplay && (
-          <button
-            onClick={exitReplay}
-            className="text-xs bg-amber-800 hover:bg-amber-700 text-white px-2 py-1 rounded"
-          >
-            Exit Replay
-          </button>
+          <div className="flex gap-1">
+            {!whatIfSnapshot && (
+              <button
+                onClick={() => { exitReplay(); enterWhatIf() }}
+                className="text-xs bg-purple-800 hover:bg-purple-700 text-purple-200 px-2 py-1 rounded"
+              >
+                What-if
+              </button>
+            )}
+            <button
+              onClick={exitReplay}
+              className="text-xs bg-amber-800 hover:bg-amber-700 text-white px-2 py-1 rounded"
+            >
+              Exit Replay
+            </button>
+          </div>
         )}
       </div>
 
