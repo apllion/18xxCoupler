@@ -7,6 +7,8 @@ import { corpPrice } from '../../engine/stockMarket.js'
 import { currentPhase, trainLimit, operatingRounds } from '../../engine/phase.js'
 import { nextAvailableTrains, remainingCount } from '../../engine/depot.js'
 import { calculateDividend } from '../../engine/rules/dividend.js'
+import { dividendComparison } from '../../engine/rules/dividendAdvisor.js'
+import { trainRushAnalysis } from '../../engine/rules/trainRush.js'
 import { currentInterestRate, interestDue, maxLoansForCorp } from '../../engine/loans.js'
 
 export default function CorpsTab() {
@@ -145,6 +147,7 @@ function CorpDetail({ game, corp, dispatch, fmt, onNext }) {
   const revNum = parseInt(revenue, 10) || 0
   const perShare = revNum > 0 ? Math.floor(revNum / 10) : 0
   const dividendPreview = revNum > 0 ? calculateDividend(game, corp.sym, revNum) : null
+  const advisor = revNum > 0 ? dividendComparison(game, corp.sym, revNum) : null
   const isDoubleJump = price && perShare >= price
 
   function handlePay() {
@@ -206,6 +209,9 @@ function CorpDetail({ game, corp, dispatch, fmt, onNext }) {
         </div>
       </div>
 
+
+      {/* Train Rush Indicator */}
+      <TrainRushPanel game={game} corpSym={corp.sym} fmt={fmt} />
 
       {/* Trains */}
       <div className="bg-broker-surface rounded-lg p-3">
@@ -277,13 +283,9 @@ function CorpDetail({ game, corp, dispatch, fmt, onNext }) {
           ))}
         </div>
 
-        {dividendPreview && (
-          <div className="text-xs text-broker-text-muted mb-2">
-            {fmt(dividendPreview.perShare)}/share
-            {isDoubleJump && <span className="text-yellow-400 font-medium ml-1">(double jump!)</span>}
-            {' · '}
-            {dividendPreview.payouts.map((p) => `${p.name}: +${fmt(p.amount)}`).join(' · ')}
-          </div>
+        {/* Dividend Advisor */}
+        {advisor && (
+          <DividendAdvisorPanel advisor={advisor} fmt={fmt} />
         )}
 
         <div className="flex gap-2">
@@ -1004,6 +1006,127 @@ function BuyFromCorpPanel({ otherCorpTrains, buyerCash, onBuy, fmt }) {
           </button>
         </div>
       )}
+    </div>
+  )
+}
+
+function TrainRushPanel({ game, corpSym, fmt }) {
+  const rush = useMemo(() => trainRushAnalysis(game), [game])
+  const info = rush.corpAnalysis.find(c => c.sym === corpSym)
+  if (!info) return null
+
+  // Only show if there's something interesting
+  const hasRisk = info.rustRisk.length > 0
+  const hasPressure = rush.nextPhase && rush.tiers.some(t => t.triggersPhase && t.remaining <= 3 && t.remaining > 0)
+  if (!hasRisk && !hasPressure && info.permanentCount > 0) return null
+
+  return (
+    <div className={`rounded-lg p-3 text-sm ${
+      info.emergencyBuyExposed
+        ? 'bg-red-900/30 border border-red-800/50'
+        : hasRisk
+          ? 'bg-amber-900/20 border border-amber-800/40'
+          : 'bg-broker-surface'
+    }`}>
+      <div className="text-xs text-broker-text-muted mb-2 font-medium uppercase">Train Outlook</div>
+
+      {/* Rust warnings */}
+      {info.rustRisk.map(r => (
+        <div key={r.trigger} className="mb-1">
+          <span className={`text-xs ${r.willBeTrainless ? 'text-red-300 font-medium' : 'text-amber-300'}`}>
+            {r.affectedTrains.join(', ')}-train{r.affectedTrains.length > 1 ? 's' : ''} rust{r.affectedTrains.length === 1 ? 's' : ''} when {r.trigger} is bought
+          </span>
+          <span className="text-xs text-broker-text-muted ml-1">
+            ({r.remaining} left in depot{r.remaining <= 2 ? ' — imminent' : ''})
+          </span>
+          {r.willBeTrainless && (
+            <div className="text-xs text-red-400 mt-0.5">
+              Will be trainless — {info.presidentCanCover
+                ? `president can cover (${fmt(info.treasuryVsCheapest)} short)`
+                : 'emergency buy risk'}
+            </div>
+          )}
+        </div>
+      ))}
+
+      {/* Phase pressure */}
+      {rush.nextPhase && rush.tiers.filter(t => t.triggersPhase && t.remaining > 0).map(t => (
+        <div key={t.name} className="text-xs text-broker-text-muted">
+          Next phase ({rush.nextPhase.name}): {t.remaining} {t.name}-train{t.remaining !== 1 ? 's' : ''} left · {fmt(t.price)}
+          {t.events.length > 0 && (
+            <span className="text-amber-400 ml-1">[{t.events.join(', ')}]</span>
+          )}
+        </div>
+      ))}
+
+      {/* Permanent train status */}
+      {info.permanentCount === 0 && info.rustRisk.length === 0 && (
+        <div className="text-xs text-amber-300">No permanent trains</div>
+      )}
+      {info.permanentCount > 0 && (
+        <div className="text-xs text-green-400">{info.permanentCount} permanent train{info.permanentCount !== 1 ? 's' : ''}</div>
+      )}
+    </div>
+  )
+}
+
+function DividendAdvisorPanel({ advisor, fmt }) {
+  const options = [advisor.payout, advisor.halfPay, advisor.withhold].filter(Boolean)
+
+  return (
+    <div className="mb-3 space-y-1">
+      {/* Per-share info */}
+      <div className="text-xs text-broker-text-muted">
+        {fmt(advisor.perShare)}/share
+        {advisor.payout.isDoubleJump && <span className="text-yellow-400 font-medium ml-1">(double jump!)</span>}
+      </div>
+
+      {/* Comparison table */}
+      <div className="grid gap-1" style={{ gridTemplateColumns: `repeat(${options.length}, 1fr)` }}>
+        {options.map(opt => (
+          <div key={opt.label} className={`rounded p-2 text-xs ${
+            opt.label === 'Pay' ? 'bg-green-900/30' :
+            opt.label === 'Half' ? 'bg-yellow-900/30' :
+            'bg-orange-900/30'
+          }`}>
+            <div className="font-medium text-white mb-1">{opt.label}</div>
+            <div className="space-y-0.5 text-broker-text-muted">
+              <div>
+                Price: {fmt(opt.newPrice)}
+                <span className={`ml-1 ${opt.priceChange > 0 ? 'text-green-400' : opt.priceChange < 0 ? 'text-red-400' : 'text-broker-text-muted'}`}>
+                  {opt.priceChange > 0 ? '+' : ''}{fmt(opt.priceChange)}
+                </span>
+              </div>
+              <div>Players: +{fmt(opt.toPlayers)}</div>
+              <div>Treasury: {fmt(opt.treasuryAfter)}</div>
+              {advisor.trainInfo && (
+                <div className={opt.canAffordTrain ? 'text-green-400' : 'text-red-400'}>
+                  {opt.canAffordTrain ? 'Can' : "Can't"} buy {advisor.trainInfo.name} ({fmt(advisor.trainInfo.cost)})
+                </div>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Player breakdown */}
+      <details className="text-xs">
+        <summary className="text-broker-text-muted cursor-pointer">Per-player breakdown</summary>
+        <div className="mt-1 space-y-0.5">
+          {advisor.payout.playerPayouts.map(p => {
+            const half = advisor.halfPay?.playerPayouts.find(hp => hp.name === p.name)
+            return (
+              <div key={p.name} className="text-broker-text-muted flex justify-between">
+                <span>{p.name} ({p.percent}%)</span>
+                <span>
+                  <span className="text-green-400">+{fmt(p.amount)}</span>
+                  {half && <span className="text-yellow-400 ml-2">+{fmt(half.amount)}</span>}
+                </span>
+              </div>
+            )
+          })}
+        </div>
+      </details>
     </div>
   )
 }
