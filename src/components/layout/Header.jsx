@@ -21,6 +21,13 @@ export default function Header() {
   const exitWhatIf = useGameStore((s) => s.exitWhatIf)
   const isWhatIf = !!whatIfSnapshot
 
+  // Replay
+  const fullLog = useGameStore((s) => s.fullLog)
+  const enterReplay = useGameStore((s) => s.enterReplay)
+  const exitReplay = useGameStore((s) => s.exitReplay)
+  const replayTo = useGameStore((s) => s.replayTo)
+  const inReplay = fullLog !== null
+
   // Turn tracking
   const turnTracking = useUIStore((s) => s.turnTracking)
   const toggleTurnTracking = useUIStore((s) => s.toggleTurnTracking)
@@ -211,6 +218,70 @@ export default function Header() {
               Keep
             </button>
           </div>
+        </div>
+      )}
+
+      {/* Replay bar */}
+      {inReplay && (
+        <div className="bg-blue-900/80 border-b border-blue-700 px-3 py-2">
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-sm text-blue-200 font-medium">
+              Replay {game.actionLog.length}/{fullLog.length}
+              {game.actionLog.length > 0 && ` — ${game.actionLog[game.actionLog.length - 1].description}`}
+            </span>
+            <div className="flex gap-2">
+              {!isWhatIf && (
+                <button
+                  onClick={() => { exitReplay(); enterWhatIf() }}
+                  className="text-xs bg-purple-800 hover:bg-purple-700 text-purple-200 px-2 py-1 rounded"
+                >
+                  What-if
+                </button>
+              )}
+              <button
+                onClick={exitReplay}
+                className="text-xs bg-blue-700 hover:bg-blue-600 text-white px-2 py-1 rounded"
+              >
+                Exit Replay
+              </button>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => replayTo(Math.max(-1, game.actionLog.length - 2))}
+              disabled={game.actionLog.length <= 0}
+              className="text-xs px-2 py-1 rounded bg-blue-800 hover:bg-blue-700 disabled:opacity-30 text-white"
+            >
+              Prev
+            </button>
+            <input
+              type="range"
+              min={-1}
+              max={fullLog.length - 1}
+              value={game.actionLog.length - 1}
+              onChange={(e) => replayTo(parseInt(e.target.value, 10))}
+              className="flex-1 accent-blue-400"
+            />
+            <button
+              onClick={() => replayTo(Math.min(fullLog.length - 1, game.actionLog.length))}
+              disabled={game.actionLog.length >= fullLog.length}
+              className="text-xs px-2 py-1 rounded bg-blue-800 hover:bg-blue-700 disabled:opacity-30 text-white"
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Enter replay button (when not in replay and game has actions) */}
+      {!inReplay && !inPregame && game.actionLog.length > 0 && !showUndoBanner && (
+        <div className="bg-broker-surface border-b border-broker-border px-3 py-1 flex justify-end">
+          <button
+            onClick={enterReplay}
+            className="text-xs bg-blue-900/60 hover:bg-blue-800 text-blue-200 px-2 py-1 rounded"
+          >
+            Replay
+          </button>
         </div>
       )}
 
