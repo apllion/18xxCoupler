@@ -105,8 +105,8 @@ export default function ModeratorOverview() {
             <MRow label="Treas" corps={corps} cc={curCol} r={c => !c.ipoed ? '—' : <span className={c.cash < 0 ? 'text-red-400' : 'text-green-300'}>{fmt(c.cash)}</span>} />
             <MRow label="IPO" corps={corps} cc={curCol} r={c => <span className="text-blue-300">{c.ipoShares < 100 ? `${c.ipoShares}%` : '—'}</span>} />
             <MRow label="Pool" corps={corps} cc={curCol} r={c => c.marketShares > 0 ? <span className="text-yellow-300">{c.marketShares}%</span> : '—'} />
-            <MRow label="Trains" corps={corps} cc={curCol} r={c => !c.floated ? '—' : c.trains.length === 0 ? <span className="text-red-500 font-bold">!</span> : <span className="text-white font-bold">{c.trains.map(t => t.name).join('')}</span>} />
-            <MRow label="Rev" corps={corps} cc={curCol} r={c => { if (!c.floated) return '—'; const rev = lastRevenue[c.sym]; if (!rev) return '—'; const sign = rev.type === 'WITHHOLD_DIVIDEND' ? '-' : rev.type === 'HALF_DIVIDEND' ? '~' : '+'; return <span className={rev.type === 'WITHHOLD_DIVIDEND' ? 'text-red-300' : 'text-green-300'}>{sign}{rev.amount}</span> }} />
+            <MRow label="Trains" corps={corps} cc={curCol} onClick={(sym, ci) => { setCurCol(ci); setPanel('train') }} r={c => !c.floated ? '—' : c.trains.length === 0 ? <span className="text-red-500 font-bold">!</span> : <span className="text-white font-bold">{c.trains.map(t => t.name).join('')}</span>} />
+            <MRow label="Rev" corps={corps} cc={curCol} onClick={(sym, ci) => { setCurCol(ci); setPanel('revenue'); setTimeout(() => revRef.current?.focus(), 50) }} r={c => { if (!c.floated) return '—'; const rev = lastRevenue[c.sym]; if (!rev) return '—'; const sign = rev.type === 'WITHHOLD_DIVIDEND' ? '-' : rev.type === 'HALF_DIVIDEND' ? '~' : '+'; return <span className={rev.type === 'WITHHOLD_DIVIDEND' ? 'text-red-300' : 'text-green-300'}>{sign}{rev.amount}</span> }} />
             <MRow label="Tokens" corps={corps} cc={curCol} r={c => !c.floated ? '—' : <span className="text-blue-300">{c.tokensPlaced}/{c.tokens.length}</span>} />
             <MRow label="Pres" corps={corps} cc={curCol} r={c => { if (!c.ipoed) return '—'; const pr = game.players.find(p => isPresident(p, c.sym)); return <span className="text-yellow-400">{pr ? pr.name.slice(0, 6) : '—'}</span> }} />
             {game.title.loans && <MRow label="Loans" corps={corps} cc={curCol} r={c => !c.floated ? '—' : <span className={c.loans ? 'text-red-300 font-bold' : ''}>{c.loans || 0}</span>} />}
@@ -137,6 +137,9 @@ export default function ModeratorOverview() {
         </div>
       ) : (
         <div className="bg-gray-900 border-t border-green-800 px-1 py-1 flex-shrink-0 flex items-center gap-1 flex-wrap">
+          <span className="text-yellow-300 text-xs">{selPlayer?.name}</span>
+          {selCorp && <span className="text-xs font-bold" style={{ color: selCorp.color }}>{selCorp.sym}</span>}
+          <span className="text-blue-800">|</span>
           <Mb t="[B]uy" o={() => { if (!selCorp) return; if (!selCorp.ipoed) { setPanel('par'); return } if (selCorp.ipoShares > 0) doAction({ type: 'BUY_SHARE', playerId: selPlayer?.id, corpSym: selCorp.sym, source: 'ipo', percent: 10 }); else if (selCorp.marketShares > 0) doAction({ type: 'BUY_SHARE', playerId: selPlayer?.id, corpSym: selCorp.sym, source: 'market', percent: 10 }) }} />
           <Mb t="[S]ell" o={() => selPlayer && selCorp && playerSharePercent(selPlayer, selCorp.sym) > 0 && doAction({ type: 'SELL_SHARES', playerId: selPlayer.id, corpSym: selCorp.sym, percent: 10 })} />
           <Mb t="[R]ev" o={() => { setPanel('revenue'); setTimeout(() => revRef.current?.focus(), 50) }} />
@@ -155,11 +158,17 @@ export default function ModeratorOverview() {
   )
 }
 
-function MRow({ label, corps, cc, r }) {
+function MRow({ label, corps, cc, r, onClick }) {
   return (
     <tr className="bg-blue-950 border-t border-blue-900/20">
       <td colSpan={4} className="px-1 py-px text-green-600 sticky left-0 bg-blue-950 z-10">{label}</td>
-      {corps.map((c, ci) => <td key={c.sym} className={`px-1 text-center py-px ${ci === cc ? 'bg-blue-900/30' : ''}`}>{r(c)}</td>)}
+      {corps.map((c, ci) => (
+        <td key={c.sym}
+          className={`px-1 text-center py-px ${ci === cc ? 'bg-blue-900/30' : ''} ${onClick ? 'cursor-pointer hover:bg-blue-800/40' : ''}`}
+          onClick={onClick ? () => onClick(c.sym, ci) : undefined}>
+          {r(c)}
+        </td>
+      ))}
     </tr>
   )
 }

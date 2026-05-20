@@ -106,12 +106,12 @@ export default function BrokerOverview() {
             <BRow l="Treasury" corps={corps} cc={curCol} r={c => !c.ipoed ? '' : <span className={c.cash < 0 ? 'text-red-400' : 'text-broker-text'}>{fmt(c.cash)}</span>} />
             <BRow l="IPO" corps={corps} cc={curCol} r={c => c.ipoShares < 100 ? `${c.ipoShares}%` : ''} />
             <BRow l="Pool" corps={corps} cc={curCol} r={c => c.marketShares > 0 ? <span className="text-amber-400">{c.marketShares}%</span> : ''} />
-            <BRow l="Trains" corps={corps} cc={curCol} r={c => {
+            <BRow l="Trains" corps={corps} cc={curCol} onClick={(sym, ci) => { setCurCol(ci); setPanel('train') }} r={c => {
               if (!c.floated) return ''
               if (c.trains.length === 0) return <span className="text-red-400 font-bold">none</span>
               return <span className="font-medium text-white">{c.trains.map(t => t.name).join(' ')}</span>
             }} />
-            <BRow l="Revenue" corps={corps} cc={curCol} r={c => {
+            <BRow l="Revenue" corps={corps} cc={curCol} onClick={(sym, ci) => { setCurCol(ci); setPanel('revenue'); setTimeout(() => revRef.current?.focus(), 50) }} r={c => {
               if (!c.floated) return ''
               const rev = lastRevenue[c.sym]
               if (!rev) return ''
@@ -154,6 +154,12 @@ export default function BrokerOverview() {
         </div>
       ) : (
         <div className="bg-broker-surface border-t border-broker-border px-3 py-2 flex-shrink-0 flex items-center gap-1.5 flex-wrap">
+          {/* Context: who is acting */}
+          <span className="text-xs text-broker-text-muted">
+            <span className="text-white font-medium">{selPlayer?.name}</span>
+            {selCorp && <> + <span className="font-bold" style={{ color: selCorp.color }}>{selCorp.sym}</span></>}
+          </span>
+          <span className="text-broker-border mx-0.5">|</span>
           <Bb t="Buy" o={() => { if (!selCorp) return; if (!selCorp.ipoed) { setPanel('par'); return } if (selCorp.ipoShares > 0) doAction({ type: 'BUY_SHARE', playerId: selPlayer?.id, corpSym: selCorp.sym, source: 'ipo', percent: 10 }); else if (selCorp.marketShares > 0) doAction({ type: 'BUY_SHARE', playerId: selPlayer?.id, corpSym: selCorp.sym, source: 'market', percent: 10 }) }} />
           <Bb t="Sell" v="red" o={() => selPlayer && selCorp && playerSharePercent(selPlayer, selCorp.sym) > 0 && doAction({ type: 'SELL_SHARES', playerId: selPlayer.id, corpSym: selCorp.sym, percent: 10 })} />
           <Bb t="Revenue" o={() => { setPanel('revenue'); setTimeout(() => revRef.current?.focus(), 50) }} />
@@ -161,7 +167,7 @@ export default function BrokerOverview() {
           {unfloated.length > 0 && <Bb t="Par" o={() => setPanel('par')} />}
           <Bb t="Private" o={() => setPanel('private')} />
           {game.title.loans && selCorp?.floated && <Bb t="Loan" o={() => setPanel('loan')} />}
-          <span className="text-broker-border mx-1">|</span>
+          <span className="text-broker-border mx-0.5">|</span>
           <Bb t="Advance" v="muted" o={() => doAction({ type: 'ADVANCE_ROUND' })} />
           <Bb t="Collect" v="muted" o={() => doAction({ type: 'COLLECT_ALL_REVENUE' })} />
           <Bb t="Sold-out" v="muted" o={() => doAction({ type: 'SOLD_OUT_ADJUST' })} />
@@ -174,11 +180,17 @@ export default function BrokerOverview() {
   )
 }
 
-function BRow({ l, corps, cc, r }) {
+function BRow({ l, corps, cc, r, onClick }) {
   return (
     <tr className="border-t border-broker-border/20">
       <td colSpan={3} className="px-2 py-0.5 text-broker-text-muted sticky left-0 bg-broker-bg z-10 text-xs">{l}</td>
-      {corps.map((c, ci) => <td key={c.sym} className={`px-2 text-center py-0.5 text-xs ${ci === cc ? 'bg-broker-surface-hover/20' : ''}`}>{r(c)}</td>)}
+      {corps.map((c, ci) => (
+        <td key={c.sym}
+          className={`px-2 text-center py-0.5 text-xs ${ci === cc ? 'bg-broker-surface-hover/20' : ''} ${onClick ? 'cursor-pointer hover:bg-broker-surface-hover/30' : ''}`}
+          onClick={onClick ? () => onClick(c.sym, ci) : undefined}>
+          {r(c)}
+        </td>
+      ))}
     </tr>
   )
 }
