@@ -13,6 +13,7 @@ export default function BrokerOverview() {
 
   return (
     <div ref={rootRef} tabIndex={0} onKeyDown={onKeyDown}
+      onClick={(e) => { if (e.target.tagName !== 'INPUT') rootRef.current?.focus() }}
       className="text-sm select-none h-full flex flex-col bg-broker-bg outline-none">
 
       {/* Header */}

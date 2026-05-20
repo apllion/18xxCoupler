@@ -15,6 +15,7 @@ export default function ModeratorOverview() {
 
   return (
     <div ref={rootRef} tabIndex={0} onKeyDown={onKeyDown}
+      onClick={(e) => { if (e.target.tagName !== 'INPUT') rootRef.current?.focus() }}
       className="font-mono text-xs leading-tight select-none h-full flex flex-col bg-blue-950 outline-none">
 
       {/* Title bar */}
