@@ -1,7 +1,8 @@
-// OverviewTab — Lemmi-style dense single-screen interactive view.
-// Full moderator: buy/sell shares, pay dividends, buy trains — all from the matrix.
+// OverviewTab — Lemmi-style interactive moderator.
+// Keyboard-first: arrow keys navigate, letters trigger actions.
+// Full game management from one screen.
 
-import { useState, useMemo, useCallback, useEffect } from 'react'
+import { useState, useMemo, useEffect, useRef, useCallback } from 'react'
 import { useGameStore } from '../../store/gameStore.js'
 import { useUIStore } from '../../store/uiStore.js'
 import { useDispatch } from '../../hooks/useDispatch.js'
@@ -18,11 +19,15 @@ export default function OverviewTab() {
   const canUndo = useGameStore((s) => s.canUndo)
   const dispatch = useDispatch()
 
-  // Active context: which player + corp is selected for actions
-  const [activePlayer, setActivePlayer] = useState(null)
-  const [activeCorp, setActiveCorp] = useState(null)
-  const [panel, setPanel] = useState(null) // null | 'share' | 'revenue' | 'train' | 'par'
+  // Cursor position in the matrix
+  const [curRow, setCurRow] = useState(0) // player index
+  const [curCol, setCurCol] = useState(0) // corp index
+  // Action panel
+  const [panel, setPanel] = useState(null) // null|'share'|'revenue'|'train'|'par'|'private'|'round'
   const [revenueInput, setRevenueInput] = useState('')
+  const [trainPrice, setTrainPrice] = useState('')
+  const revRef = useRef(null)
+  const rootRef = useRef(null)
 
   if (!game) return null
 
@@ -43,7 +48,6 @@ export default function OverviewTab() {
     [game.corporations, game.stockMarket]
   )
 
-  // Unfloated corps (for par)
   const unfloated = useMemo(() =>
     game.corporations.filter(c => !c.ipoed && !c.floated),
     [game.corporations]
@@ -71,11 +75,12 @@ export default function OverviewTab() {
     return map
   }, [game.companies])
 
-  const playerPrivateValue = useMemo(() => {
+  const playerPrivates = useMemo(() => {
     const map = {}
     for (const c of (game.companies || [])) {
       if (c.ownerType === 'player' && c.ownerId && !c.closed) {
-        map[c.ownerId] = (map[c.ownerId] || 0) + (c.value || 0)
+        if (!map[c.ownerId]) map[c.ownerId] = []
+        map[c.ownerId].push(c)
       }
     }
     return map
@@ -87,82 +92,120 @@ export default function OverviewTab() {
     for (const t of game.depot.upcoming) {
       if (!seen.has(t.name)) {
         seen.add(t.name)
-        groups.push({
-          name: t.name,
-          price: t.price,
-          count: remainingCount(game.depot, t.name),
-          rustsOn: t.rustsOn,
-        })
+        groups.push({ name: t.name, price: t.price, count: remainingCount(game.depot, t.name), rustsOn: t.rustsOn })
       }
     }
     return groups
   }, [game.depot])
 
-  const colCount = corps.length
+  const lastAction = game.actionLog.length > 0 ? game.actionLog[game.actionLog.length - 1] : null
 
-  // Click on player×corp cell → share actions
-  function handleCellClick(playerId, corpSym) {
-    setActivePlayer(playerId)
-    setActiveCorp(corpSym)
-    setPanel('share')
-    setRevenueInput('')
+  // Current selections
+  const selPlayer = game.players[curRow] || game.players[0]
+  const selCorp = corps[curCol] || corps[0]
+
+  function closePanel() { setPanel(null); setRevenueInput(''); setTrainPrice(''); rootRef.current?.focus() }
+
+  function doAction(action) {
+    dispatch(action)
+    closePanel()
   }
 
-  // Click on revenue row → dividend actions
-  function handleRevenueClick(corpSym) {
-    setActiveCorp(corpSym)
-    setActivePlayer(null)
-    setPanel('revenue')
-    setRevenueInput('')
-  }
-
-  // Click on trains row → buy train
-  function handleTrainClick(corpSym) {
-    setActiveCorp(corpSym)
-    setActivePlayer(null)
-    setPanel('train')
-  }
-
-  // Click on player name → par new corp
-  function handlePlayerClick(playerId) {
-    if (unfloated.length > 0) {
-      setActivePlayer(playerId)
-      setActiveCorp(null)
-      setPanel('par')
-    }
-  }
-
-  function closePanel() {
-    setPanel(null)
-    setActivePlayer(null)
-    setActiveCorp(null)
-    setRevenueInput('')
-  }
-
-  // Keyboard shortcuts
-  useEffect(() => {
-    function onKey(e) {
-      if (e.target.tagName === 'INPUT') return
+  // Master keyboard handler
+  const onKeyDown = useCallback((e) => {
+    // Don't intercept input fields
+    if (e.target.tagName === 'INPUT') {
       if (e.key === 'Escape') closePanel()
-      if (e.key === 'z' && (e.metaKey || e.ctrlKey) && canUndo()) { e.preventDefault(); undo() }
+      return
     }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [canUndo, undo])
+
+    const key = e.key
+
+    // Navigation
+    if (key === 'ArrowUp') { e.preventDefault(); setCurRow(r => Math.max(0, r - 1)) }
+    if (key === 'ArrowDown') { e.preventDefault(); setCurRow(r => Math.min(game.players.length - 1, r + 1)) }
+    if (key === 'ArrowLeft') { e.preventDefault(); setCurCol(c => Math.max(0, c - 1)) }
+    if (key === 'ArrowRight') { e.preventDefault(); setCurCol(c => Math.min(corps.length - 1, c + 1)) }
+
+    // Quick player select: 1-9
+    if (key >= '1' && key <= '9') {
+      const idx = parseInt(key) - 1
+      if (idx < game.players.length) setCurRow(idx)
+    }
+
+    // Undo
+    if (key === 'z' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); if (canUndo()) undo() }
+    if (key === 'u') { if (canUndo()) undo() }
+
+    // Escape closes panel
+    if (key === 'Escape') { closePanel(); return }
+
+    // Actions on current selection
+    if (!selPlayer || !selCorp) return
+
+    // B = Buy share (IPO)
+    if (key === 'b' && !panel) {
+      if (selCorp.ipoShares > 0) {
+        doAction({ type: 'BUY_SHARE', playerId: selPlayer.id, corpSym: selCorp.sym, source: 'ipo', percent: 10 })
+      } else if (selCorp.marketShares > 0) {
+        doAction({ type: 'BUY_SHARE', playerId: selPlayer.id, corpSym: selCorp.sym, source: 'market', percent: 10 })
+      }
+    }
+    // M = Buy from market
+    if (key === 'm' && !panel) {
+      if (selCorp.marketShares > 0) {
+        doAction({ type: 'BUY_SHARE', playerId: selPlayer.id, corpSym: selCorp.sym, source: 'market', percent: 10 })
+      }
+    }
+    // S = Sell 10%
+    if (key === 's' && !panel) {
+      if (playerSharePercent(selPlayer, selCorp.sym) > 0) {
+        doAction({ type: 'SELL_SHARES', playerId: selPlayer.id, corpSym: selCorp.sym, percent: 10 })
+      }
+    }
+    // R = Revenue / dividend panel
+    if (key === 'r' && !panel) {
+      setPanel('revenue')
+      setTimeout(() => revRef.current?.focus(), 50)
+    }
+    // T = Train purchase panel
+    if (key === 't' && !panel) { setPanel('train') }
+    // P = Par new corp panel
+    if (key === 'n' && !panel && unfloated.length > 0) { setPanel('par') }
+    // V = Sell private to corp
+    if (key === 'v' && !panel) { setPanel('private') }
+    // A = Advance round
+    if (key === 'a' && !panel) { doAction({ type: 'ADVANCE_ROUND' }) }
+    // C = Collect all private revenue
+    if (key === 'c' && !panel) { doAction({ type: 'COLLECT_ALL_REVENUE' }) }
+    // O = Sold-out adjust
+    if (key === 'o' && !panel) { doAction({ type: 'SOLD_OUT_ADJUST' }) }
+    // Tab = switch to broker view
+    if (key === 'Tab') { e.preventDefault(); useUIStore.getState().toggleViewMode() }
+  }, [game, corps, selPlayer, selCorp, panel, canUndo, undo, unfloated])
+
+  useEffect(() => {
+    const el = rootRef.current
+    if (el) el.focus()
+  }, [])
 
   return (
-    <div className="font-mono text-xs leading-tight select-none overflow-x-auto h-full flex flex-col bg-blue-950">
+    <div ref={rootRef} tabIndex={0} onKeyDown={onKeyDown}
+      className="font-mono text-xs leading-tight select-none h-full flex flex-col bg-blue-950 outline-none">
+
       {/* Title bar */}
       <div className="bg-blue-900 text-blue-200 px-2 py-1 flex justify-between flex-shrink-0">
         <span>
-          {game.title.title} — {label} — Phase {phase.name}
-          <span className="text-blue-400 ml-2">Limit:{limit}</span>
+          <span className="text-white font-bold">{game.title.title}</span>
+          <span className="text-green-400 ml-2">{label}</span>
+          <span className="text-cyan-300 ml-2">Phase {phase.name}</span>
+          <span className="text-blue-400 ml-2">Lim:{limit}</span>
         </span>
         <span className="flex items-center gap-2">
-          <span className={game.bank.cash <= 0 ? 'text-red-400 font-bold' : ''}>Bank: {fmt(game.bank.cash)}</span>
-          <button onClick={undo} disabled={!canUndo()} className="text-blue-400 hover:text-white disabled:text-blue-800">Undo</button>
+          <span className={game.bank.cash <= 0 ? 'text-red-400 font-bold' : 'text-green-300'}>Bank:{fmt(game.bank.cash)}</span>
+          <button onClick={() => canUndo() && undo()} className="text-blue-400 hover:text-white disabled:text-blue-800">[U]ndo</button>
           <button onClick={useUIStore.getState().toggleViewMode}
-            className="text-yellow-400 hover:text-yellow-200 font-bold">Broker</button>
+            className="text-yellow-400 hover:text-yellow-200">[Tab]Broker</button>
         </span>
       </div>
 
@@ -171,46 +214,53 @@ export default function OverviewTab() {
         <table className="w-full border-collapse">
           <thead>
             <tr className="bg-blue-950 text-green-400">
-              <th className="text-left px-1 py-0.5 sticky left-0 bg-blue-950 z-10 min-w-[90px]">Player</th>
+              <th className="text-left px-1 py-0.5 sticky left-0 bg-blue-950 z-10 min-w-[80px]"></th>
               <th className="px-1 text-right min-w-[44px]">Cash</th>
               <th className="px-1 text-right min-w-[28px]">Prv</th>
               <th className="px-1 text-center min-w-[32px]">Cert</th>
-              {corps.map(c => (
-                <th key={c.sym} className="px-1 text-center min-w-[40px] cursor-pointer hover:bg-blue-900" style={{ color: c.color }}
-                  onClick={() => handleTrainClick(c.sym)}>
+              {corps.map((c, ci) => (
+                <th key={c.sym}
+                  className={`px-1 text-center min-w-[44px] cursor-pointer ${ci === curCol ? 'bg-blue-800' : 'hover:bg-blue-900'}`}
+                  style={{ color: c.color }}
+                  onClick={() => setCurCol(ci)}>
                   {c.sym}
                 </th>
               ))}
             </tr>
           </thead>
           <tbody>
-            {/* Player rows */}
-            {game.players.map(p => {
+            {game.players.map((p, pi) => {
               const isPriority = p.id === game.priorityDeal
               const certs = playerCertCount(p)
-              const isActive = activePlayer === p.id
+              const isRow = pi === curRow
+              const privs = playerPrivates[p.id]
               return (
-                <tr key={p.id} className={`border-t border-blue-900/50 ${isActive ? 'bg-blue-900' : 'bg-blue-950'}`}>
-                  <td className={`px-1 py-0.5 sticky left-0 z-10 cursor-pointer hover:bg-blue-900 ${isActive ? 'bg-blue-900' : 'bg-blue-950'} text-yellow-300`}
-                    onClick={() => handlePlayerClick(p.id)}>
+                <tr key={p.id} className={`border-t border-blue-900/40 ${isRow ? 'bg-blue-900/60' : 'bg-blue-950'}`}>
+                  <td className={`px-1 py-0.5 sticky left-0 z-10 cursor-pointer ${isRow ? 'bg-blue-900/60' : 'bg-blue-950'} text-yellow-300`}
+                    onClick={() => setCurRow(pi)}>
+                    <span className="text-blue-500 mr-0.5">{pi + 1}</span>
                     {isPriority && <span className="text-white">{'\u00BB'}</span>}
                     {p.name}
                   </td>
                   <td className="px-1 text-right text-green-300">{fmt(p.cash)}</td>
-                  <td className="px-1 text-right text-blue-300">{playerPrivateValue[p.id] || '—'}</td>
+                  <td className="px-1 text-right text-purple-300" title={privs?.map(c => c.sym).join(', ')}>
+                    {privs ? privs.length : '—'}
+                  </td>
                   <td className={`px-1 text-center ${certs > game.certLimit ? 'text-red-400 font-bold' : 'text-blue-300'}`}>
                     {certs}/{game.certLimit}
                   </td>
-                  {corps.map(c => {
+                  {corps.map((c, ci) => {
                     const pct = playerSharePercent(p, c.sym)
                     const pres = isPresident(p, c.sym)
-                    const isSelected = activePlayer === p.id && activeCorp === c.sym
+                    const isCursor = pi === curRow && ci === curCol
                     return (
                       <td key={c.sym}
-                        className={`px-1 text-center cursor-pointer hover:bg-blue-800 ${isSelected ? 'bg-blue-700' : ''}`}
-                        onClick={() => handleCellClick(p.id, c.sym)}>
+                        className={`px-1 text-center cursor-pointer ${
+                          isCursor ? 'bg-green-900 ring-1 ring-green-500' : ci === curCol ? 'bg-blue-900/30' : 'hover:bg-blue-800/40'
+                        }`}
+                        onClick={() => { setCurRow(pi); setCurCol(ci) }}>
                         {pct === 0
-                          ? <span className="text-blue-900">·</span>
+                          ? <span className="text-blue-900/60">·</span>
                           : <span className="text-white">{pres && <span className="text-yellow-400">{'\u00BB'}</span>}{pct}</span>
                         }
                       </td>
@@ -220,86 +270,94 @@ export default function OverviewTab() {
               )
             })}
 
-            {/* Separator */}
-            <tr><td colSpan={4 + colCount} className="h-px bg-green-700"></td></tr>
+            {/* Green separator bar */}
+            <tr><td colSpan={4 + corps.length} className="h-0.5 bg-green-700"></td></tr>
 
             {/* Corp data rows */}
-            <CRow label="Price" corps={corps} render={c => (
+            <CRow label="Kurs" corps={corps} curCol={curCol} render={c => (
               <span className="text-cyan-300">{c.price || '—'}{c.pos && <span className="text-blue-500">/{c.pos.row}</span>}</span>
             )} />
-            <CRow label="Par" corps={corps} render={c => (
+            <CRow label="Par" corps={corps} curCol={curCol} render={c => (
               <span className="text-blue-300">{c.parPrice || '—'}</span>
             )} />
-            <CRow label="Treas" corps={corps} render={c => (
+            <CRow label="Geld" corps={corps} curCol={curCol} render={c => (
               <span className={c.cash < 0 ? 'text-red-400' : 'text-green-300'}>{fmt(c.cash)}</span>
             )} />
-            <CRow label="IPO" corps={corps} render={c => (
+            <CRow label="Bank" corps={corps} curCol={curCol} render={c => (
               <span className="text-blue-300">{c.ipoShares > 0 ? `${c.ipoShares}%` : '—'}</span>
             )} />
-            <CRow label="Pool" corps={corps} render={c => (
-              <span className={c.marketShares > 0 ? 'text-yellow-300' : 'text-blue-900'}>{c.marketShares > 0 ? `${c.marketShares}%` : '—'}</span>
+            <CRow label="Pool" corps={corps} curCol={curCol} render={c => (
+              <span className={c.marketShares > 0 ? 'text-yellow-300' : 'text-blue-900/40'}>{c.marketShares > 0 ? `${c.marketShares}%` : '—'}</span>
             )} />
-            <CRow label="Trains" corps={corps} click={handleTrainClick} render={c => {
-              if (c.trains.length === 0) return <span className="text-red-500">none</span>
+            <CRow label="Loks" corps={corps} curCol={curCol} render={c => {
+              if (c.trains.length === 0) return <span className="text-red-500 font-bold">!</span>
               return <span className="text-white font-bold">{c.trains.map(t => t.name).join('')}</span>
             }} />
-            <CRow label="Rev" corps={corps} click={handleRevenueClick} render={c => {
+            <CRow label="Fährt" corps={corps} curCol={curCol} render={c => {
               const rev = lastRevenue[c.sym]
-              if (!rev) return <span className="text-blue-900">—</span>
+              if (!rev) return <span className="text-blue-900/40">—</span>
               const sign = rev.type === 'WITHHOLD_DIVIDEND' ? '-' : rev.type === 'HALF_DIVIDEND' ? '~' : '+'
               return <span className={rev.type === 'WITHHOLD_DIVIDEND' ? 'text-red-300' : 'text-green-300'}>{sign}{rev.amount}</span>
             }} />
-            <CRow label="Tokens" corps={corps} render={c => (
+            <CRow label="Pöppel" corps={corps} curCol={curCol} render={c => (
               <span className="text-blue-300">{c.tokensPlaced}/{c.tokens.length}</span>
             )} />
-            <CRow label="Pres" corps={corps} render={c => {
+            <CRow label="Priv" corps={corps} curCol={curCol} render={c => {
+              const privs = corpPrivates[c.sym]
+              if (!privs) return <span className="text-blue-900/40">—</span>
+              return <span className="text-purple-300">{privs.join(',')}</span>
+            }} />
+            <CRow label="Dir" corps={corps} curCol={curCol} render={c => {
               const pres = game.players.find(p => isPresident(p, c.sym))
-              return <span className="text-yellow-400">{pres ? pres.name.slice(0, 5) : '—'}</span>
+              return <span className="text-yellow-400">{pres ? pres.name.slice(0, 6) : '—'}</span>
             }} />
           </tbody>
         </table>
       </div>
 
       {/* Train depot strip */}
-      <div className="bg-blue-900 text-white px-2 py-1 flex items-center gap-1 flex-wrap flex-shrink-0">
-        <span className="text-blue-400">Depot:</span>
+      <div className="bg-blue-900 text-white px-2 py-0.5 flex items-center gap-1 flex-wrap flex-shrink-0">
+        <span className="text-blue-400">trains:</span>
         {depotGroups.map(g => (
-          <span key={g.name} className="mr-1">
+          <span key={g.name}>
             <span className="text-green-300 font-bold">{String(g.name).repeat(Math.min(g.count, 12))}</span>
             <span className="text-yellow-300 ml-0.5">{fmt(g.price)}</span>
             {g.rustsOn && <span className="text-red-400 ml-0.5">r{g.rustsOn}</span>}
+            <span className="text-blue-800 mx-0.5">|</span>
           </span>
         ))}
       </div>
 
-      {/* Action panel — pops up at bottom when a cell is clicked */}
-      {panel && (
+      {/* Action panel */}
+      {panel ? (
         <ActionPanel
-          panel={panel}
-          game={game}
-          activePlayer={activePlayer}
-          activeCorp={activeCorp}
-          corps={corps}
-          unfloated={unfloated}
-          dispatch={dispatch}
-          fmt={fmt}
-          revenueInput={revenueInput}
-          setRevenueInput={setRevenueInput}
-          onClose={closePanel}
+          panel={panel} game={game} player={selPlayer} corp={selCorp}
+          corps={corps} unfloated={unfloated} dispatch={dispatch} fmt={fmt}
+          revenueInput={revenueInput} setRevenueInput={setRevenueInput}
+          trainPrice={trainPrice} setTrainPrice={setTrainPrice}
+          revRef={revRef} onClose={closePanel} doAction={doAction}
         />
+      ) : (
+        /* Hotkey bar + status line */
+        <div className="bg-gray-900 border-t border-green-800 px-2 py-1 flex justify-between flex-shrink-0">
+          <span className="text-green-600">
+            [B]uy [S]ell [M]kt [R]ev [T]rain [N]ew [V]priv [A]dv [C]oll [O]sold [U]ndo
+          </span>
+          <span className="text-blue-400 truncate ml-2">
+            {lastAction ? lastAction.description : '—'}
+          </span>
+        </div>
       )}
     </div>
   )
 }
 
-function CRow({ label, corps, render, click }) {
+function CRow({ label, corps, curCol, render }) {
   return (
     <tr className="bg-blue-950 border-t border-blue-900/20">
-      <td colSpan={4} className="px-1 py-0.5 text-green-600 sticky left-0 bg-blue-950 z-10">{label}</td>
-      {corps.map(c => (
-        <td key={c.sym}
-          className={`px-1 text-center py-0.5 ${click ? 'cursor-pointer hover:bg-blue-800' : ''}`}
-          onClick={click ? () => click(c.sym) : undefined}>
+      <td colSpan={4} className="px-1 py-px text-green-600 sticky left-0 bg-blue-950 z-10">{label}</td>
+      {corps.map((c, ci) => (
+        <td key={c.sym} className={`px-1 text-center py-px ${ci === curCol ? 'bg-blue-900/30' : ''}`}>
           {render(c)}
         </td>
       ))}
@@ -307,156 +365,131 @@ function CRow({ label, corps, render, click }) {
   )
 }
 
-function ActionPanel({ panel, game, activePlayer, activeCorp, corps, unfloated, dispatch, fmt, revenueInput, setRevenueInput, onClose }) {
-  const corp = activeCorp ? game.corporations.find(c => c.sym === activeCorp) : null
-  const player = activePlayer ? game.players.find(p => p.id === activePlayer) : null
-  const price = activeCorp ? corpPrice(game.stockMarket, activeCorp) || 0 : 0
-
-  function doAction(action) {
-    dispatch(action)
-    onClose()
-  }
+function ActionPanel({ panel, game, player, corp, corps, unfloated, dispatch, fmt, revenueInput, setRevenueInput, trainPrice, setTrainPrice, revRef, onClose, doAction }) {
+  const price = corp ? corpPrice(game.stockMarket, corp.sym) || 0 : 0
 
   return (
-    <div className="bg-gray-900 border-t border-green-700 px-2 py-2 flex-shrink-0">
-      <div className="flex items-start gap-2">
-        <div className="flex-1">
-          {/* Share actions: buy from IPO/market, sell */}
-          {panel === 'share' && player && corp && (
-            <div className="flex flex-wrap gap-1">
-              <span className="text-green-400 mr-1">{player.name} + {corp.sym}:</span>
-              {corp.ipoShares > 0 && (
-                <Btn label={`Buy IPO ${fmt(price * 1)}`} color="green"
-                  onClick={() => doAction({ type: 'BUY_SHARE', playerId: player.id, corpSym: corp.sym, source: 'ipo', percent: 10 })} />
-              )}
-              {corp.marketShares > 0 && (
-                <Btn label={`Buy Mkt ${fmt(price * 1)}`} color="cyan"
-                  onClick={() => doAction({ type: 'BUY_SHARE', playerId: player.id, corpSym: corp.sym, source: 'market', percent: 10 })} />
-              )}
-              {playerSharePercent(player, corp.sym) > 0 && (
-                <Btn label={`Sell 10%`} color="red"
-                  onClick={() => doAction({ type: 'SELL_SHARES', playerId: player.id, corpSym: corp.sym, percent: 10 })} />
-              )}
-              {playerSharePercent(player, corp.sym) >= 20 && (
-                <Btn label={`Sell 20%`} color="red"
-                  onClick={() => doAction({ type: 'SELL_SHARES', playerId: player.id, corpSym: corp.sym, percent: 20 })} />
-              )}
-            </div>
-          )}
+    <div className="bg-gray-900 border-t border-green-700 px-2 py-1.5 flex-shrink-0">
+      <div className="flex items-center gap-2">
+        <div className="flex-1 flex flex-wrap items-center gap-1">
 
-          {/* Revenue/dividend actions */}
+          {/* Share actions */}
+          {panel === 'share' && player && corp && (() => {
+            const pct = playerSharePercent(player, corp.sym)
+            return <>
+              <span className="text-green-400">{player.name}+{corp.sym}:</span>
+              {corp.ipoShares > 0 && <Btn l={`IPO ${fmt(price)}`} c="green" k="b" o={() => doAction({ type: 'BUY_SHARE', playerId: player.id, corpSym: corp.sym, source: 'ipo', percent: 10 })} />}
+              {corp.marketShares > 0 && <Btn l={`Mkt ${fmt(price)}`} c="cyan" k="m" o={() => doAction({ type: 'BUY_SHARE', playerId: player.id, corpSym: corp.sym, source: 'market', percent: 10 })} />}
+              {pct >= 10 && <Btn l="Sell 10%" c="red" k="s" o={() => doAction({ type: 'SELL_SHARES', playerId: player.id, corpSym: corp.sym, percent: 10 })} />}
+              {pct >= 20 && <Btn l="Sell 20%" c="red" o={() => doAction({ type: 'SELL_SHARES', playerId: player.id, corpSym: corp.sym, percent: 20 })} />}
+              {pct >= 30 && <Btn l="Sell 30%" c="red" o={() => doAction({ type: 'SELL_SHARES', playerId: player.id, corpSym: corp.sym, percent: 30 })} />}
+            </>
+          })()}
+
+          {/* Revenue */}
           {panel === 'revenue' && corp && (
-            <div className="flex flex-wrap items-center gap-1">
-              <span className="text-green-400 mr-1">{corp.sym} Rev:</span>
-              <input
-                type="number"
-                value={revenueInput}
-                onChange={e => setRevenueInput(e.target.value)}
-                placeholder="0"
+            <>
+              <span className="text-green-400">{corp.sym} Rev:</span>
+              <input ref={revRef} type="number" value={revenueInput} onChange={e => setRevenueInput(e.target.value)}
+                placeholder="0" autoFocus
                 className="w-16 bg-black border border-green-800 rounded px-1 py-0.5 text-white text-center"
-                autoFocus
                 onKeyDown={e => {
                   const rev = parseInt(revenueInput, 10)
                   if (!rev || rev <= 0) return
-                  if (e.key === 'p' || e.key === '+') doAction({ type: 'PAY_DIVIDEND', corpSym: corp.sym, totalRevenue: rev })
-                  if (e.key === 'w' || e.key === '-') doAction({ type: 'WITHHOLD_DIVIDEND', corpSym: corp.sym, totalRevenue: rev })
-                  if (e.key === 'h' || e.key === '~') doAction({ type: 'HALF_DIVIDEND', corpSym: corp.sym, totalRevenue: rev })
+                  if (e.key === 'p' || e.key === 'Enter') { e.preventDefault(); doAction({ type: 'PAY_DIVIDEND', corpSym: corp.sym, totalRevenue: rev }) }
+                  if (e.key === 'w') { e.preventDefault(); doAction({ type: 'WITHHOLD_DIVIDEND', corpSym: corp.sym, totalRevenue: rev }) }
+                  if (e.key === 'h') { e.preventDefault(); doAction({ type: 'HALF_DIVIDEND', corpSym: corp.sym, totalRevenue: rev }) }
                 }}
               />
-              {(() => {
-                const rev = parseInt(revenueInput, 10) || 0
-                if (rev <= 0) return null
-                return (
-                  <>
-                    <Btn label={`Pay(p)`} color="green"
-                      onClick={() => doAction({ type: 'PAY_DIVIDEND', corpSym: corp.sym, totalRevenue: rev })} />
-                    {game.title.halfPay && (
-                      <Btn label={`Half(h)`} color="yellow"
-                        onClick={() => doAction({ type: 'HALF_DIVIDEND', corpSym: corp.sym, totalRevenue: rev })} />
-                    )}
-                    <Btn label={`W/hold(w)`} color="red"
-                      onClick={() => doAction({ type: 'WITHHOLD_DIVIDEND', corpSym: corp.sym, totalRevenue: rev })} />
-                    <span className="text-blue-400 ml-1">{fmt(Math.floor(rev / 10))}/sh</span>
-                  </>
-                )
-              })()}
-            </div>
+              {parseInt(revenueInput, 10) > 0 && <>
+                <Btn l="[P]ay" c="green" o={() => doAction({ type: 'PAY_DIVIDEND', corpSym: corp.sym, totalRevenue: parseInt(revenueInput) })} />
+                {game.title.halfPay && <Btn l="[H]alf" c="yellow" o={() => doAction({ type: 'HALF_DIVIDEND', corpSym: corp.sym, totalRevenue: parseInt(revenueInput) })} />}
+                <Btn l="[W]hold" c="red" o={() => doAction({ type: 'WITHHOLD_DIVIDEND', corpSym: corp.sym, totalRevenue: parseInt(revenueInput) })} />
+                <span className="text-blue-400">{fmt(Math.floor(parseInt(revenueInput) / 10))}/sh</span>
+                {price > 0 && Math.floor(parseInt(revenueInput) / 10) >= price && <span className="text-yellow-400 font-bold">x2!</span>}
+              </>}
+            </>
           )}
 
           {/* Train purchase */}
           {panel === 'train' && corp && (
-            <div className="flex flex-wrap items-center gap-1">
-              <span className="text-green-400 mr-1">{corp.sym} Buy:</span>
-              {nextAvailableTrains(game.depot).map(t => {
-                const canAfford = corp.cash >= t.price
-                return (
-                  <Btn key={t.name}
-                    label={`${t.name} ${fmt(t.price)}`}
-                    color={canAfford ? 'green' : 'gray'}
-                    onClick={() => canAfford && doAction({ type: 'BUY_TRAIN', corpSym: corp.sym, trainName: t.name, price: t.price })} />
-                )
+            <>
+              <span className="text-green-400">{corp.sym} train ({fmt(corp.cash)}):</span>
+              {nextAvailableTrains(game.depot).map((t, i) => {
+                const ok = corp.cash >= t.price
+                return <Btn key={t.name} l={`${i + 1}:${t.name} ${fmt(t.price)}${t.rustsOn ? ' r' + t.rustsOn : ''}`}
+                  c={ok ? 'green' : 'gray'} k={String(i + 1)}
+                  o={() => ok && doAction({ type: 'BUY_TRAIN', corpSym: corp.sym, trainName: t.name, price: t.price })} />
               })}
-              {/* Buy from other corps */}
-              {game.corporations.filter(c => c.sym !== corp.sym && c.trains.length > 0).map(other => (
+              {game.corporations.filter(c => c.sym !== corp.sym && c.trains.length > 0).map(other =>
                 other.trains.map(t => (
-                  <Btn key={`${other.sym}-${t.id}`}
-                    label={`${t.name} from ${other.sym}`}
-                    color="cyan"
-                    onClick={() => {
+                  <Btn key={`${other.sym}-${t.id}`} l={`${t.name}<${other.sym}`} c="cyan"
+                    o={() => {
                       const p = prompt(`Price for ${t.name} from ${other.sym}?`)
-                      const price = parseInt(p, 10)
-                      if (price > 0) doAction({ type: 'BUY_TRAIN', corpSym: corp.sym, trainName: t.name, price, fromCorpSym: other.sym })
+                      const pr = parseInt(p, 10)
+                      if (pr > 0) doAction({ type: 'BUY_TRAIN', corpSym: corp.sym, trainName: t.name, price: pr, fromCorpSym: other.sym })
                     }} />
                 ))
-              ))}
-            </div>
+              )}
+            </>
           )}
 
-          {/* Par new corporation */}
+          {/* Par new corp */}
           {panel === 'par' && player && (
-            <div className="flex flex-wrap items-center gap-1">
-              <span className="text-green-400 mr-1">{player.name} Par:</span>
+            <>
+              <span className="text-green-400">{player.name} par ({fmt(player.cash)}):</span>
               {unfloated.map(c => (
-                <span key={c.sym} className="inline-flex items-center gap-0.5">
+                <span key={c.sym} className="inline-flex items-center gap-0.5 mr-1">
                   <span style={{ color: c.color }} className="font-bold">{c.sym}</span>
-                  {parPrices(game.stockMarket).map(pp => {
+                  {parPrices(game.stockMarket).slice(0, 8).map(pp => {
                     const presPercent = game.title.shares?.[0] ?? 20
                     const cost = (pp.price * presPercent) / 10
-                    const canAfford = player.cash >= cost
-                    return (
-                      <Btn key={`${c.sym}-${pp.price}`}
-                        label={`${fmt(pp.price)}`}
-                        color={canAfford ? 'green' : 'gray'}
-                        onClick={() => canAfford && doAction({
-                          type: 'PAR_SHARE', playerId: player.id, corpSym: c.sym,
-                          parPrice: pp.price, row: pp.row, col: pp.col,
-                        })} />
-                    )
+                    const ok = player.cash >= cost
+                    return <Btn key={`${c.sym}-${pp.price}`} l={`${pp.price}`}
+                      c={ok ? 'green' : 'gray'}
+                      o={() => ok && doAction({ type: 'PAR_SHARE', playerId: player.id, corpSym: c.sym, parPrice: pp.price, row: pp.row, col: pp.col })} />
                   })}
-                  <span className="text-blue-900 mx-1">|</span>
                 </span>
               ))}
-            </div>
+            </>
           )}
+
+          {/* Sell private to corp */}
+          {panel === 'private' && player && corp && (() => {
+            const privs = (game.companies || []).filter(c => c.ownerType === 'player' && c.ownerId === player.id && !c.closed && c.canSellToCorp !== false)
+            if (privs.length === 0) return <span className="text-red-400">No privates to sell</span>
+            return <>
+              <span className="text-green-400">{player.name} sell priv to {corp.sym}:</span>
+              {privs.map(c => (
+                <Btn key={c.sym} l={`${c.sym} (${fmt(c.value)})`} c="purple"
+                  o={() => {
+                    const p = prompt(`Sell ${c.sym} to ${corp.sym} for? (face: ${c.value})`)
+                    const pr = parseInt(p, 10)
+                    if (pr > 0) doAction({ type: 'SELL_PRIVATE', companySym: c.sym, fromPlayerId: player.id, toCorpSym: corp.sym, price: pr })
+                  }} />
+              ))}
+            </>
+          })()}
         </div>
 
-        <button onClick={onClose} className="text-red-400 hover:text-red-200 px-1">Esc</button>
+        <button onClick={onClose} className="text-red-400 hover:text-red-200 font-bold">[Esc]</button>
       </div>
     </div>
   )
 }
 
-function Btn({ label, color, onClick }) {
+function Btn({ l, c, k, o }) {
   const colors = {
-    green: 'bg-green-900 text-green-300 hover:bg-green-800',
-    red: 'bg-red-900 text-red-300 hover:bg-red-800',
-    cyan: 'bg-cyan-900 text-cyan-300 hover:bg-cyan-800',
-    yellow: 'bg-yellow-900 text-yellow-300 hover:bg-yellow-800',
-    gray: 'bg-gray-800 text-gray-500 cursor-not-allowed',
+    green: 'bg-green-900/80 text-green-300 hover:bg-green-800',
+    red: 'bg-red-900/80 text-red-300 hover:bg-red-800',
+    cyan: 'bg-cyan-900/80 text-cyan-300 hover:bg-cyan-800',
+    yellow: 'bg-yellow-900/80 text-yellow-300 hover:bg-yellow-800',
+    purple: 'bg-purple-900/80 text-purple-300 hover:bg-purple-800',
+    gray: 'bg-gray-800/60 text-gray-600 cursor-not-allowed',
   }
   return (
-    <button onClick={onClick} className={`px-1.5 py-0.5 rounded text-xs font-mono ${colors[color] || colors.green}`}>
-      {label}
+    <button onClick={o} className={`px-1.5 py-0.5 rounded text-xs font-mono ${colors[c] || colors.green}`}>
+      {l}
     </button>
   )
 }
