@@ -36,6 +36,7 @@ export function useOverviewData() {
   const [trainPrice, setTrainPrice] = useState('')
   const revRef = useRef(null)
   const rootRef = useRef(null)
+  const cursorRef = useRef(null)
 
   const fmt = game ? (n) => formatCurrency(n, game.title.currencyFormat) : (n) => String(n)
   const phase = game ? currentPhase(game.phaseManager) : null
@@ -164,13 +165,14 @@ export function useOverviewData() {
   }, [game, corps, selPlayer, selCorp, panel, canUndo, undo, unfloated, inReplay, fullLog])
 
   useEffect(() => { rootRef.current?.focus() }, [])
+  useEffect(() => { cursorRef.current?.scrollIntoView({ block: 'nearest', inline: 'nearest' }) }, [curRow, curCol])
 
   return {
     game, fmt, phase, label, limit, corps, unfloated, depotGroups,
     lastRevenue, corpPrivates, playerPrivates, lastAction,
     selPlayer, cursorPlayer, myPlayerId, selCorp, curRow, setCurRow, curCol, setCurCol,
     panel, setPanel, revenueInput, setRevenueInput, trainPrice, setTrainPrice,
-    revRef, rootRef, onKeyDown, closePanel, doAction,
+    revRef, rootRef, cursorRef, onKeyDown, closePanel, doAction,
     inReplay, fullLog, enterReplay, exitReplay, replayTo, enterWhatIf,
     isWhatIf, whatIfSnapshot, exitWhatIf: useGameStore.getState().exitWhatIf,
     canUndo, undo, dispatch,

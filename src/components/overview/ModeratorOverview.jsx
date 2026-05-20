@@ -16,7 +16,7 @@ export default function ModeratorOverview() {
   const d = useOverviewData()
   const [themeId, setThemeId] = useState('dos')
   if (!d.game) return null
-  const { game, fmt, phase, label, limit, corps, unfloated, depotGroups, lastRevenue, corpPrivates, playerPrivates, lastAction, selPlayer, myPlayerId, selCorp, curRow, setCurRow, curCol, setCurCol, panel, setPanel, revenueInput, setRevenueInput, revRef, rootRef, onKeyDown, closePanel, doAction, inReplay, fullLog, enterReplay, exitReplay, replayTo, enterWhatIf, isWhatIf, exitWhatIf, canUndo, undo, isSR, isOR, isPre, rt } = d
+  const { game, fmt, phase, label, limit, corps, unfloated, depotGroups, lastRevenue, corpPrivates, playerPrivates, lastAction, selPlayer, myPlayerId, selCorp, curRow, setCurRow, curCol, setCurCol, panel, setPanel, revenueInput, setRevenueInput, revRef, rootRef, cursorRef, onKeyDown, closePanel, doAction, inReplay, fullLog, enterReplay, exitReplay, replayTo, enterWhatIf, isWhatIf, exitWhatIf, canUndo, undo, isSR, isOR, isPre, rt } = d
 
   const t = THEMES[themeId]
   const barBg = isSR ? 'bg-green-900' : isOR ? 'bg-amber-900' : isPre ? 'bg-purple-900' : t.bar
@@ -45,10 +45,10 @@ export default function ModeratorOverview() {
             {game.players.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
           </select>
           <button onClick={() => canUndo() && undo()} className="text-blue-400 hover:text-white">[U]ndo</button>
-          {Object.values(THEMES).map(th => (
-            <button key={th.id} onClick={() => setThemeId(th.id)}
-              className={`${th.id === themeId ? t.bright + ' font-bold' : t.text} hover:${t.bright}`}>{th.label}</button>
-          ))}
+          <select value={themeId} onChange={e => setThemeId(e.target.value)}
+            className={`${t.bg} border border-current rounded px-0.5 py-0 ${t.head}`}>
+            {Object.values(THEMES).map(th => <option key={th.id} value={th.id}>{th.label}</option>)}
+          </select>
           <button onClick={() => useUIStore.getState().setActiveTab('market')} className={`${t.player} hover:${t.bright}`}>[Tab]</button>
           <button onClick={() => useUIStore.getState().setActiveTab('overview')} className={`${t.head} hover:${t.bright}`}>Broker</button>
         </span>
@@ -75,11 +75,11 @@ export default function ModeratorOverview() {
       )}
 
       {/* Matrix */}
-      <div className="flex-1 overflow-auto">
+      <div className="flex-1 overflow-auto relative">
         <table className="w-full border-collapse">
-          <thead>
+          <thead className="sticky top-0 z-20">
             <tr className={`${t.bg} ${t.head}`}>
-              <th className={`text-left px-1 py-0.5 sticky left-0 ${t.bg} z-10 min-w-[80px]`}></th>
+              <th className={`text-left px-1 py-0.5 sticky left-0 ${t.bg} z-30 min-w-[80px]`}></th>
               <th className="px-1 text-right min-w-[44px]">Cash</th>
               <th className="px-1 text-right min-w-[28px] cursor-pointer hover:text-purple-300" onClick={() => setPanel('private')}>Prv</th>
               <th className="px-1 text-center min-w-[32px]">Cert</th>
@@ -114,7 +114,8 @@ export default function ModeratorOverview() {
                     const pres = isPresident(p, c.sym)
                     const isCursor = pi === curRow && ci === curCol
                     return (
-                      <td key={c.sym} className={`px-1 text-center cursor-pointer ${isCursor ? t.cursor : ci === curCol ? t.colHi : ''}`}
+                      <td key={c.sym} ref={isCursor ? cursorRef : undefined}
+                        className={`px-1 text-center cursor-pointer ${isCursor ? t.cursor : ci === curCol ? t.colHi : ''}`}
                         onClick={() => { setCurRow(pi); setCurCol(ci) }}>
                         {pct === 0 ? <span className={t.dim}>·</span>
                           : <span className="text-white">{pres && <span className="text-yellow-400">{'\u00BB'}</span>}{pct}</span>}

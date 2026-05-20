@@ -7,7 +7,7 @@ import { ActionPanel } from './ActionPanel.jsx'
 export default function BrokerOverview() {
   const d = useOverviewData()
   if (!d.game) return null
-  const { game, fmt, phase, label, limit, corps, unfloated, depotGroups, lastRevenue, corpPrivates, playerPrivates, lastAction, selPlayer, myPlayerId, selCorp, curRow, setCurRow, curCol, setCurCol, panel, setPanel, revenueInput, setRevenueInput, revRef, rootRef, onKeyDown, closePanel, doAction, inReplay, fullLog, enterReplay, exitReplay, replayTo, enterWhatIf, isWhatIf, exitWhatIf, canUndo, undo, isSR, isOR, isPre } = d
+  const { game, fmt, phase, label, limit, corps, unfloated, depotGroups, lastRevenue, corpPrivates, playerPrivates, lastAction, selPlayer, myPlayerId, selCorp, curRow, setCurRow, curCol, setCurCol, panel, setPanel, revenueInput, setRevenueInput, revRef, rootRef, cursorRef, onKeyDown, closePanel, doAction, inReplay, fullLog, enterReplay, exitReplay, replayTo, enterWhatIf, isWhatIf, exitWhatIf, canUndo, undo, isSR, isOR, isPre } = d
 
   const curIdx = game.actionLog.length - 1
 
@@ -62,15 +62,15 @@ export default function BrokerOverview() {
       )}
 
       {/* Matrix */}
-      <div className="flex-1 overflow-auto">
+      <div className="flex-1 overflow-auto relative">
         <table className="w-full border-collapse text-xs">
-          <thead>
+          <thead className="sticky top-0 z-20">
             <tr className="bg-broker-surface text-broker-text-muted">
-              <th className="text-left px-2 py-1 sticky left-0 bg-broker-surface z-10 min-w-[90px] font-medium">Player</th>
+              <th className="text-left px-2 py-1 sticky left-0 bg-broker-surface z-30 min-w-[90px] font-medium">Player</th>
               <th className="px-2 text-right min-w-[50px] font-medium">Cash</th>
               <th className="px-2 text-center min-w-[36px] font-medium">Cert</th>
               {corps.map((c, ci) => (
-                <th key={c.sym} className={`px-2 text-center min-w-[48px] font-bold cursor-pointer ${ci === curCol ? 'bg-broker-surface-hover' : ''} ${!c.ipoed ? 'opacity-30' : ''}`}
+                <th key={c.sym} className={`px-2 text-center min-w-[48px] font-bold cursor-pointer bg-broker-surface ${ci === curCol ? '!bg-broker-surface-hover' : ''} ${!c.ipoed ? 'opacity-30' : ''}`}
                   style={{ color: c.color }}
                   onClick={() => {
                     setCurCol(ci)
@@ -96,7 +96,8 @@ export default function BrokerOverview() {
                     const pres = isPresident(p, c.sym)
                     const isCursor = pi === curRow && ci === curCol
                     return (
-                      <td key={c.sym} className={`px-2 text-center cursor-pointer ${isCursor ? 'bg-broker-gold/20 ring-1 ring-broker-gold/50' : ci === curCol ? 'bg-broker-surface-hover/20' : ''}`}
+                      <td key={c.sym} ref={isCursor ? cursorRef : undefined}
+                        className={`px-2 text-center cursor-pointer ${isCursor ? 'bg-broker-gold/20 ring-1 ring-broker-gold/50' : ci === curCol ? 'bg-broker-surface-hover/20' : ''}`}
                         onClick={() => { setCurRow(pi); setCurCol(ci) }}>
                         {pct === 0 ? <span className="text-broker-text-muted/20">·</span>
                           : <span className={pres ? 'text-white font-bold' : 'text-broker-text'}>{pct}{pres && '%P'}</span>}
