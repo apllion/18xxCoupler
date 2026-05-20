@@ -274,21 +274,27 @@ const SUPPORTED_TITLES = new Set([
   '21Moon','22Mars',
 ])
 
+const SORTED_TITLES = [...SUPPORTED_TITLES].sort()
+
 function LiveGames({ onImport, importing }) {
   const [games, setGames] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [tab, setTab] = useState('active')
+  const [titleFilter, setTitleFilter] = useState('')
 
-  function fetchGames(status) {
+  function fetchGames(status, title) {
     setLoading(true)
     setError(null)
     setTab(status)
-    fetch(`/18xx-games-api/game?status=${status}&page=1`)
+    const url = title
+      ? `/18xx-games-api/game?title=${encodeURIComponent(title)}&status=${status}&page=1`
+      : `/18xx-games-api/game?status=${status}&page=1`
+    fetch(url)
       .then(r => { if (!r.ok) throw new Error('Failed'); return r.json() })
       .then(data => {
         const supported = (data.games || []).filter(g => SUPPORTED_TITLES.has(g.title))
-        setGames(supported.slice(0, 20))
+        setGames(supported.slice(0, 30))
       })
       .catch(() => setError('Could not reach 18xx.games'))
       .finally(() => setLoading(false))
@@ -296,13 +302,17 @@ function LiveGames({ onImport, importing }) {
 
   return (
     <div className="mt-3">
-      <div className="flex items-center gap-2 mb-2">
-        <span className="text-xs text-broker-text-muted font-medium">Browse:</span>
-        <button onClick={() => fetchGames('active')}
+      <div className="flex items-center gap-2 mb-2 flex-wrap">
+        <select value={titleFilter} onChange={e => setTitleFilter(e.target.value)}
+          className="text-xs bg-broker-bg border border-broker-border rounded px-2 py-1 text-white">
+          <option value="">All titles</option>
+          {SORTED_TITLES.map(t => <option key={t} value={t}>{t}</option>)}
+        </select>
+        <button onClick={() => fetchGames('active', titleFilter)}
           className={`text-xs px-2 py-0.5 rounded ${tab === 'active' && games ? 'bg-green-800 text-green-200' : 'bg-broker-surface-hover text-broker-text-muted hover:text-white'}`}>
           Active
         </button>
-        <button onClick={() => fetchGames('finished')}
+        <button onClick={() => fetchGames('finished', titleFilter)}
           className={`text-xs px-2 py-0.5 rounded ${tab === 'finished' && games ? 'bg-blue-800 text-blue-200' : 'bg-broker-surface-hover text-broker-text-muted hover:text-white'}`}>
           Finished
         </button>
