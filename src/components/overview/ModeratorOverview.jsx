@@ -1,6 +1,5 @@
 // ModeratorOverview — terminal retro skin with selectable color themes.
 
-import { useState } from 'react'
 import { useOverviewData, playerSharePercent, playerCertCount, isPresident } from './useOverviewData.js'
 import { useUIStore } from '../../store/uiStore.js'
 import { ActionPanel } from './ActionPanel.jsx'
@@ -15,7 +14,7 @@ const THEMES = {
 
 export default function ModeratorOverview() {
   const d = useOverviewData()
-  const [themeId, setThemeId] = useState('dos')
+  const themeId = useUIStore((s) => s.modTheme) || 'dos'
   if (!d.game) return null
   const { game, fmt, phase, label, limit, corps, unfloated, depotGroups, lastRevenue, corpPrivates, playerPrivates, lastAction, selPlayer, myPlayerId, selCorp, curRow, setCurRow, curCol, setCurCol, panel, setPanel, revenueInput, setRevenueInput, revRef, rootRef, cursorRef, onKeyDown, closePanel, doAction, inReplay, fullLog, enterReplay, exitReplay, replayTo, enterWhatIf, isWhatIf, exitWhatIf, canUndo, undo, isSR, isOR, isPre, rt } = d
 
@@ -46,10 +45,6 @@ export default function ModeratorOverview() {
             {game.players.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
           </select>
           <button onClick={() => canUndo() && undo()} className={`${t.text} hover:${t.bright}`}>[U]ndo</button>
-          <select value={themeId} onChange={e => setThemeId(e.target.value)}
-            className={`text-xs ${t.bg} border border-current rounded px-0.5 py-0 ${t.head}`}>
-            {Object.values(THEMES).map(th => <option key={th.id} value={th.id}>{th.label}</option>)}
-          </select>
           <button onClick={() => setPanel('settings')} className={`${t.head} hover:${t.bright}`}>[X]Set</button>
         </span>
       </div>

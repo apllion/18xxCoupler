@@ -391,8 +391,10 @@ function PriceInput({ m, label, value, onChange, onConfirm, onCancel }) {
 function SettingsPanel({ m }) {
   const ac = useUIStore((s) => s.autoConfig)
   const skin = useUIStore((s) => s.skin)
+  const modTheme = useUIStore((s) => s.modTheme)
   const setAutoConfig = useUIStore((s) => s.setAutoConfig)
   const setActiveTab = useUIStore((s) => s.setActiveTab)
+  const setModTheme = useUIStore((s) => s.setModTheme)
 
   const autoItems = [
     { key: 'advanceOnAllPass', label: 'Auto-advance SR when all pass' },
@@ -411,11 +413,23 @@ function SettingsPanel({ m }) {
       <Title m={m}>Settings</Title>
       <div className="mt-1 flex gap-4 flex-wrap">
         <div>
-          <div className={labelColor}>App Theme</div>
+          <div className={labelColor}>App</div>
           <div className="flex gap-1">
             <Btn m={m} v={skin === 'broker' ? 'green' : 'blue'} o={() => setActiveTab('overview')}>Broker</Btn>
             <Btn m={m} v={skin === 'moderator' ? 'green' : 'blue'} o={() => setActiveTab('moderator')}>Moderator</Btn>
           </div>
+          {skin === 'moderator' && (
+            <>
+              <div className={`${labelColor} mt-1`}>Terminal</div>
+              <div className="flex gap-1">
+                {['dos', 'green', 'amber', 'white'].map(tid => (
+                  <Btn key={tid} m={m} v={modTheme === tid ? 'green' : 'blue'} o={() => setModTheme(tid)}>
+                    {tid.charAt(0).toUpperCase() + tid.slice(1)}
+                  </Btn>
+                ))}
+              </div>
+            </>
+          )}
         </div>
         <div className="flex-1 min-w-[200px]">
           <div className={labelColor}>Automation</div>

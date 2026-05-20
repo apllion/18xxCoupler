@@ -25,12 +25,14 @@ export const useUIStore = create((set) => ({
   })),
 
   skin: 'broker',            // 'broker' | 'moderator' — which chrome to use for detail tabs
+  modTheme: 'dos',           // 'dos' | 'green' | 'amber' | 'white' — moderator terminal theme
   setActiveTab: (tab) => set((s) => ({
     activeTab: tab,
     skin: tab === 'overview' ? 'broker' : tab === 'moderator' ? 'moderator' : s.skin,
   })),
   setActivePlayer: (id) => set({ activePlayerId: id }),
   setMyPlayer: (id) => set({ myPlayerId: id }),
+  setModTheme: (id) => set({ modTheme: id }),
   setActiveCorp: (sym) => set({ activeCorpSym: sym }),
   toggleLog: () => set((s) => ({ showLog: !s.showLog })),
   toggleTurnTracking: () => set((s) => ({
