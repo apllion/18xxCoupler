@@ -36,8 +36,7 @@ export default function BrokerOverview() {
             {game.players.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
           </select>
           <button onClick={() => canUndo() && undo()} className="text-xs text-broker-text-muted hover:text-white px-1">Undo</button>
-          <button onClick={() => useUIStore.getState().setActiveTab('moderator')} className="text-xs text-broker-text-muted hover:text-white bg-broker-surface-hover px-2 py-0.5 rounded">Moderator</button>
-          <button onClick={() => useUIStore.getState().setActiveTab('market')} className="text-xs text-broker-text-muted hover:text-white bg-broker-surface-hover px-2 py-0.5 rounded">Detail</button>
+          <button onClick={() => setPanel('settings')} className="text-xs text-broker-text-muted hover:text-white bg-broker-surface-hover px-2 py-0.5 rounded">Settings</button>
         </div>
       </div>
 
