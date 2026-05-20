@@ -3,6 +3,7 @@
 import { useOverviewData, playerSharePercent, playerCertCount, isPresident } from './useOverviewData.js'
 import { useUIStore } from '../../store/uiStore.js'
 import { ActionPanel } from './ActionPanel.jsx'
+import { ContextBar } from './ContextBar.jsx'
 
 export default function BrokerOverview() {
   const d = useOverviewData()
@@ -163,31 +164,9 @@ export default function BrokerOverview() {
           <span className="text-broker-text-muted text-xs truncate ml-1 flex-1">{curIdx < 0 ? 'Game start' : `${curIdx + 1}/${fullLog.length} — ${lastAction?.description || ''}`}</span>
         </div>
       ) : (
-        <div className="bg-broker-surface border-t border-broker-border px-3 py-2 flex-shrink-0 flex items-center gap-1.5 flex-wrap">
-          {/* Context: who is acting */}
-          <span className="text-xs text-broker-text-muted">
-            {myPlayerId && <span className="text-broker-gold text-[10px] mr-0.5">MY</span>}
-            <span className="text-white font-medium">{selPlayer?.name}</span>
-            {selCorp && <> + <span className="font-bold" style={{ color: selCorp.color }}>{selCorp.sym}</span></>}
-          </span>
-          <span className="text-broker-border mx-0.5">|</span>
-          <Bb t="Buy" o={() => { if (!selCorp) return; if (!selCorp.ipoed) { setPanel('par'); return } if (selCorp.ipoShares > 0) doAction({ type: 'BUY_SHARE', playerId: selPlayer?.id, corpSym: selCorp.sym, source: 'ipo', percent: 10 }); else if (selCorp.marketShares > 0) doAction({ type: 'BUY_SHARE', playerId: selPlayer?.id, corpSym: selCorp.sym, source: 'market', percent: 10 }) }} />
-          <Bb t="Sell" v="red" o={() => selPlayer && selCorp && playerSharePercent(selPlayer, selCorp.sym) > 0 && doAction({ type: 'SELL_SHARES', playerId: selPlayer.id, corpSym: selCorp.sym, percent: 10 })} />
-          <Bb t="Revenue" o={() => { setPanel('revenue'); setTimeout(() => revRef.current?.focus(), 50) }} />
-          <Bb t="Train" o={() => setPanel('train')} />
-          {unfloated.length > 0 && <Bb t="Par" o={() => setPanel('par')} />}
-          <Bb t="Priv Buy" o={() => setPanel('buyprivate')} />
-          <Bb t="Priv Sell" o={() => setPanel('private')} />
-          {game.title.loans && selCorp?.floated && <Bb t="Loan" o={() => setPanel('loan')} />}
-          {game.title.corpCanBuyShares && selCorp?.floated && <Bb t="Corp Trade" o={() => setPanel('corpshare')} />}
-          <span className="text-broker-border mx-0.5">|</span>
-          <Bb t="Advance" v="muted" o={() => doAction({ type: 'ADVANCE_ROUND' })} />
-          <Bb t="Collect" v="muted" o={() => doAction({ type: 'COLLECT_ALL_REVENUE' })} />
-          <Bb t="Sold-out" v="muted" o={() => doAction({ type: 'SOLD_OUT_ADJUST' })} />
-          <Bb t="Undo" v="muted" o={() => canUndo() && undo()} />
-          {game.actionLog.length > 0 && <Bb t="Replay" v="purple" o={() => enterReplay()} />}
-          <span className="text-broker-text-muted text-xs truncate ml-1 flex-1">{lastAction?.description || ''}</span>
-        </div>
+        <ContextBar game={game} selPlayer={selPlayer} selCorp={selCorp} myPlayerId={myPlayerId}
+          setPanel={setPanel} doAction={doAction} revRef={revRef} canUndo={canUndo} undo={undo}
+          enterReplay={enterReplay} lastAction={lastAction} skin="broker" />
       )}
     </div>
   )

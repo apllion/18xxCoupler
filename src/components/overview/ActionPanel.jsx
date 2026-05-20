@@ -179,6 +179,7 @@ function PanelContent({ panel, game, player, corp, unfloated, fmt, revenueInput,
       { key: 'collectPrivates', label: 'Auto-collect private revenue at OR start' },
       { key: 'soldOutAdjust', label: 'Auto-sold-out adjustment at OR end' },
       { key: 'presidentSwap', label: 'Auto-swap presidency on share majority' },
+      { key: 'superUmpire', label: 'Super-umpire: show ALL actions (corrections mode)' },
     ]
     const skin = useUIStore.getState().skin
     const onColor = m ? 'bg-green-900 text-green-300' : 'bg-green-700/30 text-green-300'

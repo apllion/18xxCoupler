@@ -18,6 +18,7 @@ export const useUIStore = create((set) => ({
     collectPrivates: false,     // auto-collect private revenue at OR start
     soldOutAdjust: false,       // auto-sold-out adjustment at OR end
     presidentSwap: false,       // auto-swap presidency on share majority
+    superUmpire: false,          // show ALL actions regardless of context
   },
   setAutoConfig: (key, value) => set((s) => ({
     autoConfig: { ...s.autoConfig, [key]: value },
