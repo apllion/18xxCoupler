@@ -23,7 +23,11 @@ export const useUIStore = create((set) => ({
     autoConfig: { ...s.autoConfig, [key]: value },
   })),
 
-  setActiveTab: (tab) => set({ activeTab: tab }),
+  skin: 'broker',            // 'broker' | 'moderator' — which chrome to use for detail tabs
+  setActiveTab: (tab) => set((s) => ({
+    activeTab: tab,
+    skin: tab === 'overview' ? 'broker' : tab === 'moderator' ? 'moderator' : s.skin,
+  })),
   setActivePlayer: (id) => set({ activePlayerId: id }),
   setMyPlayer: (id) => set({ myPlayerId: id }),
   setActiveCorp: (sym) => set({ activeCorpSym: sym }),
