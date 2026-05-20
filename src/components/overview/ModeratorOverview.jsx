@@ -7,7 +7,7 @@ import { ActionPanel } from './ActionPanel.jsx'
 export default function ModeratorOverview() {
   const d = useOverviewData()
   if (!d.game) return null
-  const { game, fmt, phase, label, limit, corps, unfloated, depotGroups, lastRevenue, corpPrivates, playerPrivates, lastAction, selPlayer, selCorp, curRow, setCurRow, curCol, setCurCol, panel, setPanel, revenueInput, setRevenueInput, revRef, rootRef, onKeyDown, closePanel, doAction, inReplay, fullLog, enterReplay, exitReplay, replayTo, enterWhatIf, canUndo, undo, isSR, isOR, isPre, rt } = d
+  const { game, fmt, phase, label, limit, corps, unfloated, depotGroups, lastRevenue, corpPrivates, playerPrivates, lastAction, selPlayer, selCorp, curRow, setCurRow, curCol, setCurCol, panel, setPanel, revenueInput, setRevenueInput, revRef, rootRef, onKeyDown, closePanel, doAction, inReplay, fullLog, enterReplay, exitReplay, replayTo, enterWhatIf, isWhatIf, exitWhatIf, canUndo, undo, isSR, isOR, isPre, rt } = d
 
   const barBg = isSR ? 'bg-green-900' : isOR ? 'bg-amber-900' : isPre ? 'bg-purple-900' : 'bg-blue-900'
   const labelColor = isSR ? 'text-green-300' : isOR ? 'text-amber-300' : isPre ? 'text-purple-300' : 'text-blue-300'
@@ -25,7 +25,7 @@ export default function ModeratorOverview() {
           <span className={`ml-2 font-bold ${labelColor}`}>{isPre ? 'Setup' : label}</span>
           <span className="text-cyan-300 ml-2">Ph.{phase.name}</span>
           <span className="text-blue-400 ml-2">Lim:{limit}</span>
-          {isPre && <button onClick={() => doAction({ type: 'ADVANCE_ROUND' })} className="ml-2 text-green-300 hover:text-green-100">[Start SR1]</button>}
+          {isPre && !inReplay && <button onClick={() => doAction({ type: 'ADVANCE_ROUND' })} className="ml-2 text-green-300 hover:text-green-100">[Start SR1]</button>}
         </span>
         <span className="flex items-center gap-2">
           {inReplay && <span className="text-purple-300 font-bold">REPLAY {curIdx + 1}/{fullLog.length}</span>}
@@ -35,6 +35,26 @@ export default function ModeratorOverview() {
           <button onClick={() => useUIStore.getState().setActiveTab('overview')} className="text-cyan-400 hover:text-cyan-200">Broker</button>
         </span>
       </div>
+
+      {/* Mode banners */}
+      {isWhatIf && (
+        <div className="bg-purple-900 px-2 py-0.5 flex items-center justify-between flex-shrink-0 text-xs">
+          <span className="text-purple-200 font-bold">WHAT-IF — exploring, nothing saved</span>
+          <span className="flex gap-1">
+            <button onClick={() => exitWhatIf(true)} className="text-purple-300 hover:text-white">Discard</button>
+            <button onClick={() => exitWhatIf(false)} className="text-purple-400 hover:text-white">Keep</button>
+          </span>
+        </div>
+      )}
+      {inReplay && !isWhatIf && (
+        <div className="bg-blue-800 px-2 py-0.5 flex items-center justify-between flex-shrink-0 text-xs">
+          <span className="text-blue-200 font-bold">REPLAY {curIdx + 1}/{fullLog.length} — {lastAction?.description || 'Start'}</span>
+          <span className="flex gap-1">
+            <button onClick={() => { exitReplay(); enterWhatIf() }} className="text-purple-300 hover:text-white">What-if</button>
+            <button onClick={() => exitReplay()} className="text-blue-300 hover:text-white">Exit</button>
+          </span>
+        </div>
+      )}
 
       {/* Matrix */}
       <div className="flex-1 overflow-auto">

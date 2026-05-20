@@ -25,6 +25,8 @@ export function useOverviewData() {
   const exitReplay = useGameStore((s) => s.exitReplay)
   const replayTo = useGameStore((s) => s.replayTo)
   const enterWhatIf = useGameStore((s) => s.enterWhatIf)
+  const whatIfSnapshot = useGameStore((s) => s.whatIfSnapshot)
+  const isWhatIf = !!whatIfSnapshot
   const inReplay = fullLog !== null
 
   const [curRow, setCurRow] = useState(0)
@@ -165,6 +167,7 @@ export function useOverviewData() {
     panel, setPanel, revenueInput, setRevenueInput, trainPrice, setTrainPrice,
     revRef, rootRef, onKeyDown, closePanel, doAction,
     inReplay, fullLog, enterReplay, exitReplay, replayTo, enterWhatIf,
+    isWhatIf, whatIfSnapshot, exitWhatIf: useGameStore.getState().exitWhatIf,
     canUndo, undo, dispatch,
     isSR, isOR, isPre, rt,
   }

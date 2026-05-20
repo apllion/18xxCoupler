@@ -7,7 +7,7 @@ import { ActionPanel } from './ActionPanel.jsx'
 export default function BrokerOverview() {
   const d = useOverviewData()
   if (!d.game) return null
-  const { game, fmt, phase, label, limit, corps, unfloated, depotGroups, lastRevenue, corpPrivates, playerPrivates, lastAction, selPlayer, selCorp, curRow, setCurRow, curCol, setCurCol, panel, setPanel, revenueInput, setRevenueInput, revRef, rootRef, onKeyDown, closePanel, doAction, inReplay, fullLog, enterReplay, exitReplay, replayTo, enterWhatIf, canUndo, undo, isSR, isOR, isPre } = d
+  const { game, fmt, phase, label, limit, corps, unfloated, depotGroups, lastRevenue, corpPrivates, playerPrivates, lastAction, selPlayer, selCorp, curRow, setCurRow, curCol, setCurCol, panel, setPanel, revenueInput, setRevenueInput, revRef, rootRef, onKeyDown, closePanel, doAction, inReplay, fullLog, enterReplay, exitReplay, replayTo, enterWhatIf, isWhatIf, exitWhatIf, canUndo, undo, isSR, isOR, isPre } = d
 
   const curIdx = game.actionLog.length - 1
 
@@ -24,9 +24,9 @@ export default function BrokerOverview() {
           <span className="font-bold text-lg text-white">{game.title.title}</span>
           <span className={`text-sm font-medium px-2 py-0.5 rounded ${
             isSR ? 'bg-green-800 text-green-200' : isOR ? 'bg-amber-800 text-amber-200' : 'bg-broker-surface-hover text-broker-text-muted'
-          }`}>{isPre ? 'Setup' : label}</span>
+          }`}>{label}</span>
           <span className="text-xs text-broker-text-muted">Phase {phase.name} / Limit {limit}</span>
-          {isPre && (
+          {isPre && !inReplay && (
             <button onClick={() => doAction({ type: 'ADVANCE_ROUND' })}
               className="text-xs font-medium px-2 py-0.5 rounded bg-green-700 text-white hover:bg-green-600">
               Start SR 1
@@ -41,6 +41,26 @@ export default function BrokerOverview() {
           <button onClick={() => useUIStore.getState().setActiveTab('market')} className="text-xs text-broker-text-muted hover:text-white bg-broker-surface-hover px-2 py-0.5 rounded">Detail</button>
         </div>
       </div>
+
+      {/* Mode indicator banners */}
+      {isWhatIf && (
+        <div className="bg-purple-900 border-b border-purple-600 px-3 py-1.5 flex items-center justify-between flex-shrink-0">
+          <span className="text-purple-200 text-sm font-bold">WHAT-IF — exploring, nothing saved</span>
+          <div className="flex gap-2">
+            <button onClick={() => exitWhatIf(true)} className="text-xs bg-purple-700 hover:bg-purple-600 text-white px-2 py-0.5 rounded">Discard</button>
+            <button onClick={() => exitWhatIf(false)} className="text-xs text-purple-300 hover:text-white px-2">Keep</button>
+          </div>
+        </div>
+      )}
+      {inReplay && !isWhatIf && (
+        <div className="bg-blue-900 border-b border-blue-600 px-3 py-1.5 flex items-center justify-between flex-shrink-0">
+          <span className="text-blue-200 text-sm font-bold">REPLAY {curIdx + 1}/{fullLog.length} — {lastAction?.description || 'Game start'}</span>
+          <div className="flex gap-2">
+            <button onClick={() => { exitReplay(); enterWhatIf() }} className="text-xs bg-purple-700 hover:bg-purple-600 text-white px-2 py-0.5 rounded">What-if</button>
+            <button onClick={() => exitReplay()} className="text-xs bg-blue-700 hover:bg-blue-600 text-white px-2 py-0.5 rounded">Exit</button>
+          </div>
+        </div>
+      )}
 
       {/* Matrix */}
       <div className="flex-1 overflow-auto">
