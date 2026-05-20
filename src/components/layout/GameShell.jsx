@@ -29,7 +29,9 @@ export default function GameShell() {
   const activeTab = useUIStore((s) => s.activeTab)
   const viewMode = useUIStore((s) => s.viewMode)
   const TabComponent = TAB_COMPONENTS[activeTab] || SummaryTab
-  const inPregame = game?.roundTracker?.inPregame
+  const fullLog = useGameStore((s) => s.fullLog)
+  const inReplay = fullLog !== null
+  const inPregame = game?.roundTracker?.inPregame && !inReplay
   const sync = useSyncContext()
 
   // Moderator mode: Lemmi-style full screen, no header/nav chrome
