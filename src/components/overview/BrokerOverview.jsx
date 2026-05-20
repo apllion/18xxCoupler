@@ -30,6 +30,11 @@ export default function BrokerOverview() {
         <div className="flex items-center gap-2">
           {inReplay && <span className="text-xs font-medium text-purple-300 bg-purple-900/40 px-2 py-0.5 rounded">{curIdx + 1}/{fullLog.length}</span>}
           <span className={`text-sm font-medium ${game.bank.cash <= 0 ? 'text-red-400' : 'text-broker-text'}`}>Bank {fmt(game.bank.cash)}</span>
+          <select value={myPlayerId || ''} onChange={e => useUIStore.getState().setMyPlayer(e.target.value || null)}
+            className="text-xs bg-broker-surface-hover border border-broker-border rounded px-1 py-0.5 text-white">
+            <option value="">Umpire</option>
+            {game.players.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+          </select>
           <button onClick={() => canUndo() && undo()} className="text-xs text-broker-text-muted hover:text-white px-1">Undo</button>
           <button onClick={() => useUIStore.getState().setActiveTab('moderator')} className="text-xs text-broker-text-muted hover:text-white bg-broker-surface-hover px-2 py-0.5 rounded">Moderator</button>
           <button onClick={() => useUIStore.getState().setActiveTab('market')} className="text-xs text-broker-text-muted hover:text-white bg-broker-surface-hover px-2 py-0.5 rounded">Detail</button>
@@ -156,6 +161,7 @@ export default function BrokerOverview() {
         <div className="bg-broker-surface border-t border-broker-border px-3 py-2 flex-shrink-0 flex items-center gap-1.5 flex-wrap">
           {/* Context: who is acting */}
           <span className="text-xs text-broker-text-muted">
+            {myPlayerId && <span className="text-broker-gold text-[10px] mr-0.5">MY</span>}
             <span className="text-white font-medium">{selPlayer?.name}</span>
             {selCorp && <> + <span className="font-bold" style={{ color: selCorp.color }}>{selCorp.sym}</span></>}
           </span>

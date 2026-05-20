@@ -107,7 +107,11 @@ export function useOverviewData() {
   }, [game?.depot])
 
   const lastAction = game?.actionLog?.length > 0 ? game.actionLog[game.actionLog.length - 1] : null
-  const selPlayer = game?.players?.[curRow] || game?.players?.[0]
+  const myPlayerId = useUIStore((s) => s.myPlayerId)
+  const cursorPlayer = game?.players?.[curRow] || game?.players?.[0]
+  // For share actions: use myPlayerId if set, otherwise cursor row
+  const actingPlayer = myPlayerId ? game?.players?.find(p => p.id === myPlayerId) : cursorPlayer
+  const selPlayer = actingPlayer || cursorPlayer
   const selCorp = corps[curCol] || corps[0]
 
   const rt = game?.roundTracker
@@ -164,7 +168,7 @@ export function useOverviewData() {
   return {
     game, fmt, phase, label, limit, corps, unfloated, depotGroups,
     lastRevenue, corpPrivates, playerPrivates, lastAction,
-    selPlayer, selCorp, curRow, setCurRow, curCol, setCurCol,
+    selPlayer, cursorPlayer, myPlayerId, selCorp, curRow, setCurRow, curCol, setCurCol,
     panel, setPanel, revenueInput, setRevenueInput, trainPrice, setTrainPrice,
     revRef, rootRef, onKeyDown, closePanel, doAction,
     inReplay, fullLog, enterReplay, exitReplay, replayTo, enterWhatIf,

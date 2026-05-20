@@ -29,6 +29,11 @@ export default function ModeratorOverview() {
         <span className="flex items-center gap-2">
           {inReplay && <span className="text-purple-300 font-bold">REPLAY {curIdx + 1}/{fullLog.length}</span>}
           <span className={game.bank.cash <= 0 ? 'text-red-400 font-bold' : 'text-green-300'}>Bank:{fmt(game.bank.cash)}</span>
+          <select value={myPlayerId || ''} onChange={e => useUIStore.getState().setMyPlayer(e.target.value || null)}
+            className="text-xs bg-blue-900 border border-blue-700 rounded px-1 py-0 text-yellow-300 font-mono">
+            <option value="">Umpire</option>
+            {game.players.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+          </select>
           <button onClick={() => canUndo() && undo()} className="text-blue-400 hover:text-white">[U]ndo</button>
           <button onClick={() => useUIStore.getState().setActiveTab('market')} className="text-yellow-400 hover:text-yellow-200">[Tab]</button>
           <button onClick={() => useUIStore.getState().setActiveTab('overview')} className="text-cyan-400 hover:text-cyan-200">Broker</button>
