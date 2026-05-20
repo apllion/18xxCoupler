@@ -263,26 +263,9 @@ export default function OverviewTab() {
     <div ref={rootRef} tabIndex={0} onKeyDown={onKeyDown}
       className="font-mono text-xs leading-tight select-none h-full flex flex-col bg-blue-950 outline-none">
 
-      {/* Title bar */}
-      <div className="bg-blue-900 text-blue-200 px-2 py-1 flex justify-between flex-shrink-0">
-        <span>
-          <span className="text-white font-bold">{game.title.title}</span>
-          <span className="text-green-400 ml-2">{label}</span>
-          <span className="text-cyan-300 ml-2">Phase {phase.name}</span>
-          <span className="text-blue-400 ml-2">Lim:{limit}</span>
-        </span>
-        <span className="flex items-center gap-2">
-          {inReplay && (
-            <span className="text-purple-300 font-bold">
-              REPLAY {game.actionLog.length}/{fullLog.length}
-            </span>
-          )}
-          <span className={game.bank.cash <= 0 ? 'text-red-400 font-bold' : 'text-green-300'}>Bank:{fmt(game.bank.cash)}</span>
-          <button onClick={() => canUndo() && undo()} className="text-blue-400 hover:text-white disabled:text-blue-800">[U]ndo</button>
-          <button onClick={() => useUIStore.getState().setActiveTab('market')}
-            className="text-yellow-400 hover:text-yellow-200">[Tab] Detail</button>
-        </span>
-      </div>
+      {/* Title bar — color-coded by round type */}
+      <TitleBar game={game} label={label} phase={phase} limit={limit} fmt={fmt}
+        inReplay={inReplay} fullLog={fullLog} canUndo={canUndo} undo={undo} />
 
       {/* Main matrix */}
       <div className="flex-1 overflow-auto">
@@ -463,7 +446,9 @@ export default function OverviewTab() {
           <span className="text-green-600">
             {inReplay
               ? '[<] prev [>] next [Home] start [End] end [W]hat-if [E]xit replay'
-              : `[B]uy [S]ell [M]kt [R]ev [T]rain [N]ew [V]priv${game.title.loans ? ' [L]oan [I]ntr' : ''} [A]dv [C]oll [O]sold [U]ndo [D]etail [F]player [Enter]replay`
+              : game.roundTracker?.type === 'stock'
+                ? `[B]uy [S]ell [M]kt [N]ew par [A]dv [U]ndo [D]etail [F]player [Enter]replay`
+                : `[R]ev [T]rain [V]priv${game.title.loans ? ' [L]oan [I]ntr' : ''} [B]uy [S]ell [A]dv [C]oll [O]sold [U]ndo [D]etail [Enter]replay`
             }
           </span>
           <span className="text-blue-400 truncate ml-2">
@@ -473,6 +458,39 @@ export default function OverviewTab() {
           </span>
         </div>
       )}
+    </div>
+  )
+}
+
+function TitleBar({ game, label, phase, limit, fmt, inReplay, fullLog, canUndo, undo }) {
+  const rt = game.roundTracker
+  const isSR = rt?.type === 'stock' && !rt?.inPregame
+  const isOR = rt?.type === 'operating' && !rt?.inPregame
+  const isPre = rt?.inPregame
+  const barBg = isSR ? 'bg-green-900' : isOR ? 'bg-amber-900' : isPre ? 'bg-purple-900' : 'bg-blue-900'
+  const labelColor = isSR ? 'text-green-300 font-bold' : isOR ? 'text-amber-300 font-bold' : isPre ? 'text-purple-300' : 'text-blue-300'
+  const roundDesc = isSR ? 'Stock Round' : isOR ? 'Operating Round' : isPre ? (rt.pregameSteps?.[rt.pregameIndex]?.label || 'Setup') : ''
+
+  return (
+    <div className={`${barBg} text-blue-200 px-2 py-1 flex justify-between flex-shrink-0`}>
+      <span>
+        <span className="text-white font-bold">{game.title.title}</span>
+        <span className={`ml-2 ${labelColor}`}>{label}</span>
+        <span className="text-cyan-300 ml-2">Ph.{phase.name}</span>
+        <span className="text-blue-400 ml-2">Lim:{limit}</span>
+        {roundDesc && <span className={`ml-2 ${labelColor}`}>{roundDesc}</span>}
+      </span>
+      <span className="flex items-center gap-2">
+        {inReplay && (
+          <span className="text-purple-300 font-bold">
+            REPLAY {game.actionLog.length}/{fullLog.length}
+          </span>
+        )}
+        <span className={game.bank.cash <= 0 ? 'text-red-400 font-bold' : 'text-green-300'}>Bank:{fmt(game.bank.cash)}</span>
+        <button onClick={() => canUndo() && undo()} className="text-blue-400 hover:text-white">[U]ndo</button>
+        <button onClick={() => useUIStore.getState().setActiveTab('market')}
+          className="text-yellow-400 hover:text-yellow-200">[Tab] Detail</button>
+      </span>
     </div>
   )
 }
