@@ -12,10 +12,12 @@ import PlayersTab from '../players/PlayersTab.jsx'
 import SummaryTab from '../summary/SummaryTab.jsx'
 import BeerMarketTab from '../beer/BeerMarketTab.jsx'
 import OverviewTab from '../overview/OverviewTab.jsx'
+import { ModeratorOverview } from '../overview/OverviewTab.jsx'
 import AuctionGuide from '../auction/AuctionGuide.jsx'
 
 const TAB_COMPONENTS = {
   overview: OverviewTab,
+  moderator: ModeratorOverview,
   market: MarketTab,
   corps: CorpsTab,
   players: PlayersTab,
@@ -33,8 +35,8 @@ export default function GameShell() {
   const inPregame = game?.roundTracker?.inPregame && !inReplay
   const sync = useSyncContext()
 
-  // Overview is the home screen — no header/nav chrome
-  if (activeTab === 'overview') {
+  // Overview/Moderator are fullscreen — no header/nav chrome
+  if (activeTab === 'overview' || activeTab === 'moderator') {
     return (
       <div className="flex flex-col h-screen">
         <RoomBar
@@ -45,7 +47,7 @@ export default function GameShell() {
           joinRoom={sync?.joinRoom}
           leaveRoom={sync?.leaveRoom}
         />
-        <OverviewTab />
+        {activeTab === 'moderator' ? <ModeratorOverview /> : <OverviewTab />}
       </div>
     )
   }

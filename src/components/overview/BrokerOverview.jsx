@@ -1,0 +1,174 @@
+// BrokerOverview — Modern slim overview. Broker theme colors, clean typography.
+
+import { useOverviewData, playerSharePercent, playerCertCount, isPresident } from './useOverviewData.js'
+import { useUIStore } from '../../store/uiStore.js'
+import { ActionPanel } from './ActionPanel.jsx'
+
+export default function BrokerOverview() {
+  const d = useOverviewData()
+  if (!d.game) return null
+  const { game, fmt, phase, label, limit, corps, unfloated, depotGroups, lastRevenue, corpPrivates, playerPrivates, lastAction, selPlayer, selCorp, curRow, setCurRow, curCol, setCurCol, panel, setPanel, revenueInput, setRevenueInput, revRef, rootRef, onKeyDown, closePanel, doAction, inReplay, fullLog, enterReplay, exitReplay, replayTo, enterWhatIf, canUndo, undo, isSR, isOR, isPre } = d
+
+  const curIdx = game.actionLog.length - 1
+
+  return (
+    <div ref={rootRef} tabIndex={0} onKeyDown={onKeyDown}
+      className="text-sm select-none h-full flex flex-col bg-broker-bg outline-none">
+
+      {/* Header */}
+      <div className={`px-3 py-2 flex items-center justify-between flex-shrink-0 border-b ${
+        isSR ? 'bg-green-900/20 border-green-800/30' : isOR ? 'bg-amber-900/20 border-amber-800/30' : 'bg-broker-surface border-broker-border'
+      }`}>
+        <div className="flex items-center gap-3">
+          <span className="font-bold text-lg text-white">{game.title.title}</span>
+          <span className={`text-sm font-medium px-2 py-0.5 rounded ${
+            isSR ? 'bg-green-800 text-green-200' : isOR ? 'bg-amber-800 text-amber-200' : isPre ? 'bg-purple-800 text-purple-200' : 'bg-broker-surface-hover text-broker-text-muted'
+          }`}>{label}</span>
+          <span className="text-xs text-broker-text-muted">Phase {phase.name} / Limit {limit}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          {inReplay && <span className="text-xs font-medium text-purple-300 bg-purple-900/40 px-2 py-0.5 rounded">{curIdx + 1}/{fullLog.length}</span>}
+          <span className={`text-sm font-medium ${game.bank.cash <= 0 ? 'text-red-400' : 'text-broker-text'}`}>Bank {fmt(game.bank.cash)}</span>
+          <button onClick={() => canUndo() && undo()} className="text-xs text-broker-text-muted hover:text-white px-1">Undo</button>
+          <button onClick={() => useUIStore.getState().setActiveTab('moderator')} className="text-xs text-broker-text-muted hover:text-white bg-broker-surface-hover px-2 py-0.5 rounded">DOS</button>
+          <button onClick={() => useUIStore.getState().setActiveTab('market')} className="text-xs text-broker-text-muted hover:text-white bg-broker-surface-hover px-2 py-0.5 rounded">Detail</button>
+        </div>
+      </div>
+
+      {/* Matrix */}
+      <div className="flex-1 overflow-auto">
+        <table className="w-full border-collapse text-xs">
+          <thead>
+            <tr className="bg-broker-surface text-broker-text-muted">
+              <th className="text-left px-2 py-1 sticky left-0 bg-broker-surface z-10 min-w-[90px] font-medium">Player</th>
+              <th className="px-2 text-right min-w-[50px] font-medium">Cash</th>
+              <th className="px-2 text-center min-w-[36px] font-medium">Cert</th>
+              {corps.map((c, ci) => (
+                <th key={c.sym} className={`px-2 text-center min-w-[48px] font-bold cursor-pointer ${ci === curCol ? 'bg-broker-surface-hover' : ''} ${!c.ipoed ? 'opacity-30' : ''}`}
+                  style={{ color: c.color }} onClick={() => setCurCol(ci)}>{c.sym}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {game.players.map((p, pi) => {
+              const isRow = pi === curRow
+              return (
+                <tr key={p.id} className={`border-t border-broker-border/30 ${isRow ? 'bg-broker-surface-hover/50' : ''} hover:bg-broker-surface-hover/30`}>
+                  <td className={`px-2 py-1 sticky left-0 z-10 cursor-pointer font-medium ${isRow ? 'bg-broker-surface-hover/50 text-white' : 'bg-broker-bg text-broker-text'}`}
+                    onClick={() => setCurRow(pi)}>
+                    {p.id === game.priorityDeal && <span className="text-broker-gold mr-0.5">{'\u25B6'}</span>}
+                    {p.name}
+                  </td>
+                  <td className="px-2 text-right text-broker-text font-medium">{fmt(p.cash)}</td>
+                  <td className={`px-2 text-center ${playerCertCount(p) > game.certLimit ? 'text-red-400 font-bold' : 'text-broker-text-muted'}`}>{playerCertCount(p)}/{game.certLimit}</td>
+                  {corps.map((c, ci) => {
+                    const pct = playerSharePercent(p, c.sym)
+                    const pres = isPresident(p, c.sym)
+                    const isCursor = pi === curRow && ci === curCol
+                    return (
+                      <td key={c.sym} className={`px-2 text-center cursor-pointer ${isCursor ? 'bg-broker-gold/20 ring-1 ring-broker-gold/50' : ci === curCol ? 'bg-broker-surface-hover/20' : ''}`}
+                        onClick={() => { setCurRow(pi); setCurCol(ci) }}>
+                        {pct === 0 ? <span className="text-broker-text-muted/20">·</span>
+                          : <span className={pres ? 'text-white font-bold' : 'text-broker-text'}>{pct}{pres && '%P'}</span>}
+                      </td>
+                    )
+                  })}
+                </tr>
+              )
+            })}
+
+            {/* Separator */}
+            <tr><td colSpan={3 + corps.length} className="h-px bg-broker-border"></td></tr>
+
+            {/* Corp rows */}
+            <BRow l="Price" corps={corps} cc={curCol} r={c => !c.ipoed ? '' : <span className="text-white font-medium">{fmt(c.price)}</span>} />
+            <BRow l="Par" corps={corps} cc={curCol} r={c => !c.ipoed ? '' : <span className="text-broker-text-muted">{fmt(c.parPrice)}</span>} />
+            <BRow l="Treasury" corps={corps} cc={curCol} r={c => !c.ipoed ? '' : <span className={c.cash < 0 ? 'text-red-400' : 'text-broker-text'}>{fmt(c.cash)}</span>} />
+            <BRow l="IPO" corps={corps} cc={curCol} r={c => c.ipoShares < 100 ? `${c.ipoShares}%` : ''} />
+            <BRow l="Pool" corps={corps} cc={curCol} r={c => c.marketShares > 0 ? <span className="text-amber-400">{c.marketShares}%</span> : ''} />
+            <BRow l="Trains" corps={corps} cc={curCol} r={c => {
+              if (!c.floated) return ''
+              if (c.trains.length === 0) return <span className="text-red-400 font-bold">none</span>
+              return <span className="font-medium text-white">{c.trains.map(t => t.name).join(' ')}</span>
+            }} />
+            <BRow l="Revenue" corps={corps} cc={curCol} r={c => {
+              if (!c.floated) return ''
+              const rev = lastRevenue[c.sym]
+              if (!rev) return ''
+              const color = rev.type === 'WITHHOLD_DIVIDEND' ? 'text-red-400' : 'text-green-400'
+              return <span className={color}>{rev.type === 'WITHHOLD_DIVIDEND' ? 'W' : rev.type === 'HALF_DIVIDEND' ? 'H' : ''} {fmt(rev.amount)}</span>
+            }} />
+            <BRow l="Tokens" corps={corps} cc={curCol} r={c => !c.floated ? '' : `${c.tokensPlaced}/${c.tokens.length}`} />
+            {game.title.loans && <BRow l="Loans" corps={corps} cc={curCol} r={c => !c.floated ? '' : c.loans ? <span className="text-red-400 font-bold">{c.loans}</span> : '0'} />}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Depot strip */}
+      <div className="bg-broker-surface border-t border-broker-border px-3 py-1.5 flex items-center gap-3 flex-wrap flex-shrink-0 text-xs">
+        <span className="text-broker-text-muted font-medium">Depot</span>
+        {depotGroups.map(g => (
+          <span key={g.name} className="flex items-center gap-1">
+            <span className="font-bold text-white">{g.name}</span>
+            <span className="text-broker-text-muted">{g.count}x</span>
+            <span className="text-broker-text">{fmt(g.price)}</span>
+            {g.rustsOn && <span className="text-red-400/70">r{g.rustsOn}</span>}
+          </span>
+        ))}
+      </div>
+
+      {/* Action bar */}
+      {panel ? (
+        <ActionPanel panel={panel} game={game} player={selPlayer} corp={selCorp} unfloated={unfloated}
+          fmt={fmt} revenueInput={revenueInput} setRevenueInput={setRevenueInput}
+          revRef={revRef} onClose={closePanel} doAction={doAction} skin="broker" />
+      ) : inReplay ? (
+        <div className="bg-broker-surface border-t border-broker-border px-3 py-2 flex-shrink-0 flex items-center gap-2 flex-wrap">
+          <Bb t="Prev" o={() => replayTo(Math.max(-1, curIdx - 1))} />
+          <Bb t="Next" o={() => curIdx < fullLog.length - 1 && replayTo(curIdx + 1)} />
+          <Bb t="Start" o={() => replayTo(-1)} />
+          <Bb t="End" o={() => replayTo(fullLog.length - 1)} />
+          <Bb t="What-if" v="purple" o={() => { exitReplay(); enterWhatIf() }} />
+          <Bb t="Exit" v="red" o={() => exitReplay()} />
+          <span className="text-broker-text-muted text-xs truncate ml-1 flex-1">{curIdx < 0 ? 'Game start' : `${curIdx + 1}/${fullLog.length} — ${lastAction?.description || ''}`}</span>
+        </div>
+      ) : (
+        <div className="bg-broker-surface border-t border-broker-border px-3 py-2 flex-shrink-0 flex items-center gap-1.5 flex-wrap">
+          <Bb t="Buy" o={() => { if (!selCorp) return; if (!selCorp.ipoed) { setPanel('par'); return } if (selCorp.ipoShares > 0) doAction({ type: 'BUY_SHARE', playerId: selPlayer?.id, corpSym: selCorp.sym, source: 'ipo', percent: 10 }); else if (selCorp.marketShares > 0) doAction({ type: 'BUY_SHARE', playerId: selPlayer?.id, corpSym: selCorp.sym, source: 'market', percent: 10 }) }} />
+          <Bb t="Sell" v="red" o={() => selPlayer && selCorp && playerSharePercent(selPlayer, selCorp.sym) > 0 && doAction({ type: 'SELL_SHARES', playerId: selPlayer.id, corpSym: selCorp.sym, percent: 10 })} />
+          <Bb t="Revenue" o={() => { setPanel('revenue'); setTimeout(() => revRef.current?.focus(), 50) }} />
+          <Bb t="Train" o={() => setPanel('train')} />
+          {unfloated.length > 0 && <Bb t="Par" o={() => setPanel('par')} />}
+          <Bb t="Private" o={() => setPanel('private')} />
+          {game.title.loans && selCorp?.floated && <Bb t="Loan" o={() => setPanel('loan')} />}
+          <span className="text-broker-border mx-1">|</span>
+          <Bb t="Advance" v="muted" o={() => doAction({ type: 'ADVANCE_ROUND' })} />
+          <Bb t="Collect" v="muted" o={() => doAction({ type: 'COLLECT_ALL_REVENUE' })} />
+          <Bb t="Sold-out" v="muted" o={() => doAction({ type: 'SOLD_OUT_ADJUST' })} />
+          <Bb t="Undo" v="muted" o={() => canUndo() && undo()} />
+          {game.actionLog.length > 0 && <Bb t="Replay" v="purple" o={() => enterReplay()} />}
+          <span className="text-broker-text-muted text-xs truncate ml-1 flex-1">{lastAction?.description || ''}</span>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function BRow({ l, corps, cc, r }) {
+  return (
+    <tr className="border-t border-broker-border/20">
+      <td colSpan={3} className="px-2 py-0.5 text-broker-text-muted sticky left-0 bg-broker-bg z-10 text-xs">{l}</td>
+      {corps.map((c, ci) => <td key={c.sym} className={`px-2 text-center py-0.5 text-xs ${ci === cc ? 'bg-broker-surface-hover/20' : ''}`}>{r(c)}</td>)}
+    </tr>
+  )
+}
+
+function Bb({ t, v, o }) {
+  const styles = {
+    undefined: 'bg-broker-surface-hover text-white hover:bg-broker-gold/20',
+    red: 'bg-red-900/50 text-red-300 hover:bg-red-800',
+    purple: 'bg-purple-900/50 text-purple-300 hover:bg-purple-800',
+    muted: 'bg-broker-surface-hover/50 text-broker-text-muted hover:text-white hover:bg-broker-surface-hover',
+  }
+  return <button onClick={o} className={`px-2 py-1 rounded text-xs font-medium ${styles[v] || styles[undefined]}`}>{t}</button>
+}
