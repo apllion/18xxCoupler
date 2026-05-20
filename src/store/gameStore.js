@@ -43,10 +43,15 @@ export const useGameStore = create(
 
     // Import from 18xx.games by game ID — fetches, replays, enters replay mode
     importFrom18xxGames: async (gameId) => {
-      const resp = await fetch(`https://18xx.games/api/v1/game/${gameId}`)
+      const resp = await fetch(`/18xx-games-api/game/${gameId}`)
       if (!resp.ok) throw new Error(`Game ${gameId} not found (${resp.status})`)
       const gameJson = await resp.json()
       const game = importFrom18xxGamesEngine(gameJson)
+      // Imported games are past pregame — clear pregame state
+      if (game.roundTracker) {
+        game.roundTracker.inPregame = false
+        game.roundTracker.pregameIndex = -1
+      }
       const saveKey = `import_${gameId}`
       set({ game, saveKey })
       // Auto-enter replay mode so user can scrub through the game
