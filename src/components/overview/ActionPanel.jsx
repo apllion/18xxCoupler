@@ -38,6 +38,7 @@ function PanelContent({ panel, game, player, corp, unfloated, fmt, revenueInput,
   // Share buy/sell
   if (panel === 'share' && player && corp) {
     const pct = playerSharePercent(player, corp.sym)
+    const pres = player.shares.some(s => s.corpSym === corp.sym && s.isPresident)
     return (
       <div>
         <Title m={m}>{player.name} + <span style={{ color: corp.color }}>{corp.sym}</span></Title>
@@ -179,30 +180,27 @@ function PanelContent({ panel, game, player, corp, unfloated, fmt, revenueInput,
       { key: 'soldOutAdjust', label: 'Auto-sold-out adjustment at OR end' },
       { key: 'presidentSwap', label: 'Auto-swap presidency on share majority' },
     ]
-    const activeTab = useUIStore.getState().activeTab
-    const isMod = activeTab === 'moderator'
+    const skin = useUIStore.getState().skin
+    const onColor = m ? 'bg-green-900 text-green-300' : 'bg-green-700/30 text-green-300'
+    const offColor = m ? 'bg-gray-800 text-gray-500' : 'bg-gray-800/50 text-gray-400'
+    const labelColor = m ? 'text-green-600 text-xs mb-1 font-mono' : 'text-gray-400 text-xs mb-1'
     return (
       <div>
         <Title m={m}>Settings</Title>
         <div className="mt-1 flex gap-4 flex-wrap">
-          {/* Theme */}
           <div>
-            <div className={m ? 'text-green-600 text-xs mb-1' : 'text-broker-text-muted text-xs mb-1'}>Theme</div>
+            <div className={labelColor}>App Theme</div>
             <div className="flex gap-1">
-              <Btn m={m} v={!isMod ? 'green' : 'blue'} o={() => useUIStore.getState().setActiveTab('overview')}>Broker</Btn>
-              <Btn m={m} v={isMod ? 'green' : 'blue'} o={() => useUIStore.getState().setActiveTab('moderator')}>Moderator</Btn>
+              <Btn m={m} v={skin === 'broker' ? 'green' : 'blue'} o={() => useUIStore.getState().setActiveTab('overview')}>Broker</Btn>
+              <Btn m={m} v={skin === 'moderator' ? 'green' : 'blue'} o={() => useUIStore.getState().setActiveTab('moderator')}>Moderator</Btn>
             </div>
           </div>
-          {/* Automation */}
           <div className="flex-1 min-w-[200px]">
-            <div className={m ? 'text-green-600 text-xs mb-1' : 'text-broker-text-muted text-xs mb-1'}>Automation</div>
+            <div className={labelColor}>Automation</div>
             <div className="space-y-0.5">
               {autoItems.map(it => (
                 <button key={it.key} onClick={() => toggle(it.key)}
-                  className={`block w-full text-left text-xs px-2 py-0.5 rounded ${
-                    m ? (ac[it.key] ? 'bg-green-900 text-green-300' : 'bg-gray-800 text-gray-400')
-                      : (ac[it.key] ? 'bg-green-700/30 text-green-300' : 'bg-broker-surface-hover text-broker-text-muted')
-                  }`}>
+                  className={`block w-full text-left text-xs px-2 py-0.5 rounded ${ac[it.key] ? onColor : offColor}`}>
                   [{ac[it.key] ? 'X' : ' '}] {it.label}
                 </button>
               ))}

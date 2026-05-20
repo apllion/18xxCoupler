@@ -40,16 +40,16 @@ export default function ModeratorOverview() {
           {inReplay && <span className="text-purple-300 font-bold">REPLAY {curIdx + 1}/{fullLog.length}</span>}
           <span className={game.bank.cash <= 0 ? 'text-red-400 font-bold' : 'text-green-300'}>Bank:{fmt(game.bank.cash)}</span>
           <select value={myPlayerId || ''} onChange={e => useUIStore.getState().setMyPlayer(e.target.value || null)}
-            className="text-xs bg-blue-900 border border-blue-700 rounded px-1 py-0 text-yellow-300 font-mono">
+            className={`text-xs ${t.bg} border border-current rounded px-1 py-0 ${t.player} font-mono`}>
             <option value="">Umpire</option>
             {game.players.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
           </select>
-          <button onClick={() => canUndo() && undo()} className="text-blue-400 hover:text-white">[U]ndo</button>
+          <button onClick={() => canUndo() && undo()} className={`${t.text} hover:${t.bright}`}>[U]ndo</button>
           <select value={themeId} onChange={e => setThemeId(e.target.value)}
-            className={`${t.bg} border border-current rounded px-0.5 py-0 ${t.head}`}>
+            className={`text-xs ${t.bg} border border-current rounded px-0.5 py-0 ${t.head}`}>
             {Object.values(THEMES).map(th => <option key={th.id} value={th.id}>{th.label}</option>)}
           </select>
-          <button onClick={() => setPanel('settings')} className={`${t.text} hover:${t.bright}`}>[X]</button>
+          <button onClick={() => setPanel('settings')} className={`${t.head} hover:${t.bright}`}>[X]Set</button>
         </span>
       </div>
 
