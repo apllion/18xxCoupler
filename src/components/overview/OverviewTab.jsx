@@ -228,13 +228,29 @@ export default function OverviewTab() {
     if (key === 'n' && !panel && unfloated.length > 0) { setPanel('par') }
     // V = Sell private to corp
     if (key === 'v' && !panel) { setPanel('private') }
+    // L = Take/repay loan (1817, 1867)
+    if (key === 'l' && !panel && game.title.loans && selCorp?.floated) { setPanel('loan') }
     // A = Advance round
     if (key === 'a' && !panel) { doAction({ type: 'ADVANCE_ROUND' }) }
     // C = Collect all private revenue
     if (key === 'c' && !panel) { doAction({ type: 'COLLECT_ALL_REVENUE' }) }
     // O = Sold-out adjust
     if (key === 'o' && !panel) { doAction({ type: 'SOLD_OUT_ADJUST' }) }
-    // Tab = switch to broker view
+    // I = Pay interest (1817, 1867)
+    if (key === 'i' && !panel && game.title.loans && selCorp?.floated) {
+      doAction({ type: 'PAY_INTEREST', corpSym: selCorp.sym })
+    }
+    // D = Drill into corp detail (for mergers, conversions, complex actions)
+    if (key === 'd' && !panel && selCorp?.floated) {
+      useUIStore.getState().setActiveCorp(selCorp.sym)
+      useUIStore.getState().setActiveTab('corps')
+    }
+    // F = Drill into player detail
+    if (key === 'f' && !panel) {
+      useUIStore.getState().setActivePlayer(selPlayer.id)
+      useUIStore.getState().setActiveTab('players')
+    }
+    // Tab = switch to last detail view
     if (key === 'Tab') { e.preventDefault(); useUIStore.getState().setActiveTab('market') }
   }, [game, corps, selPlayer, selCorp, panel, canUndo, undo, unfloated])
 
@@ -377,6 +393,44 @@ export default function OverviewTab() {
               const pres = game.players.find(p => isPresident(p, c.sym))
               return <span className="text-yellow-400">{pres ? pres.name.slice(0, 6) : '—'}</span>
             }} />
+
+            {/* Conditional rows for title-specific mechanics */}
+
+            {/* Loans (1817, 1867) */}
+            {game.title.loans && (
+              <CRow label="Loans" corps={corps} curCol={curCol} render={c => {
+                if (!c.floated) return <span className="text-blue-900/30">—</span>
+                if (!c.loans) return <span className="text-blue-900/30">0</span>
+                return <span className="text-red-300 font-bold">{c.loans}</span>
+              }} />
+            )}
+
+            {/* Corp size (1817) */}
+            {game.title.corpSizing?.enabled && (
+              <CRow label="Size" corps={corps} curCol={curCol} render={c => {
+                if (!c.ipoed) return <span className="text-blue-900/30">—</span>
+                return <span className="text-cyan-300">{c.corpSize || '2sh'}</span>
+              }} />
+            )}
+
+            {/* Corp type (1861, 1867, 1822, etc.) */}
+            {corps.some(c => c.type && c.type !== 'major') && (
+              <CRow label="Type" corps={corps} curCol={curCol} render={c => {
+                if (!c.type || c.type === 'major') return <span className="text-blue-900/30">—</span>
+                const colors = { minor: 'text-cyan-400', national: 'text-red-300', brewery: 'text-amber-300', metal: 'text-gray-300', branch: 'text-green-400' }
+                return <span className={colors[c.type] || 'text-blue-300'}>{c.type}</span>
+              }} />
+            )}
+
+            {/* Shares held by corps (21Moon, PTG, 18India) */}
+            {game.title.corpCanBuyShares && (
+              <CRow label="Holds" corps={corps} curCol={curCol} render={c => {
+                if (!c.sharesHeld || c.sharesHeld.length === 0) return <span className="text-blue-900/30">—</span>
+                const summary = {}
+                for (const s of c.sharesHeld) { summary[s.corpSym] = (summary[s.corpSym] || 0) + s.percent }
+                return <span className="text-cyan-300">{Object.entries(summary).map(([k, v]) => `${k}${v}%`).join(' ')}</span>
+              }} />
+            )}
           </tbody>
         </table>
       </div>
@@ -409,7 +463,7 @@ export default function OverviewTab() {
           <span className="text-green-600">
             {inReplay
               ? '[<] prev [>] next [Home] start [End] end [W]hat-if [E]xit replay'
-              : '[B]uy [S]ell [M]kt [R]ev [T]rain [N]ew [V]priv [A]dv [C]oll [O]sold [U]ndo [Enter]replay'
+              : `[B]uy [S]ell [M]kt [R]ev [T]rain [N]ew [V]priv${game.title.loans ? ' [L]oan [I]ntr' : ''} [A]dv [C]oll [O]sold [U]ndo [D]etail [F]player [Enter]replay`
             }
           </span>
           <span className="text-blue-400 truncate ml-2">
@@ -524,6 +578,20 @@ function ActionPanel({ panel, game, player, corp, corps, unfloated, dispatch, fm
               ))}
             </>
           )}
+
+          {/* Loan actions (1817, 1867) */}
+          {panel === 'loan' && corp && (() => {
+            const config = game.title.loans || {}
+            const loanValue = config.loanValue || 100
+            const loans = corp.loans || 0
+            const max = config.maxLoansPerCorp || 99
+            return <>
+              <span className="text-green-400">{corp.sym} Loans: {loans}/{max} ({fmt(loanValue)}/loan):</span>
+              {loans < max && <Btn l={`Take +${fmt(loanValue)}`} c="green" o={() => doAction({ type: 'TAKE_LOAN', corpSym: corp.sym })} />}
+              {loans > 0 && corp.cash >= loanValue && <Btn l={`Repay -${fmt(loanValue)}`} c="red" o={() => doAction({ type: 'REPAY_LOAN', corpSym: corp.sym })} />}
+              {loans > 0 && <Btn l="Pay Interest" c="yellow" o={() => doAction({ type: 'PAY_INTEREST', corpSym: corp.sym })} />}
+            </>
+          })()}
 
           {/* Sell private to corp */}
           {panel === 'private' && player && corp && (() => {
