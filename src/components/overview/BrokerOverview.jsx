@@ -61,9 +61,8 @@ export default function BrokerOverview() {
               const isRow = pi === curRow
               return (
                 <tr key={p.id} className={`border-t border-broker-border/30 ${isRow ? 'bg-broker-surface-hover/50' : ''} hover:bg-broker-surface-hover/30`}>
-                  <td className={`px-2 py-1 sticky left-0 z-10 cursor-pointer font-medium ${isRow ? 'bg-broker-surface-hover/50 text-white' : 'bg-broker-bg text-broker-text'}`}
+                  <td className={`px-2 py-1 sticky left-0 z-10 cursor-pointer ${isRow ? 'bg-broker-surface-hover/50' : 'bg-broker-bg'} ${p.id === game.priorityDeal ? 'text-broker-gold font-bold' : 'text-broker-text font-medium'}`}
                     onClick={() => setCurRow(pi)}>
-                    {p.id === game.priorityDeal && <span className="text-broker-gold mr-0.5">{'\u25B6'}</span>}
                     {p.name}
                   </td>
                   <td className="px-2 text-right text-broker-text font-medium">{fmt(p.cash)}</td>
