@@ -6,6 +6,7 @@ import { playerSharePercent } from '../../engine/player.js'
 // Action definitions with context rules
 const ACTIONS = [
   // Share actions — SR context
+  { id: 'pass', label: 'Pass', mLabel: 'Pa[ss]', key: 'Enter', round: 'sr', always: true },
   { id: 'buy', label: 'Buy', mLabel: '[B]uy', key: 'b', round: 'sr', always: true },
   { id: 'sell', label: 'Sell', mLabel: '[S]ell', key: 's', round: 'sr', always: true },
   { id: 'par', label: 'Par', mLabel: '[N]ew', key: 'n', round: 'sr', gate: (g) => g.corporations.some(c => !c.ipoed && !c.floated) },
