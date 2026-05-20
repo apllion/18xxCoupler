@@ -131,7 +131,14 @@ export function useOverviewData() {
     if (key === 'ArrowDown') { e.preventDefault(); setCurRow(r => Math.min((game?.players?.length || 1) - 1, r + 1)) }
     if (key === 'ArrowLeft') { e.preventDefault(); setCurCol(c => Math.max(0, c - 1)) }
     if (key === 'ArrowRight') { e.preventDefault(); setCurCol(c => Math.min(Math.max(corps.length - 1, 0), c + 1)) }
-    if (key >= '1' && key <= '9') { const idx = parseInt(key) - 1; if (idx < (game?.players?.length || 0)) setCurRow(idx) }
+    // Number keys: navigate menu when open, player select otherwise
+    if (key >= '0' && key <= '9' && panel === 'navigate') {
+      e.preventDefault()
+      const navMap = { '1': 'overview', '2': 'moderator', '3': 'market', '4': 'corps', '5': 'players', '6': 'privates', '7': 'beer', '0': 'summary' }
+      if (navMap[key]) { useUIStore.getState().setActiveTab(navMap[key]); closePanel() }
+      return
+    }
+    if (key >= '1' && key <= '9' && !panel) { const idx = parseInt(key) - 1; if (idx < (game?.players?.length || 0)) setCurRow(idx) }
     if (key === 'z' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); if (canUndo()) undo() }
     if (key === 'u' && !panel) { if (canUndo()) undo() }
     // Replay
@@ -161,7 +168,7 @@ export function useOverviewData() {
     if (key === 'i' && !panel && game?.title?.loans && selCorp?.floated) doAction({ type: 'PAY_INTEREST', corpSym: selCorp.sym })
     if (key === 'd' && !panel && selCorp) { setPanel('corpdetail') }
     if (key === 'f' && !panel) { setPanel('playerdetail') }
-    if (key === 'Tab') { e.preventDefault(); useUIStore.getState().setActiveTab('market') }
+    if (key === 'Tab') { e.preventDefault(); setPanel('navigate') }
     // F-keys for view navigation
     if (key === 'F1') { e.preventDefault(); useUIStore.getState().setActiveTab('moderator') }
     if (key === 'F2') { e.preventDefault(); useUIStore.getState().setActiveTab('market') }

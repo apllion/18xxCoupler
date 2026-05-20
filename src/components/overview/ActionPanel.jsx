@@ -3,6 +3,7 @@
 
 import { useState } from 'react'
 import { playerSharePercent, corpPrice, parPrices, nextAvailableTrains } from './useOverviewData.js'
+import { useUIStore } from '../../store/uiStore.js'
 import { CorpCard } from './CorpCard.jsx'
 import { PlayerCard } from './PlayerCard.jsx'
 
@@ -162,6 +163,36 @@ function PanelContent({ panel, game, player, corp, unfloated, fmt, revenueInput,
               ))}
             </div>
         }
+      </div>
+    )
+  }
+
+  // Navigation menu
+  if (panel === 'navigate') {
+    const go = (tab) => { useUIStore.getState().setActiveTab(tab); onClose() }
+    const hasPrivates = game.companies?.length > 0
+    const hasBeer = !!game.beerMarket
+    const items = [
+      { key: '1', label: 'Broker Overview', id: 'overview' },
+      { key: '2', label: 'Moderator Overview', id: 'moderator' },
+      { key: '3', label: 'Market', id: 'market' },
+      { key: '4', label: 'Corps', id: 'corps' },
+      { key: '5', label: 'Players', id: 'players' },
+      ...(hasPrivates ? [{ key: '6', label: 'Privates', id: 'privates' }] : []),
+      ...(hasBeer ? [{ key: '7', label: 'Beer Market', id: 'beer' }] : []),
+      { key: '0', label: 'Summary / Log', id: 'summary' },
+    ]
+    return (
+      <div>
+        <Title m={m}>Switch View</Title>
+        <div className="flex flex-wrap gap-1 mt-1">
+          {items.map(it => (
+            <Btn key={it.id} m={m} v={useUIStore.getState().activeTab === it.id ? 'green' : 'blue'}
+              o={() => go(it.id)}>
+              [{it.key}] {it.label}
+            </Btn>
+          ))}
+        </div>
       </div>
     )
   }
