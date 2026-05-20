@@ -143,6 +143,16 @@ export default function Header() {
               Bank: {fmt(game.bank.cash)}
             </span>
 
+            {/* View mode toggle */}
+            {!inPregame && (
+              <button
+                onClick={useUIStore.getState().toggleViewMode}
+                className="text-xs px-2.5 py-0.5 rounded bg-broker-surface-hover text-broker-text-muted hover:text-white transition-colors"
+              >
+                Classic
+              </button>
+            )}
+
             {/* What-if toggle */}
             {!inPregame && (
               <button

@@ -1,14 +1,14 @@
 import { useGameStore } from '../../store/gameStore.js'
 import { useUIStore } from '../../store/uiStore.js'
 
-const BASE_TABS = [
+const CORE_TABS = [
   { id: 'market', label: 'Market' },
   { id: 'corps', label: 'Corps' },
-  { id: 'privates', label: 'Privates' },
+  { id: 'players', label: 'Players' },
 ]
 
+const PRIVATES_TAB = { id: 'privates', label: 'Privates' }
 const BEER_TAB = { id: 'beer', label: 'Beer' }
-
 const SUMMARY_TAB = { id: 'summary', label: 'Summary' }
 
 export default function BottomNav() {
@@ -17,7 +17,13 @@ export default function BottomNav() {
   const setActiveTab = useUIStore((s) => s.setActiveTab)
 
   const hasBeer = game?.beerMarket != null
-  const tabs = [...BASE_TABS, ...(hasBeer ? [BEER_TAB] : []), SUMMARY_TAB]
+  const hasPrivates = game?.companies?.length > 0
+  const tabs = [
+    ...CORE_TABS,
+    ...(hasPrivates ? [PRIVATES_TAB] : []),
+    ...(hasBeer ? [BEER_TAB] : []),
+    SUMMARY_TAB,
+  ]
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-broker-surface border-t border-broker-border flex z-20">
