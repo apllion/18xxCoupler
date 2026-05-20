@@ -19,6 +19,14 @@ export default function OverviewTab() {
   const canUndo = useGameStore((s) => s.canUndo)
   const dispatch = useDispatch()
 
+  // Replay state
+  const fullLog = useGameStore((s) => s.fullLog)
+  const enterReplay = useGameStore((s) => s.enterReplay)
+  const exitReplay = useGameStore((s) => s.exitReplay)
+  const replayTo = useGameStore((s) => s.replayTo)
+  const enterWhatIf = useGameStore((s) => s.enterWhatIf)
+  const inReplay = fullLog !== null
+
   // Cursor position in the matrix
   const [curRow, setCurRow] = useState(0) // player index
   const [curCol, setCurCol] = useState(0) // corp index
@@ -135,12 +143,53 @@ export default function OverviewTab() {
 
     // Undo
     if (key === 'z' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); if (canUndo()) undo() }
-    if (key === 'u') { if (canUndo()) undo() }
+    if (key === 'u' && !panel) { if (canUndo()) undo() }
 
-    // Escape closes panel
-    if (key === 'Escape') { closePanel(); return }
+    // Replay controls: [ ] step, Home/End jump, Enter=enter replay, E=exit, W=what-if
+    if (key === '[' || key === ',') {
+      e.preventDefault()
+      if (inReplay) {
+        const cur = game.actionLog.length - 1
+        replayTo(Math.max(-1, cur - 1))
+      } else if (game.actionLog.length > 0) {
+        enterReplay()
+        // Step back one from end
+        setTimeout(() => replayTo(game.actionLog.length - 2), 0)
+      }
+      return
+    }
+    if (key === ']' || key === '.') {
+      e.preventDefault()
+      if (inReplay) {
+        const cur = game.actionLog.length - 1
+        if (cur < fullLog.length - 1) replayTo(cur + 1)
+      }
+      return
+    }
+    if (key === 'Home') {
+      e.preventDefault()
+      if (!inReplay && game.actionLog.length > 0) enterReplay()
+      setTimeout(() => replayTo(-1), 0)
+      return
+    }
+    if (key === 'End') {
+      e.preventDefault()
+      if (inReplay) { replayTo(fullLog.length - 1) }
+      return
+    }
+    if (key === 'e' && !panel && inReplay) { exitReplay(); return }
+    if (key === 'w' && !panel && inReplay) { exitReplay(); enterWhatIf(); return }
+    if (key === 'Enter' && !panel && !inReplay && game.actionLog.length > 0) { enterReplay(); return }
 
-    // Actions on current selection
+    // Escape closes panel or exits replay
+    if (key === 'Escape') {
+      if (panel) { closePanel(); return }
+      if (inReplay) { exitReplay(); return }
+      return
+    }
+
+    // Actions on current selection (disabled during replay)
+    if (inReplay) return
     if (!selPlayer || !selCorp) return
 
     // B = Buy share (IPO or market) — also works as par if corp unfloated
@@ -207,6 +256,11 @@ export default function OverviewTab() {
           <span className="text-blue-400 ml-2">Lim:{limit}</span>
         </span>
         <span className="flex items-center gap-2">
+          {inReplay && (
+            <span className="text-purple-300 font-bold">
+              REPLAY {game.actionLog.length}/{fullLog.length}
+            </span>
+          )}
           <span className={game.bank.cash <= 0 ? 'text-red-400 font-bold' : 'text-green-300'}>Bank:{fmt(game.bank.cash)}</span>
           <button onClick={() => canUndo() && undo()} className="text-blue-400 hover:text-white disabled:text-blue-800">[U]ndo</button>
           <button onClick={useUIStore.getState().toggleViewMode}
@@ -353,10 +407,15 @@ export default function OverviewTab() {
         /* Hotkey bar + status line */
         <div className="bg-gray-900 border-t border-green-800 px-2 py-1 flex justify-between flex-shrink-0">
           <span className="text-green-600">
-            [B]uy [S]ell [M]kt [R]ev [T]rain [N]ew [V]priv [A]dv [C]oll [O]sold [U]ndo
+            {inReplay
+              ? '[<] prev [>] next [Home] start [End] end [W]hat-if [E]xit replay'
+              : '[B]uy [S]ell [M]kt [R]ev [T]rain [N]ew [V]priv [A]dv [C]oll [O]sold [U]ndo [Enter]replay'
+            }
           </span>
           <span className="text-blue-400 truncate ml-2">
-            {lastAction ? lastAction.description : ''}{game.roundTracker?.inPregame ? ' \u2192 ' + (game.roundTracker.pregameSteps?.[game.roundTracker.pregameIndex]?.label || 'Pregame') : ''}
+            {lastAction ? lastAction.description : ''}
+            {game.roundTracker?.inPregame ? ' \u2192 ' + (game.roundTracker.pregameSteps?.[game.roundTracker.pregameIndex]?.label || 'Pregame') : ''}
+            {inReplay && game.actionLog.length === 0 ? 'Game start' : ''}
           </span>
         </div>
       )}
