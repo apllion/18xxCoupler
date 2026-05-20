@@ -4,6 +4,7 @@
 import { useState } from 'react'
 import { playerSharePercent, corpPrice, parPrices, nextAvailableTrains } from './useOverviewData.js'
 import { useUIStore } from '../../store/uiStore.js'
+import { useGameStore } from '../../store/gameStore.js'
 import { CorpCard } from './CorpCard.jsx'
 import { PlayerCard } from './PlayerCard.jsx'
 
@@ -185,23 +186,15 @@ function PanelContent({ panel, game, player, corp, unfloated, fmt, revenueInput,
 
   // Settings — uses SettingsPanel component for reactivity
   if (panel === 'settings') {
-    return <SettingsPanel m={m} />
+    return <SettingsPanel m={m} game={game} doAction={doAction} />
   }
 
   // Navigation menu
   if (panel === 'navigate') {
     const go = (tab) => { useUIStore.getState().setActiveTab(tab); onClose() }
-    const hasPrivates = game.companies?.length > 0
-    const hasBeer = !!game.beerMarket
     const items = [
-      { key: '1', label: 'Broker Overview', id: 'overview' },
-      { key: '2', label: 'Moderator Overview', id: 'moderator' },
-      { key: '3', label: 'Market', id: 'market' },
-      { key: '4', label: 'Corps', id: 'corps' },
-      { key: '5', label: 'Players', id: 'players' },
-      ...(hasPrivates ? [{ key: '6', label: 'Privates', id: 'privates' }] : []),
-      ...(hasBeer ? [{ key: '7', label: 'Beer Market', id: 'beer' }] : []),
-      { key: '0', label: 'Summary / Log', id: 'summary' },
+      { key: '1', label: 'Broker', id: 'overview' },
+      { key: '2', label: 'Moderator', id: 'moderator' },
     ]
     return (
       <div>
@@ -388,13 +381,17 @@ function PriceInput({ m, label, value, onChange, onConfirm, onCancel }) {
   )
 }
 
-function SettingsPanel({ m }) {
+function SettingsPanel({ m, game, doAction }) {
   const ac = useUIStore((s) => s.autoConfig)
   const skin = useUIStore((s) => s.skin)
   const modTheme = useUIStore((s) => s.modTheme)
   const setAutoConfig = useUIStore((s) => s.setAutoConfig)
   const setActiveTab = useUIStore((s) => s.setActiveTab)
   const setModTheme = useUIStore((s) => s.setModTheme)
+  const enterReplay = useGameStore((s) => s.enterReplay)
+  const exitReplay = useGameStore((s) => s.exitReplay)
+  const fullLog = useGameStore((s) => s.fullLog)
+  const inReplay = fullLog !== null
 
   const autoItems = [
     { key: 'advanceOnAllPass', label: 'Auto-advance SR when all pass' },
@@ -430,6 +427,13 @@ function SettingsPanel({ m }) {
               </div>
             </>
           )}
+        </div>
+        <div>
+          <div className={labelColor}>Tools</div>
+          <div className="flex gap-1 flex-wrap">
+            {game?.actionLog?.length > 0 && !inReplay && <Btn m={m} v="blue" o={() => enterReplay()}>Replay</Btn>}
+            {inReplay && <Btn m={m} v="red" o={() => exitReplay()}>Exit Replay</Btn>}
+          </div>
         </div>
         <div className="flex-1 min-w-[200px]">
           <div className={labelColor}>Automation</div>

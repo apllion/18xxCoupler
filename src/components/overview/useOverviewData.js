@@ -169,14 +169,17 @@ export function useOverviewData() {
     if (key === 'i' && !panel && game?.title?.loans && selCorp?.floated) doAction({ type: 'PAY_INTEREST', corpSym: selCorp.sym })
     if (key === 'd' && !panel && selCorp) { setPanel('corpdetail') }
     if (key === 'f' && !panel) { setPanel('playerdetail') }
-    if (key === 'Tab') { e.preventDefault(); setPanel('navigate') }
+    // Tab opens navigate popup only in Moderator skin
+    if (key === 'Tab' && useUIStore.getState().skin === 'moderator') { e.preventDefault(); setPanel('navigate') }
     if (key === 'x' && !panel) { setPanel('settings') }
-    // F-keys for inline panels
-    if (key === 'F1') { e.preventDefault(); closePanel() }
-    if (key === 'F3') { e.preventDefault(); setPanel('corpdetail') }
-    if (key === 'F4') { e.preventDefault(); setPanel('playerdetail') }
-    if (key === 'F5') { e.preventDefault(); setPanel('buyprivate') }
-    if (key === 'F6') { e.preventDefault(); setPanel('settings') }
+    // F-keys for inline panels (Moderator only)
+    if (useUIStore.getState().skin === 'moderator') {
+      if (key === 'F1') { e.preventDefault(); closePanel() }
+      if (key === 'F3') { e.preventDefault(); setPanel('corpdetail') }
+      if (key === 'F4') { e.preventDefault(); setPanel('playerdetail') }
+      if (key === 'F5') { e.preventDefault(); setPanel('buyprivate') }
+      if (key === 'F6') { e.preventDefault(); setPanel('settings') }
+    }
   }, [game, corps, selPlayer, selCorp, panel, canUndo, undo, unfloated, inReplay, fullLog])
 
   useEffect(() => { rootRef.current?.focus() }, [])

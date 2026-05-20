@@ -62,9 +62,7 @@ const ACTIONS = [
   { id: 'collect', label: 'Collect', mLabel: '[C]oll', key: 'c', round: 'any', always: true, category: 'round' },
   { id: 'soldout', label: 'Sold-out', mLabel: 'S[o]ld', round: 'any', always: true, category: 'round' },
   // Undo is in the title bar, not the action bar
-  { id: 'replay', label: 'Replay', mLabel: 'R[e]play', key: null, round: 'any', always: true, category: 'round',
-    gate: (g) => g.actionLog.length > 0
-  },
+  // Replay is in Settings, not the action bar
 ]
 
 export function getContextActions(game, selPlayer, selCorp, superUmpire) {
