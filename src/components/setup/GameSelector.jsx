@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { allTitles } from '../../titles/index.js'
 import { useGameStore } from '../../store/gameStore.js'
@@ -135,6 +135,15 @@ export default function GameSelector() {
           {importError && (
             <div className="text-xs text-red-400 mt-2">{importError}</div>
           )}
+
+          {/* Live games browser */}
+          <LiveGames onSelect={(id) => { setImportId(String(id)) }} importing={importing}
+            onImport={async (id) => {
+              setImporting(true); setImportError(null)
+              try { await importFrom18xxGames(id); navigate('/') }
+              catch (err) { setImportError(err.message) }
+              finally { setImporting(false) }
+            }} />
         </div>
       </div>
 
@@ -253,6 +262,72 @@ function RoomJoin({ sync }) {
         >
           Join Room
         </button>
+      )}
+    </div>
+  )
+}
+
+const SUPPORTED_TITLES = new Set(['1830','1846','1849','1861','1867','1880','1889','18Chesapeake','18MEX','18MS'])
+
+function LiveGames({ onImport, importing }) {
+  const [games, setGames] = useState(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+  const [tab, setTab] = useState('active')
+
+  function fetchGames(status) {
+    setLoading(true)
+    setError(null)
+    setTab(status)
+    fetch(`/18xx-games-api/game?status=${status}&page=1`)
+      .then(r => { if (!r.ok) throw new Error('Failed'); return r.json() })
+      .then(data => {
+        const supported = (data.games || []).filter(g => SUPPORTED_TITLES.has(g.title))
+        setGames(supported.slice(0, 20))
+      })
+      .catch(() => setError('Could not reach 18xx.games'))
+      .finally(() => setLoading(false))
+  }
+
+  return (
+    <div className="mt-3">
+      <div className="flex items-center gap-2 mb-2">
+        <span className="text-xs text-broker-text-muted font-medium">Browse:</span>
+        <button onClick={() => fetchGames('active')}
+          className={`text-xs px-2 py-0.5 rounded ${tab === 'active' && games ? 'bg-green-800 text-green-200' : 'bg-broker-surface-hover text-broker-text-muted hover:text-white'}`}>
+          Active
+        </button>
+        <button onClick={() => fetchGames('finished')}
+          className={`text-xs px-2 py-0.5 rounded ${tab === 'finished' && games ? 'bg-blue-800 text-blue-200' : 'bg-broker-surface-hover text-broker-text-muted hover:text-white'}`}>
+          Finished
+        </button>
+        {loading && <span className="text-xs text-broker-text-muted animate-pulse">Loading...</span>}
+      </div>
+
+      {error && <div className="text-xs text-red-400">{error}</div>}
+
+      {games && games.length > 0 && (
+        <div className="space-y-1 max-h-48 overflow-y-auto">
+          {games.map(g => (
+            <div key={g.id} className="flex items-center justify-between bg-broker-bg rounded px-2 py-1.5 text-xs hover:bg-broker-surface-hover/50">
+              <div className="flex-1 min-w-0">
+                <span className="font-bold text-white">{g.title}</span>
+                <span className="text-broker-text-muted ml-1">#{g.id}</span>
+                <span className="text-broker-text-muted ml-1">{g.players.length}p</span>
+                <span className="text-broker-text-muted ml-1 truncate">
+                  {g.players.map(p => p.name).join(', ')}
+                </span>
+              </div>
+              <button onClick={() => onImport(g.id)} disabled={importing}
+                className="text-xs bg-purple-800 hover:bg-purple-700 text-white px-2 py-0.5 rounded ml-2 disabled:opacity-40 flex-shrink-0">
+                Load
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+      {games && games.length === 0 && (
+        <div className="text-xs text-broker-text-muted">No supported games found</div>
       )}
     </div>
   )
