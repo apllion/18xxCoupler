@@ -441,23 +441,91 @@ export default function OverviewTab() {
           revRef={revRef} onClose={closePanel} doAction={doAction}
         />
       ) : (
-        /* Hotkey bar + status line */
-        <div className="bg-gray-900 border-t border-green-800 px-2 py-1 flex justify-between flex-shrink-0">
-          <span className="text-green-600">
-            {inReplay
-              ? '[<] prev [>] next [Home] start [End] end [W]hat-if [E]xit replay'
-              : game.roundTracker?.type === 'stock'
-                ? `[B]uy [S]ell [M]kt [N]ew par [A]dv [U]ndo [D]etail [F]player [Enter]replay`
-                : `[R]ev [T]rain [V]priv${game.title.loans ? ' [L]oan [I]ntr' : ''} [B]uy [S]ell [A]dv [C]oll [O]sold [U]ndo [D]etail [Enter]replay`
-            }
-          </span>
-          <span className="text-blue-400 truncate ml-2">
-            {lastAction ? lastAction.description : ''}
-            {game.roundTracker?.inPregame ? ' \u2192 ' + (game.roundTracker.pregameSteps?.[game.roundTracker.pregameIndex]?.label || 'Pregame') : ''}
-            {inReplay && game.actionLog.length === 0 ? 'Game start' : ''}
+        <BottomBar game={game} inReplay={inReplay} fullLog={fullLog} lastAction={lastAction}
+          selPlayer={selPlayer} selCorp={selCorp} dispatch={dispatch}
+          enterReplay={enterReplay} exitReplay={exitReplay} replayTo={replayTo} enterWhatIf={enterWhatIf}
+          setPanel={setPanel} doAction={doAction} revRef={revRef} rootRef={rootRef}
+          unfloated={unfloated} canUndo={canUndo} undo={undo} />
+      )}
+    </div>
+  )
+}
+
+function BottomBar({ game, inReplay, fullLog, lastAction, selPlayer, selCorp, dispatch,
+  enterReplay, exitReplay, replayTo, enterWhatIf, setPanel, doAction, revRef, rootRef,
+  unfloated, canUndo, undo }) {
+
+  const isSR = game.roundTracker?.type === 'stock' && !game.roundTracker?.inPregame
+  const curIdx = game.actionLog.length - 1
+
+  if (inReplay) {
+    return (
+      <div className="bg-gray-900 border-t border-purple-800 px-1 py-1 flex-shrink-0">
+        <div className="flex items-center gap-1 flex-wrap">
+          <Btn l="Prev" c="cyan" o={() => replayTo(Math.max(-1, curIdx - 1))} />
+          <Btn l="Next" c="cyan" o={() => curIdx < fullLog.length - 1 && replayTo(curIdx + 1)} />
+          <Btn l="Start" c="gray" o={() => replayTo(-1)} />
+          <Btn l="End" c="gray" o={() => replayTo(fullLog.length - 1)} />
+          <Btn l="What-if" c="purple" o={() => { exitReplay(); enterWhatIf() }} />
+          <Btn l="Exit" c="red" o={() => exitReplay()} />
+          <span className="text-blue-400 text-xs truncate ml-1 flex-1">
+            {curIdx < 0 ? 'Game start' : `${curIdx + 1}/${fullLog.length}: ${lastAction?.description || ''}`}
           </span>
         </div>
-      )}
+      </div>
+    )
+  }
+
+  return (
+    <div className="bg-gray-900 border-t border-green-800 px-1 py-1 flex-shrink-0">
+      <div className="flex items-center gap-1 flex-wrap">
+        {/* Share actions */}
+        <Btn l="Buy" c="green" o={() => {
+          if (!selCorp) return
+          if (!selCorp.ipoed && !selCorp.floated) { setPanel('par'); return }
+          if (selCorp.ipoShares > 0) doAction({ type: 'BUY_SHARE', playerId: selPlayer?.id, corpSym: selCorp.sym, source: 'ipo', percent: 10 })
+          else if (selCorp.marketShares > 0) doAction({ type: 'BUY_SHARE', playerId: selPlayer?.id, corpSym: selCorp.sym, source: 'market', percent: 10 })
+        }} />
+        <Btn l="Sell" c="red" o={() => {
+          if (selPlayer && selCorp && playerSharePercent(selPlayer, selCorp.sym) > 0)
+            doAction({ type: 'SELL_SHARES', playerId: selPlayer.id, corpSym: selCorp.sym, percent: 10 })
+        }} />
+        <Btn l="Mkt" c="cyan" o={() => {
+          if (selPlayer && selCorp?.marketShares > 0)
+            doAction({ type: 'BUY_SHARE', playerId: selPlayer.id, corpSym: selCorp.sym, source: 'market', percent: 10 })
+        }} />
+
+        {/* Corp actions */}
+        <Btn l="Rev" c="yellow" o={() => { setPanel('revenue'); setTimeout(() => revRef.current?.focus(), 50) }} />
+        <Btn l="Train" c="green" o={() => setPanel('train')} />
+        {unfloated.length > 0 && <Btn l="New" c="cyan" o={() => setPanel('par')} />}
+        <Btn l="Priv" c="purple" o={() => setPanel('private')} />
+        {game.title.loans && selCorp?.floated && <Btn l="Loan" c="yellow" o={() => setPanel('loan')} />}
+
+        {/* Round management */}
+        <span className="text-blue-800 mx-0.5">|</span>
+        <Btn l="Adv" c="gray" o={() => doAction({ type: 'ADVANCE_ROUND' })} />
+        <Btn l="Coll" c="gray" o={() => doAction({ type: 'COLLECT_ALL_REVENUE' })} />
+        <Btn l="Sold" c="gray" o={() => doAction({ type: 'SOLD_OUT_ADJUST' })} />
+        <Btn l="Undo" c="gray" o={() => canUndo() && undo()} />
+
+        {/* Navigation */}
+        <span className="text-blue-800 mx-0.5">|</span>
+        {selCorp?.floated && <Btn l="Corp" c="gray" o={() => {
+          useUIStore.getState().setActiveCorp(selCorp.sym)
+          useUIStore.getState().setActiveTab('corps')
+        }} />}
+        <Btn l="Player" c="gray" o={() => {
+          useUIStore.getState().setActivePlayer(selPlayer?.id)
+          useUIStore.getState().setActiveTab('players')
+        }} />
+        {game.actionLog.length > 0 && <Btn l="Replay" c="purple" o={() => enterReplay()} />}
+
+        {/* Status */}
+        <span className="text-blue-400 text-xs truncate ml-1 flex-1">
+          {lastAction?.description || ''}
+        </span>
+      </div>
     </div>
   )
 }
