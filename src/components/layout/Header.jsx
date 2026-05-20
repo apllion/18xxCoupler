@@ -49,15 +49,9 @@ export default function Header() {
   const suggestion = rt?.suggestion
   const guidance = rt?.roundGuidance
   const lastRound = rt ? isLastRound(rt) : false
-  const inPregame = rt?.inPregame
   const lastAction = game.actionLog?.[game.actionLog.length - 1]?.action
 
   function handleAdvanceClick() {
-    if (inPregame) {
-      // No confirm needed during pregame — AuctionGuide has its own button
-      doAdvance()
-      return
-    }
     if (confirmPending) {
       // Second tap — execute
       clearTimeout(confirmTimer.current)
@@ -159,7 +153,7 @@ export default function Header() {
             </button>
 
             {/* What-if toggle */}
-            {!inPregame && (
+            {(
               <button
                 onClick={() => isWhatIf ? exitWhatIf(true) : enterWhatIf()}
                 className={`text-xs px-2.5 py-0.5 rounded transition-colors ${
@@ -262,7 +256,7 @@ export default function Header() {
       )}
 
       {/* Enter replay button (when not in replay and game has actions) */}
-      {!inReplay && !inPregame && game.actionLog.length > 0 && !showUndoBanner && (
+      {!inReplay && game.actionLog.length > 0 && !showUndoBanner && (
         <div className="bg-broker-surface border-b border-broker-border px-3 py-1 flex justify-end">
           <button
             onClick={enterReplay}
@@ -274,7 +268,7 @@ export default function Header() {
       )}
 
       {/* Prominent undo banner after advancing */}
-      {showUndoBanner && !inPregame && (
+      {showUndoBanner && (
         <div className="bg-amber-900/80 border-b border-amber-700 px-3 py-2 flex items-center justify-between">
           <span className="text-sm text-amber-200">Advanced to {label}</span>
           <div className="flex gap-2">

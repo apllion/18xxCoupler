@@ -26,12 +26,6 @@ export default function BrokerOverview() {
             isSR ? 'bg-green-800 text-green-200' : isOR ? 'bg-amber-800 text-amber-200' : 'bg-broker-surface-hover text-broker-text-muted'
           }`}>{label}</span>
           <span className="text-xs text-broker-text-muted">Phase {phase.name} / Limit {limit}</span>
-          {isPre && !inReplay && (
-            <button onClick={() => doAction({ type: 'ADVANCE_ROUND' })}
-              className="text-xs font-medium px-2 py-0.5 rounded bg-green-700 text-white hover:bg-green-600">
-              Start SR 1
-            </button>
-          )}
         </div>
         <div className="flex items-center gap-2">
           {inReplay && <span className="text-xs font-medium text-purple-300 bg-purple-900/40 px-2 py-0.5 rounded">{curIdx + 1}/{fullLog.length}</span>}

@@ -13,7 +13,6 @@ import SummaryTab from '../summary/SummaryTab.jsx'
 import BeerMarketTab from '../beer/BeerMarketTab.jsx'
 import OverviewTab from '../overview/OverviewTab.jsx'
 import { ModeratorOverview } from '../overview/OverviewTab.jsx'
-import AuctionGuide from '../auction/AuctionGuide.jsx'
 
 const TAB_COMPONENTS = {
   overview: OverviewTab,
@@ -30,9 +29,6 @@ export default function GameShell() {
   const game = useGameStore((s) => s.game)
   const activeTab = useUIStore((s) => s.activeTab)
   const TabComponent = TAB_COMPONENTS[activeTab] || SummaryTab
-  const fullLog = useGameStore((s) => s.fullLog)
-  const inReplay = fullLog !== null
-  const inPregame = game?.roundTracker?.inPregame && !inReplay
   const sync = useSyncContext()
 
   // Overview/Moderator are fullscreen — no header/nav chrome
@@ -63,11 +59,11 @@ export default function GameShell() {
         joinRoom={sync?.joinRoom}
         leaveRoom={sync?.leaveRoom}
       />
-      {!inPregame && <TurnStatus />}
+      <TurnStatus />
       <main className="flex-1 overflow-y-auto pb-16">
-        {inPregame ? <AuctionGuide /> : <TabComponent />}
+        <TabComponent />
       </main>
-      {!inPregame && <BottomNav />}
+      <BottomNav />
     </div>
   )
 }
