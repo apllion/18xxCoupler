@@ -67,11 +67,16 @@ export default function ModeratorOverview() {
             <tr className="bg-blue-950 text-green-400">
               <th className="text-left px-1 py-0.5 sticky left-0 bg-blue-950 z-10 min-w-[80px]"></th>
               <th className="px-1 text-right min-w-[44px]">Cash</th>
-              <th className="px-1 text-right min-w-[28px]">Prv</th>
+              <th className="px-1 text-right min-w-[28px] cursor-pointer hover:text-purple-300" onClick={() => setPanel('private')}>Prv</th>
               <th className="px-1 text-center min-w-[32px]">Cert</th>
               {corps.map((c, ci) => (
                 <th key={c.sym} className={`px-1 text-center min-w-[44px] cursor-pointer ${ci === curCol ? 'bg-blue-800' : ''} ${!c.ipoed && !c.floated ? 'opacity-40' : ''}`}
-                  style={{ color: c.color }} onClick={() => setCurCol(ci)}>{c.sym}</th>
+                  style={{ color: c.color }}
+                  onClick={() => {
+                    setCurCol(ci)
+                    if (!c.ipoed && !c.floated) setPanel('par')
+                    else setPanel('corpdetail')
+                  }}>{c.sym}</th>
               ))}
             </tr>
           </thead>
@@ -81,7 +86,8 @@ export default function ModeratorOverview() {
               const privs = playerPrivates[p.id]
               return (
                 <tr key={p.id} className={`border-t border-blue-900/40 ${isRow ? 'bg-blue-900/60' : 'bg-blue-950'}`}>
-                  <td className={`px-1 py-0.5 sticky left-0 z-10 cursor-pointer ${isRow ? 'bg-blue-900/60' : 'bg-blue-950'} text-yellow-300`} onClick={() => setCurRow(pi)}>
+                  <td className={`px-1 py-0.5 sticky left-0 z-10 cursor-pointer ${isRow ? 'bg-blue-900/60' : 'bg-blue-950'} text-yellow-300`}
+                    onClick={() => { setCurRow(pi); setPanel('playerdetail') }}>
                     <span className="text-blue-500 mr-0.5">{pi + 1}</span>
                     {p.id === game.priorityDeal && <span className="text-white">{'\u00BB'}</span>}
                     {p.name}
