@@ -331,6 +331,24 @@ export function applyAction(state, action) {
       }
       break
     }
+    case 'SWAP_PRESIDENT': {
+      const fromPlayer = state.players.find(p => p.shares.some(s => s.corpSym === action.corpSym && s.isPresident))
+      const toPlayer = state.players.find(p => p.id === action.playerId)
+      if (fromPlayer && toPlayer && fromPlayer.id !== toPlayer.id) {
+        const oldPres = fromPlayer.shares.find(s => s.corpSym === action.corpSym && s.isPresident)
+        if (oldPres) {
+          oldPres.isPresident = false
+          const newPres = toPlayer.shares.find(s => s.corpSym === action.corpSym && !s.isPresident)
+          if (newPres) {
+            const presPercent = oldPres.percent
+            oldPres.percent = newPres.percent
+            newPres.percent = presPercent
+            newPres.isPresident = true
+          }
+        }
+      }
+      break
+    }
     case 'SET_CORP_ORDER':
       if (action.order && Array.isArray(action.order)) {
         state.corpOrder = action.order
@@ -896,6 +914,8 @@ function describeAction(state, action) {
       return `Event acknowledged: ${action.event}`
     case 'REMOVE_CORPORATION':
       return `${action.corpSym} removed from game`
+    case 'SWAP_PRESIDENT':
+      return `${playerName(action.playerId)} becomes president of ${action.corpSym}`
     case 'SET_CORP_ORDER':
       return `Corporation order set: ${(action.order || []).join(', ')}`
     case 'SET_TURN_QUEUE':

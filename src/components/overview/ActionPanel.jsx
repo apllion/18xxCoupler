@@ -47,6 +47,7 @@ function PanelContent({ panel, game, player, corp, unfloated, fmt, revenueInput,
           {pct >= 10 && <Btn m={m} v="red" o={() => doAction({ type: 'SELL_SHARES', playerId: player.id, corpSym: corp.sym, percent: 10 })}>Sell 10%</Btn>}
           {pct >= 20 && <Btn m={m} v="red" o={() => doAction({ type: 'SELL_SHARES', playerId: player.id, corpSym: corp.sym, percent: 20 })}>Sell 20%</Btn>}
           {pct >= 30 && <Btn m={m} v="red" o={() => doAction({ type: 'SELL_SHARES', playerId: player.id, corpSym: corp.sym, percent: 30 })}>Sell 30%</Btn>}
+          {pct > 0 && !pres && <Btn m={m} v="yellow" o={() => doAction({ type: 'SWAP_PRESIDENT', playerId: player.id, corpSym: corp.sym })}>President</Btn>}
         </div>
       </div>
     )
