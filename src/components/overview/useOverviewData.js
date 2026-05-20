@@ -162,6 +162,13 @@ export function useOverviewData() {
     if (key === 'd' && !panel && selCorp) { setPanel('corpdetail') }
     if (key === 'f' && !panel) { setPanel('playerdetail') }
     if (key === 'Tab') { e.preventDefault(); useUIStore.getState().setActiveTab('market') }
+    // F-keys for view navigation
+    if (key === 'F1') { e.preventDefault(); useUIStore.getState().setActiveTab('moderator') }
+    if (key === 'F2') { e.preventDefault(); useUIStore.getState().setActiveTab('market') }
+    if (key === 'F3') { e.preventDefault(); useUIStore.getState().setActiveTab('corps') }
+    if (key === 'F4') { e.preventDefault(); useUIStore.getState().setActiveTab('players') }
+    if (key === 'F5') { e.preventDefault(); useUIStore.getState().setActiveTab('privates') }
+    if (key === 'F6') { e.preventDefault(); useUIStore.getState().setActiveTab('summary') }
   }, [game, corps, selPlayer, selCorp, panel, canUndo, undo, unfloated, inReplay, fullLog])
 
   useEffect(() => { rootRef.current?.focus() }, [])

@@ -54,6 +54,26 @@ export default function ModeratorOverview() {
         </span>
       </div>
 
+      {/* Nav tabs */}
+      <div className={`${t.bar} px-2 py-0.5 flex items-center gap-1 flex-shrink-0 border-b ${t.border}`}>
+        {[
+          { key: 'F1', id: 'moderator', label: 'Overview' },
+          { key: 'F2', id: 'market', label: 'Market' },
+          { key: 'F3', id: 'corps', label: 'Corps' },
+          { key: 'F4', id: 'players', label: 'Players' },
+          ...(game.companies?.length > 0 ? [{ key: 'F5', id: 'privates', label: 'Privates' }] : []),
+          { key: 'F6', id: 'summary', label: 'Summary' },
+        ].map(tab => {
+          const active = useUIStore.getState().activeTab === tab.id
+          return (
+            <button key={tab.id} onClick={() => useUIStore.getState().setActiveTab(tab.id)}
+              className={`text-xs px-1.5 py-0.5 ${active ? `${t.bright} font-bold` : `${t.text} hover:${t.bright}`}`}>
+              {tab.key}:{tab.label}
+            </button>
+          )
+        })}
+      </div>
+
       {/* Mode banners */}
       {isWhatIf && (
         <div className="bg-purple-900 px-2 py-0.5 flex items-center justify-between flex-shrink-0 text-xs">
