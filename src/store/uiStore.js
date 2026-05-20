@@ -19,6 +19,7 @@ export const useUIStore = create((set) => ({
     soldOutAdjust: false,       // auto-sold-out adjustment at OR end
     presidentSwap: false,       // auto-swap presidency on share majority
     superUmpire: false,          // show ALL actions regardless of context
+    limitMode: 'warn',           // 'ignore' | 'warn' | 'block' — how to handle limit violations
   },
   setAutoConfig: (key, value) => set((s) => ({
     autoConfig: { ...s.autoConfig, [key]: value },

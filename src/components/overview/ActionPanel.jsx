@@ -460,6 +460,15 @@ function SettingsPanel({ m, game, doAction }) {
               </button>
             ))}
           </div>
+          <div className={`${labelColor} mt-1`}>Limits</div>
+          <div className="flex gap-1">
+            {['ignore', 'warn', 'block'].map(mode => (
+              <Btn key={mode} m={m} v={ac.limitMode === mode ? 'green' : 'blue'}
+                o={() => setAutoConfig('limitMode', mode)}>
+                {mode.charAt(0).toUpperCase() + mode.slice(1)}
+              </Btn>
+            ))}
+          </div>
         </div>
       </div>
     </div>

@@ -12,6 +12,7 @@ export function ContextBar({ game, selPlayer, selCorp, myPlayerId, setPanel, doA
 
   const handlers = {
     pass: () => selPlayer && doAction({ type: 'SR_PASS', playerId: selPlayer.id }),
+    president: () => selPlayer && selCorp && doAction({ type: 'SWAP_PRESIDENT', playerId: selPlayer.id, corpSym: selCorp.sym }),
     buy: () => { if (!selCorp) return; if (!selCorp.ipoed) { setPanel('par'); return } if (selCorp.ipoShares > 0) doAction({ type: 'BUY_SHARE', playerId: selPlayer?.id, corpSym: selCorp.sym, source: 'ipo', percent: 10 }); else if (selCorp.marketShares > 0) doAction({ type: 'BUY_SHARE', playerId: selPlayer?.id, corpSym: selCorp.sym, source: 'market', percent: 10 }) },
     sell: () => selPlayer && selCorp && playerSharePercent(selPlayer, selCorp.sym) > 0 && doAction({ type: 'SELL_SHARES', playerId: selPlayer.id, corpSym: selCorp.sym, percent: 10 }),
     par: () => setPanel('par'),

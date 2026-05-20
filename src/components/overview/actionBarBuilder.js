@@ -10,6 +10,14 @@ const ACTIONS = [
   { id: 'buy', label: 'Buy', mLabel: '[B]uy', key: 'b', round: 'sr', always: true },
   { id: 'sell', label: 'Sell', mLabel: '[S]ell', key: 's', round: 'sr', always: true },
   { id: 'par', label: 'Par', mLabel: '[N]ew', key: 'n', round: 'sr', gate: (g) => g.corporations.some(c => !c.ipoed && !c.floated) },
+  { id: 'president', label: 'President', mLabel: 'Pres', round: 'any', always: true,
+    gate: (g, rt, player, corp) => {
+      if (!player || !corp || !corp.ipoed) return false
+      const pct = player.shares.filter(s => s.corpSym === corp.sym).reduce((s, x) => s + x.percent, 0)
+      const isPres = player.shares.some(s => s.corpSym === corp.sym && s.isPresident)
+      return pct > 0 && !isPres
+    }
+  },
   { id: 'short', label: 'Short', mLabel: 'Sh[o]rt', key: 'o', round: 'sr', gate: (g) => !!g.title.shorts },
   { id: 'closeshort', label: 'Close Short', mLabel: 'Cl[j]', key: 'j', round: 'sr', gate: (g) => !!g.title.shorts },
 
