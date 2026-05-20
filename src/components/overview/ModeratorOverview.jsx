@@ -22,9 +22,10 @@ export default function ModeratorOverview() {
       <div className={`${barBg} text-blue-200 px-2 py-1 flex justify-between flex-shrink-0`}>
         <span>
           <span className="text-white font-bold">{game.title.title}</span>
-          <span className={`ml-2 font-bold ${labelColor}`}>{label}</span>
+          <span className={`ml-2 font-bold ${labelColor}`}>{isPre ? 'Setup' : label}</span>
           <span className="text-cyan-300 ml-2">Ph.{phase.name}</span>
           <span className="text-blue-400 ml-2">Lim:{limit}</span>
+          {isPre && <button onClick={() => doAction({ type: 'ADVANCE_ROUND' })} className="ml-2 text-green-300 hover:text-green-100">[Start SR1]</button>}
         </span>
         <span className="flex items-center gap-2">
           {inReplay && <span className="text-purple-300 font-bold">REPLAY {curIdx + 1}/{fullLog.length}</span>}
