@@ -29,6 +29,8 @@ export function ActionPanel({ panel, game, player, corp, unfloated, fmt, revenue
 
 function PanelContent({ panel, game, player, corp, unfloated, fmt, revenueInput, setRevenueInput, revRef, doAction, m }) {
   const price = corp ? corpPrice(game.stockMarket, corp.sym) || 0 : 0
+  const [priceTarget, setPriceTarget] = useState(null) // { type, data } for inline price entry
+  const [priceValue, setPriceValue] = useState('')
 
   // Par: two-step — pick corp, then pick price
   if (panel === 'par' && player) {
@@ -119,11 +121,17 @@ function PanelContent({ panel, game, player, corp, unfloated, fmt, revenueInput,
               <span className={m ? 'text-blue-400 text-xs' : 'text-broker-text-muted text-xs'}>From corps:</span>
               {otherCorps.map(other => other.trains.map(t => (
                 <Btn key={`${other.sym}-${t.id}`} m={m} v="blue"
-                  o={() => { const p = prompt(`Price for ${t.name} from ${other.sym}?`); const pr = parseInt(p, 10); if (pr > 0) doAction({ type: 'BUY_TRAIN', corpSym: corp.sym, trainName: t.name, price: pr, fromCorpSym: other.sym }) }}>
+                  o={() => { setPriceTarget({ type: 'train', trainName: t.name, fromCorpSym: other.sym, corpSym: corp.sym }); setPriceValue(String(t.price)) }}>
                   {t.name} from <span style={{ color: other.color }}>{other.sym}</span>
                 </Btn>
               )))}
             </div>
+          )}
+          {priceTarget?.type === 'train' && (
+            <PriceInput m={m} label={`Price for ${priceTarget.trainName} from ${priceTarget.fromCorpSym}`}
+              value={priceValue} onChange={setPriceValue}
+              onConfirm={() => { const pr = parseInt(priceValue); if (pr > 0) doAction({ type: 'BUY_TRAIN', corpSym: priceTarget.corpSym, trainName: priceTarget.trainName, price: pr, fromCorpSym: priceTarget.fromCorpSym }) }}
+              onCancel={() => setPriceTarget(null)} />
           )}
         </div>
       </div>
@@ -159,57 +167,25 @@ function PanelContent({ panel, game, player, corp, unfloated, fmt, revenueInput,
           : <div className="flex gap-2 mt-1 flex-wrap">
               {privs.map(c => (
                 <Btn key={c.sym} m={m} v="blue"
-                  o={() => { const p = prompt(`Sell ${c.sym} to ${corp.sym} for? (face: ${c.value})`); const pr = parseInt(p, 10); if (pr > 0) doAction({ type: 'SELL_PRIVATE', companySym: c.sym, fromPlayerId: player.id, toCorpSym: corp.sym, price: pr }) }}>
+                  o={() => { setPriceTarget({ type: 'sellpriv', companySym: c.sym, fromPlayerId: player.id, toCorpSym: corp.sym }); setPriceValue(String(c.value)) }}>
                   {c.sym} — {fmt(c.value)}
                 </Btn>
               ))}
+              {priceTarget?.type === 'sellpriv' && (
+                <PriceInput m={m} label={`Sell ${priceTarget.companySym} to ${priceTarget.toCorpSym} for`}
+                  value={priceValue} onChange={setPriceValue}
+                  onConfirm={() => { const pr = parseInt(priceValue); if (pr > 0) doAction({ type: 'SELL_PRIVATE', companySym: priceTarget.companySym, fromPlayerId: priceTarget.fromPlayerId, toCorpSym: priceTarget.toCorpSym, price: pr }) }}
+                  onCancel={() => setPriceTarget(null)} />
+              )}
             </div>
         }
       </div>
     )
   }
 
-  // Settings
+  // Settings — uses SettingsPanel component for reactivity
   if (panel === 'settings') {
-    const ac = useUIStore.getState().autoConfig
-    const toggle = (key) => useUIStore.getState().setAutoConfig(key, !ac[key])
-    const autoItems = [
-      { key: 'advanceOnAllPass', label: 'Auto-advance SR when all pass' },
-      { key: 'advanceOnCorpDone', label: 'Auto-next corp after revenue + train' },
-      { key: 'collectPrivates', label: 'Auto-collect private revenue at OR start' },
-      { key: 'soldOutAdjust', label: 'Auto-sold-out adjustment at OR end' },
-      { key: 'presidentSwap', label: 'Auto-swap presidency on share majority' },
-      { key: 'superUmpire', label: 'Super-umpire: show ALL actions (corrections mode)' },
-    ]
-    const skin = useUIStore.getState().skin
-    const onColor = m ? 'bg-green-900 text-green-300' : 'bg-green-700/30 text-green-300'
-    const offColor = m ? 'bg-gray-800 text-gray-500' : 'bg-gray-800/50 text-gray-400'
-    const labelColor = m ? 'text-green-600 text-xs mb-1 font-mono' : 'text-gray-400 text-xs mb-1'
-    return (
-      <div>
-        <Title m={m}>Settings</Title>
-        <div className="mt-1 flex gap-4 flex-wrap">
-          <div>
-            <div className={labelColor}>App Theme</div>
-            <div className="flex gap-1">
-              <Btn m={m} v={skin === 'broker' ? 'green' : 'blue'} o={() => useUIStore.getState().setActiveTab('overview')}>Broker</Btn>
-              <Btn m={m} v={skin === 'moderator' ? 'green' : 'blue'} o={() => useUIStore.getState().setActiveTab('moderator')}>Moderator</Btn>
-            </div>
-          </div>
-          <div className="flex-1 min-w-[200px]">
-            <div className={labelColor}>Automation</div>
-            <div className="space-y-0.5">
-              {autoItems.map(it => (
-                <button key={it.key} onClick={() => toggle(it.key)}
-                  className={`block w-full text-left text-xs px-2 py-0.5 rounded ${ac[it.key] ? onColor : offColor}`}>
-                  [{ac[it.key] ? 'X' : ' '}] {it.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    )
+    return <SettingsPanel m={m} />
   }
 
   // Navigation menu
@@ -265,15 +241,17 @@ function PanelContent({ panel, game, player, corp, unfloated, fmt, revenueInput,
                 const ok = player.cash >= c.value
                 return (
                   <Btn key={c.sym} m={m} v={ok ? 'green' : 'disabled'}
-                    o={() => {
-                      const input = prompt(`${c.sym} (${c.name}) — face value ${fmt(c.value)}\nPrice paid:`, c.value)
-                      const pr = parseInt(input, 10)
-                      if (pr > 0) doAction({ type: 'BUY_PRIVATE', playerId: player.id, companySym: c.sym, price: pr })
-                    }}>
+                    o={() => { setPriceTarget({ type: 'buypriv', companySym: c.sym, playerId: player.id }); setPriceValue(String(c.value)) }}>
                     {c.sym} {fmt(c.value)} {c.revenue > 0 && `+${fmt(c.revenue)}`}
                   </Btn>
                 )
               })}
+              {priceTarget?.type === 'buypriv' && (
+                <PriceInput m={m} label={`Buy ${priceTarget.companySym} for`}
+                  value={priceValue} onChange={setPriceValue}
+                  onConfirm={() => { const pr = parseInt(priceValue); if (pr > 0) doAction({ type: 'BUY_PRIVATE', playerId: priceTarget.playerId, companySym: priceTarget.companySym, price: pr }) }}
+                  onCancel={() => setPriceTarget(null)} />
+              )}
             </div>
         }
       </div>
@@ -390,6 +368,69 @@ function ParPanel({ player, unfloated, game, fmt, doAction, m }) {
 
 function Title({ m, children }) {
   return <div className={m ? 'text-green-400 text-xs font-mono font-bold' : 'text-sm font-medium text-white'}>{children}</div>
+}
+
+function PriceInput({ m, label, value, onChange, onConfirm, onCancel }) {
+  return (
+    <div className="flex items-center gap-1 mt-1">
+      <span className={m ? 'text-blue-400 text-xs' : 'text-broker-text-muted text-xs'}>{label}:</span>
+      <input type="number" value={value} onChange={e => onChange(e.target.value)}
+        autoFocus
+        className={m
+          ? 'w-20 bg-black border border-green-800 rounded px-2 py-0.5 text-white text-center text-xs font-mono'
+          : 'w-20 bg-broker-bg border border-broker-border rounded px-2 py-0.5 text-white text-center text-xs'
+        }
+        onKeyDown={e => { if (e.key === 'Enter') onConfirm(); if (e.key === 'Escape') onCancel() }}
+      />
+      <Btn m={m} v="green" o={onConfirm}>OK</Btn>
+      <Btn m={m} v="red" o={onCancel}>Cancel</Btn>
+    </div>
+  )
+}
+
+function SettingsPanel({ m }) {
+  const ac = useUIStore((s) => s.autoConfig)
+  const skin = useUIStore((s) => s.skin)
+  const setAutoConfig = useUIStore((s) => s.setAutoConfig)
+  const setActiveTab = useUIStore((s) => s.setActiveTab)
+
+  const autoItems = [
+    { key: 'advanceOnAllPass', label: 'Auto-advance SR when all pass' },
+    { key: 'advanceOnCorpDone', label: 'Auto-next corp after revenue + train' },
+    { key: 'collectPrivates', label: 'Auto-collect private revenue at OR start' },
+    { key: 'soldOutAdjust', label: 'Auto-sold-out adjustment at OR end' },
+    { key: 'presidentSwap', label: 'Auto-swap presidency on share majority' },
+    { key: 'superUmpire', label: 'Super-umpire: show ALL actions' },
+  ]
+  const onColor = m ? 'bg-green-900 text-green-300' : 'bg-green-700/30 text-green-300'
+  const offColor = m ? 'bg-gray-800 text-gray-500' : 'bg-gray-800/50 text-gray-400'
+  const labelColor = m ? 'text-green-600 text-xs mb-1 font-mono' : 'text-gray-400 text-xs mb-1'
+
+  return (
+    <div>
+      <Title m={m}>Settings</Title>
+      <div className="mt-1 flex gap-4 flex-wrap">
+        <div>
+          <div className={labelColor}>App Theme</div>
+          <div className="flex gap-1">
+            <Btn m={m} v={skin === 'broker' ? 'green' : 'blue'} o={() => setActiveTab('overview')}>Broker</Btn>
+            <Btn m={m} v={skin === 'moderator' ? 'green' : 'blue'} o={() => setActiveTab('moderator')}>Moderator</Btn>
+          </div>
+        </div>
+        <div className="flex-1 min-w-[200px]">
+          <div className={labelColor}>Automation</div>
+          <div className="space-y-0.5">
+            {autoItems.map(it => (
+              <button key={it.key} onClick={() => setAutoConfig(it.key, !ac[it.key])}
+                className={`block w-full text-left text-xs px-2 py-0.5 rounded ${ac[it.key] ? onColor : offColor}`}>
+                [{ac[it.key] ? 'X' : ' '}] {it.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
 }
 
 function Btn({ m, v, o, children }) {

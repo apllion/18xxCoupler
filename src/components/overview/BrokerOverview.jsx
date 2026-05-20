@@ -25,7 +25,7 @@ export default function BrokerOverview() {
           <span className="font-bold text-lg text-white">{game.title.title}</span>
           <span className={`text-sm font-medium px-2 py-0.5 rounded ${
             isSR ? 'bg-green-800 text-green-200' : isOR ? 'bg-amber-800 text-amber-200' : 'bg-broker-surface-hover text-broker-text-muted'
-          }`}>{label}</span>
+          }`}>{isSR ? label : isOR ? label : 'Setup'}</span>
           <span className="text-xs text-broker-text-muted">Phase {phase.name} / Limit {limit}</span>
         </div>
         <div className="flex items-center gap-2">

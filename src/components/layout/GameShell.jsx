@@ -44,11 +44,11 @@ export default function GameShell() {
     />
   )
 
-  // Overview screens — fullscreen, no chrome
+  // Overview screens — fullscreen, no chrome (RoomBar only when connected)
   if (activeTab === 'overview' || activeTab === 'moderator') {
     return (
       <div className="flex flex-col h-screen">
-        {roomBar}
+        {sync?.roomId && roomBar}
         {activeTab === 'moderator' ? <ModeratorOverview /> : <OverviewTab />}
       </div>
     )
