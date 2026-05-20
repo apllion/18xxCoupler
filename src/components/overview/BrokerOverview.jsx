@@ -30,7 +30,7 @@ export default function BrokerOverview() {
           {inReplay && <span className="text-xs font-medium text-purple-300 bg-purple-900/40 px-2 py-0.5 rounded">{curIdx + 1}/{fullLog.length}</span>}
           <span className={`text-sm font-medium ${game.bank.cash <= 0 ? 'text-red-400' : 'text-broker-text'}`}>Bank {fmt(game.bank.cash)}</span>
           <button onClick={() => canUndo() && undo()} className="text-xs text-broker-text-muted hover:text-white px-1">Undo</button>
-          <button onClick={() => useUIStore.getState().setActiveTab('moderator')} className="text-xs text-broker-text-muted hover:text-white bg-broker-surface-hover px-2 py-0.5 rounded">DOS</button>
+          <button onClick={() => useUIStore.getState().setActiveTab('moderator')} className="text-xs text-broker-text-muted hover:text-white bg-broker-surface-hover px-2 py-0.5 rounded">Retro</button>
           <button onClick={() => useUIStore.getState().setActiveTab('market')} className="text-xs text-broker-text-muted hover:text-white bg-broker-surface-hover px-2 py-0.5 rounded">Detail</button>
         </div>
       </div>
