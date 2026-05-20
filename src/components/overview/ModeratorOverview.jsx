@@ -39,11 +39,18 @@ export default function ModeratorOverview() {
         <span className="flex items-center gap-2">
           {inReplay && <span className="text-purple-300 font-bold">REPLAY {curIdx + 1}/{fullLog.length}</span>}
           <span className={game.bank.cash <= 0 ? 'text-red-400 font-bold' : 'text-green-300'}>Bank:{fmt(game.bank.cash)}</span>
-          <select value={myPlayerId || ''} onChange={e => useUIStore.getState().setMyPlayer(e.target.value || null)}
-            className={`text-xs ${t.bg} border border-current rounded px-1 py-0 ${t.player} font-mono`}>
-            <option value="">Umpire</option>
-            {game.players.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-          </select>
+          <span className="flex items-center gap-0.5">
+            <button onClick={() => useUIStore.getState().setMyPlayer(null)}
+              className={`text-xs px-1 py-0 rounded ${!myPlayerId ? `${t.bright} font-bold` : `${t.text}`}`}>
+              Ump
+            </button>
+            {game.players.map(p => (
+              <button key={p.id} onClick={() => useUIStore.getState().setMyPlayer(p.id)}
+                className={`text-xs px-1 py-0 rounded ${myPlayerId === p.id ? `${t.bright} font-bold` : `${t.text}`}`}>
+                {p.name.slice(0, 3)}
+              </button>
+            ))}
+          </span>
           <button onClick={() => canUndo() && undo()} className={`${t.text} hover:${t.bright}`}>[U]ndo</button>
           <button onClick={() => setPanel('settings')} className={`${t.head} hover:${t.bright}`}>[X]Set</button>
         </span>

@@ -248,6 +248,38 @@ export function applyAction(state, action) {
       }
       break
     }
+    // Issue shares: corp sells shares from IPO to raise cash (incremental cap)
+    case 'ISSUE_SHARES': {
+      const ic = state.corporations.find(co => co.sym === action.corpSym)
+      if (ic && ic.ipoShares > 0) {
+        const shareSize = state.title.shares?.[1] ?? 10
+        const issuePrice = corpPrice(state.stockMarket, action.corpSym) || ic.parPrice || 0
+        const revenue = (issuePrice * shareSize) / 10
+        ic.ipoShares -= shareSize
+        ic.marketShares += shareSize
+        ic.cash += revenue
+        // Price moves left on issue
+        moveLeft(state.stockMarket, action.corpSym, 1)
+      }
+      break
+    }
+    // Redeem shares: corp buys shares from market pool back to IPO
+    case 'REDEEM_SHARES': {
+      const rc = state.corporations.find(co => co.sym === action.corpSym)
+      if (rc && rc.marketShares > 0) {
+        const shareSize = state.title.shares?.[1] ?? 10
+        const redeemPrice = corpPrice(state.stockMarket, action.corpSym) || rc.parPrice || 0
+        const cost = (redeemPrice * shareSize) / 10
+        if (rc.cash >= cost) {
+          rc.marketShares -= shareSize
+          rc.ipoShares += shareSize
+          rc.cash -= cost
+          // Price moves right on redeem
+          moveRight(state.stockMarket, action.corpSym, 1)
+        }
+      }
+      break
+    }
     // Nationalization: close a corp and transfer assets to national entity
     // Change float percent (1880: event-driven 20→30→40→60)
     case 'SET_FLOAT_PERCENT': {
@@ -914,6 +946,10 @@ function describeAction(state, action) {
       return `Event acknowledged: ${action.event}`
     case 'REMOVE_CORPORATION':
       return `${action.corpSym} removed from game`
+    case 'ISSUE_SHARES':
+      return `${action.corpSym} issues shares (IPO → market)`
+    case 'REDEEM_SHARES':
+      return `${action.corpSym} redeems shares (market → IPO)`
     case 'SWAP_PRESIDENT':
       return `${playerName(action.playerId)} becomes president of ${action.corpSym}`
     case 'SET_CORP_ORDER':

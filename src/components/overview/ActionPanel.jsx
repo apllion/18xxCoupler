@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { playerSharePercent, corpPrice, parPrices, nextAvailableTrains } from './useOverviewData.js'
 import { useUIStore } from '../../store/uiStore.js'
 import { useGameStore } from '../../store/gameStore.js'
+import { useThemeStore, themes as brokerThemes } from '../../store/themeStore.js'
 import { CorpCard } from './CorpCard.jsx'
 import { PlayerCard } from './PlayerCard.jsx'
 
@@ -388,6 +389,8 @@ function SettingsPanel({ m, game, doAction }) {
   const setAutoConfig = useUIStore((s) => s.setAutoConfig)
   const setActiveTab = useUIStore((s) => s.setActiveTab)
   const setModTheme = useUIStore((s) => s.setModTheme)
+  const brokerThemeId = useThemeStore((s) => s.themeId)
+  const setBrokerTheme = useThemeStore((s) => s.setTheme)
   const enterReplay = useGameStore((s) => s.enterReplay)
   const exitReplay = useGameStore((s) => s.exitReplay)
   const fullLog = useGameStore((s) => s.fullLog)
@@ -415,6 +418,18 @@ function SettingsPanel({ m, game, doAction }) {
             <Btn m={m} v={skin === 'broker' ? 'green' : 'blue'} o={() => setActiveTab('overview')}>Broker</Btn>
             <Btn m={m} v={skin === 'moderator' ? 'green' : 'blue'} o={() => setActiveTab('moderator')}>Moderator</Btn>
           </div>
+          {skin === 'broker' && (
+            <>
+              <div className={`${labelColor} mt-1`}>Color</div>
+              <div className="flex gap-1">
+                {Object.values(brokerThemes).map(bt => (
+                  <Btn key={bt.id} m={m} v={brokerThemeId === bt.id ? 'green' : 'blue'} o={() => setBrokerTheme(bt.id)}>
+                    {bt.label}
+                  </Btn>
+                ))}
+              </div>
+            </>
+          )}
           {skin === 'moderator' && (
             <>
               <div className={`${labelColor} mt-1`}>Terminal</div>

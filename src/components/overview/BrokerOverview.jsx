@@ -31,11 +31,18 @@ export default function BrokerOverview() {
         <div className="flex items-center gap-2">
           {inReplay && <span className="text-xs font-medium text-purple-300 bg-purple-900/40 px-2 py-0.5 rounded">{curIdx + 1}/{fullLog.length}</span>}
           <span className={`text-sm font-medium ${game.bank.cash <= 0 ? 'text-red-400' : 'text-broker-text'}`}>Bank {fmt(game.bank.cash)}</span>
-          <select value={myPlayerId || ''} onChange={e => useUIStore.getState().setMyPlayer(e.target.value || null)}
-            className="text-xs bg-broker-surface-hover border border-broker-border rounded px-1 py-0.5 text-white">
-            <option value="">Umpire</option>
-            {game.players.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-          </select>
+          <span className="flex items-center gap-0.5">
+            <button onClick={() => useUIStore.getState().setMyPlayer(null)}
+              className={`text-xs px-1.5 py-0.5 rounded ${!myPlayerId ? 'bg-broker-gold/20 text-broker-gold font-bold' : 'bg-broker-surface-hover text-broker-text-muted hover:text-white'}`}>
+              Umpire
+            </button>
+            {game.players.map(p => (
+              <button key={p.id} onClick={() => useUIStore.getState().setMyPlayer(p.id)}
+                className={`text-xs px-1.5 py-0.5 rounded ${myPlayerId === p.id ? 'bg-broker-gold/20 text-broker-gold font-bold' : 'bg-broker-surface-hover text-broker-text-muted hover:text-white'}`}>
+                {p.name.slice(0, 4)}
+              </button>
+            ))}
+          </span>
           <button onClick={() => canUndo() && undo()} className="text-xs text-broker-text-muted hover:text-white px-1">Undo</button>
           <button onClick={() => setPanel('settings')} className="text-xs text-broker-text-muted hover:text-white bg-broker-surface-hover px-2 py-0.5 rounded">Settings</button>
         </div>
