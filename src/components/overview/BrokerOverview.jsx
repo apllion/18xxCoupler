@@ -167,6 +167,7 @@ export default function BrokerOverview() {
           {unfloated.length > 0 && <Bb t="Par" o={() => setPanel('par')} />}
           <Bb t="Private" o={() => setPanel('private')} />
           {game.title.loans && selCorp?.floated && <Bb t="Loan" o={() => setPanel('loan')} />}
+          {game.title.corpCanBuyShares && selCorp?.floated && <Bb t="Corp Trade" o={() => setPanel('corpshare')} />}
           <span className="text-broker-border mx-0.5">|</span>
           <Bb t="Advance" v="muted" o={() => doAction({ type: 'ADVANCE_ROUND' })} />
           <Bb t="Collect" v="muted" o={() => doAction({ type: 'COLLECT_ALL_REVENUE' })} />

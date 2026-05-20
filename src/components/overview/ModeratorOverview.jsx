@@ -147,6 +147,7 @@ export default function ModeratorOverview() {
           {unfloated.length > 0 && <Mb t="[N]ew" o={() => setPanel('par')} />}
           <Mb t="Pri[v]" o={() => setPanel('private')} />
           {game.title.loans && selCorp?.floated && <Mb t="[L]oan" o={() => setPanel('loan')} />}
+          {game.title.corpCanBuyShares && selCorp?.floated && <Mb t="[G]corp" o={() => setPanel('corpshare')} />}
           <span className="text-blue-800">|</span>
           <Mb t="[A]dv" o={() => doAction({ type: 'ADVANCE_ROUND' })} /><Mb t="[C]oll" o={() => doAction({ type: 'COLLECT_ALL_REVENUE' })} />
           <Mb t="S[o]ld" o={() => doAction({ type: 'SOLD_OUT_ADJUST' })} /><Mb t="[U]ndo" o={() => canUndo() && undo()} />

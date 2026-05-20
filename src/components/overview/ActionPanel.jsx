@@ -164,6 +164,61 @@ function PanelContent({ panel, game, player, corp, unfloated, fmt, revenueInput,
     )
   }
 
+  // Corp share trading (21Moon, PTG, 18India)
+  if (panel === 'corpshare' && corp) {
+    const shareSize = game.title.shares?.[1] ?? 10
+    const otherCorps = game.corporations.filter(c => c.ipoed && c.sym !== corp.sym)
+    const ownShares = corp.sharesHeld || []
+    return (
+      <div>
+        <Title m={m}><span style={{ color: corp.color }}>{corp.sym}</span> Share Trading — Treasury {fmt(corp.cash)}</Title>
+        {/* Buy from other corps */}
+        <div className="mt-1 space-y-1">
+          <span className={m ? 'text-blue-400 text-xs' : 'text-broker-text-muted text-xs'}>Buy {shareSize}% from:</span>
+          <div className="flex gap-1 flex-wrap">
+            {otherCorps.map(target => {
+              const tp = corpPrice(game.stockMarket, target.sym) || 0
+              const cost = (tp * shareSize) / 10
+              const hasIPO = target.ipoShares > 0
+              const hasMkt = target.marketShares > 0
+              const ok = corp.cash >= cost
+              return (
+                <span key={target.sym} className="inline-flex gap-0.5">
+                  {hasIPO && <Btn m={m} v={ok ? 'green' : 'disabled'}
+                    o={() => ok && doAction({ type: 'CORP_BUY_SHARE', buyerCorpSym: corp.sym, targetCorpSym: target.sym, source: 'ipo', percent: shareSize })}>
+                    <span style={{ color: target.color }}>{target.sym}</span> IPO {fmt(cost)}
+                  </Btn>}
+                  {hasMkt && <Btn m={m} v={ok ? 'blue' : 'disabled'}
+                    o={() => ok && doAction({ type: 'CORP_BUY_SHARE', buyerCorpSym: corp.sym, targetCorpSym: target.sym, source: 'market', percent: shareSize })}>
+                    <span style={{ color: target.color }}>{target.sym}</span> Mkt {fmt(cost)}
+                  </Btn>}
+                </span>
+              )
+            })}
+          </div>
+          {/* Sell holdings */}
+          {ownShares.length > 0 && (
+            <>
+              <span className={m ? 'text-blue-400 text-xs' : 'text-broker-text-muted text-xs'}>Sell holdings:</span>
+              <div className="flex gap-1 flex-wrap">
+                {[...new Set(ownShares.map(s => s.corpSym))].map(sym => {
+                  const pct = ownShares.filter(s => s.corpSym === sym).reduce((s, x) => s + x.percent, 0)
+                  const target = game.corporations.find(c => c.sym === sym)
+                  return (
+                    <Btn key={sym} m={m} v="red"
+                      o={() => doAction({ type: 'CORP_SELL_SHARES', sellerCorpSym: corp.sym, targetCorpSym: sym, percent: shareSize })}>
+                      <span style={{ color: target?.color }}>{sym}</span> {pct}%
+                    </Btn>
+                  )
+                })}
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    )
+  }
+
   return null
 }
 
