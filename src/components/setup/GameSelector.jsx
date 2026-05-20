@@ -267,7 +267,12 @@ function RoomJoin({ sync }) {
   )
 }
 
-const SUPPORTED_TITLES = new Set(['1830','1846','1849','1861','1867','1880','1889','18Chesapeake','18MEX','18MS'])
+const SUPPORTED_TITLES = new Set([
+  '1817','1822','1822CA','1822MX','1830','1846','1847 AE','1849','1858','1860',
+  '1861','1862','1867','1871','1880','1889',
+  '18Chesapeake','18GB','18India','18Ireland','18MEX','18MS','18RHL','18 Royal Gorge','18SJ','18USA',
+  '21Moon','22Mars',
+])
 
 function LiveGames({ onImport, importing }) {
   const [games, setGames] = useState(null)

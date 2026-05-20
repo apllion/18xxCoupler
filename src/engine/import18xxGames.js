@@ -7,17 +7,34 @@ import { getTitle } from '../titles/index.js'
 
 // Map 18xx.games title string to our titleId
 const TITLE_MAP = {
+  '1817': 'g1817',
+  '1822': 'g1822',
+  '1822CA': 'g1822ca',
   '1822MX': 'g1822mx',
   '1830': 'g1830',
   '1846': 'g1846',
+  '1847 AE': 'g1847ae',
   '1849': 'g1849',
+  '1858': 'g1858',
+  '1860': 'g1860',
   '1861': 'g1861',
+  '1862': 'g1862',
   '1867': 'g1867',
+  '1871': 'g1871',
   '1880': 'g1880',
   '1889': 'g1889',
   '18Chesapeake': 'g18chesapeake',
+  '18GB': 'g18gb',
+  '18India': 'g18india',
+  '18Ireland': 'g18ireland',
   '18MEX': 'g18mex',
   '18MS': 'g18ms',
+  '18RHL': 'g18rhl',
+  '18 Royal Gorge': 'g18royalgorge',
+  '18SJ': 'g18sj',
+  '18USA': 'g18usa',
+  '21Moon': 'g21moon',
+  '22Mars': 'g22mars',
 }
 
 // Map variant names back to their base train name in the depot.
