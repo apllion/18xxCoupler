@@ -173,6 +173,8 @@ export default function BrokerOverview() {
           <Bb t="Collect" v="muted" o={() => doAction({ type: 'COLLECT_ALL_REVENUE' })} />
           <Bb t="Sold-out" v="muted" o={() => doAction({ type: 'SOLD_OUT_ADJUST' })} />
           <Bb t="Undo" v="muted" o={() => canUndo() && undo()} />
+          {selCorp && <Bb t="Corp" v="muted" o={() => setPanel('corpdetail')} />}
+          <Bb t="Player" v="muted" o={() => setPanel('playerdetail')} />
           {game.actionLog.length > 0 && <Bb t="Replay" v="purple" o={() => enterReplay()} />}
           <span className="text-broker-text-muted text-xs truncate ml-1 flex-1">{lastAction?.description || ''}</span>
         </div>

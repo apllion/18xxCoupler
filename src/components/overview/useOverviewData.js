@@ -154,8 +154,8 @@ export function useOverviewData() {
     if (key === 'c' && !panel) doAction({ type: 'COLLECT_ALL_REVENUE' })
     if (key === 'o' && !panel) doAction({ type: 'SOLD_OUT_ADJUST' })
     if (key === 'i' && !panel && game?.title?.loans && selCorp?.floated) doAction({ type: 'PAY_INTEREST', corpSym: selCorp.sym })
-    if (key === 'd' && !panel && selCorp?.floated) { useUIStore.getState().setActiveCorp(selCorp.sym); useUIStore.getState().setActiveTab('corps') }
-    if (key === 'f' && !panel) { useUIStore.getState().setActivePlayer(selPlayer.id); useUIStore.getState().setActiveTab('players') }
+    if (key === 'd' && !panel && selCorp) { setPanel('corpdetail') }
+    if (key === 'f' && !panel) { setPanel('playerdetail') }
     if (key === 'Tab') { e.preventDefault(); useUIStore.getState().setActiveTab('market') }
   }, [game, corps, selPlayer, selCorp, panel, canUndo, undo, unfloated, inReplay, fullLog])
 

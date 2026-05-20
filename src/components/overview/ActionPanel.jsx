@@ -3,6 +3,8 @@
 
 import { useState } from 'react'
 import { playerSharePercent, corpPrice, parPrices, nextAvailableTrains } from './useOverviewData.js'
+import { CorpCard } from './CorpCard.jsx'
+import { PlayerCard } from './PlayerCard.jsx'
 
 export function ActionPanel({ panel, game, player, corp, unfloated, fmt, revenueInput, setRevenueInput, revRef, onClose, doAction, skin }) {
   const m = skin === 'moderator'
@@ -162,6 +164,16 @@ function PanelContent({ panel, game, player, corp, unfloated, fmt, revenueInput,
         }
       </div>
     )
+  }
+
+  // Corp detail card
+  if (panel === 'corpdetail' && corp) {
+    return <CorpCard game={game} corpSym={corp.sym} skin={m ? 'moderator' : 'broker'} />
+  }
+
+  // Player detail card
+  if (panel === 'playerdetail' && player) {
+    return <PlayerCard game={game} playerId={player.id} skin={m ? 'moderator' : 'broker'} />
   }
 
   // Corp share trading (21Moon, PTG, 18India)
