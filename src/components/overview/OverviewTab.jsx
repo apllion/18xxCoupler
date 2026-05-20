@@ -279,7 +279,7 @@ export default function OverviewTab() {
             <tr><td colSpan={4 + corps.length} className="h-0.5 bg-green-700"></td></tr>
 
             {/* Corp data rows */}
-            <CRow label="Kurs" corps={corps} curCol={curCol} render={c => {
+            <CRow label="Price" corps={corps} curCol={curCol} render={c => {
               if (!c.ipoed) return <span className="text-blue-900/30">—</span>
               return <span className="text-cyan-300">{c.price || '—'}{c.pos && <span className="text-blue-500">/{c.pos.row}</span>}</span>
             }} />
@@ -287,7 +287,7 @@ export default function OverviewTab() {
               if (!c.ipoed) return <span className="text-blue-900/30">—</span>
               return <span className="text-blue-300">{c.parPrice || '—'}</span>
             }} />
-            <CRow label="Geld" corps={corps} curCol={curCol} render={c => {
+            <CRow label="Treas" corps={corps} curCol={curCol} render={c => {
               if (!c.ipoed) return <span className="text-blue-900/30">—</span>
               return <span className={c.cash < 0 ? 'text-red-400' : 'text-green-300'}>{fmt(c.cash)}</span>
             }} />
@@ -297,19 +297,19 @@ export default function OverviewTab() {
             <CRow label="Pool" corps={corps} curCol={curCol} render={c => (
               <span className={c.marketShares > 0 ? 'text-yellow-300' : 'text-blue-900/30'}>{c.marketShares > 0 ? `${c.marketShares}%` : '—'}</span>
             )} />
-            <CRow label="Loks" corps={corps} curCol={curCol} render={c => {
+            <CRow label="Trains" corps={corps} curCol={curCol} render={c => {
               if (!c.floated) return <span className="text-blue-900/30">—</span>
               if (c.trains.length === 0) return <span className="text-red-500 font-bold">!</span>
               return <span className="text-white font-bold">{c.trains.map(t => t.name).join('')}</span>
             }} />
-            <CRow label="Fährt" corps={corps} curCol={curCol} render={c => {
+            <CRow label="Rev" corps={corps} curCol={curCol} render={c => {
               if (!c.floated) return <span className="text-blue-900/30">—</span>
               const rev = lastRevenue[c.sym]
               if (!rev) return <span className="text-blue-900/30">—</span>
               const sign = rev.type === 'WITHHOLD_DIVIDEND' ? '-' : rev.type === 'HALF_DIVIDEND' ? '~' : '+'
               return <span className={rev.type === 'WITHHOLD_DIVIDEND' ? 'text-red-300' : 'text-green-300'}>{sign}{rev.amount}</span>
             }} />
-            <CRow label="Pöppel" corps={corps} curCol={curCol} render={c => {
+            <CRow label="Tokens" corps={corps} curCol={curCol} render={c => {
               if (!c.floated) return <span className="text-blue-900/30">—</span>
               return <span className="text-blue-300">{c.tokensPlaced}/{c.tokens.length}</span>
             }} />
@@ -318,7 +318,7 @@ export default function OverviewTab() {
               if (!privs) return <span className="text-blue-900/30">—</span>
               return <span className="text-purple-300">{privs.join(',')}</span>
             }} />
-            <CRow label="Dir" corps={corps} curCol={curCol} render={c => {
+            <CRow label="Pres" corps={corps} curCol={curCol} render={c => {
               if (!c.ipoed) return <span className="text-blue-900/30">—</span>
               const pres = game.players.find(p => isPresident(p, c.sym))
               return <span className="text-yellow-400">{pres ? pres.name.slice(0, 6) : '—'}</span>
@@ -329,7 +329,7 @@ export default function OverviewTab() {
 
       {/* Train depot strip */}
       <div className="bg-blue-900 text-white px-2 py-0.5 flex items-center gap-1 flex-wrap flex-shrink-0">
-        <span className="text-blue-400">trains:</span>
+        <span className="text-blue-400">Depot:</span>
         {depotGroups.map(g => (
           <span key={g.name}>
             <span className="text-green-300 font-bold">{String(g.name).repeat(Math.min(g.count, 12))}</span>
