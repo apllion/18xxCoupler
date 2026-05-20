@@ -130,24 +130,24 @@ export default function ModeratorOverview() {
           revRef={revRef} onClose={closePanel} doAction={doAction} skin="moderator" />
       ) : inReplay ? (
         <div className="bg-gray-900 border-t border-purple-800 px-1 py-1 flex-shrink-0 flex items-center gap-1 flex-wrap">
-          <Mb t="Prev" o={() => replayTo(Math.max(-1, curIdx - 1))} /><Mb t="Next" o={() => curIdx < fullLog.length - 1 && replayTo(curIdx + 1)} />
-          <Mb t="Start" o={() => replayTo(-1)} /><Mb t="End" o={() => replayTo(fullLog.length - 1)} />
-          <Mb t="What-if" o={() => { exitReplay(); enterWhatIf() }} /><Mb t="Exit" o={() => exitReplay()} />
+          <Mb t="[<]Prev" o={() => replayTo(Math.max(-1, curIdx - 1))} /><Mb t="[>]Next" o={() => curIdx < fullLog.length - 1 && replayTo(curIdx + 1)} />
+          <Mb t="[Home]" o={() => replayTo(-1)} /><Mb t="[End]" o={() => replayTo(fullLog.length - 1)} />
+          <Mb t="[W]hat-if" o={() => { exitReplay(); enterWhatIf() }} /><Mb t="[E]xit" o={() => exitReplay()} />
           <span className="text-blue-400 text-xs truncate ml-1">{curIdx < 0 ? 'Start' : `${curIdx + 1}/${fullLog.length}: ${lastAction?.description || ''}`}</span>
         </div>
       ) : (
         <div className="bg-gray-900 border-t border-green-800 px-1 py-1 flex-shrink-0 flex items-center gap-1 flex-wrap">
-          <Mb t="Buy" o={() => { if (!selCorp) return; if (!selCorp.ipoed) { setPanel('par'); return } if (selCorp.ipoShares > 0) doAction({ type: 'BUY_SHARE', playerId: selPlayer?.id, corpSym: selCorp.sym, source: 'ipo', percent: 10 }); else if (selCorp.marketShares > 0) doAction({ type: 'BUY_SHARE', playerId: selPlayer?.id, corpSym: selCorp.sym, source: 'market', percent: 10 }) }} />
-          <Mb t="Sell" o={() => selPlayer && selCorp && playerSharePercent(selPlayer, selCorp.sym) > 0 && doAction({ type: 'SELL_SHARES', playerId: selPlayer.id, corpSym: selCorp.sym, percent: 10 })} />
-          <Mb t="Rev" o={() => { setPanel('revenue'); setTimeout(() => revRef.current?.focus(), 50) }} />
-          <Mb t="Train" o={() => setPanel('train')} />
-          {unfloated.length > 0 && <Mb t="New" o={() => setPanel('par')} />}
-          <Mb t="Priv" o={() => setPanel('private')} />
-          {game.title.loans && selCorp?.floated && <Mb t="Loan" o={() => setPanel('loan')} />}
+          <Mb t="[B]uy" o={() => { if (!selCorp) return; if (!selCorp.ipoed) { setPanel('par'); return } if (selCorp.ipoShares > 0) doAction({ type: 'BUY_SHARE', playerId: selPlayer?.id, corpSym: selCorp.sym, source: 'ipo', percent: 10 }); else if (selCorp.marketShares > 0) doAction({ type: 'BUY_SHARE', playerId: selPlayer?.id, corpSym: selCorp.sym, source: 'market', percent: 10 }) }} />
+          <Mb t="[S]ell" o={() => selPlayer && selCorp && playerSharePercent(selPlayer, selCorp.sym) > 0 && doAction({ type: 'SELL_SHARES', playerId: selPlayer.id, corpSym: selCorp.sym, percent: 10 })} />
+          <Mb t="[R]ev" o={() => { setPanel('revenue'); setTimeout(() => revRef.current?.focus(), 50) }} />
+          <Mb t="[T]rain" o={() => setPanel('train')} />
+          {unfloated.length > 0 && <Mb t="[N]ew" o={() => setPanel('par')} />}
+          <Mb t="Pri[v]" o={() => setPanel('private')} />
+          {game.title.loans && selCorp?.floated && <Mb t="[L]oan" o={() => setPanel('loan')} />}
           <span className="text-blue-800">|</span>
-          <Mb t="Adv" o={() => doAction({ type: 'ADVANCE_ROUND' })} /><Mb t="Coll" o={() => doAction({ type: 'COLLECT_ALL_REVENUE' })} />
-          <Mb t="Sold" o={() => doAction({ type: 'SOLD_OUT_ADJUST' })} /><Mb t="Undo" o={() => canUndo() && undo()} />
-          {game.actionLog.length > 0 && <Mb t="Replay" o={() => enterReplay()} />}
+          <Mb t="[A]dv" o={() => doAction({ type: 'ADVANCE_ROUND' })} /><Mb t="[C]oll" o={() => doAction({ type: 'COLLECT_ALL_REVENUE' })} />
+          <Mb t="S[o]ld" o={() => doAction({ type: 'SOLD_OUT_ADJUST' })} /><Mb t="[U]ndo" o={() => canUndo() && undo()} />
+          {game.actionLog.length > 0 && <Mb t="R[e]play" o={() => enterReplay()} />}
           <span className="text-blue-400 text-xs truncate ml-1 flex-1">{lastAction?.description || ''}</span>
         </div>
       )}
