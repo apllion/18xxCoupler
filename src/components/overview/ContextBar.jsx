@@ -29,6 +29,11 @@ export function ContextBar({ game, selPlayer, selCorp, myPlayerId, setPanel, doA
     redeem: () => selCorp && doAction({ type: 'REDEEM_SHARES', corpSym: selCorp.sym }),
     short: () => setPanel('short'),
     closeshort: () => setPanel('closeshort'),
+    token: () => {
+      if (!selCorp || selCorp.tokensPlaced >= selCorp.tokens.length) return
+      const cost = selCorp.tokens[selCorp.tokensPlaced] || 0
+      doAction({ type: 'PLACE_TOKEN', corpSym: selCorp.sym, price: cost })
+    },
     discard: () => setPanel('discard'),
     advance: () => doAction({ type: 'ADVANCE_ROUND' }),
     collect: () => doAction({ type: 'COLLECT_ALL_REVENUE' }),

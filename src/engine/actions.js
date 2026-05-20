@@ -248,6 +248,17 @@ export function applyAction(state, action) {
       }
       break
     }
+    // Place token: corp pays token cost, increments tokensPlaced
+    case 'PLACE_TOKEN': {
+      const tc = state.corporations.find(co => co.sym === action.corpSym)
+      if (tc && tc.tokensPlaced < tc.tokens.length) {
+        const cost = action.price ?? tc.tokens[tc.tokensPlaced] ?? 0
+        tc.cash -= cost
+        state.bank.cash += cost
+        tc.tokensPlaced++
+      }
+      break
+    }
     // Issue shares: corp sells shares from IPO to raise cash (incremental cap)
     case 'ISSUE_SHARES': {
       const ic = state.corporations.find(co => co.sym === action.corpSym)
@@ -946,6 +957,8 @@ function describeAction(state, action) {
       return `Event acknowledged: ${action.event}`
     case 'REMOVE_CORPORATION':
       return `${action.corpSym} removed from game`
+    case 'PLACE_TOKEN':
+      return `${action.corpSym} places token (${fmt(action.price ?? 0)})`
     case 'ISSUE_SHARES':
       return `${action.corpSym} issues shares (IPO → market)`
     case 'REDEEM_SHARES':

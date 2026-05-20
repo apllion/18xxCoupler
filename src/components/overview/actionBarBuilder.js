@@ -33,6 +33,9 @@ const ACTIONS = [
   // Corp OR actions
   { id: 'revenue', label: 'Revenue', mLabel: '[R]ev', key: 'r', round: 'or', always: true },
   { id: 'train', label: 'Train', mLabel: '[T]rain', key: 't', round: 'or', always: true },
+  { id: 'token', label: 'Token', mLabel: 'To[k]en', key: 'k', round: 'or', always: true,
+    gate: (g, rt, player, corp) => corp?.floated && corp?.tokensPlaced < corp?.tokens?.length
+  },
   { id: 'issue', label: 'Issue', mLabel: '[I]ssue', key: 'i', round: 'or',
     gate: (g, rt, player, corp) => g.title.capitalization === 'incremental' && corp?.ipoShares > 0
   },
