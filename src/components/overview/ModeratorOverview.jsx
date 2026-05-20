@@ -131,7 +131,7 @@ export default function ModeratorOverview() {
       ) : inReplay ? (
         <div className="bg-gray-900 border-t border-purple-800 px-1 py-1 flex-shrink-0 flex items-center gap-1 flex-wrap">
           <Mb t="[<]Prev" o={() => replayTo(Math.max(-1, curIdx - 1))} /><Mb t="[>]Next" o={() => curIdx < fullLog.length - 1 && replayTo(curIdx + 1)} />
-          <Mb t="[Home]" o={() => replayTo(-1)} /><Mb t="[End]" o={() => replayTo(fullLog.length - 1)} />
+          <Mb t="[{]Start" o={() => replayTo(-1)} /><Mb t="[}]End" o={() => replayTo(fullLog.length - 1)} />
           <Mb t="[W]hat-if" o={() => { exitReplay(); enterWhatIf() }} /><Mb t="[E]xit" o={() => exitReplay()} />
           <span className="text-blue-400 text-xs truncate ml-1">{curIdx < 0 ? 'Start' : `${curIdx + 1}/${fullLog.length}: ${lastAction?.description || ''}`}</span>
         </div>

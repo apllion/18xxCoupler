@@ -132,8 +132,8 @@ export function useOverviewData() {
     // Replay
     if (key === '[' || key === ',') { e.preventDefault(); if (inReplay) { replayTo(Math.max(-1, (game?.actionLog?.length || 0) - 2)) } else if (game?.actionLog?.length > 0) { enterReplay(); setTimeout(() => replayTo((game?.actionLog?.length || 1) - 2), 0) }; return }
     if (key === ']' || key === '.') { e.preventDefault(); if (inReplay) { const cur = (game?.actionLog?.length || 0) - 1; if (cur < fullLog.length - 1) replayTo(cur + 1) }; return }
-    if (key === 'Home') { e.preventDefault(); if (!inReplay && game?.actionLog?.length > 0) enterReplay(); setTimeout(() => replayTo(-1), 0); return }
-    if (key === 'End') { e.preventDefault(); if (inReplay) replayTo(fullLog.length - 1); return }
+    if (key === '{') { e.preventDefault(); if (!inReplay && game?.actionLog?.length > 0) enterReplay(); setTimeout(() => replayTo(-1), 0); return }
+    if (key === '}') { e.preventDefault(); if (inReplay) replayTo(fullLog.length - 1); return }
     if (key === 'e' && !panel && inReplay) { exitReplay(); return }
     if (key === 'w' && !panel && inReplay) { exitReplay(); enterWhatIf(); return }
     if (key === 'Enter' && !panel && !inReplay && game?.actionLog?.length > 0) { enterReplay(); return }
