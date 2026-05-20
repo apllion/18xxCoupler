@@ -208,6 +208,34 @@ function PanelContent({ panel, game, player, corp, unfloated, fmt, revenueInput,
     return <PlayerCard game={game} playerId={player.id} skin={m ? 'moderator' : 'broker'} />
   }
 
+  // Buy private from bank (auctions, drafts — record the result)
+  if (panel === 'buyprivate' && player) {
+    const available = (game.companies || []).filter(c => !c.ownerId && !c.closed)
+    return (
+      <div>
+        <Title m={m}>{player.name} — Buy Private</Title>
+        {available.length === 0
+          ? <span className={m ? 'text-red-400 text-xs' : 'text-broker-text-muted text-sm'}>No privates available</span>
+          : <div className="flex flex-wrap gap-1 mt-1">
+              {available.map(c => {
+                const ok = player.cash >= c.value
+                return (
+                  <Btn key={c.sym} m={m} v={ok ? 'green' : 'disabled'}
+                    o={() => {
+                      const input = prompt(`${c.sym} (${c.name}) — face value ${fmt(c.value)}\nPrice paid:`, c.value)
+                      const pr = parseInt(input, 10)
+                      if (pr > 0) doAction({ type: 'BUY_PRIVATE', playerId: player.id, companySym: c.sym, price: pr })
+                    }}>
+                    {c.sym} {fmt(c.value)} {c.revenue > 0 && `+${fmt(c.revenue)}`}
+                  </Btn>
+                )
+              })}
+            </div>
+        }
+      </div>
+    )
+  }
+
   // Corp share trading (21Moon, PTG, 18India)
   if (panel === 'corpshare' && corp) {
     const shareSize = game.title.shares?.[1] ?? 10

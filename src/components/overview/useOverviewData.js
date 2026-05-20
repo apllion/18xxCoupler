@@ -160,6 +160,7 @@ export function useOverviewData() {
     if (key === 't' && !panel) setPanel('train')
     if (key === 'n' && !panel && unfloated.length > 0) setPanel('par')
     if (key === 'v' && !panel) setPanel('private')
+    if (key === 'p' && !panel) setPanel('buyprivate')
     if (key === 'l' && !panel && game?.title?.loans && selCorp?.floated) setPanel('loan')
     if (key === 'g' && !panel && game?.title?.corpCanBuyShares && selCorp?.floated) setPanel('corpshare')
     if (key === 'a' && !panel) doAction({ type: 'ADVANCE_ROUND' })

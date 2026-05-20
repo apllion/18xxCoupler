@@ -191,7 +191,8 @@ export default function ModeratorOverview() {
           <Mb t="[R]ev" o={() => { setPanel('revenue'); setTimeout(() => revRef.current?.focus(), 50) }} />
           <Mb t="[T]rain" o={() => setPanel('train')} />
           {unfloated.length > 0 && <Mb t="[N]ew" o={() => setPanel('par')} />}
-          <Mb t="Pri[v]" o={() => setPanel('private')} />
+          <Mb t="[P]riv" o={() => setPanel('buyprivate')} />
+          <Mb t="Sel[v]" o={() => setPanel('private')} />
           {game.title.loans && selCorp?.floated && <Mb t="[L]oan" o={() => setPanel('loan')} />}
           {game.title.corpCanBuyShares && selCorp?.floated && <Mb t="[G]corp" o={() => setPanel('corpshare')} />}
           <span className="text-blue-800">|</span>

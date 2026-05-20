@@ -177,7 +177,8 @@ export default function BrokerOverview() {
           <Bb t="Revenue" o={() => { setPanel('revenue'); setTimeout(() => revRef.current?.focus(), 50) }} />
           <Bb t="Train" o={() => setPanel('train')} />
           {unfloated.length > 0 && <Bb t="Par" o={() => setPanel('par')} />}
-          <Bb t="Private" o={() => setPanel('private')} />
+          <Bb t="Priv Buy" o={() => setPanel('buyprivate')} />
+          <Bb t="Priv Sell" o={() => setPanel('private')} />
           {game.title.loans && selCorp?.floated && <Bb t="Loan" o={() => setPanel('loan')} />}
           {game.title.corpCanBuyShares && selCorp?.floated && <Bb t="Corp Trade" o={() => setPanel('corpshare')} />}
           <span className="text-broker-border mx-0.5">|</span>
