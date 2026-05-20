@@ -32,8 +32,8 @@ export default function GameShell() {
   const inPregame = game?.roundTracker?.inPregame
   const sync = useSyncContext()
 
-  // Classic mode: Lemmi-style full screen, no header/nav chrome
-  if (viewMode === 'classic' && !inPregame) {
+  // Moderator mode: Lemmi-style full screen, no header/nav chrome
+  if (viewMode === 'moderator') {
     return (
       <div className="flex flex-col h-screen">
         <OverviewTab />

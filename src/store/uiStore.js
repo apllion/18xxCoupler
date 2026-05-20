@@ -9,11 +9,11 @@ export const useUIStore = create((set) => ({
   activeCorpSym: null,      // which corp is selected in Corps tab
   showLog: false,
   turnTracking: 'on',       // 'on' | 'off' — local preference for guided/manual
-  viewMode: 'broker',       // 'broker' | 'classic' — tabbed vs Lemmi single-screen
+  viewMode: 'broker',       // 'broker' | 'moderator' — tabbed vs Lemmi single-screen
 
   setActiveTab: (tab) => set({ activeTab: tab }),
   toggleViewMode: () => set((s) => ({
-    viewMode: s.viewMode === 'broker' ? 'classic' : 'broker',
+    viewMode: s.viewMode === 'broker' ? 'moderator' : 'broker',
   })),
   setActivePlayer: (id) => set({ activePlayerId: id }),
   setActiveCorp: (sym) => set({ activeCorpSym: sym }),

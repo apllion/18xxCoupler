@@ -36,17 +36,17 @@ export default function OverviewTab() {
   const label = game.roundTracker ? roundLabel(game.roundTracker) : ''
   const limit = trainLimit(game.phaseManager)
 
-  const corps = useMemo(() =>
-    game.corporations
+  // Show ALL corps — floated first sorted by price, then unfloated in definition order
+  const corps = useMemo(() => {
+    const active = game.corporations
       .filter(c => c.ipoed || c.floated)
-      .map(c => ({
-        ...c,
-        price: corpPrice(game.stockMarket, c.sym) || 0,
-        pos: game.stockMarket.corpPositions[c.sym],
-      }))
-      .sort((a, b) => b.price - a.price),
-    [game.corporations, game.stockMarket]
-  )
+      .map(c => ({ ...c, price: corpPrice(game.stockMarket, c.sym) || 0, pos: game.stockMarket.corpPositions[c.sym] }))
+      .sort((a, b) => b.price - a.price)
+    const inactive = game.corporations
+      .filter(c => !c.ipoed && !c.floated)
+      .map(c => ({ ...c, price: 0, pos: null }))
+    return [...active, ...inactive]
+  }, [game.corporations, game.stockMarket])
 
   const unfloated = useMemo(() =>
     game.corporations.filter(c => !c.ipoed && !c.floated),
@@ -125,7 +125,7 @@ export default function OverviewTab() {
     if (key === 'ArrowUp') { e.preventDefault(); setCurRow(r => Math.max(0, r - 1)) }
     if (key === 'ArrowDown') { e.preventDefault(); setCurRow(r => Math.min(game.players.length - 1, r + 1)) }
     if (key === 'ArrowLeft') { e.preventDefault(); setCurCol(c => Math.max(0, c - 1)) }
-    if (key === 'ArrowRight') { e.preventDefault(); setCurCol(c => Math.min(corps.length - 1, c + 1)) }
+    if (key === 'ArrowRight') { e.preventDefault(); setCurCol(c => Math.min(Math.max(corps.length - 1, 0), c + 1)) }
 
     // Quick player select: 1-9
     if (key >= '1' && key <= '9') {
@@ -143,8 +143,13 @@ export default function OverviewTab() {
     // Actions on current selection
     if (!selPlayer || !selCorp) return
 
-    // B = Buy share (IPO)
+    // B = Buy share (IPO or market) — also works as par if corp unfloated
     if (key === 'b' && !panel) {
+      if (!selCorp.ipoed && !selCorp.floated) {
+        // Open par panel for this corp
+        setPanel('par')
+        return
+      }
       if (selCorp.ipoShares > 0) {
         doAction({ type: 'BUY_SHARE', playerId: selPlayer.id, corpSym: selCorp.sym, source: 'ipo', percent: 10 })
       } else if (selCorp.marketShares > 0) {
@@ -205,7 +210,7 @@ export default function OverviewTab() {
           <span className={game.bank.cash <= 0 ? 'text-red-400 font-bold' : 'text-green-300'}>Bank:{fmt(game.bank.cash)}</span>
           <button onClick={() => canUndo() && undo()} className="text-blue-400 hover:text-white disabled:text-blue-800">[U]ndo</button>
           <button onClick={useUIStore.getState().toggleViewMode}
-            className="text-yellow-400 hover:text-yellow-200">[Tab]Broker</button>
+            className="text-yellow-400 hover:text-yellow-200">[Tab] Broker</button>
         </span>
       </div>
 
@@ -220,7 +225,7 @@ export default function OverviewTab() {
               <th className="px-1 text-center min-w-[32px]">Cert</th>
               {corps.map((c, ci) => (
                 <th key={c.sym}
-                  className={`px-1 text-center min-w-[44px] cursor-pointer ${ci === curCol ? 'bg-blue-800' : 'hover:bg-blue-900'}`}
+                  className={`px-1 text-center min-w-[44px] cursor-pointer ${ci === curCol ? 'bg-blue-800' : 'hover:bg-blue-900'} ${!c.ipoed && !c.floated ? 'opacity-40' : ''}`}
                   style={{ color: c.color }}
                   onClick={() => setCurCol(ci)}>
                   {c.sym}
@@ -274,40 +279,47 @@ export default function OverviewTab() {
             <tr><td colSpan={4 + corps.length} className="h-0.5 bg-green-700"></td></tr>
 
             {/* Corp data rows */}
-            <CRow label="Kurs" corps={corps} curCol={curCol} render={c => (
-              <span className="text-cyan-300">{c.price || '—'}{c.pos && <span className="text-blue-500">/{c.pos.row}</span>}</span>
-            )} />
-            <CRow label="Par" corps={corps} curCol={curCol} render={c => (
-              <span className="text-blue-300">{c.parPrice || '—'}</span>
-            )} />
-            <CRow label="Geld" corps={corps} curCol={curCol} render={c => (
-              <span className={c.cash < 0 ? 'text-red-400' : 'text-green-300'}>{fmt(c.cash)}</span>
-            )} />
-            <CRow label="Bank" corps={corps} curCol={curCol} render={c => (
-              <span className="text-blue-300">{c.ipoShares > 0 ? `${c.ipoShares}%` : '—'}</span>
+            <CRow label="Kurs" corps={corps} curCol={curCol} render={c => {
+              if (!c.ipoed) return <span className="text-blue-900/30">—</span>
+              return <span className="text-cyan-300">{c.price || '—'}{c.pos && <span className="text-blue-500">/{c.pos.row}</span>}</span>
+            }} />
+            <CRow label="Par" corps={corps} curCol={curCol} render={c => {
+              if (!c.ipoed) return <span className="text-blue-900/30">—</span>
+              return <span className="text-blue-300">{c.parPrice || '—'}</span>
+            }} />
+            <CRow label="Geld" corps={corps} curCol={curCol} render={c => {
+              if (!c.ipoed) return <span className="text-blue-900/30">—</span>
+              return <span className={c.cash < 0 ? 'text-red-400' : 'text-green-300'}>{fmt(c.cash)}</span>
+            }} />
+            <CRow label="IPO" corps={corps} curCol={curCol} render={c => (
+              <span className="text-blue-300">{c.ipoShares < 100 ? `${c.ipoShares}%` : c.ipoed ? '—' : <span className="text-blue-900/30">100%</span>}</span>
             )} />
             <CRow label="Pool" corps={corps} curCol={curCol} render={c => (
-              <span className={c.marketShares > 0 ? 'text-yellow-300' : 'text-blue-900/40'}>{c.marketShares > 0 ? `${c.marketShares}%` : '—'}</span>
+              <span className={c.marketShares > 0 ? 'text-yellow-300' : 'text-blue-900/30'}>{c.marketShares > 0 ? `${c.marketShares}%` : '—'}</span>
             )} />
             <CRow label="Loks" corps={corps} curCol={curCol} render={c => {
+              if (!c.floated) return <span className="text-blue-900/30">—</span>
               if (c.trains.length === 0) return <span className="text-red-500 font-bold">!</span>
               return <span className="text-white font-bold">{c.trains.map(t => t.name).join('')}</span>
             }} />
             <CRow label="Fährt" corps={corps} curCol={curCol} render={c => {
+              if (!c.floated) return <span className="text-blue-900/30">—</span>
               const rev = lastRevenue[c.sym]
-              if (!rev) return <span className="text-blue-900/40">—</span>
+              if (!rev) return <span className="text-blue-900/30">—</span>
               const sign = rev.type === 'WITHHOLD_DIVIDEND' ? '-' : rev.type === 'HALF_DIVIDEND' ? '~' : '+'
               return <span className={rev.type === 'WITHHOLD_DIVIDEND' ? 'text-red-300' : 'text-green-300'}>{sign}{rev.amount}</span>
             }} />
-            <CRow label="Pöppel" corps={corps} curCol={curCol} render={c => (
-              <span className="text-blue-300">{c.tokensPlaced}/{c.tokens.length}</span>
-            )} />
+            <CRow label="Pöppel" corps={corps} curCol={curCol} render={c => {
+              if (!c.floated) return <span className="text-blue-900/30">—</span>
+              return <span className="text-blue-300">{c.tokensPlaced}/{c.tokens.length}</span>
+            }} />
             <CRow label="Priv" corps={corps} curCol={curCol} render={c => {
               const privs = corpPrivates[c.sym]
-              if (!privs) return <span className="text-blue-900/40">—</span>
+              if (!privs) return <span className="text-blue-900/30">—</span>
               return <span className="text-purple-300">{privs.join(',')}</span>
             }} />
             <CRow label="Dir" corps={corps} curCol={curCol} render={c => {
+              if (!c.ipoed) return <span className="text-blue-900/30">—</span>
               const pres = game.players.find(p => isPresident(p, c.sym))
               return <span className="text-yellow-400">{pres ? pres.name.slice(0, 6) : '—'}</span>
             }} />
@@ -344,7 +356,7 @@ export default function OverviewTab() {
             [B]uy [S]ell [M]kt [R]ev [T]rain [N]ew [V]priv [A]dv [C]oll [O]sold [U]ndo
           </span>
           <span className="text-blue-400 truncate ml-2">
-            {lastAction ? lastAction.description : '—'}
+            {lastAction ? lastAction.description : ''}{game.roundTracker?.inPregame ? ' \u2192 ' + (game.roundTracker.pregameSteps?.[game.roundTracker.pregameIndex]?.label || 'Pregame') : ''}
           </span>
         </div>
       )}
