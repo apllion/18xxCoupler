@@ -11,6 +11,18 @@ export const useUIStore = create((set) => ({
   showLog: false,
   turnTracking: 'off',      // 'on' | 'off' — dormant for now
 
+  // Configurable automation
+  autoConfig: {
+    advanceOnAllPass: false,    // auto-advance SR when all players passed
+    advanceOnCorpDone: false,   // auto-next corp after revenue+train
+    collectPrivates: false,     // auto-collect private revenue at OR start
+    soldOutAdjust: false,       // auto-sold-out adjustment at OR end
+    presidentSwap: false,       // auto-swap presidency on share majority
+  },
+  setAutoConfig: (key, value) => set((s) => ({
+    autoConfig: { ...s.autoConfig, [key]: value },
+  })),
+
   setActiveTab: (tab) => set({ activeTab: tab }),
   setActivePlayer: (id) => set({ activePlayerId: id }),
   setMyPlayer: (id) => set({ myPlayerId: id }),

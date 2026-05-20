@@ -168,6 +168,35 @@ function PanelContent({ panel, game, player, corp, unfloated, fmt, revenueInput,
     )
   }
 
+  // Settings
+  if (panel === 'settings') {
+    const ac = useUIStore.getState().autoConfig
+    const toggle = (key) => useUIStore.getState().setAutoConfig(key, !ac[key])
+    const items = [
+      { key: 'advanceOnAllPass', label: 'Auto-advance SR when all pass' },
+      { key: 'advanceOnCorpDone', label: 'Auto-next corp after revenue + train' },
+      { key: 'collectPrivates', label: 'Auto-collect private revenue at OR start' },
+      { key: 'soldOutAdjust', label: 'Auto-sold-out adjustment at OR end' },
+      { key: 'presidentSwap', label: 'Auto-swap presidency on share majority' },
+    ]
+    return (
+      <div>
+        <Title m={m}>Automation Settings</Title>
+        <div className="mt-1 space-y-1">
+          {items.map(it => (
+            <button key={it.key} onClick={() => toggle(it.key)}
+              className={`block w-full text-left text-xs px-2 py-1 rounded ${
+                m ? (ac[it.key] ? 'bg-green-900 text-green-300' : 'bg-gray-800 text-gray-400')
+                  : (ac[it.key] ? 'bg-green-700/30 text-green-300' : 'bg-broker-surface-hover text-broker-text-muted')
+              }`}>
+              [{ac[it.key] ? 'X' : ' '}] {it.label}
+            </button>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
   // Navigation menu
   if (panel === 'navigate') {
     const go = (tab) => { useUIStore.getState().setActiveTab(tab); onClose() }

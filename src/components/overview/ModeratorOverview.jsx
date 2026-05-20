@@ -49,29 +49,18 @@ export default function ModeratorOverview() {
             className={`${t.bg} border border-current rounded px-0.5 py-0 ${t.head}`}>
             {Object.values(THEMES).map(th => <option key={th.id} value={th.id}>{th.label}</option>)}
           </select>
-          <button onClick={() => useUIStore.getState().setActiveTab('market')} className={`${t.player} hover:${t.bright}`}>[Tab]</button>
-          <button onClick={() => useUIStore.getState().setActiveTab('overview')} className={`${t.head} hover:${t.bright}`}>Broker</button>
+          <button onClick={() => setPanel('settings')} className={`${t.text} hover:${t.bright}`}>[X]</button>
         </span>
       </div>
 
-      {/* Nav tabs */}
+      {/* Nav tabs — inline panels within Moderator */}
       <div className={`${t.bar} px-2 py-0.5 flex items-center gap-1 flex-shrink-0 border-b ${t.border}`}>
-        {[
-          { key: 'F1', id: 'moderator', label: 'Overview' },
-          { key: 'F2', id: 'market', label: 'Market' },
-          { key: 'F3', id: 'corps', label: 'Corps' },
-          { key: 'F4', id: 'players', label: 'Players' },
-          ...(game.companies?.length > 0 ? [{ key: 'F5', id: 'privates', label: 'Privates' }] : []),
-          { key: 'F6', id: 'summary', label: 'Summary' },
-        ].map(tab => {
-          const active = useUIStore.getState().activeTab === tab.id
-          return (
-            <button key={tab.id} onClick={() => useUIStore.getState().setActiveTab(tab.id)}
-              className={`text-xs px-1.5 py-0.5 ${active ? `${t.bright} font-bold` : `${t.text} hover:${t.bright}`}`}>
-              {tab.key}:{tab.label}
-            </button>
-          )
-        })}
+        <button onClick={() => closePanel()} className={`text-xs px-1.5 py-0.5 ${!panel ? `${t.bright} font-bold` : `${t.text}`}`}>F1:Matrix</button>
+        <button onClick={() => setPanel('corpdetail')} className={`text-xs px-1.5 py-0.5 ${panel === 'corpdetail' ? `${t.bright} font-bold` : `${t.text}`}`}>F3:Corp</button>
+        <button onClick={() => setPanel('playerdetail')} className={`text-xs px-1.5 py-0.5 ${panel === 'playerdetail' ? `${t.bright} font-bold` : `${t.text}`}`}>F4:Player</button>
+        <button onClick={() => setPanel('buyprivate')} className={`text-xs px-1.5 py-0.5 ${panel === 'buyprivate' ? `${t.bright} font-bold` : `${t.text}`}`}>F5:Privates</button>
+        <button onClick={() => setPanel('settings')} className={`text-xs px-1.5 py-0.5 ${panel === 'settings' ? `${t.bright} font-bold` : `${t.text}`}`}>F6:Settings</button>
+        <button onClick={() => setPanel('navigate')} className={`text-xs px-1.5 py-0.5 ${panel === 'navigate' ? `${t.bright} font-bold` : `${t.text}`}`}>Tab:Switch</button>
       </div>
 
       {/* Mode banners */}
