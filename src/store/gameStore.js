@@ -37,6 +37,12 @@ export const useGameStore = create(
         applyAction(freshGame, action)
       }
 
+      // If game has actions, it's past pregame setup
+      if (actions.length > 0 && freshGame.roundTracker?.inPregame) {
+        freshGame.roundTracker.inPregame = false
+        freshGame.roundTracker.pregameIndex = -1
+      }
+
       const saveKey = `${titleId}_${savedGame.createdAt}`
       set({ game: freshGame, saveKey })
     },

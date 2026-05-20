@@ -403,6 +403,12 @@ export function importGame(gameJson) {
     }
   }
 
+  // Imported games are past pregame — clear auction state
+  if (state.roundTracker) {
+    state.roundTracker.inPregame = false
+    state.roundTracker.pregameIndex = -1
+  }
+
   // Attach import metadata
   state.importSource = {
     platform: '18xx.games',
