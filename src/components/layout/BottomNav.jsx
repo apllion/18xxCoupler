@@ -1,6 +1,8 @@
 import { useGameStore } from '../../store/gameStore.js'
 import { useUIStore } from '../../store/uiStore.js'
 
+const HOME_TAB = { id: 'overview', label: '\u2302 Overview' }
+
 const CORE_TABS = [
   { id: 'market', label: 'Market' },
   { id: 'corps', label: 'Corps' },
@@ -19,6 +21,7 @@ export default function BottomNav() {
   const hasBeer = game?.beerMarket != null
   const hasPrivates = game?.companies?.length > 0
   const tabs = [
+    HOME_TAB,
     ...CORE_TABS,
     ...(hasPrivates ? [PRIVATES_TAB] : []),
     ...(hasBeer ? [BEER_TAB] : []),

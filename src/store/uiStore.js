@@ -4,17 +4,13 @@
 import { create } from 'zustand'
 
 export const useUIStore = create((set) => ({
-  activeTab: 'market',     // 'market' | 'corps' | 'privates' | 'summary'
+  activeTab: 'overview',   // 'overview' | 'market' | 'corps' | 'privates' | 'summary'
   activePlayerId: null,     // which player is "current" (soft, for filtering actions)
   activeCorpSym: null,      // which corp is selected in Corps tab
   showLog: false,
-  turnTracking: 'on',       // 'on' | 'off' — local preference for guided/manual
-  viewMode: 'broker',       // 'broker' | 'moderator' — tabbed vs Lemmi single-screen
+  turnTracking: 'off',      // 'on' | 'off' — dormant for now
 
   setActiveTab: (tab) => set({ activeTab: tab }),
-  toggleViewMode: () => set((s) => ({
-    viewMode: s.viewMode === 'broker' ? 'moderator' : 'broker',
-  })),
   setActivePlayer: (id) => set({ activePlayerId: id }),
   setActiveCorp: (sym) => set({ activeCorpSym: sym }),
   toggleLog: () => set((s) => ({ showLog: !s.showLog })),

@@ -235,7 +235,7 @@ export default function OverviewTab() {
     // O = Sold-out adjust
     if (key === 'o' && !panel) { doAction({ type: 'SOLD_OUT_ADJUST' }) }
     // Tab = switch to broker view
-    if (key === 'Tab') { e.preventDefault(); useUIStore.getState().toggleViewMode() }
+    if (key === 'Tab') { e.preventDefault(); useUIStore.getState().setActiveTab('market') }
   }, [game, corps, selPlayer, selCorp, panel, canUndo, undo, unfloated])
 
   useEffect(() => {
@@ -263,8 +263,8 @@ export default function OverviewTab() {
           )}
           <span className={game.bank.cash <= 0 ? 'text-red-400 font-bold' : 'text-green-300'}>Bank:{fmt(game.bank.cash)}</span>
           <button onClick={() => canUndo() && undo()} className="text-blue-400 hover:text-white disabled:text-blue-800">[U]ndo</button>
-          <button onClick={useUIStore.getState().toggleViewMode}
-            className="text-yellow-400 hover:text-yellow-200">[Tab] Broker</button>
+          <button onClick={() => useUIStore.getState().setActiveTab('market')}
+            className="text-yellow-400 hover:text-yellow-200">[Tab] Detail</button>
         </span>
       </div>
 

@@ -27,17 +27,24 @@ const TAB_COMPONENTS = {
 export default function GameShell() {
   const game = useGameStore((s) => s.game)
   const activeTab = useUIStore((s) => s.activeTab)
-  const viewMode = useUIStore((s) => s.viewMode)
   const TabComponent = TAB_COMPONENTS[activeTab] || SummaryTab
   const fullLog = useGameStore((s) => s.fullLog)
   const inReplay = fullLog !== null
   const inPregame = game?.roundTracker?.inPregame && !inReplay
   const sync = useSyncContext()
 
-  // Moderator mode: Lemmi-style full screen, no header/nav chrome
-  if (viewMode === 'moderator') {
+  // Overview is the home screen — no header/nav chrome
+  if (activeTab === 'overview') {
     return (
       <div className="flex flex-col h-screen">
+        <RoomBar
+          roomId={sync?.roomId}
+          peerCount={sync?.peerCount}
+          status={sync?.status}
+          createRoom={sync?.createRoom}
+          joinRoom={sync?.joinRoom}
+          leaveRoom={sync?.leaveRoom}
+        />
         <OverviewTab />
       </div>
     )

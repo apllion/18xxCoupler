@@ -150,12 +150,12 @@ export default function Header() {
               Bank: {fmt(game.bank.cash)}
             </span>
 
-            {/* View mode toggle — always available */}
+            {/* Home — back to overview */}
             <button
-              onClick={useUIStore.getState().toggleViewMode}
+              onClick={() => useUIStore.getState().setActiveTab('overview')}
               className="text-xs px-2.5 py-0.5 rounded bg-broker-surface-hover text-broker-text-muted hover:text-white transition-colors"
             >
-              Moderator
+              {'\u2302'} Overview
             </button>
 
             {/* What-if toggle */}
@@ -172,19 +172,7 @@ export default function Header() {
               </button>
             )}
 
-            {/* Guided / Open toggle */}
-            {!inPregame && !isWhatIf && (
-              <button
-                onClick={toggleTurnTracking}
-                className={`text-xs px-2.5 py-0.5 rounded transition-colors ${
-                  turnTracking === 'on'
-                    ? 'bg-blue-800 text-blue-200'
-                    : 'bg-amber-800 text-amber-200'
-                }`}
-              >
-                {turnTracking === 'on' ? 'Guided' : 'Open'}
-              </button>
-            )}
+            {/* Guided / Open toggle — dormant */}
 
             <button onClick={toggleLog} className="text-broker-text-muted hover:text-broker-gold text-xs">
               Log
