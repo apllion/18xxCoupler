@@ -7,6 +7,7 @@ import { getTitle } from '../titles/index.js'
 
 // Map 18xx.games title string to our titleId
 const TITLE_MAP = {
+  '1822MX': 'g1822mx',
   '1830': 'g1830',
   '1846': 'g1846',
   '1849': 'g1849',

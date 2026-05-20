@@ -26,6 +26,9 @@ export default function ActionPanel() {
       <ParSection game={game} player={player} dispatch={dispatch} fmt={fmt} />
       <BuySection game={game} player={player} dispatch={dispatch} fmt={fmt} />
       <SellSection game={game} player={player} dispatch={dispatch} fmt={fmt} />
+      {game.title.shorts?.enabled && (
+        <ShortSection game={game} player={player} dispatch={dispatch} fmt={fmt} />
+      )}
     </div>
   )
 }
@@ -165,7 +168,7 @@ function SellSection({ game, player, dispatch, fmt }) {
   const holdingsToSell = []
   for (const corp of game.corporations) {
     const pct = player.shares
-      .filter((s) => s.corpSym === corp.sym)
+      .filter((s) => s.corpSym === corp.sym && !s.isShort)
       .reduce((sum, s) => sum + s.percent, 0)
     if (pct > 0) {
       const price = corpPrice(game.stockMarket, corp.sym)
@@ -205,6 +208,86 @@ function SellSection({ game, player, dispatch, fmt }) {
           </div>
         ))}
       </div>
+    </div>
+  )
+}
+
+function ShortSection({ game, player, dispatch, fmt }) {
+  const phase = game.phaseManager?.phases?.[game.phaseManager?.currentIndex]
+  const noNewShorts = game.title.shorts?.noNewShortsPhase && phase?.name === game.title.shorts.noNewShortsPhase
+
+  // Shortable corps: floated, right size, player doesn't own positive shares
+  const shortable = game.corporations.filter((c) => {
+    if (!c.floated || c.liquidated) return false
+    const minSize = game.title.shorts?.minCorpSize || '5share'
+    if (minSize === '5share' && c.corpSize === '2share') return false
+    const ownsPositive = player.shares.some((s) => s.corpSym === c.sym && !s.isShort)
+    return !ownsPositive
+  })
+
+  // Current shorts this player has
+  const shorts = player.shares.filter((s) => s.isShort)
+  const shortsByCorp = {}
+  for (const s of shorts) {
+    shortsByCorp[s.corpSym] = (shortsByCorp[s.corpSym] || 0) + 1
+  }
+
+  if (shortable.length === 0 && shorts.length === 0) return null
+
+  return (
+    <div className="bg-broker-surface rounded-lg p-3">
+      <div className="text-xs text-broker-text-muted mb-2 font-medium uppercase">
+        Short Selling {noNewShorts && <span className="text-red-400">(closed in phase {phase.name})</span>}
+      </div>
+
+      {/* Open new shorts */}
+      {!noNewShorts && shortable.length > 0 && (
+        <div className="space-y-1 mb-2">
+          {shortable.map((corp) => {
+            const price = corpPrice(game.stockMarket, corp.sym)
+            if (!price) return null
+            return (
+              <div key={corp.sym} className="flex items-center gap-2">
+                <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: corp.color }} />
+                <span className="text-sm font-medium w-12">{corp.sym}</span>
+                <button
+                  onClick={() => dispatch({ type: 'SHORT_SELL', playerId: player.id, corpSym: corp.sym })}
+                  className="text-xs px-2 py-1 rounded bg-orange-900 hover:bg-orange-800 text-orange-200"
+                >
+                  Short → +{fmt(price)}
+                </button>
+              </div>
+            )
+          })}
+        </div>
+      )}
+
+      {/* Close existing shorts */}
+      {Object.keys(shortsByCorp).length > 0 && (
+        <div>
+          <div className="text-xs text-broker-text-muted mb-1">Open Shorts:</div>
+          <div className="space-y-1">
+            {Object.entries(shortsByCorp).map(([corpSym, count]) => {
+              const price = corpPrice(game.stockMarket, corpSym)
+              const corp = game.corporations.find((c) => c.sym === corpSym)
+              return (
+                <div key={corpSym} className="flex items-center gap-2">
+                  <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: corp?.color || '#666' }} />
+                  <span className="text-sm font-medium w-12">{corpSym}</span>
+                  <span className="text-xs text-red-300">×{count} short</span>
+                  <button
+                    onClick={() => dispatch({ type: 'CLOSE_SHORT', playerId: player.id, corpSym })}
+                    disabled={player.cash < (price || 0)}
+                    className="text-xs px-2 py-1 rounded bg-green-900 hover:bg-green-800 disabled:opacity-30 text-green-200"
+                  >
+                    Close → -{fmt(price)}
+                  </button>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -90,8 +90,16 @@ function PrivateCard({ company, game, dispatch, fmt }) {
         <div>
           <div className="font-medium">{company.sym} — {company.name}</div>
           <div className="text-xs text-broker-text-muted mt-0.5">
-            Value: {fmt(company.value)} · Revenue: {fmt(company.revenue)}/OR
+            Value: {fmt(company.value)}
+            {company.revenue > 0 && <> · Revenue: {fmt(company.revenue)}/OR</>}
+            {company.activeInPhase && <span className="text-yellow-400"> · Active in {company.activeInPhase} phase</span>}
+            {company.neverCloses && <span className="text-green-400"> · Never closes</span>}
           </div>
+          {company.sharesGranted && (
+            <div className="text-xs text-blue-300 mt-0.5">
+              Grants: {company.sharesGranted.map((s) => `${s.percent}% ${s.corpSym}`).join(', ')}
+            </div>
+          )}
           <div className="text-xs text-broker-text-muted mt-1">{company.desc}</div>
         </div>
         <div className="text-sm text-broker-text flex-shrink-0 ml-3">{ownerName}</div>
@@ -106,7 +114,7 @@ function PrivateCard({ company, game, dispatch, fmt }) {
             Buy
           </button>
         )}
-        {company.ownerId && company.ownerType === 'player' && (
+        {company.ownerId && company.ownerType === 'player' && company.canSellToCorp !== false && (
           <button
             onClick={() => setSellMode(!sellMode)}
             className="text-xs bg-broker-surface-hover hover:bg-broker-surface-hover px-2 py-1 rounded"
@@ -149,8 +157,16 @@ function PrivateCard({ company, game, dispatch, fmt }) {
             <button
               key={c.sym}
               onClick={() => {
-                setSellCorpSym(c.sym)
-                handleSell()
+                const price = parseInt(sellPrice, 10)
+                if (!price || !company.ownerId) return
+                dispatch({
+                  type: 'SELL_PRIVATE',
+                  companySym: company.sym,
+                  fromPlayerId: company.ownerId,
+                  toCorpSym: c.sym,
+                  price,
+                })
+                setSellMode(false)
               }}
               className="text-xs px-2 py-1 rounded font-medium"
               style={{ backgroundColor: c.color, color: c.textColor || '#fff' }}
