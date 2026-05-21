@@ -153,7 +153,7 @@ export default function PassphraseGate({ children }) {
 
             <p><strong>P2P Sync:</strong> When you create or join a room, your browser connects to public Nostr relay servers for WebRTC signaling. This transmits your IP address to relay operators and peer devices. This connection requires your explicit action. Legal basis: Art. 6(1)(a) GDPR (consent).</p>
 
-            <p><strong>18xx.games API:</strong> When you browse or import games, your browser connects to 18xx.games servers. This transmits your IP address. Only public game data is retrieved. Legal basis: Art. 6(1)(a) GDPR (consent — user-initiated).</p>
+            <p><strong>18xx.games API:</strong> When you browse or import games, requests are routed through a CORS proxy on Cloudflare Workers (Cloudflare, Inc., USA) to the 18xx.games API. This transmits your IP address to Cloudflare and 18xx.games servers. The proxy does not store or log data. Only public game data is retrieved. <a href="https://www.cloudflare.com/privacypolicy/" className="underline hover:text-gray-300" target="_blank" rel="noopener">Cloudflare Privacy Policy</a>. Legal basis: Art. 6(1)(a) GDPR (consent — user-initiated).</p>
 
             <p><strong>Hosting:</strong> GitHub Pages (GitHub/Microsoft, USA). GitHub may log IP addresses. <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement" className="underline hover:text-gray-300" target="_blank" rel="noopener">GitHub Privacy Statement</a>. EU-US Data Privacy Framework.</p>
 
