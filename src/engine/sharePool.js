@@ -16,14 +16,8 @@ export function buyShareFromIPO(state, playerId, corpSym, percent = 10) {
   player.cash -= cost
   corp.ipoShares -= percent
 
-  // Capitalization: full = money goes to corp treasury from each IPO sale
-  // Incremental = money goes to bank; corp gets par * 10 when it floats
-  if (state.title.capitalization === 'full') {
-    corp.cash += cost
-  } else {
-    // Incremental: player pays bank
-    state.bank.cash += cost
-  }
+  // Both full and incremental: player pays bank. Corp gets money on float.
+  state.bank.cash += cost
 
   player.shares.push({ corpSym, percent, isPresident })
 
@@ -31,12 +25,10 @@ export function buyShareFromIPO(state, playerId, corpSym, percent = 10) {
   const soldPercent = 100 - corp.ipoShares
   if (!corp.floated && soldPercent >= corp.floatPercent) {
     corp.floated = true
-    if (state.title.capitalization === 'incremental') {
-      // Corp receives par * 10 from the bank on float
-      const capitalization = corp.parPrice * 10
-      corp.cash += capitalization
-      state.bank.cash -= capitalization
-    }
+    // Corp receives par * 10 from bank on float (both full and incremental)
+    const capitalization = corp.parPrice * 10
+    corp.cash += capitalization
+    state.bank.cash -= capitalization
   }
 }
 
@@ -92,10 +84,7 @@ export function corpBuyShareFromIPO(state, buyerCorpSym, targetCorpSym, percent 
 
   const cost = (price * percent) / 10
   buyer.cash -= cost
-
-  if (state.title.capitalization === 'full') {
-    target.cash += cost
-  }
+  state.bank.cash += cost
 
   target.ipoShares -= percent
   buyer.sharesHeld.push({ corpSym: targetCorpSym, percent, isPresident: false })
@@ -104,6 +93,9 @@ export function corpBuyShareFromIPO(state, buyerCorpSym, targetCorpSym, percent 
   const soldPercent = 100 - target.ipoShares
   if (!target.floated && soldPercent >= target.floatPercent) {
     target.floated = true
+    const capitalization = target.parPrice * 10
+    target.cash += capitalization
+    state.bank.cash -= capitalization
   }
 }
 

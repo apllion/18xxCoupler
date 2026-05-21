@@ -474,13 +474,8 @@ function handlePar(state, { playerId, corpSym, parPrice, row, col }) {
   player.cash -= cost
   corp.ipoShares -= presPercent
 
-  if (state.title.capitalization === 'incremental') {
-    // Incremental: player pays bank; corp receives par * 10 on float
-    state.bank.cash += cost
-  } else {
-    // Full: player pays corp directly
-    corp.cash += cost
-  }
+  // Both full and incremental: player pays bank. Corp gets money on float.
+  state.bank.cash += cost
 
   player.shares.push({ corpSym, percent: presPercent, isPresident: true })
 
@@ -488,6 +483,12 @@ function handlePar(state, { playerId, corpSym, parPrice, row, col }) {
   if (soldPercent >= corp.floatPercent) {
     corp.floated = true
     if (state.title.capitalization === 'incremental') {
+      // Incremental: corp receives par * 10
+      const capitalization = parPrice * 10
+      corp.cash += capitalization
+      state.bank.cash -= capitalization
+    } else {
+      // Full: corp receives par * 10
       const capitalization = parPrice * 10
       corp.cash += capitalization
       state.bank.cash -= capitalization
