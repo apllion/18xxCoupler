@@ -213,14 +213,15 @@ export function useSync(gameStore) {
   // Cleanup on unmount
   useEffect(() => cleanup, [cleanup])
 
-  // Auto-rejoin on mount
-  useEffect(() => {
+  // Saved room info for manual rejoin (no auto-connect for GDPR consent)
+  const [savedRoom] = useState(() => loadRoomInfo())
+  const rejoinRoom = useCallback(() => {
     const saved = loadRoomInfo()
     if (saved) {
       if (stateRef.current) establishedRef.current = true
       connect(saved.code, saved.isCreator)
     }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [connect])
 
   // Reconnect on tab visibility
   useEffect(() => {
@@ -278,5 +279,7 @@ export function useSync(gameStore) {
     createRoom,
     joinRoom: joinRoomByCode,
     leaveRoom,
+    savedRoom,    // { code, isCreator } or null — for showing rejoin prompt
+    rejoinRoom,   // call to reconnect to saved room (requires user action)
   }
 }
