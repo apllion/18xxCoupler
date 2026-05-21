@@ -56,7 +56,12 @@ const ACTIONS = [
   { id: 'corpshare', label: 'Corp Trade', mLabel: '[G]corp', key: 'g', round: 'or', gate: (g) => !!g.title.corpCanBuyShares },
   { id: 'execcar', label: 'Exec Car', mLabel: 'ExCar', round: 'or', gate: (g) => !!g.title.executiveCars },
   { id: 'export', label: 'Export', mLabel: 'Export', round: 'or', gate: (g) => !!g.title.trainExport },
-  { id: 'discard', label: 'Discard', mLabel: 'Discard', round: 'or', always: true },
+  { id: 'discard', label: 'Discard', mLabel: 'Discard', round: 'or',
+    gate: (g, rt, player, corp) => corp?.floated && corp?.trains?.length > 0
+  },
+  { id: 'removetoken', label: 'Rm Token', mLabel: 'RmTok', round: 'or',
+    gate: (g, rt, player, corp) => corp?.floated && corp?.tokensPlaced > 0
+  },
 
   // Concessions — 1822 family
   { id: 'concession', label: 'Concession', mLabel: 'Conc', round: 'sr',
@@ -68,6 +73,11 @@ const ACTIONS = [
 
   // Merger actions — title and round specific
   { id: 'merge', label: 'Merge', mLabel: 'Merge', round: 'any', gate: (g) => !!g.title.merger },
+
+  // Player bankrupt
+  { id: 'bankrupt', label: 'Bankrupt', mLabel: 'Bankr', round: 'any',
+    gate: (g) => g.players.some(p => !p.bankrupt)
+  },
 
   // Round management — always
   { id: 'advance', label: 'Advance', mLabel: '[A]dv', key: 'a', round: 'any', always: true, category: 'round' },

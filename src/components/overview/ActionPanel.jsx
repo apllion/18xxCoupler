@@ -252,6 +252,24 @@ function PanelContent({ panel, game, player, corp, unfloated, fmt, revenueInput,
     )
   }
 
+  // Discard train (forced when over train limit)
+  if (panel === 'discard' && corp) {
+    if (corp.trains.length === 0) return <Title m={m}>{corp.sym} has no trains to discard</Title>
+    return (
+      <div>
+        <Title m={m}><span style={{ color: corp.color }}>{corp.sym}</span> — Discard Train</Title>
+        <div className="flex gap-1 mt-1 flex-wrap">
+          {corp.trains.map((t, i) => (
+            <Btn key={t.id || i} m={m} v="red"
+              o={() => doAction({ type: 'DISCARD_TRAIN', corpSym: corp.sym, trainName: t.name })}>
+              {t.name}-train
+            </Btn>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
   // Corp share trading (21Moon, PTG, 18India)
   if (panel === 'corpshare' && corp) {
     const shareSize = game.title.shares?.[1] ?? 10

@@ -248,6 +248,26 @@ export function applyAction(state, action) {
       }
       break
     }
+    // Discard train: forced discard when over train limit after phase change
+    case 'DISCARD_TRAIN': {
+      const dc = state.corporations.find(co => co.sym === action.corpSym)
+      if (dc) {
+        const idx = dc.trains.findIndex(t => t.name === action.trainName)
+        if (idx !== -1) {
+          const discarded = dc.trains.splice(idx, 1)[0]
+          state.depot.discarded.push(discarded)
+        }
+      }
+      break
+    }
+    // Remove token: undo a station token placement
+    case 'REMOVE_TOKEN': {
+      const rc = state.corporations.find(co => co.sym === action.corpSym)
+      if (rc && rc.tokensPlaced > 0) {
+        rc.tokensPlaced--
+      }
+      break
+    }
     // Place token: corp pays token cost, increments tokensPlaced
     case 'PLACE_TOKEN': {
       const tc = state.corporations.find(co => co.sym === action.corpSym)
@@ -958,6 +978,10 @@ function describeAction(state, action) {
       return `Event acknowledged: ${action.event}`
     case 'REMOVE_CORPORATION':
       return `${action.corpSym} removed from game`
+    case 'DISCARD_TRAIN':
+      return `${action.corpSym} discards ${action.trainName}-train`
+    case 'REMOVE_TOKEN':
+      return `${action.corpSym} removes a station token`
     case 'PLACE_TOKEN':
       return `${action.corpSym} places token (${fmt(action.price ?? 0)})`
     case 'ISSUE_SHARES':

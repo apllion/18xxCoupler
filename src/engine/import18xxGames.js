@@ -326,18 +326,13 @@ function convertAction(action, state, playerMap, revenueMap, variantToBase) {
       return null
 
     case 'discard_train': {
-      // Corp forced to discard due to train limit
       const discardName = action.variant || action.train.split('-')[0]
       const baseDiscardName = variantToBase[discardName] || discardName
-      // Find and remove this train from the corp
-      const corp = state.corporations.find(c => c.sym === action.entity)
-      if (corp) {
-        const idx = corp.trains.findIndex(t => t.name === baseDiscardName)
-        if (idx !== -1) {
-          corp.trains.splice(idx, 1)
-        }
+      return {
+        type: 'DISCARD_TRAIN',
+        corpSym: action.entity,
+        trainName: baseDiscardName,
       }
-      return null // handled inline, no engine action needed
     }
 
     case 'bankrupt':
@@ -388,12 +383,17 @@ function convertAction(action, state, playerMap, revenueMap, variantToBase) {
       }
       return null
 
+    case 'remove_token':
+      if (action.entity_type === 'corporation') {
+        return { type: 'REMOVE_TOKEN', corpSym: action.entity }
+      }
+      return null
+
     // Non-financial actions — skip
     case 'assign':
     case 'choose':
     case 'end_game':
     case 'log':
-    case 'remove_token':
     case 'lay_tile':
     case 'run_routes':
     case 'place_token':
