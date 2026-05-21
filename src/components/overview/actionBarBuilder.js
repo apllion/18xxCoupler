@@ -13,9 +13,14 @@ const ACTIONS = [
   { id: 'president', label: 'President', mLabel: 'Pres', round: 'any', always: true,
     gate: (g, rt, player, corp) => {
       if (!player || !corp || !corp.ipoed) return false
-      const pct = player.shares.filter(s => s.corpSym === corp.sym).reduce((s, x) => s + x.percent, 0)
+      const certs = player.shares.filter(s => s.corpSym === corp.sym && !s.isPresident)
       const isPres = player.shares.some(s => s.corpSym === corp.sym && s.isPresident)
-      return pct > 0 && !isPres
+      if (isPres || certs.length === 0) return false
+      // Need enough regular certs to exchange for president cert
+      const presPercent = g.title.shares?.[0] ?? 20
+      const shareSize = g.title.shares?.[1] ?? 10
+      const certsNeeded = Math.floor(presPercent / shareSize)
+      return certs.length >= certsNeeded
     }
   },
   { id: 'short', label: 'Short', mLabel: 'Sh[o]rt', key: 'o', round: 'sr', gate: (g) => !!g.title.shorts },
