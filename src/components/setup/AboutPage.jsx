@@ -114,16 +114,22 @@ export default function AboutPage({ onEnter }) {
 
         <div>
           <h2 className="text-lg font-bold text-white mb-2">Impressum</h2>
-          <p>
-            Angaben gemäß § 5 TMG / Information according to § 5 TMG:
-          </p>
+          <p><strong>Angaben gemäß § 5 TMG</strong></p>
           <p className="mt-1">
-            [Your Name]<br />
-            [Your Address]<br />
-            [Your Email]
+            Karsten Droste<br />
+            Tannenstraße 43<br />
+            67655 Kaiserslautern
+          </p>
+          <p className="mt-2">
+            <strong>Kontakt</strong><br />
+            E-Mail: spieldroesig@gmail.com
+          </p>
+          <p className="mt-2">
+            <strong>Hinweis</strong><br />
+            Privates, nicht-kommerzielles Hobby-Projekt. Keine Abmahnungen ohne vorherigen Kontakt.
           </p>
           <p className="mt-1 text-xs text-broker-text-muted">
-            Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV: [Your Name, Address as above]
+            Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV: Karsten Droste, Anschrift wie oben.
           </p>
         </div>
 
