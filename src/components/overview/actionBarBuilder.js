@@ -23,13 +23,9 @@ const ACTIONS = [
 
   // Private actions — context-dependent
   { id: 'buyprivate', label: 'Priv Buy', mLabel: '[P]riv', key: 'p', round: 'any',
-    gate: (g, rt) => {
-      const hasPrivs = (g.companies || []).some(c => !c.ownerId && !c.closed)
-      if (!hasPrivs) return false
-      // 1822 family: can buy during SR throughout the game
-      if (g.title.merger?.type === '1822_acquire') return true
-      // Others: only during pregame/setup
-      return !!rt?.inPregame
+    gate: (g) => {
+      // Show when unowned privates exist — we're a moderator, don't gate by round
+      return (g.companies || []).some(c => !c.ownerId && !c.closed)
     }
   },
   { id: 'sellprivate', label: 'Priv Sell', mLabel: 'Sel[v]', key: 'v', round: 'or',

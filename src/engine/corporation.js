@@ -12,6 +12,8 @@ export function createCorporation(def, title) {
     tokens: def.tokens,
     coordinates: def.coordinates,
     floatPercent,
+    type: def.type || null,   // 'major' | 'minor' | 'national' | 'brewery' | etc.
+    desc: def.desc || null,
 
     cash: 0,
     parPrice: null,
