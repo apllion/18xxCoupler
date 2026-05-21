@@ -86,45 +86,45 @@ function inferShareSource(state, corpSym, shareIndex) {
   return 'ipo'
 }
 
-// Find corp OR turns where the corp passed on routes (implicit withhold $0).
-// Returns array of { corpSym, afterActionId } for where to inject WITHHOLD_DIVIDEND $0.
+// Find corp OR turns that had no dividend (implicit withhold $0).
+// A corp's OR turn = consecutive actions by that corp ending when the next
+// action is by a different entity. If no dividend in that turn, it's withhold $0.
+// Returns array of { corpSym, insertBeforeIndex } for injecting WITHHOLD_DIVIDEND.
 function findImplicitWithholds(actions) {
   const result = []
-  // Track: for each corp, did we see a dividend between its first OR action and its pass?
-  // Pattern: corp does lay_tile/place_token, then passes (no run_routes/dividend) = withhold $0
-  // Detect sequences: [corp actions...] [pass by same corp] with NO run_routes/dividend in between
-  let corpActions = {} // corpSym → { hasRoutes: false, hasDividend: false }
+  let currentCorp = null
+  let hadDividend = false
+  let turnStartIndex = -1
+
+  function endTurn(beforeIndex) {
+    if (currentCorp && !hadDividend) {
+      result.push({ corpSym: currentCorp, insertBeforeIndex: beforeIndex })
+    }
+    currentCorp = null
+    hadDividend = false
+  }
 
   for (let i = 0; i < actions.length; i++) {
     const a = actions[i]
-    if (a.entity_type !== 'corporation') {
-      // Player action resets corp tracking (we've moved to SR or different context)
-      if (a.entity_type === 'player' && (a.type === 'buy_shares' || a.type === 'sell_shares' || a.type === 'par' || a.type === 'bid')) {
-        corpActions = {}
+
+    if (a.entity_type === 'corporation') {
+      const sym = a.entity
+      if (sym !== currentCorp) {
+        // New corp started — close previous turn
+        endTurn(i)
+        currentCorp = sym
+        hadDividend = false
+        turnStartIndex = i
       }
-      continue
-    }
-
-    const sym = a.entity
-    if (!corpActions[sym]) corpActions[sym] = { hasRoutes: false, hasDividend: false }
-
-    if (a.type === 'run_routes') corpActions[sym].hasRoutes = true
-    if (a.type === 'dividend') corpActions[sym].hasDividend = true
-
-    // When a corp passes and had NO routes/dividend in this turn, it's a withhold $0
-    if (a.type === 'pass' && corpActions[sym] && !corpActions[sym].hasDividend) {
-      // Only if we've seen at least one action for this corp in this turn
-      // (to avoid counting passes in other contexts)
-      result.push({ corpSym: sym, afterActionIndex: i })
-      // Reset for next OR turn
-      corpActions[sym] = { hasRoutes: false, hasDividend: false }
-    }
-
-    // If we see a dividend, reset for next turn
-    if (a.type === 'dividend') {
-      corpActions[sym] = { hasRoutes: false, hasDividend: false }
+      if (a.type === 'dividend') hadDividend = true
+    } else {
+      // Non-corp action — close current corp turn
+      endTurn(i)
     }
   }
+  // Close final turn
+  endTurn(actions.length)
+
   return result
 }
 
@@ -429,24 +429,14 @@ export function importGame(gameJson) {
   // Build revenue map from run_routes → dividend pairing
   const revenueMap = buildRevenueMap(actions)
 
-  // Detect corps that had an OR turn but no dividend — they implicitly withheld $0
-  // Build set: for each corp, count ORs they operated in vs dividends they paid
-  const corpORTurns = {} // corpSym → count of OR turns (sequences ending with pass)
-  const corpDividends = {} // corpSym → count of dividends
-  let lastCorpSym = null
-  for (const a of actions) {
-    if (a.entity_type === 'corporation') {
-      if (a.type === 'dividend') corpDividends[a.entity] = (corpDividends[a.entity] || 0) + 1
-      // A pass after corp actions that's NOT preceded by a dividend = OR turn end
-      if (a.type === 'pass' && a.entity !== lastCorpSym) {
-        // New corp started, previous corp's turn ended
-      }
-      lastCorpSym = a.entity
-    }
+  // Find corp OR turns with no dividend → implicit withhold $0
+  const implicitWithholds = findImplicitWithholds(actions)
+  // Build a set of action indices where we should inject withhold BEFORE processing that index
+  const withholdBeforeIndex = new Map() // index → [corpSym, ...]
+  for (const w of implicitWithholds) {
+    if (!withholdBeforeIndex.has(w.insertBeforeIndex)) withholdBeforeIndex.set(w.insertBeforeIndex, [])
+    withholdBeforeIndex.get(w.insertBeforeIndex).push(w.corpSym)
   }
-  // Count implicit withholds per corp
-  const implicitWithholdCount = {}
-  // Don't inject — this approach is too fragile. Note as known limitation.
 
   // Track import stats
   const stats = {
@@ -457,7 +447,22 @@ export function importGame(gameJson) {
   }
 
   // Replay each action
-  for (let actionIdx = 0; actionIdx < actions.length; actionIdx++) {
+  for (let actionIdx = 0; actionIdx <= actions.length; actionIdx++) {
+    // Inject implicit withhold $0 for corp turns that had no dividend
+    const withholds = withholdBeforeIndex.get(actionIdx)
+    if (withholds) {
+      for (const corpSym of withholds) {
+        const corp = state.corporations.find(c => c.sym === corpSym)
+        if (corp?.floated) {
+          try {
+            applyAction(state, { type: 'WITHHOLD_DIVIDEND', corpSym, totalRevenue: 0 })
+            stats.applied++
+          } catch {}
+        }
+      }
+    }
+
+    if (actionIdx >= actions.length) break
     const action = actions[actionIdx]
 
     const converted = convertAction(action, state, playerMap, revenueMap, variantToBase)
