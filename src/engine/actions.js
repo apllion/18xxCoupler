@@ -395,20 +395,38 @@ export function applyAction(state, action) {
       break
     }
     case 'SWAP_PRESIDENT': {
+      // Exchange president cert (e.g. 20%) for N regular certs (e.g. 2×10%)
       const fromPlayer = state.players.find(p => p.shares.some(s => s.corpSym === action.corpSym && s.isPresident))
       const toPlayer = state.players.find(p => p.id === action.playerId)
       if (fromPlayer && toPlayer && fromPlayer.id !== toPlayer.id) {
-        const oldPres = fromPlayer.shares.find(s => s.corpSym === action.corpSym && s.isPresident)
-        if (oldPres) {
-          oldPres.isPresident = false
-          const newPres = toPlayer.shares.find(s => s.corpSym === action.corpSym && !s.isPresident)
-          if (newPres) {
-            const presPercent = oldPres.percent
-            oldPres.percent = newPres.percent
-            newPres.percent = presPercent
-            newPres.isPresident = true
-          }
+        const presCert = fromPlayer.shares.find(s => s.corpSym === action.corpSym && s.isPresident)
+        if (!presCert) break
+        const presPercent = presCert.percent // e.g. 20%
+        const shareSize = state.title.shares?.[1] ?? 10 // e.g. 10%
+        const certsNeeded = Math.floor(presPercent / shareSize) // e.g. 2
+
+        // New president needs enough regular certs to exchange
+        const newPlayerCerts = toPlayer.shares.filter(s => s.corpSym === action.corpSym && !s.isPresident)
+        if (newPlayerCerts.length < certsNeeded) break
+
+        // Remove president cert from old president
+        fromPlayer.shares = fromPlayer.shares.filter(s => s !== presCert)
+
+        // Remove N regular certs from new president
+        let removed = 0
+        toPlayer.shares = toPlayer.shares.filter(s => {
+          if (removed >= certsNeeded) return true
+          if (s.corpSym === action.corpSym && !s.isPresident) { removed++; return false }
+          return true
+        })
+
+        // Give old president N regular certs
+        for (let i = 0; i < certsNeeded; i++) {
+          fromPlayer.shares.push({ corpSym: action.corpSym, percent: shareSize, isPresident: false })
         }
+
+        // Give new president the president cert
+        toPlayer.shares.push({ corpSym: action.corpSym, percent: presPercent, isPresident: true })
       }
       break
     }
