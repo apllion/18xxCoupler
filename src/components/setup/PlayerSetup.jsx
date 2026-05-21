@@ -45,7 +45,7 @@ export default function PlayerSetup() {
   const title = getTitle(titleId)
   console.log('[PlayerSetup] title resolved:', title?.title)
 
-  const [playerNames, setPlayerNames] = useState(() => pickRandomNames(2))
+  const [playerNames, setPlayerNames] = useState(() => pickRandomNames(3))
   const [selectedVariant, setSelectedVariant] = useState(null)
 
   const playerCount = playerNames.filter((n) => n.trim()).length
