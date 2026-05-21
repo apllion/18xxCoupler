@@ -57,7 +57,7 @@ export default function GameShell() {
   // Broker overview — has bottom nav for detail views
   if (activeTab === 'overview') {
     return (
-      <div className="flex flex-col h-screen">
+      <div className="flex flex-col h-screen pb-12">
         {sync?.roomId && roomBar}
         <OverviewTab />
         <BottomNav />
