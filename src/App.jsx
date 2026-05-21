@@ -48,9 +48,13 @@ export default function App() {
           </button>
         </div>
         {accessError && <p className="text-red-400 text-sm mt-2">Wrong passphrase</p>}
-        <p className="text-xs text-broker-text-muted mt-8 max-w-sm text-center">
-          Private non-commercial hobby project. Not affiliated with any game publisher.
-        </p>
+        <div className="text-xs text-broker-text-muted mt-8 max-w-sm text-center space-y-2">
+          <p>Private non-commercial hobby project. Not affiliated with any game publisher.</p>
+          <p className="text-amber-400/80">
+            This is work in progress. Things will break. I urgently need testers!
+            Please report bugs and feedback.
+          </p>
+        </div>
       </div>
     )
   }
