@@ -300,9 +300,10 @@ function LiveGames({ onImport, importing }) {
     setLoading(true)
     setError(null)
     setTab(status)
+    const base = import.meta.env.VITE_18XX_API || '/18xx-games-api'
     const url = title
-      ? `/18xx-games-api/game?title=${encodeURIComponent(title)}&status=${status}&page=1`
-      : `/18xx-games-api/game?status=${status}&page=1`
+      ? `${base}/game?title=${encodeURIComponent(title)}&status=${status}&page=1`
+      : `${base}/game?status=${status}&page=1`
     fetch(url)
       .then(r => { if (!r.ok) throw new Error('Failed'); return r.json() })
       .then(data => {
