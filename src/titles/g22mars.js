@@ -2,7 +2,7 @@ import { defaults } from './defaults.js'
 
 export const g22mars = {
   ...defaults,
-  titleId: 'g22mars', title: '22Mars', subtitle: 'Convict Camps, Mining, and Space Tourism', designer: 'Jonas Jones', wip: true,
+  untested: true, titleId: 'g22mars', title: '22Mars', subtitle: 'Convict Camps, Mining, and Space Tourism', designer: 'Jonas Jones', wip: true,
   location: 'Mars', minPlayers: 3, maxPlayers: 5,
 
   bankCash: 99999,

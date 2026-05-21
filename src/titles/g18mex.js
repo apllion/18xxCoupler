@@ -2,7 +2,7 @@ import { defaults } from './defaults.js'
 
 export const g18mex = {
   ...defaults,
-  titleId: 'g18mex', title: '18MEX', subtitle: 'National Railways of Mexico', designer: 'Mark Derrick',
+  untested: true, titleId: 'g18mex', title: '18MEX', subtitle: 'National Railways of Mexico', designer: 'Mark Derrick',
   location: 'Mexico', minPlayers: 3, maxPlayers: 5,
   bankCash: 9000, startingCash: { 3: 625, 4: 500, 5: 450 },
   certLimit: { 3: 19, 4: 14, 5: 11 },

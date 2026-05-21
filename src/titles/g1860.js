@@ -3,7 +3,7 @@ import { defaults } from './defaults.js'
 export const g1860 = {
   ...defaults,
 
-  titleId: 'g1860',
+  untested: true, titleId: 'g1860',
   title: '1860',
   subtitle: 'Railways on the Isle of Wight',
   designer: 'Mike Hutton',

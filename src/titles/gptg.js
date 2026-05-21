@@ -3,7 +3,7 @@ import { defaults } from './defaults.js'
 export const gptg = {
   ...defaults,
 
-  titleId: 'gptg', wip: true,
+  untested: true, titleId: 'gptg', wip: true,
   title: 'PTG',
   subtitle: 'Pocket Train Game',
   designer: 'Jonas Jones',

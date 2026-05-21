@@ -2,7 +2,7 @@ import { defaults } from './defaults.js'
 
 export const g18gb = {
   ...defaults,
-  titleId: 'g18gb', title: '18GB', subtitle: 'Railways of Great Britain', designer: 'Dave Berry',
+  untested: true, titleId: 'g18gb', title: '18GB', subtitle: 'Railways of Great Britain', designer: 'Dave Berry',
   location: 'Great Britain', minPlayers: 2, maxPlayers: 6,
   bankCash: 99999, startingCash: { 2: 500, 3: 400, 4: 350, 5: 300, 6: 250 },
   certLimit: { 2: 20, 3: 16, 4: 14, 5: 12, 6: 10 },

@@ -2,7 +2,7 @@ import { defaults } from './defaults.js'
 
 export const g18daihan = {
   ...defaults,
-  titleId: 'g18daihan', wip: true, title: '1899 Daihan', subtitle: 'Railways of the Korean Empire', designer: 'Geonil',
+  untested: true, titleId: 'g18daihan', wip: true, title: '1899 Daihan', subtitle: 'Railways of the Korean Empire', designer: 'Geonil',
   location: 'Korean Peninsula', minPlayers: 3, maxPlayers: 5,
   bankCash: 7600,
   startingCash: { 3: 440, 4: 400, 5: 380 },

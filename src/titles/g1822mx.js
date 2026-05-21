@@ -3,7 +3,7 @@ import { defaults } from './defaults.js'
 export const g1822mx = {
   ...defaults,
 
-  titleId: 'g1822mx',
+  untested: true, titleId: 'g1822mx',
   title: '1822MX',
   subtitle: 'The Railways of Mexico',
   designer: 'Scott Peterson',

@@ -2,7 +2,7 @@ import { defaults } from './defaults.js'
 
 export const g1817 = {
   ...defaults,
-  titleId: 'g1817', title: '1817', subtitle: 'NYSE', designer: 'Craig Bartell, Tim Flowers',
+  untested: true, titleId: 'g1817', title: '1817', subtitle: 'NYSE', designer: 'Craig Bartell, Tim Flowers',
   location: 'Northeast USA', minPlayers: 3, maxPlayers: 12,
   bankCash: 99999,
   startingCash: { 3: 420, 4: 315, 5: 252, 6: 210, 7: 180, 8: 158, 9: 140, 10: 126, 11: 115, 12: 105 },

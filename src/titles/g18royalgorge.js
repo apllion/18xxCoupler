@@ -2,7 +2,7 @@ import { defaults } from './defaults.js'
 
 export const g18royalgorge = {
   ...defaults,
-  titleId: 'g18royalgorge', title: '18 Royal Gorge', subtitle: 'The Royal Gorge Wars', designer: 'Kayla Ross & Denman Scofield',
+  untested: true, titleId: 'g18royalgorge', title: '18 Royal Gorge', subtitle: 'The Royal Gorge Wars', designer: 'Kayla Ross & Denman Scofield',
   location: 'Fremont County, Colorado', minPlayers: 2, maxPlayers: 4,
   bankCash: 99999, startingCash: { 2: 800, 3: 550, 4: 400 }, certLimit: { 2: 20, 3: 14, 4: 10 },
   currencyFormat: '$', capitalization: 'incremental', floatPercent: 20, sellBuyOrder: 'sell_buy',

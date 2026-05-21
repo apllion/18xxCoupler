@@ -2,7 +2,7 @@ import { defaults } from './defaults.js'
 
 export const g1822ca = {
   ...defaults,
-  titleId: 'g1822ca', title: '1822CA', subtitle: 'The Railways of Canada', designer: 'Robert Lecuyer & Simon Cutforth',
+  untested: true, titleId: 'g1822ca', title: '1822CA', subtitle: 'The Railways of Canada', designer: 'Robert Lecuyer & Simon Cutforth',
   location: 'Canada', minPlayers: 2, maxPlayers: 7,
   bankCash: 12000, startingCash: { 2: 1000, 3: 700, 4: 525, 5: 420, 6: 350, 7: 300 },
   certLimit: { 2: 40, 3: 26, 4: 20, 5: 16, 6: 13, 7: 11 },

@@ -3,7 +3,7 @@ import { defaults } from './defaults.js'
 export const g1849 = {
   ...defaults,
 
-  titleId: 'g1849',
+  untested: true, titleId: 'g1849',
   title: '1849',
   subtitle: 'The Game of Sicilian Railways',
   designer: 'Federico Vellani',

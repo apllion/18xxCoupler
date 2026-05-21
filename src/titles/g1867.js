@@ -3,7 +3,7 @@ import { defaults } from './defaults.js'
 export const g1867 = {
   ...defaults,
 
-  titleId: 'g1867',
+  untested: true, titleId: 'g1867',
   title: '1867',
   subtitle: 'Railways of Canada',
   designer: 'Ian D. Wilson',
