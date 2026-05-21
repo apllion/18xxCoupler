@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-export default function RoomBar({ roomId, peerCount, status, createRoom, joinRoom, leaveRoom }) {
+export default function RoomBar({ roomId, peerCount, status, createRoom, joinRoom, leaveRoom, savedRoom, rejoinRoom }) {
   const [joinCode, setJoinCode] = useState('')
   const [showJoin, setShowJoin] = useState(false)
 
@@ -23,6 +23,29 @@ export default function RoomBar({ roomId, peerCount, status, createRoom, joinRoo
         >
           Leave
         </button>
+      </div>
+    )
+  }
+
+  // Rejoin prompt — saved room from previous session
+  if (!roomId && savedRoom) {
+    return (
+      <div className="bg-broker-surface border-b border-broker-border px-3 py-1.5 flex items-center justify-between text-xs">
+        <div className="flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-amber-400" />
+          <span className="text-broker-text-muted">Previous room:</span>
+          <span className="font-mono font-bold text-white tracking-wider">{savedRoom.code}</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <button onClick={rejoinRoom}
+            className="bg-blue-800 hover:bg-blue-700 text-white px-2 py-0.5 rounded">
+            Reconnect
+          </button>
+          <button onClick={() => { localStorage.removeItem('18xxBroker_room') ; location.reload() }}
+            className="text-broker-text-muted hover:text-red-300 px-1">
+            Dismiss
+          </button>
+        </div>
       </div>
     )
   }

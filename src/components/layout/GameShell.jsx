@@ -41,6 +41,8 @@ export default function GameShell() {
       createRoom={sync?.createRoom}
       joinRoom={sync?.joinRoom}
       leaveRoom={sync?.leaveRoom}
+      savedRoom={sync?.savedRoom}
+      rejoinRoom={sync?.rejoinRoom}
     />
   )
 
@@ -48,7 +50,7 @@ export default function GameShell() {
   if (activeTab === 'moderator') {
     return (
       <div className="flex flex-col h-screen">
-        {sync?.roomId && roomBar}
+        {roomBar}
         <ModeratorOverview />
       </div>
     )
@@ -58,7 +60,7 @@ export default function GameShell() {
   if (activeTab === 'overview') {
     return (
       <div className="flex flex-col h-screen pb-12">
-        {sync?.roomId && roomBar}
+        {roomBar}
         <OverviewTab />
         <BottomNav />
       </div>
