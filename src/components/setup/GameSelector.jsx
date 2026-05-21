@@ -86,19 +86,21 @@ export default function GameSelector() {
             onClick={() => { console.log('[GameSelector] selected:', t.titleId, t.title); navigate(`/setup/${t.titleId}`) }}
             className="bg-broker-surface hover:bg-broker-surface-hover border border-broker-border rounded-lg p-4 text-left transition-colors relative overflow-hidden"
           >
-            {t.wip && (
+            {(t.wip || t.untested) && (
               <svg className="absolute -bottom-2 -right-2 w-20 h-20 opacity-[0.07] text-broker-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
               </svg>
             )}
-            <div className="text-xl font-bold text-broker-text">
-              {t.title}
-              {(t.untested || t.wip) && <span className="ml-1.5 text-sm" title={t.wip ? 'Work in progress' : 'Untested'}>{t.wip ? '\uD83D\uDEA7' : '\uD83D\uDD27'}</span>}
-            </div>
+            <div className="text-xl font-bold text-broker-text">{t.title}</div>
             <div className="text-sm text-broker-text-muted mt-1">{t.subtitle}</div>
             <div className="text-xs text-broker-text-muted mt-2">
               {t.minPlayers}–{t.maxPlayers} players
             </div>
+            {(t.wip || t.untested) && (
+              <div className="text-[10px] text-red-400/70 mt-1">
+                completely untested, work in progress
+              </div>
+            )}
           </button>
         ))}
       </div>
