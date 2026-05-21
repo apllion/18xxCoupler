@@ -4,7 +4,7 @@
 import { buyShareFromIPO, buyShareFromMarket, sellShares, corpBuyShareFromIPO, corpBuyShareFromMarket, corpSellShares } from './sharePool.js'
 import { placeCorpOnMarket, moveDividend, moveSell, moveRight, moveLeft, moveSoldOutCorps, corpPrice } from './stockMarket.js'
 import { buyAvailableTrain, rustTrains } from './depot.js'
-import { addTrain } from './corporation.js'
+import { addTrain, getCorpShares } from './corporation.js'
 import { advanceToPhase, phaseForTrain } from './phase.js'
 import { collectRevenue, collectAllRevenue, closeAllCompanies, assignPrivate, closePrivate } from './privateCompany.js'
 import { transferFromBank, transferToBank } from './bank.js'
@@ -283,7 +283,7 @@ export function applyAction(state, action) {
     case 'ISSUE_SHARES': {
       const ic = state.corporations.find(co => co.sym === action.corpSym)
       if (ic && ic.ipoShares > 0) {
-        const shareSize = state.title.shares?.[1] ?? 10
+        const shareSize = getCorpShares(state, action.corpSym)[1] ?? 10
         const issuePrice = corpPrice(state.stockMarket, action.corpSym) || ic.parPrice || 0
         const revenue = (issuePrice * shareSize) / 10
         ic.ipoShares -= shareSize
@@ -298,7 +298,7 @@ export function applyAction(state, action) {
     case 'REDEEM_SHARES': {
       const rc = state.corporations.find(co => co.sym === action.corpSym)
       if (rc && rc.marketShares > 0) {
-        const shareSize = state.title.shares?.[1] ?? 10
+        const shareSize = getCorpShares(state, action.corpSym)[1] ?? 10
         const redeemPrice = corpPrice(state.stockMarket, action.corpSym) || rc.parPrice || 0
         const cost = (redeemPrice * shareSize) / 10
         if (rc.cash >= cost) {
@@ -332,7 +332,7 @@ export function applyAction(state, action) {
         player.privates = player.privates.filter((s) => s !== action.companySym)
         company.closed = true
         // Give president cert
-        const presPercent = state.title.shares?.[0] ?? 20
+        const presPercent = getCorpShares(state, action.corpSym)[0] ?? 20
         player.shares.push({ corpSym: action.corpSym, percent: presPercent, isPresident: true })
         corp.ipoShares -= presPercent
         corp.ipoed = true
@@ -489,7 +489,8 @@ function handlePar(state, { playerId, corpSym, parPrice, row, col }) {
   corp.ipoed = true
   placeCorpOnMarket(state.stockMarket, corpSym, row, col)
 
-  const presPercent = state.title.shares?.[0] ?? 20
+  const corpShares = getCorpShares(state, corpSym)
+  const presPercent = corpShares[0] ?? 20
   const cost = (parPrice * presPercent) / 10
   player.cash -= cost
   corp.ipoShares -= presPercent

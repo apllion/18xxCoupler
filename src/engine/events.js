@@ -37,6 +37,10 @@ export const EVENT_INFO = {
     label: 'No New Minors',
     desc: 'No new minor corporations may be started from this point.',
   },
+  corporations_can_merge: {
+    label: 'Corporations Can Merge',
+    desc: 'Minor corporations may now convert to or merge into major corporations.',
+  },
 
   // 18SJ nationalization
   nationalization: {

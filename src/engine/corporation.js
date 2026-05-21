@@ -2,7 +2,7 @@
 
 export function createCorporation(def, title) {
   const floatPercent = def.floatPercent ?? title.floatPercent ?? 60
-  const shares = title.shares ?? [20, 10, 10, 10, 10, 10, 10, 10, 10]
+  const shares = def.shares ?? title.shares ?? [20, 10, 10, 10, 10, 10, 10, 10, 10]
 
   return {
     sym: def.sym,
@@ -61,4 +61,10 @@ export function removeTrainsByName(corp, trainName) {
   const removed = corp.trains.filter((t) => t.name === trainName)
   corp.trains = corp.trains.filter((t) => t.name !== trainName)
   return removed
+}
+
+// Get the share structure for a specific corp, checking corp def then title default
+export function getCorpShares(state, corpSym) {
+  const def = state.title.corporations?.find((c) => c.sym === corpSym)
+  return def?.shares ?? state.title.shares ?? [20, 10, 10, 10, 10, 10, 10, 10, 10]
 }
