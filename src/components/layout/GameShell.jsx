@@ -44,12 +44,23 @@ export default function GameShell() {
     />
   )
 
-  // Overview screens — fullscreen, no chrome (RoomBar only when connected)
-  if (activeTab === 'overview' || activeTab === 'moderator') {
+  // Moderator overview — fully self-contained, no chrome
+  if (activeTab === 'moderator') {
     return (
       <div className="flex flex-col h-screen">
         {sync?.roomId && roomBar}
-        {activeTab === 'moderator' ? <ModeratorOverview /> : <OverviewTab />}
+        <ModeratorOverview />
+      </div>
+    )
+  }
+
+  // Broker overview — has bottom nav for detail views
+  if (activeTab === 'overview') {
+    return (
+      <div className="flex flex-col h-screen">
+        {sync?.roomId && roomBar}
+        <OverviewTab />
+        <BottomNav />
       </div>
     )
   }
