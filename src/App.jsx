@@ -4,6 +4,7 @@ import { useSyncContext } from './hooks/SyncContext.jsx'
 import GameSelector from './components/setup/GameSelector.jsx'
 import PlayerSetup from './components/setup/PlayerSetup.jsx'
 import GameShell from './components/layout/GameShell.jsx'
+import AboutPage from './components/setup/AboutPage.jsx'
 
 export default function App() {
   const game = useGameStore((s) => s.game)
@@ -42,6 +43,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<GameSelector />} />
         <Route path="/setup/:titleId" element={<PlayerSetup />} />
+        <Route path="/about" element={<AboutPage onEnter={() => window.history.back()} />} />
       </Routes>
     )
   }

@@ -198,6 +198,14 @@ export default function GameSelector() {
           </div>
         </div>
       )}
+
+      {/* About / Legal */}
+      <div className="w-full max-w-md mt-8 mb-4 text-center">
+        <button onClick={() => navigate('/about')}
+          className="text-xs text-broker-text-muted hover:text-broker-gold">
+          About / Legal / Impressum
+        </button>
+      </div>
     </div>
   )
 }
