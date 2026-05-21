@@ -29,6 +29,8 @@ export default function App() {
   const access = useAccess()
   const [accessInput, setAccessInput] = useState('')
   const [accessError, setAccessError] = useState(false)
+  const game = useGameStore((s) => s.game)
+  const sync = useSyncContext()
 
   if (!access.granted) {
     return (
@@ -58,8 +60,6 @@ export default function App() {
       </div>
     )
   }
-  const game = useGameStore((s) => s.game)
-  const sync = useSyncContext()
 
   // In a room but no game yet — waiting for host to send state
   if (!game && sync?.roomId) {
