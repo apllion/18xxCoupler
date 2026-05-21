@@ -29,13 +29,18 @@ export default function AboutPage({ onEnter }) {
         <div>
           <h2 className="text-lg font-bold text-white mb-2">Disclaimer</h2>
           <p>
-            This software is provided as-is, without warranty. It is a game aid, not a rules
-            engine — it does not enforce game rules. The players at the table are responsible
-            for correct play. Financial calculations are advisory and may contain errors.
+            This is a private, non-commercial hobby project. The author is not affiliated with,
+            employed by, or working on behalf of any game designer, publisher, or the 18xx.games
+            platform. This software is not endorsed by or associated with any game company.
           </p>
           <p className="mt-2">
-            This is not an official product of any game publisher. No game content (maps, tiles,
-            artwork) is included. Only financial tracking mechanics are implemented.
+            This software is provided as-is, without warranty of any kind. It is a game aid, not
+            a rules engine — it does not enforce game rules. The players at the table are
+            responsible for correct play. Financial calculations are advisory and may contain errors.
+          </p>
+          <p className="mt-2">
+            No game content (maps, tiles, artwork, rules text) is included or distributed.
+            Only financial tracking mechanics are implemented.
           </p>
         </div>
 
