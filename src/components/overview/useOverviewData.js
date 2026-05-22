@@ -195,5 +195,6 @@ export function useOverviewData() {
     isWhatIf, whatIfSnapshot, exitWhatIf: useGameStore.getState().exitWhatIf,
     canUndo, undo, dispatch,
     isSR, isOR, isPre, rt,
+    superUmpire: useUIStore.getState().autoConfig?.superUmpire || false,
   }
 }

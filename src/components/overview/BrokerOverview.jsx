@@ -4,18 +4,20 @@ import { useOverviewData, playerSharePercent, playerCertCount, isPresident } fro
 import { useUIStore } from '../../store/uiStore.js'
 import { ActionPanel } from './ActionPanel.jsx'
 import { ContextBar } from './ContextBar.jsx'
+import { InlineEdit } from './InlineEdit.jsx'
 
 export default function BrokerOverview() {
   const d = useOverviewData()
   if (!d.game) return null
-  const { game, fmt, phase, label, limit, corps, unfloated, depotGroups, lastRevenue, corpPrivates, playerPrivates, lastAction, selPlayer, myPlayerId, selCorp, curRow, setCurRow, curCol, setCurCol, panel, setPanel, revenueInput, setRevenueInput, revRef, rootRef, cursorRef, onKeyDown, closePanel, doAction, inReplay, fullLog, enterReplay, exitReplay, replayTo, enterWhatIf, isWhatIf, exitWhatIf, canUndo, undo, isSR, isOR, isPre } = d
+  const { game, fmt, phase, label, limit, corps, unfloated, depotGroups, lastRevenue, corpPrivates, playerPrivates, lastAction, selPlayer, myPlayerId, selCorp, curRow, setCurRow, curCol, setCurCol, panel, setPanel, revenueInput, setRevenueInput, revRef, rootRef, cursorRef, onKeyDown, closePanel, doAction, inReplay, fullLog, enterReplay, exitReplay, replayTo, enterWhatIf, isWhatIf, exitWhatIf, canUndo, undo, isSR, isOR, isPre, superUmpire } = d
+  const su = superUmpire
 
   const curIdx = game.actionLog.length - 1
 
   return (
     <div ref={rootRef} tabIndex={0} onKeyDown={onKeyDown}
       onClick={(e) => { if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'SELECT') rootRef.current?.focus() }}
-      className="text-sm select-none h-full flex flex-col bg-broker-bg outline-none">
+      className={`text-sm select-none h-full flex flex-col bg-broker-bg outline-none ${su ? 'ring-2 ring-orange-500/50' : ''}`}>
 
       {/* Header */}
       <div className={`px-3 py-2 flex items-center justify-between flex-shrink-0 border-b ${
@@ -96,7 +98,12 @@ export default function BrokerOverview() {
                     onClick={() => { setCurRow(pi); setPanel('playerdetail') }}>
                     {p.name}
                   </td>
-                  <td className="px-2 text-right text-broker-text font-medium">{fmt(p.cash)}</td>
+                  <td className="px-2 text-right text-broker-text font-medium">
+                    <InlineEdit value={p.cash} enabled={su} skin="broker"
+                      onSave={v => doAction({ type: 'SET_CASH', entityId: p.id, entityType: 'player', value: v })}>
+                      {fmt(p.cash)}
+                    </InlineEdit>
+                  </td>
                   <td className={`px-2 text-center ${playerCertCount(p) > game.certLimit ? 'text-red-400 font-bold' : 'text-broker-text-muted'}`}>{playerCertCount(p)}/{game.certLimit}</td>
                   {corps.map((c, ci) => {
                     const pct = playerSharePercent(p, c.sym)
@@ -107,7 +114,10 @@ export default function BrokerOverview() {
                         className={`px-2 text-center cursor-pointer ${isCursor ? 'bg-broker-gold/20 ring-1 ring-broker-gold/50' : ci === curCol ? 'bg-broker-surface-hover/20' : ''}`}
                         onClick={() => { setCurRow(pi); setCurCol(ci) }}>
                         {pct === 0 ? <span className="text-broker-text-muted/20">·</span>
-                          : <span className={pres ? 'text-white font-bold' : 'text-broker-text'}>{pct}{pres && '%P'}</span>}
+                          : <InlineEdit value={pct} enabled={su} skin="broker"
+                              onSave={v => doAction({ type: 'SET_SHARES', playerId: p.id, corpSym: c.sym, percent: v })}>
+                              <span className={pres ? 'text-white font-bold' : 'text-broker-text'}>{pct}{pres && '%P'}</span>
+                            </InlineEdit>}
                       </td>
                     )
                   })}
@@ -121,7 +131,11 @@ export default function BrokerOverview() {
             {/* Corp rows */}
             <BRow l="Price" corps={corps} cc={curCol} r={c => !c.ipoed ? '' : <span className="text-white font-medium">{fmt(c.price)}</span>} />
             <BRow l="Par" corps={corps} cc={curCol} r={c => !c.ipoed ? '' : <span className="text-broker-text-muted">{fmt(c.parPrice)}</span>} />
-            <BRow l="Treasury" corps={corps} cc={curCol} r={c => !c.ipoed ? '' : <span className={c.cash < 0 ? 'text-red-400' : 'text-broker-text'}>{fmt(c.cash)}</span>} />
+            <BRow l="Treasury" corps={corps} cc={curCol} r={c => !c.ipoed ? '' :
+              <InlineEdit value={c.cash} enabled={su} skin="broker"
+                onSave={v => doAction({ type: 'SET_CASH', entityId: c.sym, entityType: 'corporation', value: v })}>
+                <span className={c.cash < 0 ? 'text-red-400' : 'text-broker-text'}>{fmt(c.cash)}</span>
+              </InlineEdit>} />
             <BRow l="IPO" corps={corps} cc={curCol} r={c => c.ipoShares < 100 ? `${c.ipoShares}%` : ''} />
             <BRow l="Pool" corps={corps} cc={curCol} r={c => c.marketShares > 0 ? <span className="text-amber-400">{c.marketShares}%</span> : ''} />
             <BRow l="Trains" corps={corps} cc={curCol} onClick={(sym, ci) => { setCurCol(ci); setPanel('train') }} r={c => {

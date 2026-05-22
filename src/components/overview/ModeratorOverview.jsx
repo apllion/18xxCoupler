@@ -4,6 +4,7 @@ import { useOverviewData, playerSharePercent, playerCertCount, isPresident } fro
 import { useUIStore } from '../../store/uiStore.js'
 import { ActionPanel } from './ActionPanel.jsx'
 import { ContextBar } from './ContextBar.jsx'
+import { InlineEdit } from './InlineEdit.jsx'
 
 const THEMES = {
   dos:    { id: 'dos',    label: 'DOS',    bg: 'bg-blue-950',  bar: 'bg-blue-900',  head: 'text-green-400',  text: 'text-blue-300',  bright: 'text-white',  player: 'text-yellow-300', dim: 'text-blue-900/60', sep: 'bg-green-700', cursor: 'bg-green-900 ring-1 ring-green-500', colHi: 'bg-blue-900/30', rowHi: 'bg-blue-900/60', input: 'bg-black border-green-800', btn: 'bg-green-900/80 text-green-300 hover:bg-green-800', depot: 'bg-blue-900', depotTrain: 'text-green-300', depotPrice: 'text-yellow-300', actionBar: 'bg-gray-900 border-green-800', border: 'border-blue-900/40' },
@@ -16,7 +17,8 @@ export default function ModeratorOverview() {
   const d = useOverviewData()
   const themeId = useUIStore((s) => s.modTheme) || 'dos'
   if (!d.game) return null
-  const { game, fmt, phase, label, limit, corps, unfloated, depotGroups, lastRevenue, corpPrivates, playerPrivates, lastAction, selPlayer, myPlayerId, selCorp, curRow, setCurRow, curCol, setCurCol, panel, setPanel, revenueInput, setRevenueInput, revRef, rootRef, cursorRef, onKeyDown, closePanel, doAction, inReplay, fullLog, enterReplay, exitReplay, replayTo, enterWhatIf, isWhatIf, exitWhatIf, canUndo, undo, isSR, isOR, isPre, rt } = d
+  const { game, fmt, phase, label, limit, corps, unfloated, depotGroups, lastRevenue, corpPrivates, playerPrivates, lastAction, selPlayer, myPlayerId, selCorp, curRow, setCurRow, curCol, setCurCol, panel, setPanel, revenueInput, setRevenueInput, revRef, rootRef, cursorRef, onKeyDown, closePanel, doAction, inReplay, fullLog, enterReplay, exitReplay, replayTo, enterWhatIf, isWhatIf, exitWhatIf, canUndo, undo, isSR, isOR, isPre, rt, superUmpire } = d
+  const su = superUmpire
 
   const t = THEMES[themeId]
   const barBg = isSR ? 'bg-green-900' : isOR ? 'bg-amber-900' : isPre ? 'bg-purple-900' : t.bar
@@ -26,7 +28,7 @@ export default function ModeratorOverview() {
   return (
     <div ref={rootRef} tabIndex={0} onKeyDown={onKeyDown}
       onClick={(e) => { if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'SELECT') rootRef.current?.focus() }}
-      className={`font-mono text-xs leading-tight select-none h-full flex flex-col ${t.bg} outline-none`}>
+      className={`font-mono text-xs leading-tight select-none h-full flex flex-col ${t.bg} outline-none ${su ? 'ring-2 ring-orange-500/50' : ''}`}>
 
       {/* Title bar */}
       <div className={`${barBg} text-blue-200 px-2 py-1 flex justify-between flex-shrink-0`}>
@@ -118,7 +120,12 @@ export default function ModeratorOverview() {
                     {p.id === game.priorityDeal && <span className={t.bright}>{'\u00BB'}</span>}
                     {p.name}
                   </td>
-                  <td className={`px-1 text-right ${t.bright}`}>{fmt(p.cash)}</td>
+                  <td className={`px-1 text-right ${t.bright}`}>
+                    <InlineEdit value={p.cash} enabled={su} skin="moderator"
+                      onSave={v => doAction({ type: 'SET_CASH', entityId: p.id, entityType: 'player', value: v })}>
+                      {fmt(p.cash)}
+                    </InlineEdit>
+                  </td>
                   <td className="px-1 text-right text-purple-300" title={privs?.map(c => c.sym).join(', ')}>{privs ? privs.length : '—'}</td>
                   <td className={`px-1 text-center ${playerCertCount(p) > game.certLimit ? 'text-red-400 font-bold' : t.text}`}>{playerCertCount(p)}/{game.certLimit}</td>
                   {corps.map((c, ci) => {

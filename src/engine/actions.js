@@ -75,6 +75,67 @@ export function applyAction(state, action) {
     case 'ADJUST_CASH':
       handleAdjustCash(state, action)
       break
+    // Super-umpire direct edit actions
+    case 'SET_CASH': {
+      if (action.entityType === 'player') {
+        const p = state.players.find(pl => pl.id === action.entityId)
+        if (p) p.cash = action.value
+      } else if (action.entityType === 'corporation') {
+        const c = state.corporations.find(co => co.sym === action.entityId)
+        if (c) c.cash = action.value
+      } else if (action.entityType === 'bank') {
+        state.bank.cash = action.value
+      }
+      break
+    }
+    case 'SET_SHARES': {
+      const sp = state.players.find(pl => pl.id === action.playerId)
+      const sc = state.corporations.find(co => co.sym === action.corpSym)
+      if (!sp || !sc) break
+      const newPct = action.percent
+      const oldPct = sp.shares.filter(s => s.corpSym === action.corpSym).reduce((sum, s) => sum + s.percent, 0)
+      const wasPres = sp.shares.some(s => s.corpSym === action.corpSym && s.isPresident)
+      // Remove all existing shares of this corp
+      sp.shares = sp.shares.filter(s => s.corpSym !== action.corpSym)
+      // Add new shares
+      if (newPct > 0) {
+        const shareSize = state.title.shares?.[1] ?? 10
+        const presSize = state.title.shares?.[0] ?? 20
+        if (wasPres || newPct >= presSize) {
+          sp.shares.push({ corpSym: action.corpSym, percent: presSize, isPresident: true })
+          let remaining = newPct - presSize
+          while (remaining >= shareSize) { sp.shares.push({ corpSym: action.corpSym, percent: shareSize, isPresident: false }); remaining -= shareSize }
+        } else {
+          let remaining = newPct
+          while (remaining >= shareSize) { sp.shares.push({ corpSym: action.corpSym, percent: shareSize, isPresident: false }); remaining -= shareSize }
+        }
+      }
+      // Adjust IPO to compensate
+      const totalPlayerShares = state.players.reduce((sum, p) => sum + p.shares.filter(s => s.corpSym === action.corpSym).reduce((s2, sh) => s2 + sh.percent, 0), 0)
+      sc.ipoShares = 100 - totalPlayerShares - sc.marketShares
+      break
+    }
+    case 'SET_CORP_FIELD': {
+      const fc = state.corporations.find(co => co.sym === action.corpSym)
+      if (fc && action.field in fc) { fc[action.field] = action.value }
+      break
+    }
+    case 'SET_MARKET_POSITION': {
+      const mp = state.stockMarket.corpPositions[action.corpSym]
+      if (mp) { mp.row = action.row; mp.col = action.col }
+      else { state.stockMarket.corpPositions[action.corpSym] = { row: action.row, col: action.col } }
+      break
+    }
+    case 'ADD_TRAIN_MANUAL': {
+      const atc = state.corporations.find(co => co.sym === action.corpSym)
+      if (atc) { atc.trains.push({ name: action.trainName, id: `manual_${Date.now()}`, distance: 0, price: 0 }) }
+      break
+    }
+    case 'REMOVE_TRAIN_MANUAL': {
+      const rtc = state.corporations.find(co => co.sym === action.corpSym)
+      if (rtc) { const idx = rtc.trains.findIndex(t => t.name === action.trainName); if (idx !== -1) rtc.trains.splice(idx, 1) }
+      break
+    }
     case 'ADVANCE_ROUND':
       if (state.roundTracker) {
         advanceRound(state.roundTracker, state.phaseManager)
@@ -983,6 +1044,18 @@ function describeAction(state, action) {
       return `No Demand placed on segment ${action.segmentId}`
     case 'ADJUST_CASH':
       return `Manual adjustment: ${action.entityId} ${action.amount >= 0 ? '+' : ''}${fmt(action.amount)}${action.reason ? ` (${action.reason})` : ''}`
+    case 'SET_CASH':
+      return `Set ${action.entityId} cash to ${fmt(action.value)}`
+    case 'SET_SHARES':
+      return `Set ${playerName(action.playerId)} ${action.corpSym} to ${action.percent}%`
+    case 'SET_CORP_FIELD':
+      return `Set ${action.corpSym} ${action.field} to ${action.value}`
+    case 'SET_MARKET_POSITION':
+      return `Move ${action.corpSym} to [${action.row},${action.col}]`
+    case 'ADD_TRAIN_MANUAL':
+      return `Add ${action.trainName}-train to ${action.corpSym} (manual)`
+    case 'REMOVE_TRAIN_MANUAL':
+      return `Remove ${action.trainName}-train from ${action.corpSym} (manual)`
     case 'ADVANCE_ROUND':
       return `→ ${state.roundTracker ? roundLabel(state.roundTracker) : 'next round'}`
     case 'SET_ROUND':
