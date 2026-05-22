@@ -257,6 +257,104 @@ function PanelContent({ panel, game, player, corp, unfloated, fmt, revenueInput,
     return <MergePanel game={game} corp={corp} fmt={fmt} doAction={doAction} m={m} />
   }
 
+  // Short sell (1817)
+  if (panel === 'short' && player) {
+    const corps = game.corporations.filter(c => c.ipoed && c.floated)
+    return (
+      <div>
+        <Title m={m}>{player.name} — Short Sell</Title>
+        <div className="flex gap-1 mt-1 flex-wrap">
+          {corps.map(c => (
+            <Btn key={c.sym} m={m} v="red"
+              o={() => doAction({ type: 'SHORT_SELL', playerId: player.id, corpSym: c.sym })}>
+              <span style={{ color: c.color }}>{c.sym}</span> @ {fmt(corpPrice(game.stockMarket, c.sym) || 0)}
+            </Btn>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  // Close short (1817)
+  if (panel === 'closeshort' && player) {
+    const shorts = player.shares?.filter(s => s.isShort) || []
+    if (shorts.length === 0) return <Title m={m}>{player.name} has no open short positions</Title>
+    return (
+      <div>
+        <Title m={m}>{player.name} — Close Short Position</Title>
+        <div className="flex gap-1 mt-1 flex-wrap">
+          {shorts.map((s, i) => (
+            <Btn key={i} m={m} v="green"
+              o={() => doAction({ type: 'CLOSE_SHORT', playerId: player.id, corpSym: s.corpSym })}>
+              <span style={{ color: game.corporations.find(c => c.sym === s.corpSym)?.color }}>{s.corpSym}</span>
+            </Btn>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  // Executive car (18Daihan)
+  if (panel === 'execcar' && corp) {
+    const trainsWithoutCar = corp.trains.filter(t => !t.attachment)
+    if (trainsWithoutCar.length === 0) return <Title m={m}>{corp.sym}: all trains have attachments</Title>
+    const ecPrice = game.title.executiveCars?.price ?? 0
+    return (
+      <div>
+        <Title m={m}><span style={{ color: corp.color }}>{corp.sym}</span> — Buy Executive Car ({fmt(ecPrice)})</Title>
+        <div className="flex gap-1 mt-1 flex-wrap">
+          {trainsWithoutCar.map(t => (
+            <Btn key={t.id} m={m} v={corp.cash >= ecPrice ? 'green' : 'disabled'}
+              o={() => corp.cash >= ecPrice && doAction({ type: 'BUY_EXECUTIVE_CAR', corpSym: corp.sym, trainId: t.id, price: ecPrice })}>
+              {t.name}-train + EC
+            </Btn>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  // Convert concession (1822 family)
+  if (panel === 'concession' && player) {
+    const concessions = (game.companies || []).filter(c =>
+      c.ownerType === 'player' && c.ownerId === player.id && !c.closed && c.sym.startsWith('C')
+    )
+    if (concessions.length === 0) return <Title m={m}>{player.name} has no concessions</Title>
+    return (
+      <div>
+        <Title m={m}>{player.name} — Convert Concession</Title>
+        <div className="flex gap-1 mt-1 flex-wrap">
+          {concessions.map(c => {
+            const matchingCorp = game.corporations.find(corp => c.desc?.includes(corp.name) || c.desc?.includes(corp.sym))
+            return (
+              <Btn key={c.sym} m={m} v="green"
+                o={() => doAction({ type: 'CONVERT_CONCESSION', playerId: player.id, companySym: c.sym, corpSym: matchingCorp?.sym || c.sym })}>
+                {c.sym} → {matchingCorp?.sym || '?'}
+              </Btn>
+            )
+          })}
+        </div>
+      </div>
+    )
+  }
+
+  // Export train (1817, 18USA)
+  if (panel === 'export') {
+    const nextTrain = game.depot.upcoming[0]
+    if (!nextTrain) return <Title m={m}>No trains to export</Title>
+    return (
+      <div>
+        <Title m={m}>Export Train</Title>
+        <div className="mt-1">
+          <Btn m={m} v="red"
+            o={() => doAction({ type: 'EXPORT_TRAIN' })}>
+            Export {nextTrain.name}-train ({fmt(nextTrain.price)})
+          </Btn>
+        </div>
+      </div>
+    )
+  }
+
   // Discard train (forced when over train limit)
   if (panel === 'discard' && corp) {
     if (corp.trains.length === 0) return <Title m={m}>{corp.sym} has no trains to discard</Title>

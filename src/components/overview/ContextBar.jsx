@@ -24,7 +24,7 @@ export function ContextBar({ game, selPlayer, selCorp, myPlayerId, setPanel, doA
     interest: () => selCorp && doAction({ type: 'PAY_INTEREST', corpSym: selCorp.sym }),
     corpshare: () => setPanel('corpshare'),
     execcar: () => setPanel('execcar'),
-    export: () => doAction({ type: 'EXPORT_TRAIN' }),
+    export: () => setPanel('export'),
     concession: () => setPanel('concession'),
     merge: () => setPanel('merge'),
     issue: () => selCorp && doAction({ type: 'ISSUE_SHARES', corpSym: selCorp.sym }),
