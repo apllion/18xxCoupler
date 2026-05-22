@@ -541,6 +541,17 @@ function MoveCertPanel({ certs, player, corp, game, otherPlayers, doAction, fmt,
               </Btn>
             </>
           )}
+          {/* Force president — any player with shares can be forced president */}
+          {corpCerts.length > 0 && !corpCerts.some(c => c.isPresident) && (
+            <Btn m={m} v="yellow" o={() => doAction({ type: 'FORCE_PRESIDENT', playerId: player.id, corpSym: corp.sym })}>
+              Force President
+            </Btn>
+          )}
+          {corpCerts.some(c => c.isPresident) && (
+            <span className={m ? 'text-yellow-400 text-xs block mt-1' : 'text-amber-400 text-xs block mt-1'}>
+              Currently president. Move the pres cert or use Force President on another player.
+            </span>
+          )}
         </div>
       </div>
     )

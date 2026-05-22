@@ -88,6 +88,21 @@ export function applyAction(state, action) {
       }
       break
     }
+    // Force-set presidency (super-umpire — no cert exchange, just flag flip)
+    case 'FORCE_PRESIDENT': {
+      const fpCorp = action.corpSym
+      for (const pl of state.players) {
+        for (const s of pl.shares) {
+          if (s.corpSym === fpCorp) s.isPresident = false
+        }
+      }
+      const fpPlayer = state.players.find(p => p.id === action.playerId)
+      if (fpPlayer) {
+        const cert = fpPlayer.shares.find(s => s.corpSym === fpCorp)
+        if (cert) cert.isPresident = true
+      }
+      break
+    }
     case 'MOVE_CERT': {
       // Move one specific certificate between players (or to/from IPO/pool)
       const mcFrom = action.fromPlayerId ? state.players.find(p => p.id === action.fromPlayerId) : null
@@ -1085,6 +1100,8 @@ function describeAction(state, action) {
       return `No Demand placed on segment ${action.segmentId}`
     case 'ADJUST_CASH':
       return `Manual adjustment: ${action.entityId} ${action.amount >= 0 ? '+' : ''}${fmt(action.amount)}${action.reason ? ` (${action.reason})` : ''}`
+    case 'FORCE_PRESIDENT':
+      return `Force ${playerName(action.playerId)} as president of ${action.corpSym}`
     case 'MOVE_CERT': {
       const from = action.fromSource || playerName(action.fromPlayerId)
       const to = action.toSource || playerName(action.toPlayerId)
