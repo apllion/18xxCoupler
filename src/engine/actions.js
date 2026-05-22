@@ -88,6 +88,47 @@ export function applyAction(state, action) {
       }
       break
     }
+    case 'MOVE_CERT': {
+      // Move one specific certificate between players (or to/from IPO/pool)
+      const mcFrom = action.fromPlayerId ? state.players.find(p => p.id === action.fromPlayerId) : null
+      const mcTo = action.toPlayerId ? state.players.find(p => p.id === action.toPlayerId) : null
+      const mcCorp = state.corporations.find(c => c.sym === action.corpSym)
+      if (!mcCorp) break
+
+      if (action.fromSource === 'ipo') {
+        // From IPO to player
+        if (mcTo && mcCorp.ipoShares >= action.percent) {
+          mcCorp.ipoShares -= action.percent
+          mcTo.shares.push({ corpSym: action.corpSym, percent: action.percent, isPresident: !!action.isPresident })
+        }
+      } else if (action.fromSource === 'pool') {
+        // From market pool to player
+        if (mcTo && mcCorp.marketShares >= action.percent) {
+          mcCorp.marketShares -= action.percent
+          mcTo.shares.push({ corpSym: action.corpSym, percent: action.percent, isPresident: !!action.isPresident })
+        }
+      } else if (action.toSource === 'ipo') {
+        // From player to IPO
+        if (mcFrom) {
+          const idx = mcFrom.shares.findIndex(s => s.corpSym === action.corpSym && s.percent === action.percent && s.isPresident === !!action.isPresident)
+          if (idx !== -1) { mcFrom.shares.splice(idx, 1); mcCorp.ipoShares += action.percent }
+        }
+      } else if (action.toSource === 'pool') {
+        // From player to market pool
+        if (mcFrom) {
+          const idx = mcFrom.shares.findIndex(s => s.corpSym === action.corpSym && s.percent === action.percent && s.isPresident === !!action.isPresident)
+          if (idx !== -1) { mcFrom.shares.splice(idx, 1); mcCorp.marketShares += action.percent }
+        }
+      } else if (mcFrom && mcTo) {
+        // Player to player
+        const idx = mcFrom.shares.findIndex(s => s.corpSym === action.corpSym && s.percent === action.percent && s.isPresident === !!action.isPresident)
+        if (idx !== -1) {
+          const cert = mcFrom.shares.splice(idx, 1)[0]
+          mcTo.shares.push(cert)
+        }
+      }
+      break
+    }
     case 'SET_SHARES': {
       const sp = state.players.find(pl => pl.id === action.playerId)
       const sc = state.corporations.find(co => co.sym === action.corpSym)
@@ -1044,6 +1085,11 @@ function describeAction(state, action) {
       return `No Demand placed on segment ${action.segmentId}`
     case 'ADJUST_CASH':
       return `Manual adjustment: ${action.entityId} ${action.amount >= 0 ? '+' : ''}${fmt(action.amount)}${action.reason ? ` (${action.reason})` : ''}`
+    case 'MOVE_CERT': {
+      const from = action.fromSource || playerName(action.fromPlayerId)
+      const to = action.toSource || playerName(action.toPlayerId)
+      return `Move ${action.percent}%${action.isPresident ? 'P' : ''} ${action.corpSym} from ${from} to ${to}`
+    }
     case 'SET_CASH':
       return `Set ${action.entityId} cash to ${fmt(action.value)}`
     case 'SET_SHARES':

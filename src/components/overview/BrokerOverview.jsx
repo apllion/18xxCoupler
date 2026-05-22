@@ -112,13 +112,13 @@ export default function BrokerOverview() {
                     const isCursor = pi === curRow && ci === curCol
                     return (
                       <td key={c.sym} ref={isCursor ? cursorRef : undefined}
-                        className={`px-2 text-center cursor-pointer ${isCursor ? 'bg-broker-gold/20 ring-1 ring-broker-gold/50' : ci === curCol ? 'bg-broker-surface-hover/20' : ''}`}
-                        onClick={() => { setCurRow(pi); setCurCol(ci) }}>
+                        className={`px-2 text-center cursor-pointer ${isCursor ? 'bg-broker-gold/20 ring-1 ring-broker-gold/50' : ci === curCol ? 'bg-broker-surface-hover/20' : ''} ${su && pct > 0 ? 'hover:ring-1 hover:ring-orange-400/50' : ''}`}
+                        onClick={() => {
+                          setCurRow(pi); setCurCol(ci)
+                          if (su) setPanel('movecert')
+                        }}>
                         {pct === 0 ? <span className="text-broker-text-muted/20">·</span>
-                          : <InlineEdit value={pct} enabled={su} skin="broker"
-                              onSave={v => doAction({ type: 'SET_SHARES', playerId: p.id, corpSym: c.sym, percent: v })}>
-                              <span className={pres ? 'text-white font-bold' : 'text-broker-text'}>{pct}{pres && '%P'}</span>
-                            </InlineEdit>}
+                          : <span className={pres ? 'text-white font-bold' : 'text-broker-text'}>{pct}{pres && '%P'}</span>}
                       </td>
                     )
                   })}

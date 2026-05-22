@@ -258,6 +258,16 @@ function PanelContent({ panel, game, player, corp, unfloated, fmt, revenueInput,
     return <MergePanel game={game} corp={corp} fmt={fmt} doAction={doAction} m={m} />
   }
 
+  // Move certificate panel (super-umpire)
+  if (panel === 'movecert' && player && corp) {
+    const certs = player.shares.filter(s => s.corpSym === corp.sym)
+    const otherPlayers = game.players.filter(p => p.id !== player.id)
+    return (
+      <MoveCertPanel certs={certs} player={player} corp={corp} game={game}
+        otherPlayers={otherPlayers} doAction={doAction} fmt={fmt} m={m} />
+    )
+  }
+
   // Short sell (1817)
   if (panel === 'short' && player) {
     const corps = game.corporations.filter(c => c.ipoed && c.floated)
@@ -484,6 +494,95 @@ function ParPanel({ player, unfloated, game, fmt, doAction, m }) {
 
 function Title({ m, children }) {
   return <div className={m ? 'text-green-400 text-xs font-mono font-bold' : 'text-sm font-medium text-white'}>{children}</div>
+}
+
+function MoveCertPanel({ certs, player, corp, game, otherPlayers, doAction, fmt, m }) {
+  const [selectedCert, setSelectedCert] = useState(null) // { percent, isPresident, index }
+
+  // Certs this player holds
+  const corpCerts = certs.map((s, i) => ({ ...s, index: i }))
+
+  // Also show IPO/pool as sources to pull from
+  const ipoAvail = corp.ipoShares
+  const poolAvail = corp.marketShares
+  const shareSize = game.title.shares?.[1] ?? 10
+  const presSize = game.title.shares?.[0] ?? 20
+
+  if (!selectedCert) {
+    return (
+      <div>
+        <Title m={m}>{player.name} — <span style={{ color: corp.color }}>{corp.sym}</span> Certificates</Title>
+        <div className="mt-1 space-y-0.5">
+          {corpCerts.length === 0 && <span className={m ? 'text-blue-400 text-xs' : 'text-broker-text-muted text-xs'}>No certs held</span>}
+          {corpCerts.map((c, i) => (
+            <Btn key={i} m={m} v={c.isPresident ? 'yellow' : 'blue'}
+              o={() => setSelectedCert({ percent: c.percent, isPresident: c.isPresident, source: 'player' })}>
+              {c.percent}%{c.isPresident ? ' President' : ''} → move
+            </Btn>
+          ))}
+          {ipoAvail > 0 && (
+            <>
+              <span className={m ? 'text-green-600 text-xs block mt-1' : 'text-broker-text-muted text-xs block mt-1'}>From IPO ({ipoAvail}%):</span>
+              <Btn m={m} v="green" o={() => setSelectedCert({ percent: shareSize, isPresident: false, source: 'ipo' })}>
+                Pull {shareSize}% from IPO
+              </Btn>
+              {ipoAvail >= presSize && (
+                <Btn m={m} v="yellow" o={() => setSelectedCert({ percent: presSize, isPresident: true, source: 'ipo' })}>
+                  Pull {presSize}% Pres from IPO
+                </Btn>
+              )}
+            </>
+          )}
+          {poolAvail > 0 && (
+            <>
+              <span className={m ? 'text-green-600 text-xs block mt-1' : 'text-broker-text-muted text-xs block mt-1'}>From Pool ({poolAvail}%):</span>
+              <Btn m={m} v="green" o={() => setSelectedCert({ percent: shareSize, isPresident: false, source: 'pool' })}>
+                Pull {shareSize}% from Pool
+              </Btn>
+            </>
+          )}
+        </div>
+      </div>
+    )
+  }
+
+  // Step 2: pick destination
+  return (
+    <div>
+      <Title m={m}>Move {selectedCert.percent}%{selectedCert.isPresident ? ' President' : ''} <span style={{ color: corp.color }}>{corp.sym}</span> to:</Title>
+      <div className="flex gap-1 mt-1 flex-wrap">
+        {selectedCert.source === 'player' ? (
+          <>
+            {otherPlayers.map(p => (
+              <Btn key={p.id} m={m} v="green" o={() => doAction({
+                type: 'MOVE_CERT', corpSym: corp.sym, fromPlayerId: player.id, toPlayerId: p.id,
+                percent: selectedCert.percent, isPresident: selectedCert.isPresident
+              })}>{p.name}</Btn>
+            ))}
+            <Btn m={m} v="blue" o={() => doAction({
+              type: 'MOVE_CERT', corpSym: corp.sym, fromPlayerId: player.id, toSource: 'ipo',
+              percent: selectedCert.percent, isPresident: selectedCert.isPresident
+            })}>IPO</Btn>
+            <Btn m={m} v="blue" o={() => doAction({
+              type: 'MOVE_CERT', corpSym: corp.sym, fromPlayerId: player.id, toSource: 'pool',
+              percent: selectedCert.percent, isPresident: selectedCert.isPresident
+            })}>Pool</Btn>
+          </>
+        ) : (
+          // From IPO/pool → pick player
+          <>
+            {game.players.map(p => (
+              <Btn key={p.id} m={m} v="green" o={() => doAction({
+                type: 'MOVE_CERT', corpSym: corp.sym, fromSource: selectedCert.source, toPlayerId: p.id,
+                percent: selectedCert.percent, isPresident: selectedCert.isPresident
+              })}>{p.name}</Btn>
+            ))}
+          </>
+        )}
+        <Btn m={m} v="red" o={() => setSelectedCert(null)}>Cancel</Btn>
+      </div>
+    </div>
+  )
 }
 
 function MergePanel({ game, corp, fmt, doAction, m }) {
