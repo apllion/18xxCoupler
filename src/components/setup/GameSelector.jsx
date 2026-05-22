@@ -72,7 +72,10 @@ export default function GameSelector() {
         ))}
       </div>
 
-      <img src={import.meta.env.BASE_URL + 'logo.png'} alt="18xxBroker" className="w-48 mb-4 mt-2" />
+      <img src={import.meta.env.BASE_URL + 'logo.png'} alt="18xxBroker" className="w-48 mb-1 mt-2" />
+      <p className="text-[10px] text-broker-text-muted mb-4">
+        v{typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '?'} · {typeof __BUILD_ID__ !== 'undefined' ? __BUILD_ID__ : '?'}
+      </p>
 
       {/* Room join — join a peer's game */}
       <RoomJoin sync={sync} />
