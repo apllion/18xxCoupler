@@ -6,6 +6,7 @@ import { playerSharePercent, corpPrice, parPrices, nextAvailableTrains } from '.
 import { useUIStore } from '../../store/uiStore.js'
 import { useGameStore } from '../../store/gameStore.js'
 import { useThemeStore, themes as brokerThemes } from '../../store/themeStore.js'
+import { exportGamePdf } from '../../utils/exportPdf.js'
 import { CorpCard } from './CorpCard.jsx'
 import { PlayerCard } from './PlayerCard.jsx'
 
@@ -710,6 +711,7 @@ function SettingsPanel({ m, game, doAction }) {
           <div className="flex gap-1 flex-wrap">
             {game?.actionLog?.length > 0 && !inReplay && <Btn m={m} v="blue" o={() => enterReplay()}>Replay</Btn>}
             {inReplay && <Btn m={m} v="red" o={() => exitReplay()}>Exit Replay</Btn>}
+            {game && <Btn m={m} v="green" o={() => exportGamePdf(game)}>Export PDF</Btn>}
           </div>
         </div>
         <div className="flex-1 min-w-[200px]">
