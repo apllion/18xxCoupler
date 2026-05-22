@@ -40,7 +40,8 @@ export default function ModeratorOverview() {
         </span>
         <span className="flex items-center gap-2">
           {inReplay && <span className="text-purple-300 font-bold">REPLAY {curIdx + 1}/{fullLog.length}</span>}
-          <span className={game.bank.cash <= 0 ? 'text-red-400 font-bold' : 'text-green-300'}>Bank:{fmt(game.bank.cash)}</span>
+          <span className={game.bank.cash <= 0 ? 'text-red-400 font-bold' : 'text-green-300'}>Bank:<InlineEdit value={game.bank.cash} enabled={su} skin="moderator"
+            onSave={v => doAction({ type: 'SET_CASH', entityId: 'bank', entityType: 'bank', value: v })}>{fmt(game.bank.cash)}</InlineEdit></span>
           <span className="flex items-center gap-0.5">
             <button onClick={() => useUIStore.getState().setMyPlayer(null)}
               className={`text-xs px-1 py-0 rounded ${!myPlayerId ? `${t.bright} font-bold` : `${t.text}`}`}>
@@ -145,14 +146,38 @@ export default function ModeratorOverview() {
               )
             })}
             <tr><td colSpan={4 + corps.length} className="h-0.5 bg-green-700"></td></tr>
-            <MRow t={t} label="Price" corps={corps} cc={curCol} r={c => !c.ipoed ? '—' : <span className="text-cyan-300">{c.price}{c.pos && <span className="text-blue-500">/{c.pos.row}</span>}</span>} />
-            <MRow t={t} label="Par" corps={corps} cc={curCol} r={c => !c.ipoed ? '—' : <span className="text-blue-300">{c.parPrice}</span>} />
-            <MRow t={t} label="Treas" corps={corps} cc={curCol} r={c => !c.ipoed ? '—' : <span className={c.cash < 0 ? 'text-red-400' : 'text-green-300'}>{fmt(c.cash)}</span>} />
-            <MRow t={t} label="IPO" corps={corps} cc={curCol} r={c => <span className="text-blue-300">{c.ipoShares < 100 ? `${c.ipoShares}%` : '—'}</span>} />
-            <MRow t={t} label="Pool" corps={corps} cc={curCol} r={c => c.marketShares > 0 ? <span className="text-yellow-300">{c.marketShares}%</span> : '—'} />
+            <MRow t={t} label="Price" corps={corps} cc={curCol} r={c => !c.ipoed ? '—' :
+              <InlineEdit value={`${c.pos?.row ?? 0},${c.pos?.col ?? 0}`} type="text" enabled={su} skin="moderator"
+                onSave={v => { const [r, cl] = v.split(',').map(Number); if (!isNaN(r) && !isNaN(cl)) doAction({ type: 'SET_MARKET_POSITION', corpSym: c.sym, row: r, col: cl }) }}>
+                <span className="text-cyan-300">{c.price}{c.pos && <span className="text-blue-500">/{c.pos.row}</span>}</span>
+              </InlineEdit>} />
+            <MRow t={t} label="Par" corps={corps} cc={curCol} r={c => !c.ipoed ? '—' :
+              <InlineEdit value={c.parPrice} enabled={su} skin="moderator"
+                onSave={v => doAction({ type: 'SET_CORP_FIELD', corpSym: c.sym, field: 'parPrice', value: v })}>
+                <span className="text-blue-300">{c.parPrice}</span>
+              </InlineEdit>} />
+            <MRow t={t} label="Treas" corps={corps} cc={curCol} r={c => !c.ipoed ? '—' :
+              <InlineEdit value={c.cash} enabled={su} skin="moderator"
+                onSave={v => doAction({ type: 'SET_CASH', entityId: c.sym, entityType: 'corporation', value: v })}>
+                <span className={c.cash < 0 ? 'text-red-400' : 'text-green-300'}>{fmt(c.cash)}</span>
+              </InlineEdit>} />
+            <MRow t={t} label="IPO" corps={corps} cc={curCol} r={c =>
+              <InlineEdit value={c.ipoShares} enabled={su && c.ipoShares < 100} skin="moderator"
+                onSave={v => doAction({ type: 'SET_CORP_FIELD', corpSym: c.sym, field: 'ipoShares', value: v })}>
+                <span className="text-blue-300">{c.ipoShares < 100 ? `${c.ipoShares}%` : '—'}</span>
+              </InlineEdit>} />
+            <MRow t={t} label="Pool" corps={corps} cc={curCol} r={c =>
+              <InlineEdit value={c.marketShares} enabled={su && c.marketShares > 0} skin="moderator"
+                onSave={v => doAction({ type: 'SET_CORP_FIELD', corpSym: c.sym, field: 'marketShares', value: v })}>
+                {c.marketShares > 0 ? <span className="text-yellow-300">{c.marketShares}%</span> : '—'}
+              </InlineEdit>} />
             <MRow t={t} label="Trains" corps={corps} cc={curCol} onClick={(sym, ci) => { setCurCol(ci); setPanel('train') }} r={c => !c.floated ? '—' : c.trains.length === 0 ? <span className="text-red-500 font-bold">!</span> : <span className="text-white font-bold">{c.trains.map(t => t.name).join('')}</span>} />
             <MRow t={t} label="Rev" corps={corps} cc={curCol} onClick={(sym, ci) => { setCurCol(ci); setPanel('revenue'); setTimeout(() => revRef.current?.focus(), 50) }} r={c => { if (!c.floated) return '—'; const rev = lastRevenue[c.sym]; if (!rev) return '—'; const sign = rev.type === 'WITHHOLD_DIVIDEND' ? '-' : rev.type === 'HALF_DIVIDEND' ? '~' : '+'; return <span className={rev.type === 'WITHHOLD_DIVIDEND' ? 'text-red-300' : 'text-green-300'}>{sign}{rev.amount}</span> }} />
-            <MRow t={t} label="Tokens" corps={corps} cc={curCol} r={c => !c.floated ? '—' : <span className="text-blue-300">{c.tokensPlaced}/{c.tokens.length}</span>} />
+            <MRow t={t} label="Tokens" corps={corps} cc={curCol} r={c => !c.floated ? '—' :
+              <InlineEdit value={c.tokensPlaced} enabled={su} skin="moderator"
+                onSave={v => doAction({ type: 'SET_CORP_FIELD', corpSym: c.sym, field: 'tokensPlaced', value: v })}>
+                <span className="text-blue-300">{c.tokensPlaced}/{c.tokens.length}</span>
+              </InlineEdit>} />
             <MRow t={t} label="Pres" corps={corps} cc={curCol} r={c => { if (!c.ipoed) return '—'; const pr = game.players.find(p => isPresident(p, c.sym)); return <span className="text-yellow-400">{pr ? pr.name.slice(0, 6) : '—'}</span> }} />
             {game.title.loans && <MRow t={t} label="Loans" corps={corps} cc={curCol} r={c => !c.floated ? '—' : <span className={c.loans ? 'text-red-300 font-bold' : ''}>{c.loans || 0}</span>} />}
             {game.title.corpSizing?.enabled && <MRow t={t} label="Size" corps={corps} cc={curCol} r={c => !c.ipoed ? '—' : <span className="text-cyan-300">{c.corpSize || '2sh'}</span>} />}

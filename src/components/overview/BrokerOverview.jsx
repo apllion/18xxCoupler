@@ -32,7 +32,8 @@ export default function BrokerOverview() {
         </div>
         <div className="flex items-center gap-2">
           {inReplay && <span className="text-xs font-medium text-purple-300 bg-purple-900/40 px-2 py-0.5 rounded">{curIdx + 1}/{fullLog.length}</span>}
-          <span className={`text-sm font-medium ${game.bank.cash <= 0 ? 'text-red-400' : 'text-broker-text'}`}>Bank {fmt(game.bank.cash)}</span>
+          <span className={`text-sm font-medium ${game.bank.cash <= 0 ? 'text-red-400' : 'text-broker-text'}`}>Bank <InlineEdit value={game.bank.cash} enabled={su} skin="broker"
+            onSave={v => doAction({ type: 'SET_CASH', entityId: 'bank', entityType: 'bank', value: v })}>{fmt(game.bank.cash)}</InlineEdit></span>
           <span className="flex items-center gap-0.5">
             <button onClick={() => useUIStore.getState().setMyPlayer(null)}
               className={`text-xs px-1.5 py-0.5 rounded ${!myPlayerId ? 'bg-broker-gold/20 text-broker-gold font-bold' : 'bg-broker-surface-hover text-broker-text-muted hover:text-white'}`}>
@@ -129,15 +130,31 @@ export default function BrokerOverview() {
             <tr><td colSpan={3 + corps.length} className="h-px bg-broker-border"></td></tr>
 
             {/* Corp rows */}
-            <BRow l="Price" corps={corps} cc={curCol} r={c => !c.ipoed ? '' : <span className="text-white font-medium">{fmt(c.price)}</span>} />
-            <BRow l="Par" corps={corps} cc={curCol} r={c => !c.ipoed ? '' : <span className="text-broker-text-muted">{fmt(c.parPrice)}</span>} />
+            <BRow l="Price" corps={corps} cc={curCol} r={c => !c.ipoed ? '' :
+              <InlineEdit value={`${c.pos?.row ?? 0},${c.pos?.col ?? 0}`} type="text" enabled={su} skin="broker"
+                onSave={v => { const [r, cl] = v.split(',').map(Number); if (!isNaN(r) && !isNaN(cl)) doAction({ type: 'SET_MARKET_POSITION', corpSym: c.sym, row: r, col: cl }) }}>
+                <span className="text-white font-medium">{fmt(c.price)}</span>
+              </InlineEdit>} />
+            <BRow l="Par" corps={corps} cc={curCol} r={c => !c.ipoed ? '' :
+              <InlineEdit value={c.parPrice} enabled={su} skin="broker"
+                onSave={v => doAction({ type: 'SET_CORP_FIELD', corpSym: c.sym, field: 'parPrice', value: v })}>
+                <span className="text-broker-text-muted">{fmt(c.parPrice)}</span>
+              </InlineEdit>} />
             <BRow l="Treasury" corps={corps} cc={curCol} r={c => !c.ipoed ? '' :
               <InlineEdit value={c.cash} enabled={su} skin="broker"
                 onSave={v => doAction({ type: 'SET_CASH', entityId: c.sym, entityType: 'corporation', value: v })}>
                 <span className={c.cash < 0 ? 'text-red-400' : 'text-broker-text'}>{fmt(c.cash)}</span>
               </InlineEdit>} />
-            <BRow l="IPO" corps={corps} cc={curCol} r={c => c.ipoShares < 100 ? `${c.ipoShares}%` : ''} />
-            <BRow l="Pool" corps={corps} cc={curCol} r={c => c.marketShares > 0 ? <span className="text-amber-400">{c.marketShares}%</span> : ''} />
+            <BRow l="IPO" corps={corps} cc={curCol} r={c => c.ipoShares < 100 ?
+              <InlineEdit value={c.ipoShares} enabled={su} skin="broker"
+                onSave={v => doAction({ type: 'SET_CORP_FIELD', corpSym: c.sym, field: 'ipoShares', value: v })}>
+                {c.ipoShares}%
+              </InlineEdit> : ''} />
+            <BRow l="Pool" corps={corps} cc={curCol} r={c => c.marketShares > 0 ?
+              <InlineEdit value={c.marketShares} enabled={su} skin="broker"
+                onSave={v => doAction({ type: 'SET_CORP_FIELD', corpSym: c.sym, field: 'marketShares', value: v })}>
+                <span className="text-amber-400">{c.marketShares}%</span>
+              </InlineEdit> : ''} />
             <BRow l="Trains" corps={corps} cc={curCol} onClick={(sym, ci) => { setCurCol(ci); setPanel('train') }} r={c => {
               if (!c.floated) return ''
               if (c.trains.length === 0) return <span className="text-red-400 font-bold">none</span>
@@ -150,7 +167,11 @@ export default function BrokerOverview() {
               const color = rev.type === 'WITHHOLD_DIVIDEND' ? 'text-red-400' : 'text-green-400'
               return <span className={color}>{rev.type === 'WITHHOLD_DIVIDEND' ? 'W' : rev.type === 'HALF_DIVIDEND' ? 'H' : ''} {fmt(rev.amount)}</span>
             }} />
-            <BRow l="Tokens" corps={corps} cc={curCol} r={c => !c.floated ? '' : `${c.tokensPlaced}/${c.tokens.length}`} />
+            <BRow l="Tokens" corps={corps} cc={curCol} r={c => !c.floated ? '' :
+              <InlineEdit value={c.tokensPlaced} enabled={su} skin="broker"
+                onSave={v => doAction({ type: 'SET_CORP_FIELD', corpSym: c.sym, field: 'tokensPlaced', value: v })}>
+                {c.tokensPlaced}/{c.tokens.length}
+              </InlineEdit>} />
             {game.title.loans && <BRow l="Loans" corps={corps} cc={curCol} r={c => !c.floated ? '' : c.loans ? <span className="text-red-400 font-bold">{c.loans}</span> : '0'} />}
           </tbody>
         </table>

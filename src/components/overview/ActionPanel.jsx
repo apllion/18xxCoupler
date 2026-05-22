@@ -665,7 +665,7 @@ function SettingsPanel({ m, game, doAction }) {
     { key: 'collectPrivates', label: 'Auto-collect private revenue at OR start' },
     { key: 'soldOutAdjust', label: 'Auto-sold-out adjustment at OR end' },
     { key: 'presidentSwap', label: 'Auto-swap presidency on share majority' },
-    { key: 'superUmpire', label: 'Super-umpire: show ALL actions' },
+    { key: 'superUmpire', label: 'Edit mode: show all actions + click values to edit' },
   ]
   const onColor = m ? 'bg-green-900 text-green-300' : 'bg-green-700/30 text-green-300'
   const offColor = m ? 'bg-gray-800 text-gray-500' : 'bg-gray-800/50 text-gray-400'
