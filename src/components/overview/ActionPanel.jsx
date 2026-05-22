@@ -252,6 +252,11 @@ function PanelContent({ panel, game, player, corp, unfloated, fmt, revenueInput,
     )
   }
 
+  // Merge panel — handles all merger types
+  if (panel === 'merge' && corp) {
+    return <MergePanel game={game} corp={corp} fmt={fmt} doAction={doAction} m={m} />
+  }
+
   // Discard train (forced when over train limit)
   if (panel === 'discard' && corp) {
     if (corp.trains.length === 0) return <Title m={m}>{corp.sym} has no trains to discard</Title>
@@ -380,6 +385,147 @@ function ParPanel({ player, unfloated, game, fmt, doAction, m }) {
 
 function Title({ m, children }) {
   return <div className={m ? 'text-green-400 text-xs font-mono font-bold' : 'text-sm font-medium text-white'}>{children}</div>
+}
+
+function MergePanel({ game, corp, fmt, doAction, m }) {
+  const [target, setTarget] = useState(null)
+  const [paymentShares, setPaymentShares] = useState(0)
+  const [cashDiff, setCashDiff] = useState('')
+
+  const merger = game.title.merger
+  if (!merger) return <Title m={m}>No merger rules for this title</Title>
+
+  const mergerType = merger.type
+  const phase = game.phaseManager.phases[game.phaseManager.currentIndex]
+
+  // Check phase eligibility
+  if (merger.fromPhase) {
+    const phaseNames = game.phaseManager.phases.map(p => p.name)
+    const currentIdx = phaseNames.indexOf(phase.name)
+    const fromIdx = phaseNames.indexOf(merger.fromPhase)
+    if (currentIdx < fromIdx) {
+      return <Title m={m}>Mergers available from phase {merger.fromPhase} (current: {phase.name})</Title>
+    }
+  }
+
+  // Find eligible targets based on merger type
+  let targets = []
+  let label = 'Merge'
+
+  if (mergerType === '1867_minor_major') {
+    if (corp.type !== 'minor') return <Title m={m}>Select a minor corporation to convert</Title>
+    targets = game.corporations.filter(c => c.type === 'major' && !c.floated)
+    label = 'Convert to Major'
+  } else if (mergerType === '1822_acquire') {
+    if (corp.type !== 'major') return <Title m={m}>Select a major corporation to acquire with</Title>
+    targets = game.corporations.filter(c => c.type === 'minor' && c.floated && c.sym !== corp.sym)
+    label = 'Acquire Minor'
+  } else if (mergerType === '1862_peer') {
+    targets = game.corporations.filter(c => c.sym !== corp.sym && c.floated)
+    label = 'Merge (absorb)'
+  } else if (mergerType === 'ptg_combine') {
+    targets = game.corporations.filter(c => c.sym !== corp.sym && c.floated && !c.isMerged)
+    label = 'Combine'
+  } else if (mergerType === 'rla_merge') {
+    if (corp.type !== 'minor') return <Title m={m}>Select a minor to merge</Title>
+    targets = game.corporations.filter(c => c.sym !== corp.sym && c.type === 'minor' && c.floated)
+    label = 'Merge Minors'
+  } else if (mergerType === '1817_merge') {
+    targets = game.corporations.filter(c => c.sym !== corp.sym && c.floated && c.corpSize === corp.corpSize)
+    label = 'Merge (same size)'
+  }
+
+  if (targets.length === 0 && !target) {
+    return <Title m={m}>{label}: no eligible targets</Title>
+  }
+
+  // Step 1: pick target
+  if (!target) {
+    return (
+      <div>
+        <Title m={m}><span style={{ color: corp.color }}>{corp.sym}</span> — {label}</Title>
+        <div className="flex gap-1 mt-1 flex-wrap">
+          {targets.map(t => (
+            <Btn key={t.sym} m={m} v="blue" o={() => {
+              // Simple mergers: execute directly
+              if (mergerType === '1867_minor_major') {
+                doAction({ type: 'CONVERT_MINOR', minorSym: corp.sym, majorSym: t.sym })
+              } else if (mergerType === '1862_peer') {
+                doAction({ type: 'MERGE_CORPS', survivorSym: corp.sym, nonsurvivorSym: t.sym })
+              } else if (mergerType === 'ptg_combine') {
+                doAction({ type: 'MERGE_CORPS', topCorpSym: corp.sym, bottomCorpSym: t.sym })
+              } else {
+                // Multi-step: go to step 2
+                setTarget(t.sym)
+              }
+            }}>
+              <span style={{ color: t.color }} className="font-bold">{t.sym}</span>
+              {' '}{t.name?.slice(0, 20)}
+            </Btn>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  // Step 2: 1822_acquire payment options
+  if (mergerType === '1822_acquire') {
+    return (
+      <div>
+        <Title m={m}><span style={{ color: corp.color }}>{corp.sym}</span> acquires {target}</Title>
+        <div className="mt-1 space-y-1">
+          <div className="flex gap-1 items-center">
+            <span className={m ? 'text-blue-400 text-xs' : 'text-broker-text-muted text-xs'}>Shares:</span>
+            {(merger.paymentOptions || [0, 1, 2]).map(n => (
+              <Btn key={n} m={m} v={paymentShares === n ? 'green' : 'blue'}
+                o={() => setPaymentShares(n)}>{n}</Btn>
+            ))}
+          </div>
+          <PriceInput m={m} label="Cash difference" value={cashDiff} onChange={setCashDiff}
+            onConfirm={() => doAction({ type: 'ACQUIRE_MINOR', majorSym: corp.sym, minorSym: target, paymentShares, cashDifference: parseInt(cashDiff) || 0 })}
+            onCancel={() => { setTarget(null); setPaymentShares(0); setCashDiff('') }} />
+        </div>
+      </div>
+    )
+  }
+
+  // Step 2: rla_merge — pick major corp
+  if (mergerType === 'rla_merge') {
+    const availMajors = game.corporations.filter(c => c.type === 'major' && !c.floated)
+    return (
+      <div>
+        <Title m={m}>{corp.sym} + {target} → pick Major</Title>
+        <div className="flex gap-1 mt-1 flex-wrap">
+          {availMajors.map(maj => (
+            <Btn key={maj.sym} m={m} v="green"
+              o={() => doAction({ type: 'MERGE_CORPS', minorSymA: corp.sym, minorSymB: target, majorCorpSym: maj.sym })}>
+              <span style={{ color: maj.color }}>{maj.sym}</span>
+            </Btn>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  // Step 2: 1817_merge
+  if (mergerType === '1817_merge') {
+    return (
+      <div>
+        <Title m={m}>{corp.sym} merges with {target}</Title>
+        <div className="flex gap-1 mt-1">
+          <Btn m={m} v="green" o={() => doAction({ type: 'MERGE_CORPS', survivorSym: corp.sym, nonsurvivorSym: target })}>
+            {corp.sym} survives
+          </Btn>
+          <Btn m={m} v="blue" o={() => doAction({ type: 'MERGE_CORPS', survivorSym: target, nonsurvivorSym: corp.sym })}>
+            {target} survives
+          </Btn>
+          <Btn m={m} v="red" o={() => { setTarget(null) }}>Cancel</Btn>
+        </div>
+      </div>
+    )
+  }
+
+  return null
 }
 
 function PriceInput({ m, label, value, onChange, onConfirm, onCancel }) {
