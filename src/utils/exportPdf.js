@@ -52,15 +52,20 @@ export function exportGamePdf(game) {
     const certs = playerCertCount(p)
     const privs = p.privates.join(', ') || '—'
 
-    // Share holdings
+    // Share holdings — show individual certificates
     const holdings = []
     for (const c of game.corporations) {
       if (!c.ipoed) continue
-      const pct = playerSharePercent(p, c.sym)
-      if (pct > 0) {
-        const pres = isPresident(p, c.sym) ? 'P' : ''
-        holdings.push(`${c.sym}:${pct}%${pres}`)
+      const playerCerts = p.shares.filter(s => s.corpSym === c.sym)
+      if (playerCerts.length === 0) continue
+      // Group by percent: e.g. "1x20%P + 2x10%"
+      const groups = {}
+      for (const cert of playerCerts) {
+        const key = cert.percent + (cert.isPresident ? 'P' : '')
+        groups[key] = (groups[key] || 0) + 1
       }
+      const parts = Object.entries(groups).map(([key, count]) => `${count}x${key}%`)
+      holdings.push(`${c.sym}[${parts.join('+')}]`)
     }
 
     doc.text(`${isPriority ? '>> ' : ''}${p.name}${p.bankrupt ? ' [BANKRUPT]' : ''}`, colX[0], y)
