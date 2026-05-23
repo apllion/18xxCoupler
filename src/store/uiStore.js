@@ -10,6 +10,7 @@ export const useUIStore = create((set) => ({
   activeCorpSym: null,      // which corp is selected in Corps tab
   showLog: false,
   turnTracking: 'off',      // 'on' | 'off' — dormant for now
+  plusPlus: false,           // analysis features unlocked via hidden passphrase
 
   // Configurable automation
   autoConfig: {

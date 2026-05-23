@@ -759,12 +759,14 @@ function SettingsPanel({ m, game, doAction }) {
   const ac = useUIStore((s) => s.autoConfig)
   const skin = useUIStore((s) => s.skin)
   const modTheme = useUIStore((s) => s.modTheme)
+  const plusPlus = useUIStore((s) => s.plusPlus)
   const setAutoConfig = useUIStore((s) => s.setAutoConfig)
   const setActiveTab = useUIStore((s) => s.setActiveTab)
   const setModTheme = useUIStore((s) => s.setModTheme)
   const brokerThemeId = useThemeStore((s) => s.themeId)
   const setBrokerTheme = useThemeStore((s) => s.setTheme)
   const enterReplay = useGameStore((s) => s.enterReplay)
+  const [secretInput, setSecretInput] = useState('')
   const exitReplay = useGameStore((s) => s.exitReplay)
   const fullLog = useGameStore((s) => s.fullLog)
   const inReplay = fullLog !== null
@@ -844,6 +846,25 @@ function SettingsPanel({ m, game, doAction }) {
             ))}
           </div>
         </div>
+        {/* Hidden passphrase for analysis features */}
+        {plusPlus ? (
+          <div className={`${labelColor} mt-2`}>
+            ++ Analysis features unlocked
+          </div>
+        ) : (
+          <input type="text" value={secretInput}
+            onChange={e => {
+              const v = e.target.value
+              setSecretInput(v)
+              if (v === 'plusplus') { useUIStore.setState({ plusPlus: true }); setSecretInput('') }
+            }}
+            placeholder=""
+            className={m
+              ? 'mt-2 w-20 bg-transparent border-none text-blue-950 text-[8px] focus:outline-none caret-transparent'
+              : 'mt-2 w-20 bg-transparent border-none text-broker-bg text-[8px] focus:outline-none caret-transparent'
+            }
+          />
+        )}
       </div>
     </div>
   )
