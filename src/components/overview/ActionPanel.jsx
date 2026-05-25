@@ -10,6 +10,12 @@ import { exportGamePdf } from '../../utils/exportPdf.js'
 import { CorpCard } from './CorpCard.jsx'
 import { PlayerCard } from './PlayerCard.jsx'
 
+async function sha256pp(text) {
+  const data = new TextEncoder().encode(text)
+  const hash = await crypto.subtle.digest('SHA-256', data)
+  return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('')
+}
+
 export function ActionPanel({ panel, game, player, corp, unfloated, fmt, revenueInput, setRevenueInput, revRef, onClose, doAction, skin }) {
   const m = skin === 'moderator'
   const wrap = m
@@ -863,7 +869,11 @@ function SettingsPanel({ m, game, doAction }) {
                   onChange={e => {
                     const v = e.target.value
                     setSecretInput(v)
-                    if (v === 'plusplus') { useUIStore.setState({ plusPlus: true }); setSecretInput(null) }
+                    sha256pp(v).then(h => {
+                      if (h === '5e701b2286b8bd7845b9a2c95a324e368f07409b100139ebf81d9a3a81764bb2') {
+                        useUIStore.setState({ plusPlus: true }); setSecretInput(null)
+                      }
+                    })
                   }}
                   placeholder="passphrase"
                   className={m
