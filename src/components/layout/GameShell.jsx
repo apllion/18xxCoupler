@@ -13,6 +13,7 @@ import SummaryTab from '../summary/SummaryTab.jsx'
 import BeerMarketTab from '../beer/BeerMarketTab.jsx'
 import OverviewTab from '../overview/OverviewTab.jsx'
 import { ModeratorOverview } from '../overview/OverviewTab.jsx'
+import EndgameCalcTab from '../overview/EndgameCalcTab.jsx'
 // PlusPlus: analysis tab (stripped from Broker build)
 const PP = !!import.meta.env.VITE_PLUSPLUS || import.meta.env.DEV
 const AnalysisTab = PP ? (await import('../overview/AnalysisTab.jsx')).default : null
@@ -21,6 +22,7 @@ import ModeratorShell from './ModeratorShell.jsx'
 const TAB_COMPONENTS = {
   overview: OverviewTab,
   moderator: ModeratorOverview,
+  endgame: EndgameCalcTab,
   ...(AnalysisTab ? { analysis: AnalysisTab } : {}),
   market: MarketTab,
   corps: CorpsTab,
