@@ -517,3 +517,94 @@ export async function importFromFile(filePath) {
   const json = JSON.parse((await gunzip(compressed)).toString())
   return importGame(json)
 }
+
+// Step-by-step replay — calls callback at each OR boundary with current state.
+// callback(state, orNumber, actionIndex) — return false to stop.
+export function replayWithCallbacks(gameJson, callback) {
+  const titleId = TITLE_MAP[gameJson.title]
+  if (!titleId) throw new Error(`Unsupported title: ${gameJson.title}`)
+
+  const playerNames = gameJson.players.map(p => p.name)
+  const playerMap = buildPlayerMap(gameJson.players)
+  const baseTitle = getTitle(titleId)
+  const state = createGame(baseTitle, playerNames)
+  const variantToBase = buildVariantToBaseMap(baseTitle)
+
+  let actions = stripUndoRedo(gameJson.actions)
+  actions = flattenAutoActions(actions)
+  const revenueMap = buildRevenueMap(actions)
+  const implicitWithholds = findImplicitWithholds(actions)
+  const withholdBeforeIndex = new Map()
+  for (const w of implicitWithholds) {
+    if (!withholdBeforeIndex.has(w.insertBeforeIndex)) withholdBeforeIndex.set(w.insertBeforeIndex, [])
+    withholdBeforeIndex.get(w.insertBeforeIndex).push(w.corpSym)
+  }
+
+  let orNumber = 0
+  let srNumber = 0
+  let lastPhase = null // 'sr' | 'or'
+
+  // Detect phase from 18xx.games action type (roundTracker isn't updated during import)
+  const SR_ACTIONS = new Set(['par', 'buy_shares', 'sell_shares', 'pass', 'bid', 'program_share_pass',
+    'program_buy_shares', 'program_merger_pass'])
+  const OR_ACTIONS = new Set(['run_routes', 'dividend', 'buy_train', 'lay_tile', 'place_token',
+    'buy_company', 'sell_company', 'payoff', 'take_loan', 'scrap_train', 'assign',
+    'convert', 'merge', 'choose'])
+
+  for (let actionIdx = 0; actionIdx <= actions.length; actionIdx++) {
+    const withholds = withholdBeforeIndex.get(actionIdx)
+    if (withholds) {
+      for (const corpSym of withholds) {
+        const corp = state.corporations.find(c => c.sym === corpSym)
+        if (corp?.floated) {
+          try { applyAction(state, { type: 'WITHHOLD_DIVIDEND', corpSym, totalRevenue: 0 }) } catch {}
+        }
+      }
+    }
+
+    if (actionIdx >= actions.length) break
+    const action = actions[actionIdx]
+
+    // Detect SR/OR boundary from action types
+    const actionType = action.type
+    let currentPhase = lastPhase
+    if (SR_ACTIONS.has(actionType)) currentPhase = 'sr'
+    else if (OR_ACTIONS.has(actionType)) currentPhase = 'or'
+
+    if (currentPhase !== lastPhase && currentPhase) {
+      if (currentPhase === 'or') {
+        orNumber++
+        const cont = callback(state, orNumber, actionIdx, 'or_start')
+        if (cont === false) return state
+      } else if (currentPhase === 'sr') {
+        srNumber++
+        const cont = callback(state, srNumber, actionIdx, 'sr_start')
+        if (cont === false) return state
+      }
+    }
+    lastPhase = currentPhase
+
+    const converted = convertAction(action, state, playerMap, revenueMap, variantToBase)
+    if (!converted) continue
+    const toApply = Array.isArray(converted) ? converted : [converted]
+    for (const a of toApply) {
+      try { applyAction(state, a) } catch {}
+    }
+  }
+
+  // Final callback
+  callback(state, orNumber, actions.length, 'end')
+
+  if (state.roundTracker) {
+    state.roundTracker.inPregame = false
+    state.roundTracker.pregameIndex = -1
+  }
+  state.importSource = {
+    platform: '18xx.games',
+    gameId: gameJson.id,
+    status: gameJson.status,
+    result: gameJson.result,
+    playerMap,
+  }
+  return state
+}
