@@ -10,7 +10,7 @@ export const useUIStore = create((set) => ({
   activeCorpSym: null,      // which corp is selected in Corps tab
   showLog: false,
   turnTracking: 'off',      // 'on' | 'off' — dormant for now
-  plusPlus: import.meta.env.DEV, // auto-enabled in dev, hidden passphrase in prod
+  plusPlus: !!import.meta.env.VITE_PLUSPLUS || import.meta.env.DEV,
 
   // Configurable automation
   autoConfig: {

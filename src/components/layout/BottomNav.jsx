@@ -11,14 +11,14 @@ const CORE_TABS = [
 
 const PRIVATES_TAB = { id: 'privates', label: 'Privates' }
 const BEER_TAB = { id: 'beer', label: 'Beer' }
-const ANALYSIS_TAB = { id: 'analysis', label: '++ Analysis' }
 const SUMMARY_TAB = { id: 'summary', label: 'Summary' }
+const PP = !!import.meta.env.VITE_PLUSPLUS || import.meta.env.DEV
+const ANALYSIS_TAB = PP ? { id: 'analysis', label: '++ Analysis' } : null
 
 export default function BottomNav() {
   const game = useGameStore((s) => s.game)
   const activeTab = useUIStore((s) => s.activeTab)
   const setActiveTab = useUIStore((s) => s.setActiveTab)
-  const plusPlus = useUIStore((s) => s.plusPlus)
 
   const hasBeer = game?.beerMarket != null
   const hasPrivates = game?.companies?.length > 0
@@ -27,7 +27,7 @@ export default function BottomNav() {
     ...CORE_TABS,
     ...(hasPrivates ? [PRIVATES_TAB] : []),
     ...(hasBeer ? [BEER_TAB] : []),
-    ...(plusPlus ? [ANALYSIS_TAB] : []),
+    ...(ANALYSIS_TAB ? [ANALYSIS_TAB] : []),
     SUMMARY_TAB,
   ]
 

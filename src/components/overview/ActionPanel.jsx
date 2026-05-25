@@ -9,7 +9,6 @@ import { useThemeStore, themes as brokerThemes } from '../../store/themeStore.js
 import { exportGamePdf } from '../../utils/exportPdf.js'
 import { CorpCard } from './CorpCard.jsx'
 import { PlayerCard } from './PlayerCard.jsx'
-import { sha256, PLUSPLUS_HASH } from '../../utils/passphrase.js'
 
 export function ActionPanel({ panel, game, player, corp, unfloated, fmt, revenueInput, setRevenueInput, revRef, onClose, doAction, skin }) {
   const m = skin === 'moderator'
@@ -198,7 +197,7 @@ function PanelContent({ panel, game, player, corp, unfloated, fmt, revenueInput,
     const items = [
       { key: '1', label: 'Broker', id: 'overview' },
       { key: '2', label: 'Moderator', id: 'moderator' },
-      ...(useUIStore.getState().plusPlus ? [{ key: '3', label: '++ Analysis', id: 'analysis' }] : []),
+      ...((import.meta.env.VITE_PLUSPLUS || import.meta.env.DEV) ? [{ key: '3', label: '++ Analysis', id: 'analysis' }] : []),
     ]
     return (
       <div>
@@ -761,14 +760,12 @@ function SettingsPanel({ m, game, doAction }) {
   const ac = useUIStore((s) => s.autoConfig)
   const skin = useUIStore((s) => s.skin)
   const modTheme = useUIStore((s) => s.modTheme)
-  const plusPlus = useUIStore((s) => s.plusPlus)
   const setAutoConfig = useUIStore((s) => s.setAutoConfig)
   const setActiveTab = useUIStore((s) => s.setActiveTab)
   const setModTheme = useUIStore((s) => s.setModTheme)
   const brokerThemeId = useThemeStore((s) => s.themeId)
   const setBrokerTheme = useThemeStore((s) => s.setTheme)
   const enterReplay = useGameStore((s) => s.enterReplay)
-  const [secretInput, setSecretInput] = useState(null)
   const exitReplay = useGameStore((s) => s.exitReplay)
   const fullLog = useGameStore((s) => s.fullLog)
   const inReplay = fullLog !== null
@@ -848,43 +845,10 @@ function SettingsPanel({ m, game, doAction }) {
             ))}
           </div>
         </div>
-        {/* Analysis features toggle */}
-        {plusPlus ? (
-          <div className="mt-2 flex items-center gap-2">
-            <span className={m ? 'text-green-400' : 'text-green-400'}>++ Analysis unlocked</span>
-            <button onClick={() => useUIStore.setState({ plusPlus: false })}
-              className={m ? 'text-blue-400 text-[10px] underline' : 'text-broker-text-muted text-[10px] underline'}>disable</button>
-          </div>
-        ) : (
+        {/* DEV only: analysis indicator */}
+        {(import.meta.env.VITE_PLUSPLUS || import.meta.env.DEV) && (
           <div className="mt-2">
-            {secretInput !== null ? (
-              <div className="flex items-center gap-1">
-                <input type="text" value={secretInput}
-                  autoFocus
-                  onChange={e => {
-                    const v = e.target.value
-                    setSecretInput(v)
-                    sha256(v).then(h => {
-                      if (h === PLUSPLUS_HASH) {
-                        useUIStore.setState({ plusPlus: true }); setSecretInput(null)
-                      }
-                    })
-                  }}
-                  placeholder="passphrase"
-                  className={m
-                    ? 'w-24 bg-black/30 border border-blue-800 rounded px-1 py-0.5 text-xs text-blue-300 focus:outline-none focus:border-green-600'
-                    : 'w-24 bg-broker-bg border border-broker-border rounded px-1 py-0.5 text-xs text-broker-text focus:outline-none focus:border-blue-500'
-                  }
-                />
-                <button onClick={() => setSecretInput(null)}
-                  className={m ? 'text-blue-400 text-[10px]' : 'text-broker-text-muted text-[10px]'}>cancel</button>
-              </div>
-            ) : (
-              <button onClick={() => setSecretInput('')}
-                className={m ? 'text-blue-800 text-[10px] hover:text-blue-400' : 'text-broker-text-muted/30 text-[10px] hover:text-broker-text-muted'}>
-                ++
-              </button>
-            )}
+            <span className={m ? 'text-green-400 text-[10px]' : 'text-green-400 text-[10px]'}>++ Analysis (dev)</span>
           </div>
         )}
       </div>

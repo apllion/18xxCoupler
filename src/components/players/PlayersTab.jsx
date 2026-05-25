@@ -6,14 +6,16 @@ import { formatCurrency } from '../../utils/currency.js'
 import { corpPrice } from '../../engine/stockMarket.js'
 import { playerNetWorth } from '../../engine/rules/netWorth.js'
 import { playerSharePercent } from '../../engine/player.js'
-import { playerAdvisorTips } from '../../engine/rules/advisorTips.js'
-import { AdvisorSection } from '../shared/AdvisorSection.jsx'
+// PlusPlus only — advisor tips (stripped from Broker build)
+const PP = !!import.meta.env.VITE_PLUSPLUS || import.meta.env.DEV
+const playerAdvisorTips = PP ? (await import('../../engine/rules/advisorTips.js')).playerAdvisorTips : null
+const AdvisorSection = PP ? (await import('../shared/AdvisorSection.jsx')).AdvisorSection : null
 
 export default function PlayersTab() {
   const game = useGameStore((s) => s.game)
   const dispatch = useDispatch()
   const turnTracking = useUIStore((s) => s.turnTracking)
-  const plusPlus = useUIStore((s) => s.plusPlus)
+  const plusPlus = PP
   const isWhatIf = !!useGameStore((s) => s.whatIfSnapshot)
   const [selectedIdx, setSelectedIdx] = useState(0)
   const [assigningCard, setAssigningCard] = useState(null)

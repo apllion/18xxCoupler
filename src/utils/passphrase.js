@@ -10,8 +10,6 @@
 // App access gate
 export const GATE_HASH = '0cb7cdff133b78bc1c91367ce5ab69ddf0a44606c364f9658f48ddc078230856'
 
-// Analysis features (plusplus)
-export const PLUSPLUS_HASH = '5e701b2286b8bd7845b9a2c95a324e368f07409b100139ebf81d9a3a81764bb2'
 
 export async function sha256(text) {
   const data = new TextEncoder().encode(text)

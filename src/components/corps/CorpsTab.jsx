@@ -11,15 +11,17 @@ import { calculateDividend } from '../../engine/rules/dividend.js'
 import { dividendComparison } from '../../engine/rules/dividendAdvisor.js'
 import { trainRushAnalysis } from '../../engine/rules/trainRush.js'
 import { currentInterestRate, interestDue, maxLoansForCorp } from '../../engine/loans.js'
-import { corpAdvisorTips } from '../../engine/rules/advisorTips.js'
-import { AdvisorSection } from '../shared/AdvisorSection.jsx'
+// PlusPlus only — advisor tips (stripped from Broker build)
+const PP = !!import.meta.env.VITE_PLUSPLUS || import.meta.env.DEV
+const corpAdvisorTips = PP ? (await import('../../engine/rules/advisorTips.js')).corpAdvisorTips : null
+const AdvisorSection = PP ? (await import('../shared/AdvisorSection.jsx')).AdvisorSection : null
 
 export default function CorpsTab() {
   const game = useGameStore((s) => s.game)
   const dispatch = useDispatch()
   const [corpIndex, setCorpIndex] = useState(0)
   const turnTracking = useUIStore((s) => s.turnTracking)
-  const plusPlus = useUIStore((s) => s.plusPlus)
+  const plusPlus = PP
   const isWhatIf = !!useGameStore((s) => s.whatIfSnapshot)
   const turnQueue = game?.turnQueue || []
   const turnIndex = game?.turnIndex || 0
