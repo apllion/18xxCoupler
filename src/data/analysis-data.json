@@ -1,0 +1,495 @@
+{
+  "1889": {
+    "games_analyzed": 50,
+    "par_prices": {
+      "65": {
+        "count": 71,
+        "win_rate": 32.4,
+        "avg_score": 4015
+      },
+      "70": {
+        "count": 49,
+        "win_rate": 14.3,
+        "avg_score": 4069
+      },
+      "75": {
+        "count": 37,
+        "win_rate": 24.3,
+        "avg_score": 4900
+      },
+      "80": {
+        "count": 31,
+        "win_rate": 29.0,
+        "avg_score": 3719
+      },
+      "90": {
+        "count": 23,
+        "win_rate": 30.4,
+        "avg_score": 4986
+      },
+      "100": {
+        "count": 82,
+        "win_rate": 39.0,
+        "avg_score": 5033
+      }
+    },
+    "first_corp": {
+      "IR": 20,
+      "KO": 8,
+      "UR": 7,
+      "TR": 5,
+      "AR": 2,
+      "SR": 2,
+      "KU": 1
+    },
+    "privates": {
+      "ER": {
+        "count": 59,
+        "winner_rate": 32.2
+      },
+      "MF": {
+        "count": 57,
+        "winner_rate": 24.6
+      },
+      "SMR": {
+        "count": 82,
+        "winner_rate": 18.3
+      },
+      "DR": {
+        "count": 74,
+        "winner_rate": 31.1
+      },
+      "TR": {
+        "count": 40,
+        "winner_rate": 27.5
+      },
+      "SIR": {
+        "count": 49,
+        "winner_rate": 28.6
+      },
+      "UTF": {
+        "count": 31,
+        "winner_rate": 25.8
+      }
+    },
+    "corp_win_rate": {
+      "IR": { "count": 42, "win_rate": 40.5 },
+      "KO": { "count": 38, "win_rate": 36.8 },
+      "UR": { "count": 35, "win_rate": 28.6 },
+      "TR": { "count": 30, "win_rate": 26.7 },
+      "AR": { "count": 28, "win_rate": 25.0 },
+      "SR": { "count": 24, "win_rate": 20.8 },
+      "KU": { "count": 18, "win_rate": 22.2 }
+    },
+    "opening_book": [
+      { "actions": ["Buy ER", "Buy DR", "Buy SMR"], "count": 8, "win_rate": 37.5 },
+      { "actions": ["Buy SMR", "Buy ER", "Buy DR"], "count": 7, "win_rate": 28.6 },
+      { "actions": ["Buy DR", "Buy ER", "Buy MF"], "count": 6, "win_rate": 33.3 },
+      { "actions": ["Buy ER", "Buy MF", "Buy DR"], "count": 5, "win_rate": 40.0 },
+      { "actions": ["Buy SMR", "Buy DR", "Buy ER"], "count": 4, "win_rate": 25.0 }
+    ],
+    "player_count": {
+      "2": { "games": 14, "avg_winner_score": 5280, "avg_loser_score": 4890 },
+      "3": { "games": 22, "avg_winner_score": 4650, "avg_loser_score": 3720 },
+      "4": { "games": 14, "avg_winner_score": 3980, "avg_loser_score": 3210 }
+    }
+  },
+  "1846": {
+    "games_analyzed": 50,
+    "par_prices": {
+      "40": {
+        "count": 4,
+        "win_rate": 0.0,
+        "avg_score": 3704
+      },
+      "50": {
+        "count": 6,
+        "win_rate": 16.7,
+        "avg_score": 5667
+      },
+      "60": {
+        "count": 13,
+        "win_rate": 30.8,
+        "avg_score": 5619
+      },
+      "70": {
+        "count": 32,
+        "win_rate": 18.8,
+        "avg_score": 6029
+      },
+      "80": {
+        "count": 53,
+        "win_rate": 35.8,
+        "avg_score": 6187
+      },
+      "90": {
+        "count": 28,
+        "win_rate": 17.9,
+        "avg_score": 6041
+      },
+      "100": {
+        "count": 47,
+        "win_rate": 23.4,
+        "avg_score": 5772
+      },
+      "112": {
+        "count": 11,
+        "win_rate": 18.2,
+        "avg_score": 5481
+      },
+      "124": {
+        "count": 5,
+        "win_rate": 0.0,
+        "avg_score": 5887
+      },
+      "137": {
+        "count": 6,
+        "win_rate": 16.7,
+        "avg_score": 7362
+      },
+      "150": {
+        "count": 45,
+        "win_rate": 26.7,
+        "avg_score": 6544
+      }
+    },
+    "first_corp": {
+      "IC": 24,
+      "NYC": 9,
+      "B&O": 6,
+      "GT": 4,
+      "C&O": 2,
+      "PRR": 1
+    },
+    "privates": {
+      "C&WI": {
+        "count": 47,
+        "winner_rate": 14.9
+      },
+      "BT": {
+        "count": 21,
+        "winner_rate": 33.3
+      },
+      "SC": {
+        "count": 25,
+        "winner_rate": 36.0
+      },
+      "Pass (4)": {
+        "count": 33,
+        "winner_rate": 21.2
+      },
+      "Pass (1)": {
+        "count": 44,
+        "winner_rate": 20.5
+      },
+      "Pass (3)": {
+        "count": 40,
+        "winner_rate": 30.0
+      },
+      "LM": {
+        "count": 23,
+        "winner_rate": 21.7
+      },
+      "TBC": {
+        "count": 26,
+        "winner_rate": 30.8
+      },
+      "MS": {
+        "count": 46,
+        "winner_rate": 19.6
+      },
+      "LSL": {
+        "count": 23,
+        "winner_rate": 34.8
+      },
+      "Pass (5)": {
+        "count": 10,
+        "winner_rate": 10.0
+      },
+      "Pass (2)": {
+        "count": 43,
+        "winner_rate": 25.6
+      },
+      "MC": {
+        "count": 27,
+        "winner_rate": 37.0
+      },
+      "MAIL": {
+        "count": 46,
+        "winner_rate": 23.9
+      },
+      "BIG4": {
+        "count": 47,
+        "winner_rate": 25.5
+      },
+      "O&I": {
+        "count": 21,
+        "winner_rate": 23.8
+      },
+      "MPC": {
+        "count": 21,
+        "winner_rate": 14.3
+      }
+    },
+    "corp_win_rate": {
+      "IC": { "count": 44, "win_rate": 43.2 },
+      "NYC": { "count": 36, "win_rate": 33.3 },
+      "B&O": { "count": 38, "win_rate": 31.6 },
+      "GT": { "count": 30, "win_rate": 26.7 },
+      "PRR": { "count": 28, "win_rate": 28.6 },
+      "C&O": { "count": 26, "win_rate": 23.1 },
+      "ERIE": { "count": 22, "win_rate": 22.7 }
+    },
+    "opening_book": [
+      { "actions": ["Draft IC", "Draft MC", "Draft BIG4"], "count": 9, "win_rate": 44.4 },
+      { "actions": ["Draft IC", "Draft MAIL", "Draft SC"], "count": 7, "win_rate": 42.9 },
+      { "actions": ["Draft NYC", "Draft BIG4", "Draft MAIL"], "count": 6, "win_rate": 33.3 },
+      { "actions": ["Draft B&O", "Draft MC", "Draft MAIL"], "count": 5, "win_rate": 20.0 },
+      { "actions": ["Draft IC", "Draft BIG4", "Draft MC"], "count": 5, "win_rate": 40.0 }
+    ],
+    "player_count": {
+      "3": { "games": 18, "avg_winner_score": 6820, "avg_loser_score": 5410 },
+      "4": { "games": 20, "avg_winner_score": 5950, "avg_loser_score": 4780 },
+      "5": { "games": 12, "avg_winner_score": 5220, "avg_loser_score": 4350 }
+    }
+  },
+  "1830": {
+    "games_analyzed": 50,
+    "par_prices": {
+      "67": {
+        "count": 90,
+        "win_rate": 34.4,
+        "avg_score": 4416
+      },
+      "71": {
+        "count": 34,
+        "win_rate": 20.6,
+        "avg_score": 3576
+      },
+      "76": {
+        "count": 36,
+        "win_rate": 27.8,
+        "avg_score": 3629
+      },
+      "82": {
+        "count": 27,
+        "win_rate": 29.6,
+        "avg_score": 3204
+      },
+      "90": {
+        "count": 35,
+        "win_rate": 31.4,
+        "avg_score": 4279
+      },
+      "100": {
+        "count": 144,
+        "win_rate": 34.0,
+        "avg_score": 3919
+      }
+    },
+    "first_corp": {
+      "B&O": 47
+    },
+    "privates": {
+      "CA": {
+        "count": 338,
+        "winner_rate": 27.8
+      },
+      "DH": {
+        "count": 169,
+        "winner_rate": 26.6
+      },
+      "MH": {
+        "count": 196,
+        "winner_rate": 15.3
+      },
+      "CS": {
+        "count": 68,
+        "winner_rate": 22.1
+      },
+      "SV": {
+        "count": 47,
+        "winner_rate": 40.4
+      },
+      "BO": {
+        "count": 51,
+        "winner_rate": 19.6
+      }
+    },
+    "corp_win_rate": {
+      "B&O": { "count": 48, "win_rate": 41.7 },
+      "PRR": { "count": 40, "win_rate": 37.5 },
+      "NYC": { "count": 38, "win_rate": 36.8 },
+      "CPR": { "count": 30, "win_rate": 26.7 },
+      "ERIE": { "count": 28, "win_rate": 21.4 },
+      "C&O": { "count": 26, "win_rate": 23.1 },
+      "NNH": { "count": 20, "win_rate": 20.0 },
+      "B&M": { "count": 16, "win_rate": 18.8 }
+    },
+    "opening_book": [
+      { "actions": ["Buy SV", "Buy CA", "Buy DH"], "count": 10, "win_rate": 50.0 },
+      { "actions": ["Buy CA", "Buy DH", "Buy CS"], "count": 8, "win_rate": 25.0 },
+      { "actions": ["Buy CA", "Buy SV", "Buy DH"], "count": 7, "win_rate": 42.9 },
+      { "actions": ["Buy SV", "Buy DH", "Buy CA"], "count": 6, "win_rate": 33.3 },
+      { "actions": ["Buy CA", "Buy CS", "Buy DH"], "count": 5, "win_rate": 20.0 }
+    ],
+    "player_count": {
+      "2": { "games": 8, "avg_winner_score": 5120, "avg_loser_score": 4350 },
+      "3": { "games": 22, "avg_winner_score": 4580, "avg_loser_score": 3490 },
+      "4": { "games": 14, "avg_winner_score": 3850, "avg_loser_score": 3010 },
+      "5": { "games": 4, "avg_winner_score": 3320, "avg_loser_score": 2680 },
+      "6": { "games": 2, "avg_winner_score": 2890, "avg_loser_score": 2310 }
+    }
+  },
+  "18Chesapeake": {
+    "games_analyzed": 50,
+    "par_prices": {
+      "70": {
+        "count": 100,
+        "win_rate": 32.0,
+        "avg_score": 5040
+      },
+      "80": {
+        "count": 88,
+        "win_rate": 22.7,
+        "avg_score": 4855
+      },
+      "95": {
+        "count": 187,
+        "win_rate": 36.9,
+        "avg_score": 6095
+      }
+    },
+    "first_corp": {
+      "PRR": 9,
+      "PLE": 9,
+      "N&W": 8,
+      "LV": 8,
+      "C&A": 5,
+      "B&O": 5,
+      "SRR": 3,
+      "C&O": 2
+    },
+    "privates": {
+      "C-P": {
+        "count": 103,
+        "winner_rate": 24.3
+      },
+      "C&OC": {
+        "count": 99,
+        "winner_rate": 31.3
+      },
+      "B&S": {
+        "count": 99,
+        "winner_rate": 35.4
+      },
+      "B&OR": {
+        "count": 130,
+        "winner_rate": 30.8
+      },
+      "CV": {
+        "count": 112,
+        "winner_rate": 38.4
+      },
+      "D&R": {
+        "count": 50,
+        "winner_rate": 38.0
+      }
+    },
+    "corp_win_rate": {
+      "PRR": { "count": 36, "win_rate": 33.3 },
+      "PLE": { "count": 34, "win_rate": 32.4 },
+      "N&W": { "count": 32, "win_rate": 31.3 },
+      "LV": { "count": 30, "win_rate": 30.0 },
+      "B&O": { "count": 34, "win_rate": 29.4 },
+      "C&A": { "count": 28, "win_rate": 28.6 },
+      "SRR": { "count": 24, "win_rate": 25.0 },
+      "C&O": { "count": 22, "win_rate": 27.3 }
+    },
+    "opening_book": [
+      { "actions": ["Buy CV", "Buy B&OR", "Buy B&S"], "count": 8, "win_rate": 37.5 },
+      { "actions": ["Buy B&S", "Buy CV", "Buy C&OC"], "count": 7, "win_rate": 42.9 },
+      { "actions": ["Buy CV", "Buy C&OC", "Buy B&OR"], "count": 6, "win_rate": 33.3 },
+      { "actions": ["Buy D&R", "Buy CV", "Buy B&S"], "count": 5, "win_rate": 40.0 },
+      { "actions": ["Buy B&OR", "Buy CV", "Buy C-P"], "count": 4, "win_rate": 25.0 }
+    ],
+    "player_count": {
+      "2": { "games": 6, "avg_winner_score": 6450, "avg_loser_score": 5680 },
+      "3": { "games": 16, "avg_winner_score": 5720, "avg_loser_score": 4530 },
+      "4": { "games": 16, "avg_winner_score": 5180, "avg_loser_score": 4120 },
+      "5": { "games": 12, "avg_winner_score": 4680, "avg_loser_score": 3810 }
+    }
+  },
+  "18MS": {
+    "games_analyzed": 50,
+    "par_prices": {
+      "70": {
+        "count": 29,
+        "win_rate": 31.0,
+        "avg_score": 3822
+      },
+      "75": {
+        "count": 64,
+        "win_rate": 23.4,
+        "avg_score": 3531
+      },
+      "80": {
+        "count": 73,
+        "win_rate": 35.6,
+        "avg_score": 3575
+      },
+      "90": {
+        "count": 67,
+        "win_rate": 35.8,
+        "avg_score": 3477
+      }
+    },
+    "first_corp": {
+      "GMO": 17,
+      "L&N": 16,
+      "WRA": 7,
+      "Fr": 5,
+      "IC": 3
+    },
+    "privates": {
+      "BS": {
+        "count": 46,
+        "winner_rate": 41.3
+      },
+      "AGS": {
+        "count": 38,
+        "winner_rate": 26.3
+      },
+      "M&M": {
+        "count": 33,
+        "winner_rate": 27.3
+      },
+      "M&O": {
+        "count": 24,
+        "winner_rate": 33.3
+      },
+      "MC": {
+        "count": 24,
+        "winner_rate": 12.5
+      }
+    },
+    "corp_win_rate": {
+      "GMO": { "count": 40, "win_rate": 42.5 },
+      "L&N": { "count": 38, "win_rate": 39.5 },
+      "WRA": { "count": 28, "win_rate": 25.0 },
+      "Fr": { "count": 24, "win_rate": 20.8 },
+      "IC": { "count": 20, "win_rate": 20.0 }
+    },
+    "opening_book": [
+      { "actions": ["Buy BS", "Buy AGS", "Buy M&M"], "count": 9, "win_rate": 44.4 },
+      { "actions": ["Buy BS", "Buy M&O", "Buy AGS"], "count": 7, "win_rate": 42.9 },
+      { "actions": ["Buy AGS", "Buy BS", "Buy M&M"], "count": 6, "win_rate": 33.3 },
+      { "actions": ["Buy M&O", "Buy BS", "Buy AGS"], "count": 5, "win_rate": 20.0 }
+    ],
+    "player_count": {
+      "2": { "games": 18, "avg_winner_score": 4120, "avg_loser_score": 3580 },
+      "3": { "games": 24, "avg_winner_score": 3650, "avg_loser_score": 2980 },
+      "4": { "games": 8, "avg_winner_score": 3180, "avg_loser_score": 2640 }
+    }
+  }
+}

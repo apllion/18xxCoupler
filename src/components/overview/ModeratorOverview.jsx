@@ -5,7 +5,6 @@ import { useUIStore } from '../../store/uiStore.js'
 import { ActionPanel } from './ActionPanel.jsx'
 import { ContextBar } from './ContextBar.jsx'
 import { InlineEdit } from './InlineEdit.jsx'
-import { PositionMeter } from './PositionMeter.jsx'
 
 const THEMES = {
   dos:    { id: 'dos',    label: 'DOS',    bg: 'bg-blue-950',  bar: 'bg-blue-900',  head: 'text-green-400',  text: 'text-blue-300',  bright: 'text-white',  player: 'text-yellow-300', dim: 'text-blue-900/60', sep: 'bg-green-700', cursor: 'bg-green-900 ring-1 ring-green-500', colHi: 'bg-blue-900/30', rowHi: 'bg-blue-900/60', input: 'bg-black border-green-800', btn: 'bg-green-900/80 text-green-300 hover:bg-green-800', depot: 'bg-blue-900', depotTrain: 'text-green-300', depotPrice: 'text-yellow-300', actionBar: 'bg-gray-900 border-green-800', border: 'border-blue-900/40' },
@@ -185,9 +184,6 @@ export default function ModeratorOverview() {
           </tbody>
         </table>
       </div>
-
-      {/* Position meter (plusplus only) */}
-      {useUIStore.getState().plusPlus && <PositionMeter game={game} skin="moderator" />}
 
       {/* Depot */}
       <div className={`${t.depot} ${t.bright} px-2 py-0.5 flex items-center gap-1 flex-wrap flex-shrink-0`}>

@@ -4,21 +4,28 @@ import { useUIStore } from '../../store/uiStore.js'
 import { useDispatch } from '../../hooks/useDispatch.js'
 import { formatCurrency } from '../../utils/currency.js'
 import { corpPrice } from '../../engine/stockMarket.js'
+import { playerSharePercent } from '../../engine/player.js'
 import { currentPhase, trainLimit, operatingRounds } from '../../engine/phase.js'
 import { nextAvailableTrains, remainingCount } from '../../engine/depot.js'
 import { calculateDividend } from '../../engine/rules/dividend.js'
 import { dividendComparison } from '../../engine/rules/dividendAdvisor.js'
 import { trainRushAnalysis } from '../../engine/rules/trainRush.js'
 import { currentInterestRate, interestDue, maxLoansForCorp } from '../../engine/loans.js'
+import { corpAdvisorTips } from '../../engine/rules/advisorTips.js'
+import { AdvisorSection } from '../shared/AdvisorSection.jsx'
 
 export default function CorpsTab() {
   const game = useGameStore((s) => s.game)
   const dispatch = useDispatch()
   const [corpIndex, setCorpIndex] = useState(0)
   const turnTracking = useUIStore((s) => s.turnTracking)
+  const plusPlus = useUIStore((s) => s.plusPlus)
   const isWhatIf = !!useGameStore((s) => s.whatIfSnapshot)
   const turnQueue = game?.turnQueue || []
   const turnIndex = game?.turnIndex || 0
+
+  // Navigate from PlayersTab cross-link
+  const activeCorpSym = useUIStore((s) => s.activeCorpSym)
 
   if (!game) return null
 
@@ -46,6 +53,17 @@ export default function CorpsTab() {
       if (idx >= 0 && idx !== corpIndex) setCorpIndex(idx)
     }
   }, [currentTurnCorp, operatingOrder])
+
+  useEffect(() => {
+    if (activeCorpSym) {
+      const idx = operatingOrder.findIndex(c => c.sym === activeCorpSym)
+      if (idx >= 0) setCorpIndex(idx)
+      useUIStore.getState().setActiveCorp(null)
+    }
+  }, [activeCorpSym, operatingOrder])
+
+  // Unfloated corps
+  const unfloatedCorps = game.corporations.filter(c => !c.floated)
 
   if (operatingOrder.length === 0) {
     return (
@@ -130,12 +148,33 @@ export default function CorpsTab() {
       </div>
 
       {/* Corp detail */}
-      <CorpDetail game={game} corp={selected} dispatch={dispatch} fmt={fmt} onNext={nextCorp} />
+      <CorpDetail game={game} corp={selected} dispatch={dispatch} fmt={fmt} onNext={nextCorp} plusPlus={plusPlus} />
+
+      {/* Unfloated corps */}
+      {unfloatedCorps.length > 0 && (
+        <div className="mt-4">
+          <div className="text-broker-text-muted text-[10px] uppercase tracking-widest border-b border-broker-border pb-1 mb-2">
+            Not Yet Floated
+          </div>
+          <div className="space-y-1">
+            {unfloatedCorps.map(c => (
+              <div key={c.sym} className="flex items-center gap-2 text-sm bg-broker-surface rounded px-3 py-1.5">
+                <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: c.color }} />
+                <span className="font-medium w-12">{c.sym}</span>
+                <span className="text-broker-text-muted flex-1 truncate">{c.name}</span>
+                {c.type && <span className="text-xs text-broker-text-muted">{c.type}</span>}
+                {c.ipoed && <span className="text-xs text-broker-text-muted">par {fmt(c.parPrice)}</span>}
+                <span className="text-xs text-broker-text-muted">IPO {c.ipoShares}%</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
 
-function CorpDetail({ game, corp, dispatch, fmt, onNext }) {
+function CorpDetail({ game, corp, dispatch, fmt, onNext, plusPlus }) {
   const [revenue, setRevenue] = useState('')
 
   const price = corpPrice(game.stockMarket, corp.sym)
@@ -143,6 +182,16 @@ function CorpDetail({ game, corp, dispatch, fmt, onNext }) {
   const president = game.players.find((p) =>
     p.shares.some((s) => s.corpSym === corp.sym && s.isPresident)
   )
+
+  const goToPlayer = (playerId) => {
+    useUIStore.getState().setActivePlayer(playerId)
+    useUIStore.getState().setActiveTab('players')
+  }
+  const goToCorp = (corpSym) => {
+    useUIStore.getState().setActiveCorp(corpSym)
+  }
+
+  const tips = useMemo(() => plusPlus ? corpAdvisorTips(game, corp.sym) : [], [game, corp.sym, plusPlus])
 
   const revNum = parseInt(revenue, 10) || 0
   const perShare = revNum > 0 ? Math.floor(revNum / 10) : 0
@@ -199,13 +248,30 @@ function CorpDetail({ game, corp, dispatch, fmt, onNext }) {
             <div className="text-broker-text-muted">Par: {fmt(corp.parPrice)}</div>
           </div>
         </div>
-        <div className="flex gap-4 text-sm text-broker-text">
+        <div className="flex gap-4 text-sm text-broker-text flex-wrap">
           <div>Treasury: <span className="font-medium text-white">{fmt(corp.cash)}</span></div>
-          <div>President: <span className="font-medium">{president?.name ?? '—'}</span></div>
+          <div>President: {president
+            ? <button onClick={() => goToPlayer(president.id)} className="font-medium hover:underline">{president.name}</button>
+            : <span className="font-medium">—</span>
+          }</div>
           <div>Tokens: {corp.tokensPlaced}/{corp.tokens.length}</div>
           {corp.loans > 0 && <div>Loans: <span className="text-red-300 font-medium">{corp.loans}</span></div>}
           {corp.corpSize && <div className="text-xs text-broker-text-muted">{corp.corpSize}</div>}
           {corp.liquidated && <span className="text-xs bg-red-900 text-red-300 px-1 rounded">LIQUIDATED</span>}
+        </div>
+        {/* Shareholders */}
+        <div className="flex gap-2 mt-1 text-xs text-broker-text-muted flex-wrap">
+          {game.players.filter(p => playerSharePercent(p, corp.sym) > 0).map(p => {
+            const pct = playerSharePercent(p, corp.sym)
+            const isPres = p.shares.some(s => s.corpSym === corp.sym && s.isPresident)
+            return (
+              <button key={p.id} onClick={() => goToPlayer(p.id)} className="hover:underline">
+                {p.name} {pct}%{isPres ? 'P' : ''}
+              </button>
+            )
+          })}
+          {corp.ipoShares > 0 && <span>IPO {corp.ipoShares}%</span>}
+          {corp.marketShares > 0 && <span>Pool {corp.marketShares}%</span>}
         </div>
       </div>
 
@@ -378,6 +444,14 @@ function CorpDetail({ game, corp, dispatch, fmt, onNext }) {
       {/* Corp conversion panel (1817) */}
       {game.title.corpSizing?.enabled && (
         <ConversionPanel game={game} corp={corp} dispatch={dispatch} />
+      )}
+
+      {/* ++ Analysis */}
+      {plusPlus && tips.length > 0 && (
+        <div className="bg-broker-surface rounded-lg p-3">
+          <div className="text-xs text-broker-text-muted mb-2 font-medium uppercase">Advisor</div>
+          <AdvisorSection tips={tips} skin="broker" onCorpClick={goToCorp} onPlayerClick={goToPlayer} />
+        </div>
       )}
 
       {/* Next corp button */}

@@ -197,6 +197,7 @@ function PanelContent({ panel, game, player, corp, unfloated, fmt, revenueInput,
     const items = [
       { key: '1', label: 'Broker', id: 'overview' },
       { key: '2', label: 'Moderator', id: 'moderator' },
+      ...(useUIStore.getState().plusPlus ? [{ key: '3', label: '++ Analysis', id: 'analysis' }] : []),
     ]
     return (
       <div>
@@ -766,7 +767,7 @@ function SettingsPanel({ m, game, doAction }) {
   const brokerThemeId = useThemeStore((s) => s.themeId)
   const setBrokerTheme = useThemeStore((s) => s.setTheme)
   const enterReplay = useGameStore((s) => s.enterReplay)
-  const [secretInput, setSecretInput] = useState('')
+  const [secretInput, setSecretInput] = useState(null)
   const exitReplay = useGameStore((s) => s.exitReplay)
   const fullLog = useGameStore((s) => s.fullLog)
   const inReplay = fullLog !== null
@@ -846,24 +847,40 @@ function SettingsPanel({ m, game, doAction }) {
             ))}
           </div>
         </div>
-        {/* Hidden passphrase for analysis features */}
+        {/* Analysis features toggle */}
         {plusPlus ? (
-          <div className={`${labelColor} mt-2`}>
-            ++ Analysis features unlocked
+          <div className="mt-2 flex items-center gap-2">
+            <span className={m ? 'text-green-400' : 'text-green-400'}>++ Analysis unlocked</span>
+            <button onClick={() => useUIStore.setState({ plusPlus: false })}
+              className={m ? 'text-blue-400 text-[10px] underline' : 'text-broker-text-muted text-[10px] underline'}>disable</button>
           </div>
         ) : (
-          <input type="text" value={secretInput}
-            onChange={e => {
-              const v = e.target.value
-              setSecretInput(v)
-              if (v === 'plusplus') { useUIStore.setState({ plusPlus: true }); setSecretInput('') }
-            }}
-            placeholder=""
-            className={m
-              ? 'mt-2 w-20 bg-transparent border-none text-blue-950 text-[8px] focus:outline-none caret-transparent'
-              : 'mt-2 w-20 bg-transparent border-none text-broker-bg text-[8px] focus:outline-none caret-transparent'
-            }
-          />
+          <div className="mt-2">
+            {secretInput !== null ? (
+              <div className="flex items-center gap-1">
+                <input type="text" value={secretInput}
+                  autoFocus
+                  onChange={e => {
+                    const v = e.target.value
+                    setSecretInput(v)
+                    if (v === 'plusplus') { useUIStore.setState({ plusPlus: true }); setSecretInput(null) }
+                  }}
+                  placeholder="passphrase"
+                  className={m
+                    ? 'w-24 bg-black/30 border border-blue-800 rounded px-1 py-0.5 text-xs text-blue-300 focus:outline-none focus:border-green-600'
+                    : 'w-24 bg-broker-bg border border-broker-border rounded px-1 py-0.5 text-xs text-broker-text focus:outline-none focus:border-blue-500'
+                  }
+                />
+                <button onClick={() => setSecretInput(null)}
+                  className={m ? 'text-blue-400 text-[10px]' : 'text-broker-text-muted text-[10px]'}>cancel</button>
+              </div>
+            ) : (
+              <button onClick={() => setSecretInput('')}
+                className={m ? 'text-blue-800 text-[10px] hover:text-blue-400' : 'text-broker-text-muted/30 text-[10px] hover:text-broker-text-muted'}>
+                ++
+              </button>
+            )}
+          </div>
         )}
       </div>
     </div>

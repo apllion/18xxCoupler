@@ -13,11 +13,13 @@ import SummaryTab from '../summary/SummaryTab.jsx'
 import BeerMarketTab from '../beer/BeerMarketTab.jsx'
 import OverviewTab from '../overview/OverviewTab.jsx'
 import { ModeratorOverview } from '../overview/OverviewTab.jsx'
+import AnalysisTab from '../overview/AnalysisTab.jsx'
 import ModeratorShell from './ModeratorShell.jsx'
 
 const TAB_COMPONENTS = {
   overview: OverviewTab,
   moderator: ModeratorOverview,
+  analysis: AnalysisTab,
   market: MarketTab,
   corps: CorpsTab,
   players: PlayersTab,

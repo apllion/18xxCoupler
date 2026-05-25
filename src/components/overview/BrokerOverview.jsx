@@ -5,7 +5,6 @@ import { useUIStore } from '../../store/uiStore.js'
 import { ActionPanel } from './ActionPanel.jsx'
 import { ContextBar } from './ContextBar.jsx'
 import { InlineEdit } from './InlineEdit.jsx'
-import { PositionMeter } from './PositionMeter.jsx'
 
 export default function BrokerOverview() {
   const d = useOverviewData()
@@ -177,9 +176,6 @@ export default function BrokerOverview() {
           </tbody>
         </table>
       </div>
-
-      {/* Position meter (plusplus only) */}
-      {useUIStore.getState().plusPlus && <PositionMeter game={game} skin="broker" />}
 
       {/* Depot strip */}
       <div className="bg-broker-surface border-t border-broker-border px-3 py-1.5 flex items-center gap-3 flex-wrap flex-shrink-0 text-xs">
