@@ -3,57 +3,30 @@
 // Private distribution of passphrase = "rein privat" exemption argument.
 
 import { useState, useEffect } from 'react'
-
-// SHA-256 hash of the passphrase. To change:
-// 1. Open browser console
-// 2. Run: crypto.subtle.digest('SHA-256', new TextEncoder().encode('YOUR_PASSPHRASE')).then(h => console.log(Array.from(new Uint8Array(h)).map(b => b.toString(16).padStart(2,'0')).join('')))
-// 3. Replace the hash below
-const PASSPHRASE_HASH = 'a0b1c2d3e4f5' // placeholder — will be set on init
+import { sha256, GATE_HASH } from '../../utils/passphrase.js'
 
 const STORAGE_KEY = '18xxBroker_access'
-
-async function sha256(text) {
-  const data = new TextEncoder().encode(text)
-  const hash = await crypto.subtle.digest('SHA-256', data)
-  return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('')
-}
-
-// Pre-computed hash for '18xx2026'
-// Generated via: sha256('18xx2026') → stored below
-const HASH = '7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069' // placeholder
 
 export default function PassphraseGate({ children }) {
   const [granted, setGranted] = useState(false)
   const [input, setInput] = useState('')
   const [error, setError] = useState(false)
   const [checking, setChecking] = useState(true)
-  const [storedHash, setStoredHash] = useState('')
   const [showImpressum, setShowImpressum] = useState(false)
   const [showPrivacy, setShowPrivacy] = useState(false)
 
-  // Compute the real hash on mount
   useEffect(() => {
-    sha256('18xx2026').then(h => setStoredHash(h))
-    // Check if already authenticated
     try {
       const saved = localStorage.getItem(STORAGE_KEY)
-      if (saved) {
-        sha256('18xx2026').then(h => {
-          if (saved === h) setGranted(true)
-          setChecking(false)
-        })
-      } else {
-        setChecking(false)
-      }
-    } catch {
-      setChecking(false)
-    }
+      if (saved === GATE_HASH) setGranted(true)
+    } catch {}
+    setChecking(false)
   }, [])
 
   async function handleSubmit() {
     setError(false)
     const hash = await sha256(input)
-    if (hash === storedHash) {
+    if (hash === GATE_HASH) {
       localStorage.setItem(STORAGE_KEY, hash)
       setGranted(true)
     } else {
