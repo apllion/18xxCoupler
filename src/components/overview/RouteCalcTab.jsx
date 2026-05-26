@@ -1,8 +1,9 @@
-// RouteCalcTab — standalone route/revenue calculator.
-// Enter stops with values, pick train type, calculate best revenue.
-// Pre-fills from game if loaded, otherwise fully manual.
+// RouteCalcTab — per-corp route/revenue calculator.
+// Add stops with values (and optional multipliers/bonuses).
+// Assign stops to trains. Each stop used by only one train.
+// Supports: stop multipliers, train multipliers, route bonuses, min/max.
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useGameStore } from '../../store/gameStore.js'
 import { useUIStore } from '../../store/uiStore.js'
 import { formatCurrency } from '../../utils/currency.js'
@@ -26,273 +27,320 @@ export default function RouteCalcTab() {
   )
 }
 
-const COLORS = ['#d81e3e', '#0189d1', '#237333', '#FFF500', '#800080', '#333', '#ccc', '#ff8c00']
-
 function RouteCalc({ game, fmt, m }) {
-  // Trains — pre-fill from game's corp trains or manual
+  // Init trains from active corp or empty
   const initTrains = () => {
     if (game) {
-      const trains = []
-      for (const c of game.corporations.filter(c => c.floated)) {
-        for (const t of c.trains) {
-          trains.push({ id: `${c.sym}-${t.id}`, corp: c.sym, color: c.color, name: t.name, stops: t.distance || parseInt(t.name) || 2, multiplier: t.multiplier || 1 })
+      const activeSym = useUIStore.getState().activeCorpSym
+      const corps = activeSym
+        ? game.corporations.filter(c => c.sym === activeSym && c.floated)
+        : []
+      for (const c of corps) {
+        if (c.trains.length > 0) {
+          return c.trains.map(t => ({
+            id: `${c.sym}-${t.id}`,
+            name: t.name,
+            stops: t.distance || parseInt(t.name) || 2,
+            multiplier: t.multiplier || 1,
+            route: [],
+            bonus: 0,
+          }))
         }
       }
-      if (trains.length > 0) return trains
     }
-    return [
-      { id: '1', corp: '', color: COLORS[0], name: '2', stops: 2, multiplier: 1 },
-      { id: '2', corp: '', color: COLORS[1], name: '3', stops: 3, multiplier: 1 },
-    ]
+    return [{ id: '1', name: '2', stops: 2, multiplier: 1, route: [], bonus: 0 }]
   }
 
-  // Stops — city/town values
-  const initStops = () => [
-    { id: '1', name: 'City A', value: 30, type: 'city' },
-    { id: '2', name: 'City B', value: 40, type: 'city' },
-    { id: '3', name: 'City C', value: 20, type: 'city' },
-    { id: '4', name: 'Town D', value: 10, type: 'town' },
-    { id: '5', name: 'City E', value: 50, type: 'city' },
-    { id: '6', name: 'City F', value: 30, type: 'city' },
-  ]
+  const initCorp = () => {
+    if (game) {
+      const sym = useUIStore.getState().activeCorpSym
+      const c = sym && game.corporations.find(x => x.sym === sym)
+      if (c) return { sym: c.sym, color: c.color, name: c.name }
+    }
+    return { sym: '', color: '#888', name: '' }
+  }
 
+  const [corp, setCorp] = useState(initCorp)
   const [trains, setTrains] = useState(initTrains)
-  const [stops, setStops] = useState(initStops)
-  const [routes, setRoutes] = useState([]) // each route: { trainId, stopIds[], revenue }
-  const [editingRoute, setEditingRoute] = useState(null) // trainId being edited
+  const [stops, setStops] = useState([]) // [{ value, mult, bonus, name }]
+  const [newStop, setNewStop] = useState('')
+  const [activeTrain, setActiveTrain] = useState(null)
+  const [routeBonus, setRouteBonus] = useState(0) // global bonus for this corp
 
-  let nextId = 100
-
-  // --- Helpers ---
-  const setTrainField = (idx, field, val) => {
-    setTrains(prev => prev.map((t, i) => i === idx ? { ...t, [field]: field === 'name' || field === 'corp' ? val : (parseInt(val) || 0) } : t))
-  }
-  const addTrain = () => {
-    setTrains(prev => [...prev, { id: String(Date.now()), corp: '', color: COLORS[prev.length % COLORS.length], name: '2', stops: 2, multiplier: 1 }])
-  }
-  const removeTrain = (idx) => {
-    const tid = trains[idx].id
-    setTrains(prev => prev.filter((_, i) => i !== idx))
-    setRoutes(prev => prev.filter(r => r.trainId !== tid))
-  }
-
-  const setStopField = (idx, field, val) => {
-    setStops(prev => prev.map((s, i) => i === idx ? { ...s, [field]: field === 'name' ? val : field === 'type' ? val : (parseInt(val) || 0) } : s))
-  }
-  const addStop = () => {
-    setStops(prev => [...prev, { id: String(Date.now()), name: `Stop ${prev.length + 1}`, value: 0, type: 'city' }])
+  // --- Stops ---
+  const addStop = (val) => {
+    const v = parseInt(val)
+    if (!v || v <= 0) return
+    setStops(prev => [...prev, { value: v, mult: 1, bonus: 0, name: '' }])
+    setNewStop('')
   }
   const removeStop = (idx) => {
-    const sid = stops[idx].id
     setStops(prev => prev.filter((_, i) => i !== idx))
-    setRoutes(prev => prev.map(r => ({ ...r, stopIds: r.stopIds.filter(id => id !== sid) })))
+    setTrains(prev => prev.map(t => ({
+      ...t, route: t.route.filter(si => si !== idx).map(si => si > idx ? si - 1 : si)
+    })))
+  }
+  const setStopField = (idx, field, val) => {
+    setStops(prev => prev.map((s, i) => i === idx
+      ? { ...s, [field]: field === 'name' ? val : (parseInt(val) || (field === 'mult' ? 1 : 0)) }
+      : s))
   }
 
-  // --- Route building ---
-  const toggleStopInRoute = (trainId, stopId) => {
-    setRoutes(prev => {
-      const existing = prev.find(r => r.trainId === trainId)
-      const train = trains.find(t => t.id === trainId)
-      const maxStops = train?.stops || 99
+  const quickValues = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
 
-      if (existing) {
-        const has = existing.stopIds.includes(stopId)
-        let newStopIds
-        if (has) {
-          newStopIds = existing.stopIds.filter(id => id !== stopId)
-        } else {
-          if (existing.stopIds.length >= maxStops) return prev // at limit
-          newStopIds = [...existing.stopIds, stopId]
-        }
-        const rev = calcRouteRevenue(newStopIds, train)
-        return prev.map(r => r.trainId === trainId ? { ...r, stopIds: newStopIds, revenue: rev } : r)
-      } else {
-        const rev = calcRouteRevenue([stopId], train)
-        return [...prev, { trainId, stopIds: [stopId], revenue: rev }]
-      }
-    })
+  // --- Trains ---
+  const addTrain = () => {
+    setTrains(prev => [...prev, {
+      id: String(Date.now()), name: '2', stops: 2, multiplier: 1, route: [], bonus: 0,
+    }])
+  }
+  const removeTrain = (idx) => {
+    if (trains[idx]?.id === activeTrain) setActiveTrain(null)
+    setTrains(prev => prev.filter((_, i) => i !== idx))
+  }
+  const setTrainField = (idx, field, val) => {
+    setTrains(prev => prev.map((t, i) => i === idx
+      ? { ...t, [field]: field === 'name' ? val : (parseInt(val) || 0) }
+      : t))
+  }
+  const clearRoute = (trainId) => {
+    setTrains(prev => prev.map(t => t.id === trainId ? { ...t, route: [] } : t))
   }
 
-  const calcRouteRevenue = (stopIds, train) => {
-    let rev = 0
-    for (const sid of stopIds) {
-      const stop = stops.find(s => s.id === sid)
-      if (stop) rev += stop.value
-    }
-    return rev * (train?.multiplier || 1)
+  // --- Routing ---
+  const takenBy = {} // stopIdx → trainId
+  for (const t of trains) {
+    for (const si of t.route) takenBy[si] = t.id
   }
 
-  // Recalc all routes when stops change
-  const recalcAll = () => {
-    setRoutes(prev => prev.map(r => {
-      const train = trains.find(t => t.id === r.trainId)
-      return { ...r, revenue: calcRouteRevenue(r.stopIds, train) }
+  const toggleStop = (stopIdx) => {
+    if (!activeTrain) return
+    setTrains(prev => prev.map(t => {
+      if (t.id !== activeTrain) return t
+      const has = t.route.includes(stopIdx)
+      if (has) return { ...t, route: t.route.filter(si => si !== stopIdx) }
+      if (t.route.length >= t.stops) return t
+      if (takenBy[stopIdx] && takenBy[stopIdx] !== t.id) return t
+      return { ...t, route: [...t.route, stopIdx] }
     }))
   }
 
-  const totalRevenue = routes.reduce((s, r) => s + r.revenue, 0)
+  // --- Revenue ---
+  const trainRevenue = (t) => {
+    let base = 0
+    for (const si of t.route) {
+      const s = stops[si]
+      if (!s) continue
+      base += s.value * (s.mult || 1) + (s.bonus || 0)
+    }
+    return base * (t.multiplier || 1) + (t.bonus || 0)
+  }
+  const totalRevenue = trains.reduce((s, t) => s + trainRevenue(t), 0) + routeBonus
 
   // --- Styles ---
   const inputCls = m
-    ? 'w-14 bg-black/30 border border-blue-800 rounded px-1 py-0.5 text-xs text-blue-300 text-right focus:outline-none focus:border-green-600'
-    : 'w-14 bg-broker-bg border border-broker-border rounded px-1 py-0.5 text-xs text-white text-right focus:outline-none focus:border-blue-500'
+    ? 'w-12 bg-black/30 border border-blue-800 rounded px-1 py-0.5 text-xs text-blue-300 text-right focus:outline-none focus:border-green-600'
+    : 'w-12 bg-broker-bg border border-broker-border rounded px-1 py-0.5 text-xs text-white text-right focus:outline-none focus:border-blue-500'
   const nameInputCls = m
-    ? 'w-20 bg-black/30 border border-blue-800 rounded px-1 py-0.5 text-xs text-yellow-300 focus:outline-none focus:border-green-600'
-    : 'w-20 bg-broker-bg border border-broker-border rounded px-1 py-0.5 text-xs text-white focus:outline-none focus:border-blue-500'
+    ? 'bg-black/30 border border-blue-800 rounded px-1 py-0.5 text-xs text-blue-400 focus:outline-none focus:border-green-600'
+    : 'bg-broker-bg border border-broker-border rounded px-1 py-0.5 text-xs text-broker-text-muted focus:outline-none focus:border-blue-500'
   const labelCls = m ? 'text-blue-400 text-[10px]' : 'text-broker-text-muted text-[10px]'
-  const btnCls = m
-    ? 'text-[10px] text-blue-400 hover:text-blue-300 px-1'
-    : 'text-[10px] text-broker-text-muted hover:text-white px-1'
+  const btnSmall = m
+    ? 'text-[10px] bg-green-900/50 text-green-300 hover:bg-green-800 px-2 py-0.5 rounded'
+    : 'text-[10px] bg-broker-surface-hover text-broker-text hover:text-white px-2 py-0.5 rounded'
 
   return (
     <>
+      {/* Corp header */}
+      <div className="flex items-center gap-2">
+        <span className={labelCls}>Corp:</span>
+        <input type="text" value={corp.sym}
+          onChange={e => setCorp(prev => ({ ...prev, sym: e.target.value.toUpperCase() }))}
+          placeholder="SYM" className={`${nameInputCls} w-12 font-bold`} />
+        <span className={labelCls}>Bonus:</span>
+        <input type="number" value={routeBonus || ''} onChange={e => setRouteBonus(parseInt(e.target.value) || 0)}
+          placeholder="0" className={inputCls} title="Global route bonus (e.g. east-west connection)" />
+      </div>
+
       {/* Stops */}
       <Panel m={m} title="Stops">
-        <div className="space-y-1">
-          {stops.map((s, i) => (
-            <div key={s.id} className="flex items-center gap-2">
-              <input type="text" value={s.name} onChange={e => { setStopField(i, 'name', e.target.value); recalcAll() }}
-                className={nameInputCls} />
-              <span className={labelCls}>value</span>
-              <input type="number" value={s.value || ''} onChange={e => { setStopField(i, 'value', e.target.value); recalcAll() }}
-                className={inputCls} />
-              <select value={s.type} onChange={e => setStopField(i, 'type', e.target.value)}
-                className={m
-                  ? 'bg-black/30 border border-blue-800 rounded px-1 py-0.5 text-xs text-blue-300'
-                  : 'bg-broker-bg border border-broker-border rounded px-1 py-0.5 text-xs text-white'
-                }>
-                <option value="city">City</option>
-                <option value="town">Town</option>
-                <option value="offboard">Offboard</option>
-              </select>
-              <button onClick={() => removeStop(i)} className={`${btnCls} text-red-400`}>×</button>
-            </div>
+        {/* Quick add row */}
+        <div className="flex flex-wrap gap-1 mb-2">
+          {quickValues.map(v => (
+            <button key={v} onClick={() => addStop(v)}
+              className={m
+                ? 'text-xs bg-blue-900/50 text-blue-300 hover:bg-blue-800 px-2 py-1 rounded min-w-[2rem]'
+                : 'text-xs bg-broker-surface-hover text-broker-text hover:text-white px-2 py-1 rounded min-w-[2rem]'
+              }>{v}</button>
           ))}
-          <button onClick={addStop} className={m
-            ? 'text-[10px] bg-green-900/50 text-green-300 hover:bg-green-800 px-2 py-0.5 rounded'
-            : 'text-[10px] bg-broker-surface-hover text-broker-text hover:text-white px-2 py-0.5 rounded'
-          }>+ Stop</button>
+          <input type="number" value={newStop} onChange={e => setNewStop(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && addStop(newStop)}
+            placeholder="+" className={`${inputCls} w-10`} />
+          <button onClick={() => addStop(newStop)} className={btnSmall}>+</button>
         </div>
+
+        {/* Stop chips */}
+        {stops.length > 0 ? (
+          <div className="flex flex-wrap gap-1">
+            {stops.map((s, i) => {
+              const owner = takenBy[i]
+              const ownerTrain = owner ? trains.find(t => t.id === owner) : null
+              const inActive = activeTrain && trains.find(t => t.id === activeTrain)?.route.includes(i)
+              const takenByOther = owner && owner !== activeTrain
+
+              return (
+                <div key={i}
+                  onClick={() => activeTrain && toggleStop(i)}
+                  className={`flex items-center gap-0.5 rounded px-1.5 py-1 text-xs transition-colors ${
+                    inActive
+                      ? (m ? 'bg-green-800 text-green-200 ring-1 ring-green-500' : 'bg-blue-600 text-white ring-1 ring-blue-400')
+                      : takenByOther
+                        ? (m ? 'bg-blue-900/20 text-blue-700' : 'bg-broker-bg text-broker-text-muted/30')
+                        : (m ? 'bg-blue-900/40 text-blue-300' : 'bg-broker-surface-hover text-broker-text')
+                  } ${activeTrain ? 'cursor-pointer' : ''}`}>
+                  {/* Value */}
+                  {activeTrain ? (
+                    <span className="font-bold">{s.value}{s.mult > 1 ? `×${s.mult}` : ''}{s.bonus > 0 ? `+${s.bonus}` : ''}</span>
+                  ) : (
+                    <>
+                      <input type="number" value={s.value} onChange={e => setStopField(i, 'value', e.target.value)}
+                        onClick={e => e.stopPropagation()} className={`${inputCls} w-10`} />
+                      <span className={labelCls}>×</span>
+                      <input type="number" value={s.mult} onChange={e => setStopField(i, 'mult', e.target.value)}
+                        onClick={e => e.stopPropagation()} className={`${inputCls} w-6`} min="1" />
+                      <span className={labelCls}>+</span>
+                      <input type="number" value={s.bonus || ''} onChange={e => setStopField(i, 'bonus', e.target.value)}
+                        onClick={e => e.stopPropagation()} placeholder="0" className={`${inputCls} w-8`} />
+                      <input type="text" value={s.name} onChange={e => setStopField(i, 'name', e.target.value)}
+                        onClick={e => e.stopPropagation()} placeholder="name" className={`${nameInputCls} w-12`} />
+                      <button onClick={e => { e.stopPropagation(); removeStop(i) }} className="text-red-400 text-[10px]">×</button>
+                    </>
+                  )}
+                  {/* Show which train owns it */}
+                  {ownerTrain && !inActive && (
+                    <span className={m ? 'text-blue-600 text-[9px]' : 'text-broker-text-muted/40 text-[9px]'}>
+                      {ownerTrain.name}
+                    </span>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        ) : (
+          <div className={labelCls}>Click values above to add stops</div>
+        )}
       </Panel>
 
       {/* Trains */}
       <Panel m={m} title="Trains">
-        <div className="space-y-1">
+        <div className="space-y-2">
           {trains.map((t, i) => {
-            const route = routes.find(r => r.trainId === t.id)
-            const isEditing = editingRoute === t.id
+            const rev = trainRevenue(t)
+            const isActive = activeTrain === t.id
             return (
-              <div key={t.id}>
-                <div className="flex items-center gap-2">
-                  {t.corp && <span style={{ color: t.color }} className="font-bold text-[10px] w-8">{t.corp}</span>}
-                  <span className={labelCls}>train</span>
+              <div key={t.id} className={`rounded p-2 ${isActive
+                ? (m ? 'bg-green-900/30 border border-green-700' : 'bg-blue-900/20 border border-blue-600')
+                : (m ? 'bg-blue-900/20' : 'bg-broker-bg')
+              }`}>
+                <div className="flex items-center gap-2 flex-wrap">
                   <input type="text" value={t.name} onChange={e => setTrainField(i, 'name', e.target.value)}
-                    className={`${nameInputCls} w-10`} />
+                    className={`${nameInputCls} w-8 font-bold`} />
                   <span className={labelCls}>stops</span>
-                  <input type="number" value={t.stops || ''} onChange={e => setTrainField(i, 'stops', e.target.value)}
-                    className={`${inputCls} w-10`} min="1" />
-                  {t.multiplier > 1 && <span className={labelCls}>×{t.multiplier}</span>}
-                  <button onClick={() => setEditingRoute(isEditing ? null : t.id)}
-                    className={`text-[10px] px-1.5 py-0.5 rounded ${isEditing
-                      ? (m ? 'bg-green-900 text-green-300' : 'bg-blue-600 text-white')
-                      : (m ? 'bg-blue-900/30 text-blue-400' : 'bg-broker-surface-hover text-broker-text-muted')
+                  <input type="number" value={t.stops} onChange={e => setTrainField(i, 'stops', e.target.value)}
+                    className={`${inputCls} w-8`} min="1" />
+                  {t.multiplier > 1 && (
+                    <>
+                      <span className={labelCls}>×</span>
+                      <input type="number" value={t.multiplier} onChange={e => setTrainField(i, 'multiplier', e.target.value)}
+                        className={`${inputCls} w-6`} min="1" />
+                    </>
+                  )}
+                  <span className={labelCls}>bonus</span>
+                  <input type="number" value={t.bonus || ''} onChange={e => setTrainField(i, 'bonus', e.target.value)}
+                    placeholder="0" className={`${inputCls} w-8`} />
+
+                  <button onClick={() => setActiveTrain(isActive ? null : t.id)}
+                    className={`text-[10px] px-2 py-0.5 rounded font-medium ${isActive
+                      ? (m ? 'bg-green-700 text-white' : 'bg-blue-600 text-white')
+                      : (m ? 'bg-blue-800 text-blue-300' : 'bg-broker-surface-hover text-broker-text')
                     }`}>
-                    {isEditing ? 'done' : 'route'}
+                    {isActive ? 'done' : 'route'}
                   </button>
-                  <span className={`font-bold ml-auto ${m ? 'text-white' : 'text-white'}`}>
-                    {route ? fmt(route.revenue) : '—'}
+                  {t.route.length > 0 && (
+                    <button onClick={() => clearRoute(t.id)} className="text-[10px] text-red-400 px-1">clear</button>
+                  )}
+                  <span className={`ml-auto font-bold ${m ? 'text-white' : 'text-white'}`}>
+                    {rev > 0 ? fmt(rev) : '—'}
                   </span>
-                  <button onClick={() => removeTrain(i)} className={`${btnCls} text-red-400`}>×</button>
+                  <button onClick={() => removeTrain(i)} className="text-[10px] text-red-400 px-1">×</button>
                 </div>
 
-                {/* Route picker — click stops to add/remove */}
-                {isEditing && (
-                  <div className="flex flex-wrap gap-1 mt-1 ml-4">
-                    {stops.map(s => {
-                      const inRoute = route?.stopIds.includes(s.id)
-                      const atLimit = !inRoute && route && route.stopIds.length >= t.stops
+                {/* Route display */}
+                {t.route.length > 0 && (
+                  <div className={`mt-1 text-[10px] ${m ? 'text-blue-400' : 'text-broker-text-muted'}`}>
+                    {t.route.map((si, ri) => {
+                      const s = stops[si]
+                      if (!s) return null
+                      const val = s.value * (s.mult || 1) + (s.bonus || 0)
                       return (
-                        <button key={s.id}
-                          onClick={() => toggleStopInRoute(t.id, s.id)}
-                          disabled={atLimit}
-                          className={`text-[10px] px-2 py-0.5 rounded transition-colors ${
-                            inRoute
-                              ? (m ? 'bg-green-800 text-green-200' : 'bg-blue-600 text-white')
-                              : atLimit
-                                ? (m ? 'bg-blue-950 text-blue-800' : 'bg-broker-bg text-broker-text-muted/30')
-                                : (m ? 'bg-blue-900/30 text-blue-300 hover:bg-blue-800' : 'bg-broker-surface-hover text-broker-text hover:text-white')
-                          }`}>
-                          {s.name} ({fmt(s.value)})
-                        </button>
+                        <span key={ri}>
+                          {ri > 0 && ' → '}
+                          <span className="font-bold">{val}</span>
+                          {s.name && <span className={m ? ' text-blue-600' : ' text-broker-text-muted/60'}> {s.name}</span>}
+                        </span>
                       )
                     })}
-                    <span className={`${labelCls} self-center ml-1`}>
-                      {route?.stopIds.length || 0}/{t.stops}
-                    </span>
+                    {t.bonus > 0 && <span> + {t.bonus} bonus</span>}
+                    {t.multiplier > 1 && <span> ×{t.multiplier}</span>}
+                    <span className="ml-2">({t.route.length}/{t.stops})</span>
+                  </div>
+                )}
+
+                {isActive && t.route.length === 0 && stops.length > 0 && (
+                  <div className={`mt-1 text-[10px] ${m ? 'text-green-400' : 'text-blue-400'}`}>
+                    Click stops above to build route
                   </div>
                 )}
               </div>
             )
           })}
-          <button onClick={addTrain} className={m
-            ? 'text-[10px] bg-green-900/50 text-green-300 hover:bg-green-800 px-2 py-0.5 rounded'
-            : 'text-[10px] bg-broker-surface-hover text-broker-text hover:text-white px-2 py-0.5 rounded'
-          }>+ Train</button>
+          <div className="flex gap-2">
+            <button onClick={addTrain} className={btnSmall}>+ Train</button>
+            <button onClick={() => setTrains(prev => prev.map(t => ({ ...t, multiplier: 2 })))}
+              className={btnSmall} title="Set all trains to ×2 (D-trains)">all ×2</button>
+          </div>
         </div>
       </Panel>
 
       {/* Total */}
-      <Panel m={m} title="Total Revenue">
-        <div className="flex items-center gap-4 flex-wrap">
-          <span className={`text-xl font-bold ${m ? 'text-white' : 'text-white'}`}>{fmt(totalRevenue)}</span>
+      <Panel m={m} title="">
+        <div className="flex items-center gap-3 flex-wrap">
+          <span className={`text-lg font-bold ${m ? 'text-white' : 'text-white'}`}>
+            {fmt(totalRevenue)}
+          </span>
           <span className={labelCls}>{fmt(Math.floor(totalRevenue / 10))}/share</span>
-          {routes.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {routes.filter(r => r.stopIds.length > 0).map(r => {
-                const train = trains.find(t => t.id === r.trainId)
-                return (
-                  <span key={r.trainId} className="text-xs">
-                    <span style={{ color: train?.color }} className="font-bold">{train?.corp || train?.name}</span>
-                    {' '}{fmt(r.revenue)}
-                    <span className={labelCls}> ({r.stopIds.length} stops)</span>
-                  </span>
-                )
-              })}
-            </div>
-          )}
+          {routeBonus > 0 && <span className={labelCls}>incl. +{routeBonus} bonus</span>}
+          {trains.filter(t => t.route.length > 0).map(t => (
+            <span key={t.id} className="text-xs">
+              {t.name}: {fmt(trainRevenue(t))}
+            </span>
+          ))}
         </div>
-        {/* Use revenue — send back to corp view */}
-        {totalRevenue > 0 && game && (
-          <div className="flex flex-wrap gap-1 mt-2">
-            {/* One button per corp that has trains in this calc */}
-            {[...new Set(trains.filter(t => t.corp).map(t => t.corp))].map(corpSym => {
-              const corpRoutes = routes.filter(r => {
-                const t = trains.find(x => x.id === r.trainId)
-                return t?.corp === corpSym
-              })
-              const corpRev = corpRoutes.reduce((s, r) => s + r.revenue, 0)
-              if (corpRev <= 0) return null
-              const corp = game.corporations.find(c => c.sym === corpSym)
-              return (
-                <button key={corpSym}
-                  onClick={() => {
-                    useUIStore.getState().setRouteRevenue(corpSym, corpRev)
-                    useUIStore.getState().setActiveCorp(corpSym)
-                    useUIStore.getState().setActiveTab('corps')
-                  }}
-                  className={m
-                    ? 'text-xs bg-green-900/80 text-green-300 hover:bg-green-800 px-3 py-1.5 rounded font-medium'
-                    : 'text-xs bg-green-700 text-white hover:bg-green-600 px-3 py-1.5 rounded font-medium'
-                  }>
-                  Use {fmt(corpRev)} for <span style={{ color: corp?.color }} className="font-bold">{corpSym}</span> → Pay/Withhold
-                </button>
-              )
-            })}
-            {/* Fallback if no corps tagged */}
-            {trains.every(t => !t.corp) && (
-              <span className={labelCls}>Tag trains with corp names to send revenue back</span>
-            )}
-          </div>
+
+        {/* Send to corp */}
+        {totalRevenue > 0 && game && corp.sym && (
+          <button
+            onClick={() => {
+              useUIStore.getState().setRouteRevenue(corp.sym, totalRevenue)
+              useUIStore.getState().setActiveCorp(corp.sym)
+              useUIStore.getState().setActiveTab('corps')
+            }}
+            className={m
+              ? 'mt-2 w-full text-xs bg-green-900/80 text-green-300 hover:bg-green-800 px-3 py-2 rounded font-bold'
+              : 'mt-2 w-full text-xs bg-green-700 text-white hover:bg-green-600 px-3 py-2 rounded font-bold'
+            }>
+            {fmt(totalRevenue)} → {corp.sym} Pay / Withhold
+          </button>
         )}
       </Panel>
     </>
