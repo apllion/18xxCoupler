@@ -268,14 +268,30 @@ export default function PlayersTab() {
         <div className="bg-broker-surface rounded-lg p-3">
           <div className="text-xs text-broker-text-muted mb-2 font-medium uppercase">Private Companies</div>
           <div className="space-y-1">
-            {privates.map((p) => (
-              <div key={p.sym} className={`flex items-center gap-2 text-sm ${p.closed ? 'opacity-40' : ''}`}>
-                <span className="font-medium w-10">{p.sym}</span>
-                <span className="flex-1 text-broker-text-muted truncate">{p.name}</span>
-                <span className="text-broker-text-muted">{fmt(p.revenue)}/OR</span>
-                <span className="font-medium w-14 text-right">{fmt(p.value)}</span>
-              </div>
-            ))}
+            {privates.map((p) => {
+              const isConcession = p.name?.startsWith('Concession:')
+              const concessionCorp = isConcession ? p.name.replace('Concession: ', '').replace('Concession:', '').trim() : null
+              const targetCorp = concessionCorp ? game.corporations.find(c => c.name?.includes(concessionCorp) || c.sym === concessionCorp) : null
+              return (
+                <div key={p.sym} className={`flex items-center gap-2 text-sm ${p.closed ? 'opacity-40' : ''}`}>
+                  <span className="font-medium w-10">{p.sym}</span>
+                  <span className="flex-1 text-broker-text-muted truncate">{p.name}</span>
+                  {!p.closed && p.revenue > 0 && (
+                    <button onClick={() => dispatch({ type: 'COLLECT_REVENUE', companySym: p.sym })}
+                      className="text-[10px] bg-green-800 hover:bg-green-700 text-white px-1.5 py-0.5 rounded">
+                      +{fmt(p.revenue)}
+                    </button>
+                  )}
+                  {!p.closed && isConcession && targetCorp && !targetCorp.ipoed && (
+                    <button onClick={() => dispatch({ type: 'CONVERT_CONCESSION', playerId: selected.id, companySym: p.sym, corpSym: targetCorp.sym })}
+                      className="text-[10px] bg-purple-800 hover:bg-purple-700 text-white px-1.5 py-0.5 rounded">
+                      Convert
+                    </button>
+                  )}
+                  <span className="font-medium w-14 text-right">{fmt(p.value)}</span>
+                </div>
+              )
+            })}
           </div>
         </div>
       )}

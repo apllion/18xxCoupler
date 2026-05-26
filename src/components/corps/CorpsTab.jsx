@@ -496,6 +496,60 @@ function CorpDetail({ game, corp, dispatch, fmt, onNext, plusPlus }) {
         <ConversionPanel game={game} corp={corp} dispatch={dispatch} />
       )}
 
+      {/* Export Train (1817) */}
+      {game.title.trainExport && (
+        <div className="bg-broker-surface rounded-lg p-3">
+          <div className="text-xs text-broker-text-muted mb-2 font-medium uppercase">Export Train</div>
+          <div className="text-xs text-broker-text-muted mb-1">
+            Remove the cheapest train from the depot (may trigger phase change and rusting).
+          </div>
+          {game.depot?.upcoming?.[0] ? (
+            <button
+              onClick={() => dispatch({ type: 'EXPORT_TRAIN' })}
+              className="text-xs bg-amber-800 hover:bg-amber-700 text-white px-3 py-1.5 rounded"
+            >
+              Export {game.depot.upcoming[0].name}-train ({fmt(game.depot.upcoming[0].price)})
+            </button>
+          ) : (
+            <span className="text-xs text-broker-text-muted">No trains in depot</span>
+          )}
+        </div>
+      )}
+
+      {/* Liquidate Corp (1817 — interest failure) */}
+      {game.title.loans && corp.liquidated !== true && (corp.loans || 0) > 0 && (
+        <button
+          onClick={() => dispatch({ type: 'LIQUIDATE_CORP', corpSym: corp.sym })}
+          className="w-full text-xs bg-red-900 hover:bg-red-800 text-red-300 px-3 py-2 rounded"
+        >
+          Liquidate {corp.sym}
+        </button>
+      )}
+
+      {/* Nationalize Corp (1861, 1867, 1880) */}
+      {(() => {
+        const nationals = game.corporations.filter(c => c.type === 'national')
+        if (nationals.length === 0 || corp.type === 'national') return null
+        return (
+          <div className="bg-broker-surface rounded-lg p-3">
+            <div className="text-xs text-broker-text-muted mb-2 font-medium uppercase">Nationalize</div>
+            <div className="text-xs text-broker-text-muted mb-1">
+              Absorb {corp.sym} into a national corporation. Shareholders compensated at current price.
+            </div>
+            <div className="flex flex-wrap gap-1">
+              {nationals.map(n => (
+                <button key={n.sym}
+                  onClick={() => dispatch({ type: 'NATIONALIZE_CORP', corpSym: corp.sym, nationalSym: n.sym })}
+                  className="text-xs bg-purple-800 hover:bg-purple-700 text-white px-3 py-1.5 rounded"
+                >
+                  → {n.sym}
+                </button>
+              ))}
+            </div>
+          </div>
+        )
+      })()}
+
       {/* ++ Analysis */}
       {plusPlus && tips.length > 0 && (
         <div className="bg-broker-surface rounded-lg p-3">
