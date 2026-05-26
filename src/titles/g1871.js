@@ -61,6 +61,7 @@ export const g1871 = {
   companies: [
     { sym: 'MC', name: 'Merchants and Co.', value: 40, revenue: 5, desc: 'Exchange for Shortline exchange share during SR.' },
     { sym: 'VR', name: 'Vernon River Bridge Company', value: 40, revenue: 5, desc: 'Blocks N18. Exchange for Shortline exchange share.' },
+    { sym: 'IB', name: 'Ice Boat Shipping', value: 40, revenue: 5, minPlayers: 4, desc: 'Exchange for market share of any non-ML/SL corp.' },
     { sym: 'RA', name: 'Royal Agricultural Society', value: 110, revenue: 10, desc: 'Comes with a Mainline share.' },
     { sym: 'RF', name: 'Railcar Ferry', value: 120, revenue: 15, desc: 'Comes with a Mainline share.' },
     { sym: 'SB', name: 'Shipbuilding', value: 90, revenue: 15, desc: 'Exchange for Shortline exchange share.' },

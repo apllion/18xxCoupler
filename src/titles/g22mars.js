@@ -30,13 +30,13 @@ export const g22mars = {
 
   market: [
     ['90','100','110','120','130','145','160','175','195','215','235','255','275','300e'],
-    ['80','90','100','110','120','130','145','160','175','195','215','235','255'],
-    ['70','80','90','100','110','120','130','145','160','175','195','215'],
-    ['60p','70','80','90','100','110','120','130','145','160','175'],
-    ['50','60p','70','80','90p','100','110','120','130','145'],
-    ['45','50','55','65','75','85','95','105'],
+    ['80','90p','100','110','120','130','145','160','175','195','215','235','255'],
+    ['70','80p','90','100','110','120','130','145','160','175','195','215'],
+    ['60','70p','80','90','100','110','120','130','145','160','175'],
+    ['50','60p','70','80','90','100','110','120','130','145'],
+    ['45','50p','55','65','75','85','95','105'],
     ['40','45','50','55','65','75'],
-    ['35r','40r','45r','50r'],
+    ['35b','40b','45b','50b'],
     ['0c'],
   ],
 
@@ -46,7 +46,7 @@ export const g22mars = {
     { name: '4', on: '4', trainLimit: 3, tiles: ['yellow','green'], operatingRounds: 2 },
     { name: '5', on: '5', trainLimit: 3, tiles: ['yellow','green','brown'], operatingRounds: 2 },
     { name: '7', on: '7*', trainLimit: 3, tiles: ['yellow','green','brown','gray'], operatingRounds: 2 },
-    { name: '8', on: '8*', trainLimit: 3, tiles: ['yellow','green','brown','gray'], operatingRounds: 2 },
+    { name: '8', on: '8*', trainLimit: 3, tiles: ['yellow','green','brown','gray','black'], operatingRounds: 2 },
   ],
 
   trains: [
@@ -55,7 +55,7 @@ export const g22mars = {
     { name: '4', distance: 4, price: 250, rustsOn: '7*', num: 3 },
     { name: '5', distance: 5, price: 340, rustsOn: '8*', num: 3 },
     { name: '7*', distance: 6, price: 440, num: 4, desc: 'Runs 6 stops, doubles first OR last stop value.' },
-    { name: '8*', distance: 6, price: 560, num: 5, desc: 'Runs 6 stops, doubles BOTH first and last stop.' },
+    { name: '8*', distance: 6, price: 560, num: 6, discount: { '5': 160 }, desc: 'Runs 6 stops, doubles BOTH first and last stop.' },
   ],
 
   corporations: [
@@ -73,25 +73,23 @@ export const g22mars = {
 
   // Permit cards (act like privates — bought in auction, pay revenue each OR)
   companies: [
-    { sym: 'MAA', name: 'Mining Area Alpha', value: 15, revenue: 5,
+    { sym: 'MAA', name: 'Mining Area Alpha', value: 10, revenue: 10,
       desc: 'Exclusive rights to build/run in Mining Area Alpha hex. Assign to corp.' },
-    { sym: 'MAG', name: 'Mining Area Gamma', value: 15, revenue: 5,
+    { sym: 'MAG', name: 'Mining Area Gamma', value: 10, revenue: 10,
       desc: 'Exclusive rights to build/run in Mining Area Gamma hex. Assign to corp.' },
-    { sym: 'LT', name: 'Labor Transports', value: 15, revenue: 5,
+    { sym: 'LT', name: 'Labour Transports', value: 10, revenue: 10,
       desc: '+10c bonus per train stop at Robot Factory, AAP, or Paradise City. Removed on revolt.' },
-    { sym: 'PC', name: 'Paradise City', value: 20, revenue: 5,
-      desc: 'Place white T token (+10c) in colony hex without M or C.' },
-    { sym: 'RF', name: 'Robot Factory', value: 20, revenue: 5,
-      desc: 'Place white RF token (+10c) in hex with M or C colony.' },
-    { sym: 'TA', name: 'Train Availability', value: 20, revenue: 5,
-      desc: 'Remove one 2/3/4/5 train from the train pool.' },
-    { sym: 'PH', name: 'Prototype Hyperdrive', value: 20, revenue: 5,
+    { sym: 'PC', name: 'Paradise City', value: 20, revenue: 10,
+      desc: 'Place white T token (+10c) in colony hex without M or C. Revenue drops to 5c after use.' },
+    { sym: 'RF', name: 'Robot Factory', value: 20, revenue: 10,
+      desc: 'Place white RF token (+10c) in hex with M or C colony. Revenue drops to 5c after use.' },
+    { sym: 'PH', name: 'Prototype Hyperdrive', value: 20, revenue: 10,
       desc: 'Assigned train gets +1 free outpost stop per run. Assign to corp.' },
-    { sym: 'AAP', name: 'Android Amusement Park', value: 25, revenue: 5,
-      desc: 'Place AAP tile on outpost hex as free extra tile lay. Assign to corp.' },
-    { sym: 'GD', name: 'Government Decision', value: 25, revenue: 5,
+    { sym: 'AAP', name: 'Android Amusement Park', value: 30, revenue: 10,
+      desc: 'Place AAP tile on outpost hex as free extra tile lay. Revenue drops to 5c after use.' },
+    { sym: 'GD', name: 'Government Decision', value: 30, revenue: 10,
       desc: 'Relocate any colony token (except T) of a corp you own shares in.' },
-    { sym: 'IP', name: 'Infrastructure Push', value: 25, revenue: 5,
+    { sym: 'IP', name: 'Infrastructure Push', value: 30, revenue: 10,
       desc: 'Upgrade a tile one level above current phase. Cannot upgrade to black.' },
   ],
 
