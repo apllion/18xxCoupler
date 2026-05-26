@@ -179,6 +179,15 @@ export default function CorpsTab() {
 function CorpDetail({ game, corp, dispatch, fmt, onNext, plusPlus }) {
   const [revenue, setRevenue] = useState('')
 
+  // Pick up revenue from route calculator
+  const routeRevenue = useUIStore((s) => s.routeRevenue)
+  useEffect(() => {
+    if (routeRevenue && routeRevenue.corpSym === corp.sym) {
+      setRevenue(String(routeRevenue.revenue))
+      useUIStore.setState({ routeRevenue: null })
+    }
+  }, [routeRevenue, corp.sym])
+
   const price = corpPrice(game.stockMarket, corp.sym)
   const limit = trainLimit(game.phaseManager)
   const president = game.players.find((p) =>
@@ -327,6 +336,20 @@ function CorpDetail({ game, corp, dispatch, fmt, onNext, plusPlus }) {
           </div>
         )}
       </div>
+
+      {/* Quick route calc link */}
+      {corp.trains.length > 0 && (
+        <button
+          onClick={() => {
+            useUIStore.getState().setActiveCorp(corp.sym)
+            useUIStore.getState().setActiveTab('routes')
+          }}
+          className="w-full bg-broker-surface hover:bg-broker-surface-hover text-broker-text hover:text-white rounded-lg px-3 py-2 text-sm transition-colors flex items-center justify-between"
+        >
+          <span>Route Calculator</span>
+          <span className="text-xs text-broker-text-muted">{corp.trains.map(t => t.name).join(', ')} →</span>
+        </button>
+      )}
 
       {/* Revenue & Dividends */}
       <div className="bg-broker-surface rounded-lg p-3">

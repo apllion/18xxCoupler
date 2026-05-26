@@ -36,6 +36,8 @@ export const useUIStore = create((set) => ({
   setMyPlayer: (id) => set({ myPlayerId: id }),
   setModTheme: (id) => set({ modTheme: id }),
   setActiveCorp: (sym) => set({ activeCorpSym: sym }),
+  routeRevenue: null, // { corpSym, revenue } — set by route calc, consumed by corp view
+  setRouteRevenue: (corpSym, revenue) => set({ routeRevenue: { corpSym, revenue } }),
   toggleLog: () => set((s) => ({ showLog: !s.showLog })),
   toggleTurnTracking: () => set((s) => ({
     turnTracking: s.turnTracking === 'on' ? 'off' : 'on',

@@ -6,6 +6,8 @@ import PlayerSetup from './components/setup/PlayerSetup.jsx'
 import GameShell from './components/layout/GameShell.jsx'
 import AboutPage from './components/setup/AboutPage.jsx'
 import PassphraseGate from './components/setup/PassphraseGate.jsx'
+import EndgameCalcTab from './components/overview/EndgameCalcTab.jsx'
+import RouteCalcTab from './components/overview/RouteCalcTab.jsx'
 
 export default function App() {
   const game = useGameStore((s) => s.game)
@@ -53,10 +55,23 @@ function AppContent({ game, sync }) {
       <Routes>
         <Route path="/" element={<GameSelector />} />
         <Route path="/setup/:titleId" element={<PlayerSetup />} />
+        <Route path="/endgame" element={<CalcStandalone><EndgameCalcTab /></CalcStandalone>} />
+        <Route path="/routes" element={<CalcStandalone><RouteCalcTab /></CalcStandalone>} />
         <Route path="/about" element={<AboutPage onEnter={() => window.history.back()} />} />
       </Routes>
     )
   }
 
   return <GameShell />
+}
+
+function CalcStandalone({ children }) {
+  return (
+    <div className="min-h-screen bg-broker-bg">
+      <div className="flex items-center justify-between p-3 border-b border-broker-border">
+        <button onClick={() => window.history.back()} className="text-sm text-broker-text-muted hover:text-white">← Back</button>
+      </div>
+      {children}
+    </div>
+  )
 }

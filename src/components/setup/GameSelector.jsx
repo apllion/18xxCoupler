@@ -207,6 +207,21 @@ export default function GameSelector() {
         </div>
       )}
 
+      {/* Tools */}
+      <div className="w-full max-w-md mt-6 space-y-2">
+        <div className={`text-xs text-broker-text-muted uppercase tracking-widest`}>Tools</div>
+        <button onClick={() => navigate('/routes')}
+          className="w-full bg-broker-surface hover:bg-broker-surface-hover text-broker-text hover:text-white rounded-lg px-4 py-3 text-sm font-medium transition-colors text-left">
+          Route Calculator
+          <span className="block text-xs text-broker-text-muted mt-0.5">Enter stops and trains, build routes, calculate revenue</span>
+        </button>
+        <button onClick={() => navigate('/endgame')}
+          className="w-full bg-broker-surface hover:bg-broker-surface-hover text-broker-text hover:text-white rounded-lg px-4 py-3 text-sm font-medium transition-colors text-left">
+          Endgame Calculator
+          <span className="block text-xs text-broker-text-muted mt-0.5">Enter players, shares, prices — crank ORs to bank break</span>
+        </button>
+      </div>
+
       {/* About / Legal */}
       <div className="w-full max-w-md mt-8 mb-4 text-center">
         <button onClick={() => navigate('/about')}

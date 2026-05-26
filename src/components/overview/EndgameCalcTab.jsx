@@ -36,7 +36,8 @@ export default function EndgameCalcTab() {
             lastRev = a.totalRevenue || 0; break
           }
         }
-        corpData[c.sym] = { price, revenue: lastRev, color: c.color }
+        const soldOut = c.ipoShares <= 0 && c.marketShares <= 0
+        corpData[c.sym] = { price, revenue: lastRev, color: c.color, soldOut }
       }
       return {
         players,
@@ -55,8 +56,8 @@ export default function EndgameCalcTab() {
       ],
       corps: ['A', 'B'],
       corpData: {
-        A: { price: 100, revenue: 0, color: '#d81e3e' },
-        B: { price: 100, revenue: 0, color: '#0189d1' },
+        A: { price: 100, revenue: 0, color: '#d81e3e', soldOut: false },
+        B: { price: 100, revenue: 0, color: '#0189d1', soldOut: false },
       },
       bank: 8000,
       hasGame: false,
@@ -85,6 +86,10 @@ export default function EndgameCalcTab() {
     setCorpData(prev => ({ ...prev, [sym]: { ...prev[sym], [field]: parseInt(val) || 0 } }))
     setResult(null)
   }
+  const toggleSoldOut = (sym) => {
+    setCorpData(prev => ({ ...prev, [sym]: { ...prev[sym], soldOut: !prev[sym]?.soldOut } }))
+    setResult(null)
+  }
   const addPlayer = () => {
     const shares = {}
     corps.forEach(c => { shares[c] = 0 })
@@ -98,7 +103,7 @@ export default function EndgameCalcTab() {
     const sym = newCorpName.trim().toUpperCase() || String.fromCharCode(65 + corps.length)
     if (corps.includes(sym)) return
     setCorps(prev => [...prev, sym])
-    setCorpData(prev => ({ ...prev, [sym]: { price: 100, revenue: 0, color: '#888' } }))
+    setCorpData(prev => ({ ...prev, [sym]: { price: 100, revenue: 0, color: '#888', soldOut: false } }))
     setPlayers(prev => prev.map(p => ({ ...p, shares: { ...p.shares, [sym]: 0 } })))
     setNewCorpName('')
   }
@@ -178,6 +183,19 @@ export default function EndgameCalcTab() {
         orRow.prices[sym] = simPrices[sym]
       }
 
+      // Sold-out corps get price bump at end of OR
+      for (const sym of corps) {
+        if (corpData[sym]?.soldOut) {
+          if (simMarket && simMarket.corpPositions[sym]) {
+            moveUp(simMarket, sym, 1)
+            simPrices[sym] = priceAt(simMarket, simMarket.corpPositions[sym].row, simMarket.corpPositions[sym].col) || simPrices[sym]
+          } else {
+            simPrices[sym] = Math.round(simPrices[sym] * 1.1)
+          }
+          orRow.prices[sym] = simPrices[sym]
+        }
+      }
+
       orRow.bank = simBank
       ors.push(orRow)
       if (simBank <= 0) break
@@ -228,12 +246,20 @@ export default function EndgameCalcTab() {
       <Panel m={m} title="Corporations">
         <div className="space-y-1">
           {corps.map(sym => (
-            <div key={sym} className="flex items-center gap-2">
+            <div key={sym} className="flex items-center gap-2 flex-wrap">
               <span style={{ color: corpData[sym]?.color }} className="font-bold w-10">{sym}</span>
               <span className={labelCls}>price</span>
               <input type="number" value={corpData[sym]?.price || ''} onChange={e => setCorpField(sym, 'price', e.target.value)} className={inputCls} />
               <span className={labelCls}>rev</span>
               <input type="number" value={corpData[sym]?.revenue || ''} onChange={e => setCorpField(sym, 'revenue', e.target.value)} className={inputCls} />
+              <button onClick={() => toggleSoldOut(sym)}
+                className={`text-[10px] px-1.5 py-0.5 rounded ${corpData[sym]?.soldOut
+                  ? (m ? 'bg-green-900 text-green-300' : 'bg-green-700 text-white')
+                  : (m ? 'bg-blue-900/30 text-blue-400' : 'bg-broker-surface-hover text-broker-text-muted')
+                }`}
+                title="Toggle sold-out (price bump each OR)">
+                {corpData[sym]?.soldOut ? 'SOLD OUT' : 'sold out?'}
+              </button>
               <button onClick={() => removeCorp(sym)} className={`${btnCls} text-red-400`} title="Remove">×</button>
             </div>
           ))}
