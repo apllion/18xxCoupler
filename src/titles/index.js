@@ -4,7 +4,6 @@ import { g1830 } from './g1830.js'
 import { g1846 } from './g1846.js'
 import { g1847ae } from './g1847ae.js'
 import { g1849 } from './g1849.js'
-import { g1858 } from './g1858.js'
 import { g1860 } from './g1860.js'
 import { g1862 } from './g1862.js'
 import { g1861 } from './g1861.js'
@@ -39,7 +38,6 @@ export const titles = {
   g1846,
   g1847ae,
   g1849,
-  g1858,
   g1860,
   g1862,
   g1861,
