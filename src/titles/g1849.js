@@ -51,11 +51,11 @@ export const g1849 = {
 
   trains: [
     { name: '4H', distance: 4, price: 100, rustsOn: '8H', num: 4 },
-    { name: '6H', distance: 6, price: 200, rustsOn: '10H', num: 4, events: ['green_par'] },
-    { name: '8H', distance: 8, price: 350, rustsOn: '16H', num: 3 },
+    { name: '6H', distance: 6, price: 200, rustsOn: '10H', num: { 3: 3, 4: 4, 5: 4 }, events: ['green_par'] },
+    { name: '8H', distance: 8, price: 350, rustsOn: '16H', num: { 3: 2, 4: 3, 5: 3 } },
     { name: '10H', distance: 10, price: 550, num: 2, events: ['brown_par'] },
     { name: '12H', distance: 12, price: 800, num: 1, events: ['close_companies','earthquake'] },
-    { name: '16H', distance: 16, price: 1100, num: 5 },
+    { name: '16H', distance: 16, price: 1100, num: { 3: 4, 4: 5, 5: 5 } },
     { name: 'E', distance: 99, price: 550, num: 6, availableOn: '12H' },
     { name: 'R6H', distance: 6, price: 350, num: 2, availableOn: '16H' },
   ],

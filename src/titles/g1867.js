@@ -55,9 +55,11 @@ export const g1867 = {
     { name: '8', distance: 8, price: 1000, num: 99, events: ['minors_nationalized','trainless_nationalization','train_trade_allowed'],
       discount: { '5': 275, '6': 325, '7': 400, '8': 500 } },
     { name: '2+2', distance: 2, price: 600, num: 99, availableOn: '8',
-      desc: 'Multiplier: runs route twice.' },
+      desc: 'Multiplier: runs route twice.',
+      discount: { '5': 275, '6': 325, '7': 400, '8': 500, '2+2': 300, '5+5E': 750 } },
     { name: '5+5E', distance: 5, price: 1500, num: 99, availableOn: '8',
-      desc: 'Multiplier: offboard only, runs twice.' },
+      desc: 'Multiplier: offboard only, runs twice.',
+      discount: { '5': 275, '6': 325, '7': 400, '8': 500, '2+2': 300, '5+5E': 750 } },
   ],
 
   corporations: [

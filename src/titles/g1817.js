@@ -7,7 +7,8 @@ export const g1817 = {
   bankCash: 99999,
   startingCash: { 3: 420, 4: 315, 5: 252, 6: 210, 7: 180, 8: 158, 9: 140, 10: 126, 11: 115, 12: 105 },
   certLimit: { 3: 21, 4: 16, 5: 13, 6: 11, 7: 9, 8: 8, 9: 7, 10: 6, 11: 6, 12: 5 },
-  currencyFormat: '$', capitalization: 'incremental', floatPercent: 20, sellBuyOrder: 'sell_buy',
+  currencyFormat: '$', capitalization: 'incremental', floatPercent: 20, sellBuyOrder: 'sell_buy', seedMoney: 200,
+  ebuyPresSwap: false, sellAfter: 'after_sr_floated',
   sellMovement: 'none', // selling shares causes NO stock price movement in 1817
   halfPay: true,
   marketShareLimit: 1000, // effectively unlimited
@@ -42,29 +43,29 @@ export const g1817 = {
   // 2-share: president 20% + 1 regular 10% (total 30% sold to float, rest in treasury)
   shares: [20, 10],
   corporations: [
-    { sym: 'A&S', name: 'Alton & Southern Railway', tokens: [0,50], color: '#FF69B4', corpSize: '2share' },
-    { sym: 'A&A', name: 'Arcade and Attica', tokens: [0,50], color: '#FFD700', textColor: '#000', corpSize: '2share' },
-    { sym: 'Belt', name: 'Belt Railway of Chicago', tokens: [0,50], color: '#FF8C00', corpSize: '2share' },
-    { sym: 'Bess', name: 'Bessemer and Lake Erie', tokens: [0,50], color: '#111', corpSize: '2share' },
-    { sym: 'B&A', name: 'Boston and Albany', tokens: [0,50], color: '#d81e3e', corpSize: '2share' },
-    { sym: 'DL&W', name: 'Delaware, Lackawanna & Western', tokens: [0,50], color: '#7b352a', corpSize: '2share' },
-    { sym: 'J', name: 'Elgin, Joliet & Eastern', tokens: [0,50], color: '#237333', corpSize: '2share' },
-    { sym: 'GT', name: 'Grand Trunk Western', tokens: [0,50], color: '#8B008B', corpSize: '2share' },
-    { sym: 'H', name: 'Housatonic', tokens: [0,50], color: '#ADD8E6', textColor: '#000', corpSize: '2share' },
-    { sym: 'ME', name: 'Morristown and Erie', tokens: [0,50], color: '#D2B48C', textColor: '#000', corpSize: '2share' },
-    { sym: 'NYOW', name: 'New York, Ontario & Western', tokens: [0,50], color: '#40E0D0', textColor: '#000', corpSize: '2share' },
-    { sym: 'NYSW', name: 'New York, Susquehanna & Western', tokens: [0,50], color: '#FFF500', textColor: '#000', corpSize: '2share' },
-    { sym: 'PSNR', name: 'Pittsburgh, Shawmut & Northern', tokens: [0,50], color: '#00FF7F', textColor: '#000', corpSize: '2share' },
-    { sym: 'PLE', name: 'Pittsburgh and Lake Erie', tokens: [0,50], color: '#90EE90', textColor: '#000', corpSize: '2share' },
-    { sym: 'PW', name: 'Providence and Worcester', tokens: [0,50], color: '#C0C0C0', textColor: '#000', corpSize: '2share' },
-    { sym: 'R', name: 'Rutland', tokens: [0,50], color: '#006400', corpSize: '2share' },
-    { sym: 'SR', name: 'Strasburg', tokens: [0,50], color: '#FF0000', corpSize: '2share' },
-    { sym: 'UR', name: 'Union Railroad', tokens: [0,50], color: '#000080', corpSize: '2share' },
-    { sym: 'WT', name: 'Warren & Trumbull', tokens: [0,50], color: '#9370DB', corpSize: '2share' },
-    { sym: 'WC', name: 'West Chester', tokens: [0,50], color: '#8B7355', corpSize: '2share' },
+    { sym: 'A&S', name: 'Alton & Southern Railway', tokens: [0], color: '#FF69B4', corpSize: '2share' },
+    { sym: 'A&A', name: 'Arcade and Attica', tokens: [0], color: '#FFD700', textColor: '#000', corpSize: '2share' },
+    { sym: 'Belt', name: 'Belt Railway of Chicago', tokens: [0], color: '#FF8C00', corpSize: '2share' },
+    { sym: 'Bess', name: 'Bessemer and Lake Erie', tokens: [0], color: '#111', corpSize: '2share' },
+    { sym: 'B&A', name: 'Boston and Albany', tokens: [0], color: '#d81e3e', corpSize: '2share' },
+    { sym: 'DL&W', name: 'Delaware, Lackawanna & Western', tokens: [0], color: '#7b352a', corpSize: '2share' },
+    { sym: 'J', name: 'Elgin, Joliet & Eastern', tokens: [0], color: '#237333', corpSize: '2share' },
+    { sym: 'GT', name: 'Grand Trunk Western', tokens: [0], color: '#8B008B', corpSize: '2share' },
+    { sym: 'H', name: 'Housatonic', tokens: [0], color: '#ADD8E6', textColor: '#000', corpSize: '2share' },
+    { sym: 'ME', name: 'Morristown and Erie', tokens: [0], color: '#D2B48C', textColor: '#000', corpSize: '2share' },
+    { sym: 'NYOW', name: 'New York, Ontario & Western', tokens: [0], color: '#40E0D0', textColor: '#000', corpSize: '2share' },
+    { sym: 'NYSW', name: 'New York, Susquehanna & Western', tokens: [0], color: '#FFF500', textColor: '#000', corpSize: '2share' },
+    { sym: 'PSNR', name: 'Pittsburgh, Shawmut & Northern', tokens: [0], color: '#00FF7F', textColor: '#000', corpSize: '2share' },
+    { sym: 'PLE', name: 'Pittsburgh and Lake Erie', tokens: [0], color: '#90EE90', textColor: '#000', corpSize: '2share' },
+    { sym: 'PW', name: 'Providence and Worcester', tokens: [0], color: '#C0C0C0', textColor: '#000', corpSize: '2share' },
+    { sym: 'R', name: 'Rutland', tokens: [0], color: '#006400', corpSize: '2share' },
+    { sym: 'SR', name: 'Strasburg', tokens: [0], color: '#FF0000', corpSize: '2share' },
+    { sym: 'UR', name: 'Union Railroad', tokens: [0], color: '#000080', corpSize: '2share' },
+    { sym: 'WT', name: 'Warren & Trumbull', tokens: [0], color: '#9370DB', corpSize: '2share' },
+    { sym: 'WC', name: 'West Chester', tokens: [0], color: '#8B7355', corpSize: '2share' },
   ],
 
-  pregame: [{ id: 'auction', label: 'Private Auction', type: 'waterfall' }],
+  pregame: [{ id: 'auction', label: 'Private Auction', type: 'selection' }],
 
   companies: [
     { sym: 'PSM', name: 'Pittsburgh Steel Mill', value: 40, revenue: 0, desc: 'Place special tile X00 on Pittsburgh for free.' },
@@ -115,8 +116,7 @@ export const g1817 = {
 
   // Game end: first 8-train triggers end (3 more ORs if in round 1, 2 if round 2)
   gameEndCheck: {
-    bankrupt: 'all_but_one',
-    bank: 'current_or',
+    bankrupt: 'immediate',
     finalTrain: 'signal_end_game',
   },
 

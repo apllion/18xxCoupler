@@ -47,7 +47,7 @@ export const grla = {
     { name: '5', distance: 5, price: 450, num: 3 },
     { name: '6', distance: 6, price: 550, num: 3 },
     { name: '7', distance: 7, price: 750, num: 2 },
-    { name: '∞', distance: 99, price: 1000, num: 99 },
+    { name: '∞', distance: 99, price: 1000, num: 5 },
   ],
 
   // 5 shares per minor: 1 presidency (2 shares worth) + 3 single shares

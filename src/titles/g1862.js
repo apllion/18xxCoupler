@@ -57,7 +57,7 @@ export const g1862 = {
     { sym: 'WStI', name: 'Wisbech, St Ives & Cambridge Junction', tokens: [0,0,0], color: '#008080', coordinates: 'B5' },
   ],
 
-  pregame: [{ id: 'auction', label: 'Private Auction', type: 'waterfall' }],
+  pregame: [{ id: 'auction', label: 'Private Auction', type: 'charter' }],
 
   variants: {
     'short_game': {

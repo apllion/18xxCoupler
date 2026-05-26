@@ -33,11 +33,8 @@
 | PTG | Pocket Train Game Rules 20250327.docx.pdf | Pending |
 | RLA | RailwaysRulebook-Feb-1-SinglePages.pdf | Pending |
 
-## No PDF available
-| Title | Source |
-|---|---|
-| 1871 | Ruby source only |
-| 1889 | Ruby source only (verified, no issues) |
+| 1871 | TOP71_RULES_PROTOTYPE.pdf | Pending |
+| 1889 | Shikoku_1889_Rulebook_(compressed).pdf | OK (Ruby verified) |
 
 ## Removed
 | Title | Reason |

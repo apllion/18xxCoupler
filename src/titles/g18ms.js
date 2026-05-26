@@ -13,6 +13,8 @@ export const g18ms = {
   capitalization: 'full',
   floatPercent: 60,
   maxOwnership: 70,
+  ebuyPresSwap: false,
+  ebuyDepotCheapest: false,
 
   market: [
     ['65y','70','75','80','90p','100','110','130','150','170','200','230','265','300'],
@@ -35,7 +37,7 @@ export const g18ms = {
     { name: '4+', distance: 4, price: 300, num: 3, salvageValue: 60 },
     { name: '5', distance: 5, price: 500, num: 2 },
     { name: '6', distance: 6, price: 550, num: 2, events: ['close_companies','remove_tokens'] },
-    { name: '2D', distance: 2, price: 500, num: 4, availableOn: '6', multiplier: 2 },
+    { name: '2D', distance: 2, price: 500, num: 4, availableOn: '6', multiplier: 2, variants: [{ name: '4D', price: 750, distance: 4, multiplier: 2 }] },
     { name: '5D', distance: 5, price: 850, num: 1, availableOn: '6', multiplier: 2 },
   ],
 

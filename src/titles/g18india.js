@@ -15,7 +15,7 @@ export const g18india = {
     { name: 'II', on: '3', trainLimit: 2, tiles: ['yellow','green','brown','gray'], operatingRounds: 2 },
     { name: 'III', on: '4', trainLimit: 2, tiles: ['yellow','green','brown','gray'], operatingRounds: 2 },
     { name: "III'", on: '4-2', trainLimit: 2, tiles: ['yellow','green','brown','gray'], operatingRounds: 2 },
-    { name: 'IV', on: '3x2', trainLimit: 2, tiles: ['yellow','green','brown','gray'], operatingRounds: 2 },
+    { name: 'IV', on: ['3x2', '3x3', '4x2', '4x3'], trainLimit: 2, tiles: ['yellow','green','brown','gray'], operatingRounds: 2 },
   ],
   trains: [
     { name: '2', distance: 2, price: 180, num: 6 },
@@ -27,7 +27,7 @@ export const g18india = {
     { name: '4x3', distance: 4, price: 1100, num: 3, availableOn: "III'", variants: [{ name: '4Ex3', price: 1100 }] },
   ],
   corporations: [
-    { sym: 'GIPR', name: 'Great Indian Peninsula Railway', tokens: [0,40,100,100], color: '#fff', textColor: '#000', floatPercent: 30 },
+    { sym: 'GIPR', name: 'Great Indian Peninsula Railway', tokens: [0,40,100,100], color: '#fff', textColor: '#000', floatPercent: 30, shares: [10,10,10,10,10,10,10,10,10,10] },
     { sym: 'NWR', name: 'Northwestern Railway', tokens: [0,40,100,100], color: '#48bc39', coordinates: 'G8', floatPercent: 30 },
     { sym: 'EIR', name: 'East India Railway', tokens: [0,40,100], color: '#f14324', coordinates: 'P17', floatPercent: 30 },
     { sym: 'NCR', name: 'North Central Railway', tokens: [0,40,100,100], color: '#d8ba9e', textColor: '#000', coordinates: 'K14', floatPercent: 30 },

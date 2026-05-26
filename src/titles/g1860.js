@@ -62,7 +62,7 @@ export const g1860 = {
     { sym: 'VYSC', name: 'Ventor, Yarmouth & South Coast', tokens: [0,40], color: '#9acd32', textColor: '#000', coordinates: 'E9', floatPercent: 50 },
   ],
 
-  pregame: [],
+  pregame: [{ id: 'auction', label: 'Private Auction', type: 'english' }],
 
   variants: {
     'remove_hexes': {

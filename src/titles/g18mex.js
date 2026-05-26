@@ -35,7 +35,7 @@ export const g18mex = {
     { name: '2', distance: 2, price: 100, rustsOn: '4', num: 9 },
     { name: '3', distance: 3, price: 180, rustsOn: '6', num: 4, events: ['companies_buyable'] },
     { name: "3'", distance: 3, price: 180, rustsOn: '6', num: 2, events: ['minors_closed'] },
-    { name: '4', distance: 4, price: 300, num: 3 },
+    { name: '4', distance: 4, price: 300, num: 3, obsoleteOn: "6'" },
     { name: '5', distance: 5, price: 450, num: 2, events: ['close_companies','ndm_merger'] },
     { name: '6', distance: 6, price: 600, num: 1 },
     { name: "6'", distance: 6, price: 600, num: 1 },
@@ -55,6 +55,12 @@ export const g18mex = {
   ],
 
   pregame: [{ id: 'auction', label: 'Private Auction', type: 'waterfall' }],
+
+  gameEndCheck: {
+    bankrupt: 'immediate',
+    stockMarket: 'current_or',
+    bank: 'current_or',
+  },
 
   companies: [
     { sym: 'MCAR', name: 'Mexico City-Acapulco Railroad', value: 20, revenue: 5, desc: 'No special abilities.' },

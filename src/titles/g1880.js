@@ -20,6 +20,10 @@ export const g1880 = {
   sellMovement: 'down_per_10',
   marketShareLimit: 80,
   floatPercent: 20,
+  ebuyPresSwap: false,
+  ebuyDepotCheapest: false,
+
+  gameEndCheck: { finalTrain: 'one_more_full_or_set' },
 
   market: [
     ['','','100','105','110','115B','120B','125B','130W','140W','150X','160X','180Y','200Z'],

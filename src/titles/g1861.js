@@ -44,10 +44,10 @@ export const g1861 = {
   phases: [
     { name: '2', trainLimit: { minor: 2 }, tiles: ['yellow'], operatingRounds: 2 },
     { name: '3', on: '3', trainLimit: { minor: 2, major: 4 }, tiles: ['yellow','green'], operatingRounds: 2 },
-    { name: '4', on: '4', trainLimit: { minor: 1, major: 3 }, tiles: ['yellow','green'], operatingRounds: 2 },
-    { name: '5', on: '5', trainLimit: { minor: 1, major: 3 }, tiles: ['yellow','green','brown'], operatingRounds: 2 },
-    { name: '6', on: '6', trainLimit: { minor: 1, major: 2 }, tiles: ['yellow','green','brown','gray'], operatingRounds: 2 },
-    { name: '7', on: '7', trainLimit: { minor: 1, major: 2 }, tiles: ['yellow','green','brown','gray'], operatingRounds: 2 },
+    { name: '4', on: '4', trainLimit: { minor: 1, major: 3, national: 99 }, tiles: ['yellow','green'], operatingRounds: 2 },
+    { name: '5', on: '5', trainLimit: { minor: 1, major: 3, national: 99 }, tiles: ['yellow','green','brown'], operatingRounds: 2 },
+    { name: '6', on: '6', trainLimit: { minor: 1, major: 2, national: 99 }, tiles: ['yellow','green','brown','gray'], operatingRounds: 2 },
+    { name: '7', on: '7', trainLimit: { minor: 1, major: 2, national: 99 }, tiles: ['yellow','green','brown','gray'], operatingRounds: 2 },
     { name: '8', on: '8', trainLimit: { major: 2 }, tiles: ['yellow','green','brown','gray'], operatingRounds: 2 },
   ],
 

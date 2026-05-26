@@ -12,7 +12,7 @@ export const g18sj = {
   maxPlayers: 6,
 
   bankCash: 10000,
-  startingCash: { 2: 1200, 3: 800, 4: 600, 5: 480, 6: 400 },
+  startingCash: { 2: 800, 3: 800, 4: 600, 5: 480, 6: 400 },
   // Cert limit depends on number of corps in play
   certLimit: { 2: 39, 3: 26, 4: 20, 5: 16, 6: 13 },
   currencyFormat: 'kr',
