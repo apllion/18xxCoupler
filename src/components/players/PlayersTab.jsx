@@ -3,7 +3,7 @@ import { useGameStore } from '../../store/gameStore.js'
 import { useUIStore } from '../../store/uiStore.js'
 import { useDispatch } from '../../hooks/useDispatch.js'
 import { formatCurrency } from '../../utils/currency.js'
-import { corpPrice } from '../../engine/stockMarket.js'
+import { corpPrice, parPrices } from '../../engine/stockMarket.js'
 import { playerNetWorth } from '../../engine/rules/netWorth.js'
 import { playerSharePercent } from '../../engine/player.js'
 // PlusPlus only — advisor tips (stripped from Broker build)
@@ -305,6 +305,10 @@ export default function PlayersTab() {
         </div>
       )}
 
+      {/* ======== ACTIONS ======== */}
+      <SectionHeader title="Actions" />
+      <PlayerActions game={game} player={selected} dispatch={dispatch} fmt={fmt} goToCorp={goToCorp} />
+
       {/* ======== ANALYSIS (++ only) ======== */}
       {plusPlus && tips.length > 0 && (
         <>
@@ -328,6 +332,124 @@ function SectionHeader({ title }) {
   return (
     <div className="text-broker-text-muted text-[10px] uppercase tracking-widest border-b border-broker-border pb-1 mt-2">
       {title}
+    </div>
+  )
+}
+
+function PlayerActions({ game, player, dispatch, fmt, goToCorp }) {
+  const [parCorp, setParCorp] = useState(null) // corpSym being par'd
+  const [parPrice, setParPrice] = useState(null)
+
+  const floatedCorps = game.corporations.filter(c => c.floated)
+  const unfloatedCorps = game.corporations.filter(c => !c.ipoed)
+  const availablePars = parPrices(game.stockMarket)
+
+  return (
+    <div className="bg-broker-surface rounded-lg p-3 space-y-3">
+      {/* Buy shares — from IPO or market */}
+      {floatedCorps.length > 0 && (
+        <div>
+          <div className="text-xs text-broker-text-muted mb-1 font-medium uppercase">Buy / Sell Shares</div>
+          <div className="space-y-1">
+            {floatedCorps.map(c => {
+              const price = corpPrice(game.stockMarket, c.sym) || 0
+              const hasIPO = c.ipoShares > 0
+              const hasMarket = c.marketShares > 0
+              const canAfford = player.cash >= price
+              const held = playerSharePercent(player, c.sym)
+              const canSell = held > 0
+              const isPres = player.shares.some(s => s.corpSym === c.sym && s.isPresident)
+              return (
+                <div key={c.sym} className="flex items-center gap-1 flex-wrap">
+                  <button onClick={() => goToCorp(c.sym)} className="flex items-center gap-1 w-16">
+                    <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: c.color }} />
+                    <span className="text-xs font-medium hover:underline">{c.sym}</span>
+                  </button>
+                  <span className="text-[10px] text-broker-text-muted w-10 text-right">{fmt(price)}</span>
+                  <span className="text-[10px] text-broker-text-muted w-8 text-right">{held}%</span>
+                  {isPres && <span className="text-[9px] text-yellow-400">P</span>}
+                  {hasIPO && (
+                    <button onClick={() => canAfford && dispatch({ type: 'BUY_SHARE', playerId: player.id, corpSym: c.sym, source: 'ipo' })}
+                      disabled={!canAfford}
+                      className="text-[10px] bg-blue-800 hover:bg-blue-700 disabled:opacity-30 text-white px-1.5 py-0.5 rounded">
+                      IPO
+                    </button>
+                  )}
+                  {hasMarket && (
+                    <button onClick={() => canAfford && dispatch({ type: 'BUY_SHARE', playerId: player.id, corpSym: c.sym, source: 'market' })}
+                      disabled={!canAfford}
+                      className="text-[10px] bg-blue-800 hover:bg-blue-700 disabled:opacity-30 text-white px-1.5 py-0.5 rounded">
+                      Mkt
+                    </button>
+                  )}
+                  {canSell && !isPres && (
+                    <button onClick={() => dispatch({ type: 'SELL_SHARES', playerId: player.id, corpSym: c.sym })}
+                      className="text-[10px] bg-red-800 hover:bg-red-700 text-white px-1.5 py-0.5 rounded">
+                      Sell
+                    </button>
+                  )}
+                  {canSell && isPres && held > 20 && (
+                    <button onClick={() => dispatch({ type: 'SELL_SHARES', playerId: player.id, corpSym: c.sym })}
+                      className="text-[10px] bg-red-800 hover:bg-red-700 text-white px-1.5 py-0.5 rounded">
+                      Sell
+                    </button>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Par — start new corp */}
+      {unfloatedCorps.length > 0 && availablePars.length > 0 && (
+        <div>
+          <div className="text-xs text-broker-text-muted mb-1 font-medium uppercase">Par New Corporation</div>
+          {!parCorp ? (
+            <div className="flex flex-wrap gap-1">
+              {unfloatedCorps.map(c => (
+                <button key={c.sym} onClick={() => setParCorp(c.sym)}
+                  className="text-xs bg-broker-surface-hover hover:bg-broker-bg text-broker-text hover:text-white px-2 py-1 rounded flex items-center gap-1">
+                  <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: c.color }} />
+                  {c.sym}
+                </button>
+              ))}
+            </div>
+          ) : (
+            <div>
+              <div className="text-xs text-broker-text mb-1">
+                Par <span className="font-bold">{parCorp}</span> at:
+              </div>
+              <div className="flex flex-wrap gap-1">
+                {availablePars.map(p => {
+                  const cost = p.price * 2 // president cert = 2 shares
+                  const canAfford = player.cash >= cost
+                  return (
+                    <button key={p.price} onClick={() => {
+                      if (canAfford) {
+                        dispatch({ type: 'PAR_SHARE', playerId: player.id, corpSym: parCorp, parPrice: p.price, row: p.row, col: p.col })
+                        setParCorp(null)
+                      }
+                    }}
+                      disabled={!canAfford}
+                      className={`text-xs px-2 py-1 rounded ${canAfford
+                        ? 'bg-green-800 hover:bg-green-700 text-white'
+                        : 'bg-broker-bg text-broker-text-muted/40'
+                      }`}>
+                      {fmt(p.price)} ({fmt(cost)})
+                    </button>
+                  )
+                })}
+                <button onClick={() => setParCorp(null)} className="text-xs text-broker-text-muted hover:text-white px-2">Cancel</button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {floatedCorps.length === 0 && unfloatedCorps.length === 0 && (
+        <div className="text-xs text-broker-text-muted">No corporations available</div>
+      )}
     </div>
   )
 }

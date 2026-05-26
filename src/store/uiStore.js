@@ -38,6 +38,8 @@ export const useUIStore = create((set) => ({
   setActiveCorp: (sym) => set({ activeCorpSym: sym }),
   routeRevenue: null, // { corpSym, revenue } — set by route calc, consumed by corp view
   setRouteRevenue: (corpSym, revenue) => set({ routeRevenue: { corpSym, revenue } }),
+  savedRoutes: {}, // { [corpSym]: { stops, trains } } — persisted route calc state per corp
+  saveRoutes: (corpSym, data) => set((s) => ({ savedRoutes: { ...s.savedRoutes, [corpSym]: data } })),
   toggleLog: () => set((s) => ({ showLog: !s.showLog })),
   toggleTurnTracking: () => set((s) => ({
     turnTracking: s.turnTracking === 'on' ? 'off' : 'on',

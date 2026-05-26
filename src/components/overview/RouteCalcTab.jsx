@@ -3,7 +3,7 @@
 // Assign stops to trains. Each stop used by only one train.
 // Supports: stop multipliers, train multipliers, route bonuses, min/max.
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useGameStore } from '../../store/gameStore.js'
 import { useUIStore } from '../../store/uiStore.js'
 import { formatCurrency } from '../../utils/currency.js'
@@ -28,44 +28,78 @@ export default function RouteCalcTab() {
 }
 
 function RouteCalc({ game, fmt, m }) {
-  // Init trains from active corp or empty
-  const initTrains = () => {
-    if (game) {
-      const activeSym = useUIStore.getState().activeCorpSym
-      const corps = activeSym
-        ? game.corporations.filter(c => c.sym === activeSym && c.floated)
-        : []
-      for (const c of corps) {
-        if (c.trains.length > 0) {
-          return c.trains.map(t => ({
+  const activeSym = useUIStore.getState().activeCorpSym
+  const savedRoutes = useUIStore((s) => s.savedRoutes)
+  const saveRoutes = useUIStore((s) => s.saveRoutes)
+
+  // Init from saved routes if available, otherwise from game
+  const initState = () => {
+    const sym = activeSym
+    const saved = sym && savedRoutes[sym]
+
+    // Restore saved state for this corp
+    if (saved) {
+      return {
+        corp: saved.corp || { sym, color: '#888', name: '' },
+        trains: saved.trains || [],
+        stops: saved.stops || [],
+        routeBonus: saved.routeBonus || 0,
+      }
+    }
+
+    // Init from game
+    if (game && sym) {
+      const c = game.corporations.find(x => x.sym === sym && x.floated)
+      if (c && c.trains.length > 0) {
+        return {
+          corp: { sym: c.sym, color: c.color, name: c.name },
+          trains: c.trains.map(t => ({
             id: `${c.sym}-${t.id}`,
             name: t.name,
             stops: t.distance || parseInt(t.name) || 2,
             multiplier: t.multiplier || 1,
             route: [],
             bonus: 0,
-          }))
+          })),
+          stops: [],
+          routeBonus: 0,
         }
       }
     }
-    return [{ id: '1', name: '2', stops: 2, multiplier: 1, route: [], bonus: 0 }]
-  }
 
-  const initCorp = () => {
-    if (game) {
-      const sym = useUIStore.getState().activeCorpSym
-      const c = sym && game.corporations.find(x => x.sym === sym)
-      if (c) return { sym: c.sym, color: c.color, name: c.name }
+    return {
+      corp: { sym: '', color: '#888', name: '' },
+      trains: [{ id: '1', name: '2', stops: 2, multiplier: 1, route: [], bonus: 0 }],
+      stops: [],
+      routeBonus: 0,
     }
-    return { sym: '', color: '#888', name: '' }
   }
 
-  const [corp, setCorp] = useState(initCorp)
-  const [trains, setTrains] = useState(initTrains)
-  const [stops, setStops] = useState([]) // [{ value, mult, bonus, name }]
+  const init = useMemo(initState, [activeSym])
+
+  const [corp, setCorp] = useState(init.corp)
+  const [trains, setTrains] = useState(init.trains)
+  const [stops, setStops] = useState(init.stops)
   const [newStop, setNewStop] = useState('')
   const [activeTrain, setActiveTrain] = useState(null)
-  const [routeBonus, setRouteBonus] = useState(0) // global bonus for this corp
+  const [routeBonus, setRouteBonus] = useState(init.routeBonus)
+
+  // Reload when switching to a different corp
+  useEffect(() => {
+    const s = initState()
+    setCorp(s.corp)
+    setTrains(s.trains)
+    setStops(s.stops)
+    setRouteBonus(s.routeBonus)
+    setActiveTrain(null)
+  }, [activeSym])
+
+  // Auto-save routes for this corp whenever they change
+  useEffect(() => {
+    if (corp.sym && stops.length > 0) {
+      saveRoutes(corp.sym, { corp, trains, stops, routeBonus })
+    }
+  }, [corp.sym, trains, stops, routeBonus])
 
   // --- Stops ---
   const addStop = (val) => {
@@ -151,6 +185,27 @@ function RouteCalc({ game, fmt, m }) {
 
   return (
     <>
+      {/* Corp selector */}
+      {game && game.corporations.filter(c => c.floated).length > 0 && (
+        <div className="flex flex-wrap gap-1">
+          {game.corporations.filter(c => c.floated).map(c => {
+            const isSel = corp.sym === c.sym
+            const hasSaved = !!savedRoutes[c.sym]
+            return (
+              <button key={c.sym}
+                onClick={() => useUIStore.getState().setActiveCorp(c.sym)}
+                className={`text-xs px-2 py-1 rounded font-medium transition-colors ${
+                  isSel ? 'ring-2 ring-white' : hasSaved ? 'opacity-80' : 'opacity-50'
+                }`}
+                style={{ backgroundColor: c.color, color: c.textColor || '#fff' }}>
+                {c.sym}
+                {hasSaved && !isSel && <span className="ml-0.5 text-[9px]">*</span>}
+              </button>
+            )
+          })}
+        </div>
+      )}
+
       {/* Corp header */}
       <div className="flex items-center gap-2">
         <span className={labelCls}>Corp:</span>

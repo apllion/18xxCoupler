@@ -337,19 +337,34 @@ function CorpDetail({ game, corp, dispatch, fmt, onNext, plusPlus }) {
         )}
       </div>
 
-      {/* Quick route calc link */}
-      {corp.trains.length > 0 && (
-        <button
-          onClick={() => {
-            useUIStore.getState().setActiveCorp(corp.sym)
-            useUIStore.getState().setActiveTab('routes')
-          }}
-          className="w-full bg-broker-surface hover:bg-broker-surface-hover text-broker-text hover:text-white rounded-lg px-3 py-2 text-sm transition-colors flex items-center justify-between"
-        >
-          <span>Route Calculator</span>
-          <span className="text-xs text-broker-text-muted">{corp.trains.map(t => t.name).join(', ')} →</span>
-        </button>
-      )}
+      {/* Quick route calc link + last revenue */}
+      {corp.trains.length > 0 && (() => {
+        const saved = useUIStore.getState().savedRoutes[corp.sym]
+        const lastRev = saved ? saved.trains.reduce((s, t) => {
+          let base = 0
+          for (const si of (t.route || [])) {
+            const st = saved.stops[si]
+            if (st) base += st.value * (st.mult || 1) + (st.bonus || 0)
+          }
+          return s + base * (t.multiplier || 1) + (t.bonus || 0)
+        }, 0) + (saved.routeBonus || 0) : 0
+        return (
+          <button
+            onClick={() => {
+              useUIStore.getState().setActiveCorp(corp.sym)
+              useUIStore.getState().setActiveTab('routes')
+            }}
+            className="w-full bg-broker-surface hover:bg-broker-surface-hover text-broker-text hover:text-white rounded-lg px-3 py-2 text-sm transition-colors flex items-center justify-between"
+          >
+            <span>Route Calculator</span>
+            <span className="text-xs text-broker-text-muted">
+              {corp.trains.map(t => t.name).join(', ')}
+              {lastRev > 0 && <span className="text-white ml-2">last: {fmt(lastRev)}</span>}
+              {' →'}
+            </span>
+          </button>
+        )
+      })()}
 
       {/* Revenue & Dividends */}
       <div className="bg-broker-surface rounded-lg p-3">
