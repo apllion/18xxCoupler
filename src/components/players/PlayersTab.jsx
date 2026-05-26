@@ -447,6 +447,43 @@ function PlayerActions({ game, player, dispatch, fmt, goToCorp }) {
         </div>
       )}
 
+      {/* Short Sell / Close Short (1817) */}
+      {game.title.shorts && floatedCorps.length > 0 && (
+        <div>
+          <div className="text-xs text-broker-text-muted mb-1 font-medium uppercase">Short Sell</div>
+          <div className="space-y-1">
+            {floatedCorps.map(c => {
+              const price = corpPrice(game.stockMarket, c.sym) || 0
+              // Check if player already has a short in this corp
+              const shortCount = player.shares.filter(s => s.corpSym === c.sym && s.isShort).length
+              return (
+                <div key={c.sym} className="flex items-center gap-1 flex-wrap">
+                  <span className="flex items-center gap-1 w-16">
+                    <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: c.color }} />
+                    <span className="text-xs font-medium">{c.sym}</span>
+                  </span>
+                  <span className="text-[10px] text-broker-text-muted w-10 text-right">{fmt(price)}</span>
+                  <button
+                    onClick={() => dispatch({ type: 'SHORT_SELL', playerId: player.id, corpSym: c.sym })}
+                    className="text-[10px] bg-red-800 hover:bg-red-700 text-white px-1.5 py-0.5 rounded"
+                  >
+                    Short
+                  </button>
+                  {shortCount > 0 && (
+                    <button
+                      onClick={() => dispatch({ type: 'CLOSE_SHORT', playerId: player.id, corpSym: c.sym })}
+                      className="text-[10px] bg-green-800 hover:bg-green-700 text-white px-1.5 py-0.5 rounded"
+                    >
+                      Close ({shortCount})
+                    </button>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
       {floatedCorps.length === 0 && unfloatedCorps.length === 0 && (
         <div className="text-xs text-broker-text-muted">No corporations available</div>
       )}

@@ -3,7 +3,7 @@ import { useGameStore } from '../../store/gameStore.js'
 import { useUIStore } from '../../store/uiStore.js'
 import { useDispatch } from '../../hooks/useDispatch.js'
 import { formatCurrency } from '../../utils/currency.js'
-import { corpPrice } from '../../engine/stockMarket.js'
+import { corpPrice, priceAt } from '../../engine/stockMarket.js'
 import { playerSharePercent } from '../../engine/player.js'
 import { currentPhase, trainLimit, operatingRounds } from '../../engine/phase.js'
 import { nextAvailableTrains, remainingCount } from '../../engine/depot.js'
@@ -366,6 +366,11 @@ function CorpDetail({ game, corp, dispatch, fmt, onNext, plusPlus }) {
         )
       })()}
 
+      {/* Issue / Redeem Shares (incremental cap) */}
+      {game.title.capitalization === 'incremental' && (
+        <IssueRedeemPanel game={game} corp={corp} dispatch={dispatch} fmt={fmt} />
+      )}
+
       {/* Revenue & Dividends */}
       <div className="bg-broker-surface rounded-lg p-3">
         <div className="text-xs text-broker-text-muted mb-2 font-medium uppercase">Revenue</div>
@@ -464,6 +469,11 @@ function CorpDetail({ game, corp, dispatch, fmt, onNext, plusPlus }) {
           onBuy={handleBuyFromCorp}
           fmt={fmt}
         />
+      )}
+
+      {/* Place Token */}
+      {corp.tokensPlaced < corp.tokens.length && (
+        <PlaceTokenPanel game={game} corp={corp} dispatch={dispatch} fmt={fmt} />
       )}
 
       {/* Corp share buy/sell (21Moon, PTG, 18India) */}
@@ -711,6 +721,12 @@ function MergerPanel({ game, corp, dispatch, fmt }) {
     targets = game.corporations.filter((c) =>
       c.type === 'major' && !c.floated
     )
+  } else if (mergerType === '1867_merge_minors') {
+    // Two minors merge into a major (current corp must be a minor)
+    if (corp.type !== 'minor') return null
+    targets = game.corporations.filter((c) =>
+      c.sym !== corp.sym && c.type === 'minor' && c.floated
+    )
   } else if (mergerType === 'rla_merge') {
     // Other floated minors (current corp must be a minor)
     if (corp.type !== 'minor') return null
@@ -765,7 +781,8 @@ function MergerPanel({ game, corp, dispatch, fmt }) {
 
   // Label for the panel
   const panelLabel = mergerType === '1822_acquire' ? 'Acquire Minor' :
-    mergerType === '1867_minor_major' ? 'Convert to Major' : 'Merge'
+    mergerType === '1867_minor_major' ? 'Convert to Major' :
+    mergerType === '1867_merge_minors' ? 'Merge Minors' : 'Merge'
 
   return (
     <div className="bg-broker-surface rounded-lg p-3">
@@ -816,6 +833,14 @@ function MergerPanel({ game, corp, dispatch, fmt }) {
                     className="ml-auto text-xs bg-purple-800 hover:bg-purple-700 px-2 py-1 rounded text-purple-200"
                   >
                     Convert
+                  </button>
+                )}
+                {(mergerType === '1867_merge_minors') && (
+                  <button
+                    onClick={() => setMergeTarget(t.sym)}
+                    className="ml-auto text-xs bg-purple-800 hover:bg-purple-700 px-2 py-1 rounded text-purple-200"
+                  >
+                    Merge
                   </button>
                 )}
                 {(mergerType === 'rla_merge') && (
@@ -873,6 +898,64 @@ function MergerPanel({ game, corp, dispatch, fmt }) {
             </button>
             <button
               onClick={() => { setMergeTarget(null); setPaymentShares(0); setCashDiff('') }}
+              className="text-xs text-broker-text-muted hover:text-broker-text px-2 py-1"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* 1867 merge minors: choose Major Corp */}
+      {mergeTarget && mergerType === '1867_merge_minors' && (
+        <div className="mt-2 space-y-2">
+          <div className="text-sm text-broker-text">
+            Merging <span className="font-medium">{corp.sym}</span> + <span className="font-medium">{mergeTarget}</span>
+          </div>
+
+          {/* Choose Major Corporation */}
+          <div className="text-xs text-broker-text-muted">Choose Major Corporation:</div>
+          <div className="space-y-1">
+            {game.corporations
+              .filter((c) => c.type === 'major' && !c.floated)
+              .map((c) => (
+                <button
+                  key={c.sym}
+                  onClick={() => setSelectedMajor(c.sym)}
+                  className={`w-full text-left text-xs px-2 py-1 rounded flex items-center gap-2 ${
+                    selectedMajor === c.sym
+                      ? 'bg-purple-700 text-white'
+                      : 'bg-broker-surface-hover text-broker-text-muted hover:text-white'
+                  }`}
+                  style={{ borderLeft: `3px solid ${c.color}` }}
+                >
+                  <span className="font-medium">{c.sym}</span>
+                  <span className="opacity-70">{c.name}</span>
+                </button>
+              ))}
+          </div>
+
+          {/* Confirm */}
+          <div className="flex gap-2">
+            <button
+              onClick={() => {
+                if (!selectedMajor) return
+                dispatch({
+                  type: 'MERGE_CORPS',
+                  minorSymA: corp.sym,
+                  minorSymB: mergeTarget,
+                  majorCorpSym: selectedMajor,
+                })
+                setMergeTarget(null)
+                setSelectedMajor(null)
+              }}
+              disabled={!selectedMajor}
+              className="text-xs bg-purple-800 hover:bg-purple-700 disabled:opacity-30 px-3 py-1 rounded text-white"
+            >
+              Confirm Merger
+            </button>
+            <button
+              onClick={() => { setMergeTarget(null); setSelectedMajor(null) }}
               className="text-xs text-broker-text-muted hover:text-broker-text px-2 py-1"
             >
               Cancel
@@ -1241,6 +1324,87 @@ function DividendAdvisorPanel({ advisor, fmt }) {
           })}
         </div>
       </details>
+    </div>
+  )
+}
+
+function IssueRedeemPanel({ game, corp, dispatch, fmt }) {
+  const pos = game.stockMarket.corpPositions[corp.sym]
+  if (!pos) return null
+
+  const currentPrice = corpPrice(game.stockMarket, corp.sym)
+  const issuePrice = priceAt(game.stockMarket, pos.row, Math.max(0, pos.col - 1))
+  const redeemPrice = priceAt(game.stockMarket, pos.row, pos.col + 1) || currentPrice
+
+  // Shares the corp can issue: total outstanding minus what's already in the market
+  // In incremental cap, corp has shares in its treasury (ipoShares) it can issue to the market
+  const canIssue = corp.ipoShares > 0
+  const canRedeem = corp.marketShares > 0 && corp.cash >= (redeemPrice || 0)
+
+  if (!canIssue && !canRedeem) return null
+
+  return (
+    <div className="bg-broker-surface rounded-lg p-3">
+      <div className="text-xs text-broker-text-muted mb-2 font-medium uppercase">Issue / Redeem Shares</div>
+      <div className="flex gap-4 text-sm mb-2">
+        <div>IPO: <span className="font-medium text-white">{corp.ipoShares}%</span></div>
+        <div>Market: <span className="font-medium text-white">{corp.marketShares}%</span></div>
+        <div>Price: <span className="font-medium text-white">{fmt(currentPrice)}</span></div>
+      </div>
+      <div className="flex gap-2">
+        {canIssue && (
+          <button
+            onClick={() => dispatch({ type: 'ISSUE_SHARES', corpSym: corp.sym, percent: 10 })}
+            className="text-xs bg-blue-800 hover:bg-blue-700 text-white px-3 py-1.5 rounded"
+          >
+            Issue Share (+{fmt(issuePrice)} to corp)
+          </button>
+        )}
+        {canRedeem && (
+          <button
+            onClick={() => dispatch({ type: 'REDEEM_SHARES', corpSym: corp.sym, percent: 10 })}
+            className="text-xs bg-green-800 hover:bg-green-700 text-white px-3 py-1.5 rounded"
+          >
+            Redeem Share (-{fmt(redeemPrice)} from corp)
+          </button>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function PlaceTokenPanel({ game, corp, dispatch, fmt }) {
+  const placed = corp.tokensPlaced || 0
+  const total = corp.tokens.length
+  const remaining = total - placed
+  if (remaining <= 0) return null
+
+  // Cost of the next token (tokens array has cost per slot)
+  const nextTokenCost = corp.tokens[placed] || 0
+  const canAfford = corp.cash >= nextTokenCost
+
+  return (
+    <div className="bg-broker-surface rounded-lg p-3">
+      <div className="text-xs text-broker-text-muted mb-2 font-medium uppercase">Tokens</div>
+      <div className="flex gap-4 text-sm mb-2">
+        <div>Placed: <span className="font-medium text-white">{placed}/{total}</span></div>
+        <div>Remaining: <span className="font-medium text-white">{remaining}</span></div>
+        <div>Next cost: <span className="font-medium text-white">{fmt(nextTokenCost)}</span></div>
+      </div>
+      <div className="flex gap-1 text-xs text-broker-text-muted mb-2">
+        {corp.tokens.map((cost, i) => (
+          <span key={i} className={`px-1.5 py-0.5 rounded ${i < placed ? 'bg-green-900 text-green-300' : 'bg-broker-surface-hover'}`}>
+            {fmt(cost)}
+          </span>
+        ))}
+      </div>
+      <button
+        onClick={() => dispatch({ type: 'PLACE_TOKEN', corpSym: corp.sym, cost: nextTokenCost })}
+        disabled={!canAfford}
+        className="text-xs bg-blue-800 hover:bg-blue-700 disabled:opacity-30 disabled:cursor-not-allowed text-white px-3 py-1.5 rounded"
+      >
+        Place Token ({fmt(nextTokenCost)})
+      </button>
     </div>
   )
 }
