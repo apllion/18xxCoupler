@@ -18,6 +18,7 @@ export const g1822mx = {
 
   capitalization: 'incremental',
   floatPercent: 20,
+  halfPay: true,
   mustSellInBlocks: true,
   nextSRPlayerOrder: 'most_cash',
 
@@ -101,9 +102,18 @@ export const g1822mx = {
     { sym: 'P4', name: 'MCST (Permanent LT)', value: 0, revenue: 0, desc: 'Comes with a permanent L-train.' },
     { sym: 'P5', name: 'Pullman', value: 0, revenue: 10, desc: 'Pullman car — doubles one train\'s revenue.' },
     { sym: 'P6', name: 'Pullman', value: 0, revenue: 10, desc: 'Pullman car — doubles one train\'s revenue.' },
-    { sym: 'P7', name: 'Double Cash', value: 0, revenue: 10, desc: 'Receive double cash when used.' },
-    { sym: 'P14', name: 'Mail Contract', value: 0, revenue: 10, desc: '$10 per city visited.' },
-    { sym: 'P15', name: 'Mail Contract', value: 0, revenue: 10, desc: '$10 per city visited.' },
+    { sym: 'P7', name: 'Double Cash', value: 0, revenue: 10, desc: 'Declare 2x cash holding for player order.' },
+    { sym: 'P8', name: 'P8 (Adv. Tile Lay)', value: 0, revenue: 10, desc: 'Lay one advanced non-city tile upgrade using next colour.' },
+    { sym: 'P9', name: 'P9 (Extra Tile Lay)', value: 0, revenue: 10, desc: 'Lay additional yellow tiles or one extra upgrade.' },
+    { sym: 'P10', name: 'P10 (Builder Cubes)', value: 0, revenue: 10, desc: 'Three builder cubes to reduce terrain costs.' },
+    { sym: 'P11', name: 'P11 (Builder Cubes)', value: 0, revenue: 10, desc: 'Three builder cubes to reduce terrain costs.' },
+    { sym: 'P12', name: 'P12 (Remove Town)', value: 0, revenue: 10, desc: 'Replace town with plain track tile.' },
+    { sym: 'P13', name: 'P13 (Remove Town)', value: 0, revenue: 10, desc: 'Replace town with plain track tile.' },
+    { sym: 'P14', name: 'P14 (Mail Contract)', value: 0, revenue: 10, desc: 'Half base value of start and end stations from one train.' },
+    { sym: 'P15', name: 'P15 (Mail Contract)', value: 0, revenue: 10, desc: 'Half base value of start and end stations from one train.' },
+    { sym: 'P16', name: 'P16 (Stock Drop)', value: 0, revenue: 10, desc: 'Costs company $10/OR; close to drop stock one space.' },
+    { sym: 'P17', name: 'P17 (Small Port)', value: 0, revenue: 10, desc: 'Place small port tile on a coastal spike.' },
+    { sym: 'P18', name: 'P18 (Large Port)', value: 0, revenue: 10, desc: 'Place large port tile on a coastal spike.' },
   ],
 
   // Merger: same as 1822 — major acquires minor during OR.
