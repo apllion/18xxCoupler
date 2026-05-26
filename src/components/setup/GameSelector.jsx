@@ -16,6 +16,7 @@ export default function GameSelector() {
   const [importId, setImportId] = useState('')
   const [importError, setImportError] = useState(null)
   const [importing, setImporting] = useState(false)
+  const [showMore, setShowMore] = useState(false)
 
   const savedList = Object.entries(savedGames)
     .map(([key, game]) => ({ key, game }))
@@ -52,6 +53,10 @@ export default function GameSelector() {
   const themeId = useThemeStore((s) => s.themeId)
   const setTheme = useThemeStore((s) => s.setTheme)
 
+  // Split titles into tested and untested
+  const tested = titles.filter(t => !t.wip && !t.untested)
+  const untested = titles.filter(t => t.wip || t.untested)
+
   return (
     <div className="min-h-screen flex flex-col items-center p-6">
       {/* Theme switcher */}
@@ -73,133 +78,44 @@ export default function GameSelector() {
       </div>
 
       <img src={import.meta.env.BASE_URL + 'logo.png'} alt="18xxBroker" className="w-48 mb-1 mt-2" />
-      <p className="text-[10px] text-broker-text-muted mb-4">
+      <p className="text-[10px] text-broker-text-muted mb-6">
         v{typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '?'} · {typeof __BUILD_ID__ !== 'undefined' ? __BUILD_ID__ : '?'}
       </p>
 
-      {/* Room join — join a peer's game */}
-      <RoomJoin sync={sync} />
-
-      <p className="text-broker-text-muted mb-8">Choose a game</p>
-
-      <div className="grid grid-cols-2 gap-3 w-full max-w-md">
-        {titles.map((t) => (
-          <button
-            key={t.titleId}
-            onClick={() => { console.log('[GameSelector] selected:', t.titleId, t.title); navigate(`/setup/${t.titleId}`) }}
-            className="bg-broker-surface hover:bg-broker-surface-hover border border-broker-border rounded-lg p-4 text-left transition-colors relative overflow-hidden"
-          >
-            {(t.wip || t.untested) && (
-              <svg className="absolute -bottom-2 -right-2 w-20 h-20 opacity-[0.07] text-broker-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
-              </svg>
-            )}
-            <div className="text-xl font-bold text-broker-text">{t.title}</div>
-            <div className="text-sm text-broker-text-muted mt-1">{t.subtitle}</div>
-            <div className="text-xs text-broker-text-muted mt-2">
-              {t.minPlayers}–{t.maxPlayers} players
-            </div>
-            {(t.wip || t.untested) && (
-              <div className="text-[10px] text-red-400/70 mt-1">
-                completely untested, work in progress
-              </div>
-            )}
-          </button>
-        ))}
-      </div>
-
-      {/* Import from 18xx.games */}
-      <div className="w-full max-w-md mt-6">
-        <div className="bg-broker-surface border border-broker-border rounded-lg p-3">
-          <div className="text-xs text-broker-text-muted mb-2 font-medium uppercase">Import from 18xx.games</div>
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={importId}
-              onChange={(e) => { setImportId(e.target.value.replace(/\D/g, '')); setImportError(null) }}
-              placeholder="Game ID"
-              className="flex-1 bg-broker-bg border border-broker-border rounded px-3 py-2 text-sm text-white placeholder-broker-text-muted font-mono"
-            />
-            <button
-              onClick={async () => {
-                if (!importId || importing) return
-                setImporting(true)
-                setImportError(null)
-                try {
-                  await importFrom18xxGames(parseInt(importId, 10))
-                  navigate('/')
-                } catch (err) {
-                  setImportError(err.message)
-                } finally {
-                  setImporting(false)
-                }
-              }}
-              disabled={!importId || importing}
-              className="bg-purple-800 hover:bg-purple-700 text-white px-4 py-2 rounded text-sm disabled:opacity-40"
-            >
-              {importing ? 'Loading...' : 'Import'}
-            </button>
-          </div>
-          {importError && (
-            <div className="text-xs text-red-400 mt-2">{importError}</div>
-          )}
-
-          {/* Live games browser */}
-          <LiveGames onSelect={(id) => { setImportId(String(id)) }} importing={importing}
-            onImport={async (id) => {
-              setImporting(true); setImportError(null)
-              try { await importFrom18xxGames(id); navigate('/') }
-              catch (err) { setImportError(err.message) }
-              finally { setImporting(false) }
-            }} />
-        </div>
-      </div>
-
-      {/* Load from file */}
-      <div className="w-full max-w-md mt-6">
-        <button
-          onClick={() => fileRef.current?.click()}
-          className="w-full bg-broker-surface hover:bg-broker-surface-hover border border-dashed border-broker-border rounded-lg py-3 text-sm text-broker-text-muted hover:text-white transition-colors"
-        >
-          Load Game from File
+      {/* ===== TOOLS ===== */}
+      <div className="w-full max-w-md space-y-2 mb-6">
+        <SectionLabel>Tools</SectionLabel>
+        <button onClick={() => navigate('/routes')}
+          className="w-full bg-broker-surface hover:bg-broker-surface-hover text-broker-text hover:text-white rounded-lg px-4 py-3 text-sm font-medium transition-colors text-left">
+          Route Calculator
+          <span className="block text-xs text-broker-text-muted mt-0.5">Build routes, calculate revenue per corp</span>
         </button>
-        <input ref={fileRef} type="file" accept=".json" onChange={handleImport} className="hidden" />
+        <button onClick={() => navigate('/endgame')}
+          className="w-full bg-broker-surface hover:bg-broker-surface-hover text-broker-text hover:text-white rounded-lg px-4 py-3 text-sm font-medium transition-colors text-left">
+          Endgame Calculator
+          <span className="block text-xs text-broker-text-muted mt-0.5">Enter shares and prices — crank ORs to bank break</span>
+        </button>
       </div>
 
+      {/* ===== SAVED GAMES ===== */}
       {savedList.length > 0 && (
-        <div className="w-full max-w-md mt-6">
-          <h2 className="text-lg font-medium mb-3 text-broker-text">Saved Games</h2>
+        <div className="w-full max-w-md mb-6">
+          <SectionLabel>Continue</SectionLabel>
           <div className="space-y-2">
             {savedList.map(({ key, game }) => {
-              const date = game.createdAt
-                ? new Date(game.createdAt).toLocaleDateString()
-                : '—'
+              const date = game.createdAt ? new Date(game.createdAt).toLocaleDateString() : '—'
               const players = game.players?.map((p) => p.name).join(', ') || '—'
               const actions = game.actionLog?.length || 0
-
               return (
-                <div
-                  key={key}
-                  className="bg-broker-surface border border-broker-border rounded-lg p-3 flex items-center justify-between"
-                >
-                  <button
-                    onClick={() => handleLoad(key, game)}
-                    className="flex-1 text-left hover:text-broker-gold transition-colors"
-                  >
+                <div key={key} className="bg-broker-surface border border-broker-border rounded-lg p-3 flex items-center justify-between">
+                  <button onClick={() => handleLoad(key, game)} className="flex-1 text-left hover:text-broker-gold transition-colors">
                     <div className="font-medium">
                       {game.title?.title || key}
                       <span className="text-broker-text-muted text-sm ml-2">{date}</span>
                     </div>
-                    <div className="text-xs text-broker-text-muted">
-                      {players} · {actions} actions
-                    </div>
+                    <div className="text-xs text-broker-text-muted">{players} · {actions} actions</div>
                   </button>
-                  <button
-                    onClick={() => handleDelete(key)}
-                    className="text-broker-gold-dim hover:text-red-400 ml-3 px-2 py-1 text-sm"
-                  >
-                    ×
-                  </button>
+                  <button onClick={() => handleDelete(key)} className="text-broker-gold-dim hover:text-red-400 ml-3 px-2 py-1 text-sm">×</button>
                 </div>
               )
             })}
@@ -207,19 +123,77 @@ export default function GameSelector() {
         </div>
       )}
 
-      {/* Tools */}
-      <div className="w-full max-w-md mt-6 space-y-2">
-        <div className={`text-xs text-broker-text-muted uppercase tracking-widest`}>Tools</div>
-        <button onClick={() => navigate('/routes')}
-          className="w-full bg-broker-surface hover:bg-broker-surface-hover text-broker-text hover:text-white rounded-lg px-4 py-3 text-sm font-medium transition-colors text-left">
-          Route Calculator
-          <span className="block text-xs text-broker-text-muted mt-0.5">Enter stops and trains, build routes, calculate revenue</span>
+      {/* ===== NEW GAME — tested titles ===== */}
+      <div className="w-full max-w-md mb-2">
+        <SectionLabel>New Game</SectionLabel>
+      </div>
+      {tested.length > 0 && (
+        <div className="grid grid-cols-2 gap-3 w-full max-w-md">
+          {tested.map((t) => (
+            <TitleButton key={t.titleId} t={t} onClick={() => navigate(`/setup/${t.titleId}`)} />
+          ))}
+        </div>
+      )}
+
+      {/* Untested titles — collapsed */}
+      {untested.length > 0 && (
+        <div className="w-full max-w-md mt-4">
+          <button onClick={() => setShowMore(!showMore)}
+            className="text-xs text-broker-text-muted hover:text-broker-text mb-2">
+            {showMore ? '▾' : '▸'} {untested.length} more titles (untested)
+          </button>
+          {showMore && (
+            <div className="grid grid-cols-2 gap-3">
+              {untested.map((t) => (
+                <TitleButton key={t.titleId} t={t} onClick={() => navigate(`/setup/${t.titleId}`)} />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ===== IMPORT ===== */}
+      <div className="w-full max-w-md mt-6">
+        <SectionLabel>Import</SectionLabel>
+        <div className="bg-broker-surface border border-broker-border rounded-lg p-3">
+          <div className="text-xs text-broker-text-muted mb-2">From 18xx.games</div>
+          <div className="flex gap-2">
+            <input type="text" value={importId}
+              onChange={(e) => { setImportId(e.target.value.replace(/\D/g, '')); setImportError(null) }}
+              placeholder="Game ID"
+              className="flex-1 bg-broker-bg border border-broker-border rounded px-3 py-2 text-sm text-white placeholder-broker-text-muted font-mono" />
+            <button
+              onClick={async () => {
+                if (!importId || importing) return
+                setImporting(true); setImportError(null)
+                try { await importFrom18xxGames(parseInt(importId, 10)); navigate('/') }
+                catch (err) { setImportError(err.message) }
+                finally { setImporting(false) }
+              }}
+              disabled={!importId || importing}
+              className="bg-purple-800 hover:bg-purple-700 text-white px-4 py-2 rounded text-sm disabled:opacity-40">
+              {importing ? '...' : 'Import'}
+            </button>
+          </div>
+          {importError && <div className="text-xs text-red-400 mt-2">{importError}</div>}
+          <LiveGames onImport={async (id) => {
+            setImporting(true); setImportError(null)
+            try { await importFrom18xxGames(id); navigate('/') }
+            catch (err) { setImportError(err.message) }
+            finally { setImporting(false) }
+          }} importing={importing} />
+        </div>
+
+        <button onClick={() => fileRef.current?.click()}
+          className="w-full mt-2 bg-broker-surface hover:bg-broker-surface-hover border border-dashed border-broker-border rounded-lg py-2 text-xs text-broker-text-muted hover:text-white transition-colors">
+          Load from file
         </button>
-        <button onClick={() => navigate('/endgame')}
-          className="w-full bg-broker-surface hover:bg-broker-surface-hover text-broker-text hover:text-white rounded-lg px-4 py-3 text-sm font-medium transition-colors text-left">
-          Endgame Calculator
-          <span className="block text-xs text-broker-text-muted mt-0.5">Enter players, shares, prices — crank ORs to bank break</span>
-        </button>
+        <input ref={fileRef} type="file" accept=".json" onChange={handleImport} className="hidden" />
+      </div>
+
+      {/* ===== JOIN ROOM ===== */}
+      <div className="w-full max-w-md mt-6">
+        <RoomJoin sync={sync} />
       </div>
 
       {/* About / Legal */}
@@ -233,6 +207,29 @@ export default function GameSelector() {
   )
 }
 
+function SectionLabel({ children }) {
+  return <div className="text-[10px] text-broker-text-muted uppercase tracking-widest mb-1">{children}</div>
+}
+
+function TitleButton({ t, onClick }) {
+  return (
+    <button onClick={onClick}
+      className="bg-broker-surface hover:bg-broker-surface-hover border border-broker-border rounded-lg p-4 text-left transition-colors relative overflow-hidden">
+      {(t.wip || t.untested) && (
+        <svg className="absolute -bottom-2 -right-2 w-20 h-20 opacity-[0.07] text-broker-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+        </svg>
+      )}
+      <div className="text-xl font-bold text-broker-text">{t.title}</div>
+      <div className="text-sm text-broker-text-muted mt-1">{t.subtitle}</div>
+      <div className="text-xs text-broker-text-muted mt-2">{t.minPlayers}–{t.maxPlayers} players</div>
+      {(t.wip || t.untested) && (
+        <div className="text-[10px] text-red-400/70 mt-1">untested</div>
+      )}
+    </button>
+  )
+}
+
 function RoomJoin({ sync }) {
   const [code, setCode] = useState('')
   const [showJoin, setShowJoin] = useState(false)
@@ -241,56 +238,33 @@ function RoomJoin({ sync }) {
 
   if (sync.roomId) {
     return (
-      <div className="w-full max-w-md mb-4 bg-broker-surface rounded-lg px-4 py-3 flex items-center justify-between">
+      <div className="bg-broker-surface rounded-lg px-4 py-2 flex items-center justify-between text-xs">
         <div className="flex items-center gap-2">
-          <span className={`w-2 h-2 rounded-full ${
-            sync.status === 'connected' ? 'bg-green-400' : 'bg-amber-400 animate-pulse'
-          }`} />
-          <span className="text-sm text-broker-text-muted">Room</span>
+          <span className={`w-2 h-2 rounded-full ${sync.status === 'connected' ? 'bg-green-400' : 'bg-amber-400 animate-pulse'}`} />
+          <span className="text-broker-text-muted">Room</span>
           <span className="font-mono font-bold text-white tracking-wider">{sync.roomId}</span>
-          <span className="text-xs text-broker-text-muted">
-            {sync.peerCount > 0 ? `${sync.peerCount + 1} devices` : 'waiting...'}
-          </span>
+          <span className="text-broker-text-muted">{sync.peerCount > 0 ? `${sync.peerCount + 1} devices` : 'waiting...'}</span>
         </div>
-        <button onClick={sync.leaveRoom} className="text-xs text-broker-text-muted hover:text-red-300">
-          Leave
-        </button>
+        <button onClick={sync.leaveRoom} className="text-broker-text-muted hover:text-red-300">Leave</button>
       </div>
     )
   }
 
   return (
-    <div className="w-full max-w-md mb-4 flex gap-2 justify-center">
+    <div className="flex gap-2 justify-center text-xs">
       {showJoin ? (
         <>
-          <input
-            type="text"
-            value={code}
-            onChange={(e) => setCode(e.target.value.toUpperCase())}
-            placeholder="Room code"
-            maxLength={6}
-            className="w-28 bg-broker-surface border border-broker-border rounded px-3 py-2 text-sm text-white font-mono tracking-wider placeholder-broker-text-muted text-center"
-            autoFocus
-          />
-          <button
-            onClick={() => { if (code.trim().length >= 4) { sync.joinRoom(code); setShowJoin(false) } }}
+          <input type="text" value={code} onChange={(e) => setCode(e.target.value.toUpperCase())}
+            placeholder="Room code" maxLength={6} autoFocus
+            className="w-24 bg-broker-surface border border-broker-border rounded px-2 py-1 text-white font-mono tracking-wider placeholder-broker-text-muted text-center" />
+          <button onClick={() => { if (code.trim().length >= 4) { sync.joinRoom(code); setShowJoin(false) } }}
             disabled={code.trim().length < 4}
-            className="bg-blue-800 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm disabled:opacity-40"
-          >
-            Join
-          </button>
-          <button
-            onClick={() => setShowJoin(false)}
-            className="text-broker-text-muted hover:text-white px-2 text-sm"
-          >
-            Cancel
-          </button>
+            className="bg-blue-800 hover:bg-blue-700 text-white px-3 py-1 rounded disabled:opacity-40">Join</button>
+          <button onClick={() => setShowJoin(false)} className="text-broker-text-muted hover:text-white px-2">Cancel</button>
         </>
       ) : (
-        <button
-          onClick={() => setShowJoin(true)}
-          className="bg-broker-surface hover:bg-broker-surface-hover border border-broker-border rounded px-4 py-2 text-sm text-broker-text-muted hover:text-white"
-        >
+        <button onClick={() => setShowJoin(true)}
+          className="text-broker-text-muted hover:text-white">
           Join Room
         </button>
       )}
@@ -315,9 +289,7 @@ function LiveGames({ onImport, importing }) {
   const [titleFilter, setTitleFilter] = useState('')
 
   function fetchGames(status, title) {
-    setLoading(true)
-    setError(null)
-    setTab(status)
+    setLoading(true); setError(null); setTab(status)
     const base = import.meta.env.VITE_18XX_API || '/18xx-games-api'
     const url = title
       ? `${base}/game?title=${encodeURIComponent(title)}&status=${status}&page=1`
@@ -350,9 +322,7 @@ function LiveGames({ onImport, importing }) {
         </button>
         {loading && <span className="text-xs text-broker-text-muted animate-pulse">Loading...</span>}
       </div>
-
       {error && <div className="text-xs text-red-400">{error}</div>}
-
       {games && games.length > 0 && (
         <div className="space-y-1 max-h-48 overflow-y-auto">
           {games.map(g => (
@@ -361,9 +331,7 @@ function LiveGames({ onImport, importing }) {
                 <span className="font-bold text-white">{g.title}</span>
                 <span className="text-broker-text-muted ml-1">#{g.id}</span>
                 <span className="text-broker-text-muted ml-1">{g.players.length}p</span>
-                <span className="text-broker-text-muted ml-1 truncate">
-                  {g.players.map(p => p.name).join(', ')}
-                </span>
+                <span className="text-broker-text-muted ml-1 truncate">{g.players.map(p => p.name).join(', ')}</span>
               </div>
               <button onClick={() => onImport(g.id)} disabled={importing}
                 className="text-xs bg-purple-800 hover:bg-purple-700 text-white px-2 py-0.5 rounded ml-2 disabled:opacity-40 flex-shrink-0">
@@ -373,9 +341,7 @@ function LiveGames({ onImport, importing }) {
           ))}
         </div>
       )}
-      {games && games.length === 0 && (
-        <div className="text-xs text-broker-text-muted">No supported games found</div>
-      )}
+      {games && games.length === 0 && <div className="text-xs text-broker-text-muted">No supported games found</div>}
     </div>
   )
 }
