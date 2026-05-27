@@ -50,6 +50,18 @@ function RouteCalc({ game, fmt, m }) {
   const [trains, setTrains] = useState(init.trains)
   const [activeTrain, setActiveTrain] = useState(null)
   const [customStop, setCustomStop] = useState('')
+  const [pendingDelete, setPendingDelete] = useState(null) // 'trainId-stopIdx'
+
+  const handleStopDelete = (trainId, stopIdx) => {
+    const key = `${trainId}-${stopIdx}`
+    if (pendingDelete === key) {
+      removeStopFromTrain(trainId, stopIdx)
+      setPendingDelete(null)
+    } else {
+      setPendingDelete(key)
+      setTimeout(() => setPendingDelete(prev => prev === key ? null : prev), 1500)
+    }
+  }
 
   useEffect(() => {
     const s = initState()
@@ -147,7 +159,13 @@ function RouteCalc({ game, fmt, m }) {
                   : (m ? 'bg-blue-800 text-blue-300' : 'bg-broker-surface-hover text-broker-text')
                 }`}>{isActive ? 'done' : 'edit'}</button>
               {t.stops.length > 0 && (
-                <button onClick={() => clearTrain(t.id)} className="text-[10px] text-red-400">clear</button>
+                <button onClick={() => {
+                  const key = `clear-${t.id}`
+                  if (pendingDelete === key) { clearTrain(t.id); setPendingDelete(null) }
+                  else { setPendingDelete(key); setTimeout(() => setPendingDelete(prev => prev === key ? null : prev), 1500) }
+                }} className={`text-[10px] transition-colors ${pendingDelete === `clear-${t.id}` ? 'text-red-400 font-bold animate-pulse' : 'text-broker-text-muted hover:text-red-400'}`}>
+                  {pendingDelete === `clear-${t.id}` ? 'clear?' : 'clear'}
+                </button>
               )}
               <span className={`ml-auto text-lg font-bold ${m ? 'text-white' : 'text-white'}`}>
                 {rev > 0 ? fmt(rev) : '—'}
@@ -167,14 +185,20 @@ function RouteCalc({ game, fmt, m }) {
                       }>{v}</button>
                   ))}
                 </div>
-                {/* ×2 button + custom input */}
+                {/* Multiply route + custom input */}
                 <div className="flex flex-wrap gap-1 mb-1">
-                  <button onClick={() => { const last = t.stops[t.stops.length - 1]; if (last) addStopToTrain(t.id, last) }}
+                  <button onClick={() => setTrains(prev => prev.map(x => x.id === t.id ? { ...x, stops: [...x.stops, ...x.stops] } : x))}
                     disabled={t.stops.length === 0}
                     className={m
                       ? 'text-[10px] bg-blue-800 text-blue-300 hover:bg-blue-700 disabled:opacity-30 px-2 py-0.5 rounded'
                       : 'text-[10px] bg-broker-surface-hover text-broker-text hover:text-white disabled:opacity-30 px-2 py-0.5 rounded'
-                    }>×2 last</button>
+                    }>×2</button>
+                  <button onClick={() => setTrains(prev => prev.map(x => x.id === t.id ? { ...x, stops: [...x.stops, ...x.stops, ...x.stops] } : x))}
+                    disabled={t.stops.length === 0}
+                    className={m
+                      ? 'text-[10px] bg-blue-800 text-blue-300 hover:bg-blue-700 disabled:opacity-30 px-2 py-0.5 rounded'
+                      : 'text-[10px] bg-broker-surface-hover text-broker-text hover:text-white disabled:opacity-30 px-2 py-0.5 rounded'
+                    }>×3</button>
                   <input type="number" value={customStop}
                     onChange={e => setCustomStop(e.target.value)}
                     onKeyDown={e => { if (e.key === 'Enter') { addStopToTrain(t.id, parseInt(customStop) || 0); setCustomStop('') } }}
@@ -188,16 +212,19 @@ function RouteCalc({ game, fmt, m }) {
                 {/* Route stops — with × to remove */}
                 {t.stops.length > 0 && (
                   <div className="flex flex-wrap gap-1">
-                    {t.stops.map((v, si) => (
-                      <span key={si} className={m
-                        ? 'text-xs bg-green-800 text-green-200 px-2 py-0.5 rounded font-bold inline-flex items-center gap-1'
-                        : 'text-xs bg-blue-600 text-white px-2 py-0.5 rounded font-bold inline-flex items-center gap-1'
-                      }>
-                        {v}
-                        <button onClick={() => removeStopFromTrain(t.id, si)}
-                          className="text-[9px] opacity-60 hover:opacity-100">×</button>
-                      </span>
-                    ))}
+                    {t.stops.map((v, si) => {
+                      const isAlarm = pendingDelete === `${t.id}-${si}`
+                      return (
+                        <button key={si} onClick={() => handleStopDelete(t.id, si)}
+                          className={`text-xs px-2 py-0.5 rounded font-bold transition-colors ${
+                            isAlarm
+                              ? 'bg-red-600 text-white animate-pulse'
+                              : m ? 'bg-green-800 text-green-200' : 'bg-blue-600 text-white'
+                          }`}>
+                          {v}{isAlarm ? ' ×' : ''}
+                        </button>
+                      )
+                    })}
                   </div>
                 )}
               </>
