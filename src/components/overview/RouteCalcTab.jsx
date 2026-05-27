@@ -50,6 +50,7 @@ function RouteCalc({ game, fmt, m }) {
   const [trains, setTrains] = useState(init.trains)
   const [activeTrain, setActiveTrain] = useState(null)
   const [customStop, setCustomStop] = useState('')
+  const [newCorpName, setNewCorpName] = useState('')
   const [pendingDelete, setPendingDelete] = useState(null) // 'trainId-stopIdx'
 
   const handleStopDelete = (trainId, stopIdx) => {
@@ -145,9 +146,36 @@ function RouteCalc({ game, fmt, m }) {
             {c.sym}{savedRoutes[c.sym] && corp.sym !== c.sym ? '*' : ''}
           </button>
         ))}
-        <input type="text" value={corp.sym}
-          onChange={e => setCorp({ sym: e.target.value.toUpperCase(), color: '#888' })}
-          placeholder="CORP" className={`${nameInput} w-12 font-bold`} />
+        {/* Saved routes for corps not in game */}
+        {Object.keys(savedRoutes).filter(sym => !game || !game.corporations.some(c => c.sym === sym)).map(sym => (
+          <button key={sym}
+            onClick={() => { setCorp(savedRoutes[sym].corp); setTrains(savedRoutes[sym].trains); setActiveTrain(null) }}
+            className={`text-xs px-2 py-1 rounded font-medium ${corp.sym === sym ? 'ring-2 ring-white' : 'opacity-80'}`}
+            style={{ backgroundColor: savedRoutes[sym].corp?.color || '#888', color: '#fff' }}>
+            {sym}*
+          </button>
+        ))}
+        {/* Add new corp */}
+        <input type="text" value={newCorpName}
+          onChange={e => setNewCorpName(e.target.value.toUpperCase())}
+          onKeyDown={e => { if (e.key === 'Enter' && newCorpName.trim()) {
+            const sym = newCorpName.trim()
+            setCorp({ sym, color: '#888' })
+            setTrains([{ id: String(Date.now()), name: '2', stops: [], mult: 1 }])
+            setActiveTrain(null)
+            setNewCorpName('')
+          }}}
+          placeholder="+" className={`${nameInput} w-10`} />
+        <button onClick={() => {
+          const sym = newCorpName.trim().toUpperCase() || 'NEW'
+          setCorp({ sym, color: '#888' })
+          setTrains([{ id: String(Date.now()), name: '2', stops: [], mult: 1 }])
+          setActiveTrain(null)
+          setNewCorpName('')
+        }} className={m
+          ? 'text-[10px] bg-green-900/50 text-green-300 hover:bg-green-800 px-2 py-0.5 rounded'
+          : 'text-[10px] bg-broker-surface-hover text-broker-text hover:text-white px-2 py-0.5 rounded'
+        }>+ Corp</button>
       </div>
 
       {/* Train cards */}
