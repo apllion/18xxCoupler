@@ -92,12 +92,12 @@ export default function GameSelector() {
         <SectionLabel>Tools</SectionLabel>
         <button onClick={() => navigate('/routes')}
           className="w-full bg-broker-surface hover:bg-broker-surface-hover text-broker-text hover:text-white rounded-lg px-4 py-3 text-sm font-medium transition-colors text-left">
-          Route Calculator
+          <span className="flex items-center gap-2">Route Calculator <WrenchIcon filled size="w-3 h-3" /></span>
           <span className="block text-xs text-broker-text-muted mt-0.5">Build routes, calculate revenue per corp</span>
         </button>
         <button onClick={() => navigate('/endgame')}
           className="w-full bg-broker-surface hover:bg-broker-surface-hover text-broker-text hover:text-white rounded-lg px-4 py-3 text-sm font-medium transition-colors text-left">
-          Endgame Calculator
+          <span className="flex items-center gap-2">Endgame Calculator <WrenchIcon filled size="w-3 h-3" /></span>
           <span className="block text-xs text-broker-text-muted mt-0.5">Enter shares and prices — crank ORs to bank break</span>
         </button>
       </div>
