@@ -170,7 +170,13 @@ function RouteCalc({ game, fmt, m }) {
               <span className={`ml-auto text-lg font-bold ${m ? 'text-white' : 'text-white'}`}>
                 {rev > 0 ? fmt(rev) : '—'}
               </span>
-              <button onClick={() => removeTrain(i)} className="text-[10px] text-red-400">×</button>
+              <button onClick={() => {
+                const key = `train-${t.id}`
+                if (pendingDelete === key) { removeTrain(i); setPendingDelete(null) }
+                else { setPendingDelete(key); setTimeout(() => setPendingDelete(prev => prev === key ? null : prev), 1500) }
+              }} className={`text-[10px] transition-colors ${pendingDelete === `train-${t.id}` ? 'text-red-500 font-bold animate-pulse' : 'text-broker-text-muted/40 hover:text-red-400'}`}>
+                {pendingDelete === `train-${t.id}` ? '× delete?' : '×'}
+              </button>
             </div>
 
             {isActive ? (
@@ -237,11 +243,16 @@ function RouteCalc({ game, fmt, m }) {
         )
       })}
 
-      <button onClick={addTrain}
-        className={m
-          ? 'text-[10px] bg-green-900/50 text-green-300 hover:bg-green-800 px-2 py-1 rounded'
-          : 'text-[10px] bg-broker-surface-hover text-broker-text hover:text-white px-2 py-1 rounded'
-        }>+ Train</button>
+      <div className="flex gap-2">
+        <button onClick={addTrain}
+          className={m
+            ? 'text-[10px] bg-green-900/50 text-green-300 hover:bg-green-800 px-2 py-1 rounded'
+            : 'text-[10px] bg-broker-surface-hover text-broker-text hover:text-white px-2 py-1 rounded'
+          }>+ Train</button>
+        {game && game.corporations.filter(c => c.floated && c.sym !== corp.sym).length > 0 && (
+          <span className={labelCls + ' self-center'}>or switch corp above</span>
+        )}
+      </div>
     </>
   )
 }
