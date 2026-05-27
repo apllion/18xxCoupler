@@ -46,7 +46,6 @@ export default function EndgameCalcTab() {
   const [players, setPlayers] = useState(initState.players)
   const [corps, setCorps] = useState(initState.corps)
   const [newCorpName, setNewCorpName] = useState('')
-  const [newPrice, setNewPrice] = useState({}) // { corpSym: string }
 
   // --- Corp helpers ---
   const addCorp = () => {
@@ -61,13 +60,25 @@ export default function EndgameCalcTab() {
     setCorps(prev => prev.filter(c => c.sym !== sym))
     setPlayers(prev => prev.map(p => { const s = { ...p.shares }; delete s[sym]; return { ...p, shares: s } }))
   }
-  const addPrice = (sym, val) => {
-    const v = parseInt(val) || 0
-    if (v <= 0) return
-    setCorps(prev => prev.map(c => c.sym === sym ? { ...c, prices: [...c.prices, v] } : c))
+  const [rounds, setRounds] = useState(() => Math.max(...initState.corps.map(c => c.prices.length), 1))
+
+  const setPrice = (sym, roundIdx, val) => {
+    setCorps(prev => prev.map(c => {
+      if (c.sym !== sym) return c
+      const prices = [...c.prices]
+      while (prices.length <= roundIdx) prices.push(prices[prices.length - 1] || 0)
+      prices[roundIdx] = parseInt(val) || 0
+      return { ...c, prices }
+    }))
   }
-  const removeLastPrice = (sym) => {
-    setCorps(prev => prev.map(c => c.sym === sym && c.prices.length > 1 ? { ...c, prices: c.prices.slice(0, -1) } : c))
+  const addRound = () => {
+    setRounds(r => r + 1)
+    setCorps(prev => prev.map(c => ({ ...c, prices: [...c.prices, c.prices[c.prices.length - 1] || 0] })))
+  }
+  const removeRound = () => {
+    if (rounds <= 1) return
+    setRounds(r => r - 1)
+    setCorps(prev => prev.map(c => ({ ...c, prices: c.prices.slice(0, -1) })))
   }
 
   // --- Player helpers ---
@@ -88,10 +99,6 @@ export default function EndgameCalcTab() {
   }
 
   // --- Live calculation ---
-  // Number of rounds = max prices entered across all corps
-  const rounds = Math.max(...corps.map(c => c.prices.length), 1)
-
-  // Per round: each corp pays dividends based on price difference
   // Revenue per share = price at that round (the share value for that OR)
   // Final price = last entered price
   const calcResults = () => {
@@ -184,41 +191,50 @@ export default function EndgameCalcTab() {
         </div>
       </Panel>
 
-      {/* Corps — each with price path */}
-      <Panel m={m} title="Corporations">
-        {corps.map(c => (
-          <div key={c.sym} className="mb-3">
-            <div className="flex items-center gap-2 mb-1">
-              <span style={{ color: c.color }} className="font-bold">{c.sym}</span>
-              <span className={labelCls}>{c.prices.length} round{c.prices.length !== 1 ? 's' : ''}</span>
-              <span className={`ml-auto font-bold ${m ? 'text-white' : 'text-white'}`}>
-                {fmt(c.prices[c.prices.length - 1] || 0)}
-              </span>
-              <button onClick={() => removeCorp(c.sym)} className={`${btnCls} text-red-400`}>×</button>
-            </div>
-            {/* Price chain */}
-            <div className="flex flex-wrap gap-1 items-center">
-              {c.prices.map((p, pi) => (
-                <span key={pi} className={`text-xs px-1.5 py-0.5 rounded ${
-                  pi === c.prices.length - 1
-                    ? (m ? 'bg-green-800 text-green-200 font-bold' : 'bg-blue-600 text-white font-bold')
-                    : (m ? 'bg-blue-900/40 text-blue-300' : 'bg-broker-surface-hover text-broker-text')
-                }`}>
-                  {p}
-                </span>
+      {/* Stock price path — shared rounds */}
+      <Panel m={m} title="">
+        <div className="flex items-center gap-2 mb-2">
+          <span className={m ? 'text-green-400 font-bold' : 'text-white font-medium'}>Stock Prices</span>
+          <span className={labelCls}>{rounds} round{rounds !== 1 ? 's' : ''}</span>
+          <button onClick={removeRound} disabled={rounds <= 1}
+            className={`${btnSmall} disabled:opacity-30`}>− round</button>
+          <button onClick={addRound} className={btnSmall}>+ round</button>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="text-xs w-full">
+            <thead>
+              <tr>
+                <th className={`${labelCls} text-left px-1 w-12`}>Corp</th>
+                {Array.from({ length: rounds }, (_, r) => (
+                  <th key={r} className={`${labelCls} text-right px-1 ${r === rounds - 1 ? 'font-bold' : ''}`}>
+                    {r === 0 ? 'now' : `OR${r}`}
+                  </th>
+                ))}
+                <th className="px-1 w-6" />
+              </tr>
+            </thead>
+            <tbody>
+              {corps.map(c => (
+                <tr key={c.sym}>
+                  <td className="px-1"><span style={{ color: c.color }} className="font-bold">{c.sym}</span></td>
+                  {Array.from({ length: rounds }, (_, r) => {
+                    const val = c.prices[r] ?? c.prices[c.prices.length - 1] ?? 0
+                    return (
+                      <td key={r} className="px-1">
+                        <input type="number" value={val || ''}
+                          onChange={e => setPrice(c.sym, r, e.target.value)}
+                          className={`${inputCls} w-12 ${r === rounds - 1 ? 'font-bold' : ''}`} />
+                      </td>
+                    )
+                  })}
+                  <td className="px-1">
+                    <button onClick={() => removeCorp(c.sym)} className={`${btnCls} text-red-400`}>×</button>
+                  </td>
+                </tr>
               ))}
-              {c.prices.length > 1 && (
-                <button onClick={() => removeLastPrice(c.sym)} className="text-[10px] text-red-400">←</button>
-              )}
-              <input type="number" value={newPrice[c.sym] || ''}
-                onChange={e => setNewPrice(prev => ({ ...prev, [c.sym]: e.target.value }))}
-                onKeyDown={e => { if (e.key === 'Enter') { addPrice(c.sym, newPrice[c.sym]); setNewPrice(prev => ({ ...prev, [c.sym]: '' })) } }}
-                placeholder="next" className={`${inputCls} w-12`} />
-              <button onClick={() => { addPrice(c.sym, newPrice[c.sym]); setNewPrice(prev => ({ ...prev, [c.sym]: '' })) }}
-                className={btnSmall}>+</button>
-            </div>
-          </div>
-        ))}
+            </tbody>
+          </table>
+        </div>
         <div className="flex gap-1 items-center mt-2">
           <input type="text" value={newCorpName} onChange={e => setNewCorpName(e.target.value)}
             placeholder="Name" onKeyDown={e => e.key === 'Enter' && addCorp()}
