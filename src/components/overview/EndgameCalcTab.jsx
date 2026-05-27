@@ -167,51 +167,59 @@ export default function EndgameCalcTab() {
         </div>
       </Panel>
 
-      {/* Stock price path — shared rounds */}
+      {/* Stock price grid — transposed: rows=labels, columns=corps */}
       <Panel m={m} title="">
         <div className="flex items-center gap-2 mb-2">
           <span className={m ? 'text-green-400 font-bold' : 'text-white font-medium'}>Stock Prices</span>
           <span className={labelCls}>{rounds} round{rounds !== 1 ? 's' : ''}</span>
           <button onClick={removeRound} disabled={rounds <= 1}
-            className={`${btnSmall} disabled:opacity-30`}>− round</button>
-          <button onClick={addRound} className={btnSmall}>+ round</button>
+            className={`${btnSmall} disabled:opacity-30`}>−</button>
+          <button onClick={addRound} className={btnSmall}>+</button>
         </div>
         <div className="overflow-x-auto">
           <table className="text-xs w-full">
+            {/* Header: corp names */}
             <thead>
               <tr>
-                <th className={`${labelCls} text-left px-1 w-12`}>Corp</th>
-                <th className={`${labelCls} text-right px-1`}>Rev</th>
-                {Array.from({ length: rounds }, (_, r) => (
-                  <th key={r} className={`${labelCls} text-right px-1 ${r === rounds - 1 ? 'font-bold' : ''}`}>
-                    {r === 0 ? 'now' : `OR${r}`}
+                <th className={`${labelCls} text-left px-1 w-12`} />
+                {corps.map(c => (
+                  <th key={c.sym} className="px-1 text-center">
+                    <span style={{ color: c.color }} className="font-bold">{c.sym}</span>
+                    <button onClick={() => removeCorp(c.sym)} className={`${btnCls} text-red-400 ml-0.5`}>×</button>
                   </th>
                 ))}
-                <th className="px-1 w-6" />
               </tr>
             </thead>
             <tbody>
-              {corps.map(c => (
-                <tr key={c.sym}>
-                  <td className="px-1"><span style={{ color: c.color }} className="font-bold">{c.sym}</span></td>
-                  <td className="px-1">
+              {/* Revenue row */}
+              <tr>
+                <td className={`${labelCls} px-1`}>Rev</td>
+                {corps.map(c => (
+                  <td key={c.sym} className="px-1">
                     <input type="number" value={c.revenue || ''}
                       onChange={e => setCorps(prev => prev.map(x => x.sym === c.sym ? { ...x, revenue: parseInt(e.target.value) || 0 } : x))}
-                      className={`${inputCls} w-12`} />
+                      className={`${inputCls} w-full`} />
                   </td>
-                  {Array.from({ length: rounds }, (_, r) => {
+                ))}
+              </tr>
+              {/* Separator */}
+              <tr><td colSpan={corps.length + 1} className={m ? 'border-b border-blue-800 py-0.5' : 'border-b border-broker-border py-0.5'} /></tr>
+              {/* Price rows — one per round */}
+              {Array.from({ length: rounds }, (_, r) => (
+                <tr key={r}>
+                  <td className={`${labelCls} px-1 ${r === rounds - 1 ? 'font-bold' : ''}`}>
+                    {r === 0 ? 'now' : `OR${r}`}
+                  </td>
+                  {corps.map(c => {
                     const val = c.prices[r] ?? c.prices[c.prices.length - 1] ?? 0
                     return (
-                      <td key={r} className="px-1">
+                      <td key={c.sym} className="px-1">
                         <input type="number" value={val || ''}
                           onChange={e => setPrice(c.sym, r, e.target.value)}
-                          className={`${inputCls} w-12 ${r === rounds - 1 ? 'font-bold' : ''}`} />
+                          className={`${inputCls} w-full ${r === rounds - 1 ? 'font-bold' : ''}`} />
                       </td>
                     )
                   })}
-                  <td className="px-1">
-                    <button onClick={() => removeCorp(c.sym)} className={`${btnCls} text-red-400`}>×</button>
-                  </td>
                 </tr>
               ))}
             </tbody>
