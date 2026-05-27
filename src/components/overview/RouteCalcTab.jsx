@@ -157,7 +157,7 @@ function RouteCalc({ game, fmt, m }) {
 
             {isActive ? (
               <>
-                {/* Active: show stop buttons to add */}
+                {/* Active: stop value buttons */}
                 <div className="flex flex-wrap gap-1 mb-1">
                   {quickValues.map(v => (
                     <button key={v} onClick={() => addStopToTrain(t.id, v)}
@@ -166,25 +166,37 @@ function RouteCalc({ game, fmt, m }) {
                         : 'text-xs bg-broker-surface-hover text-broker-text hover:text-white px-2 py-1 rounded min-w-[2rem]'
                       }>{v}</button>
                   ))}
+                </div>
+                {/* ×2 button + custom input */}
+                <div className="flex flex-wrap gap-1 mb-1">
+                  <button onClick={() => { const last = t.stops[t.stops.length - 1]; if (last) addStopToTrain(t.id, last) }}
+                    disabled={t.stops.length === 0}
+                    className={m
+                      ? 'text-[10px] bg-blue-800 text-blue-300 hover:bg-blue-700 disabled:opacity-30 px-2 py-0.5 rounded'
+                      : 'text-[10px] bg-broker-surface-hover text-broker-text hover:text-white disabled:opacity-30 px-2 py-0.5 rounded'
+                    }>×2 last</button>
                   <input type="number" value={customStop}
                     onChange={e => setCustomStop(e.target.value)}
                     onKeyDown={e => { if (e.key === 'Enter') { addStopToTrain(t.id, parseInt(customStop) || 0); setCustomStop('') } }}
-                    placeholder="+" className={`${nameInput} w-12`} />
+                    placeholder="other" className={`${nameInput} w-12`} />
                   <button onClick={() => { addStopToTrain(t.id, parseInt(customStop) || 0); setCustomStop('') }}
                     className={m
                       ? 'text-[10px] bg-green-900/50 text-green-300 hover:bg-green-800 px-2 py-0.5 rounded'
                       : 'text-[10px] bg-broker-surface-hover text-broker-text hover:text-white px-2 py-0.5 rounded'
                     }>add</button>
                 </div>
-                {/* Show added stops — click to remove */}
+                {/* Route stops — with × to remove */}
                 {t.stops.length > 0 && (
                   <div className="flex flex-wrap gap-1">
                     {t.stops.map((v, si) => (
-                      <button key={si} onClick={() => removeStopFromTrain(t.id, si)}
-                        className={m
-                          ? 'text-xs bg-green-800 text-green-200 px-2 py-0.5 rounded font-bold'
-                          : 'text-xs bg-blue-600 text-white px-2 py-0.5 rounded font-bold'
-                        } title="Click to remove">{v}</button>
+                      <span key={si} className={m
+                        ? 'text-xs bg-green-800 text-green-200 px-2 py-0.5 rounded font-bold inline-flex items-center gap-1'
+                        : 'text-xs bg-blue-600 text-white px-2 py-0.5 rounded font-bold inline-flex items-center gap-1'
+                      }>
+                        {v}
+                        <button onClick={() => removeStopFromTrain(t.id, si)}
+                          className="text-[9px] opacity-60 hover:opacity-100">×</button>
+                      </span>
                     ))}
                   </div>
                 )}
