@@ -3,7 +3,7 @@ import { defaults } from './defaults.js'
 export const g18sj = {
   ...defaults,
 
-  untested: true, titleId: 'g18sj',
+  maturity: 2, titleId: 'g18sj',
   title: '18SJ',
   subtitle: 'Railways in the Frozen North',
   designer: 'Örjan Wennman',

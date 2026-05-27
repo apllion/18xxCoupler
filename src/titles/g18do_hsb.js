@@ -3,7 +3,7 @@ import { defaults } from './defaults.js'
 export const g18do_hsb = {
   ...defaults,
 
-  untested: true, titleId: 'g18do_hsb', wip: true,
+  maturity: 0, titleId: 'g18do_hsb',
   title: '18DO HSB',
   subtitle: 'Dortmund — Heat, Sweat & Beer',
   designer: 'Wolfram Janich & Michael Scharf',

@@ -17,6 +17,7 @@ export default function GameSelector() {
   const [importError, setImportError] = useState(null)
   const [importing, setImporting] = useState(false)
   const [showMore, setShowMore] = useState(false)
+  const [sortBy, setSortBy] = useState('rating') // 'rating' | 'name' | 'players'
 
   const savedList = Object.entries(savedGames)
     .map(([key, game]) => ({ key, game }))
@@ -53,9 +54,13 @@ export default function GameSelector() {
   const themeId = useThemeStore((s) => s.themeId)
   const setTheme = useThemeStore((s) => s.setTheme)
 
-  // Split titles into tested and untested
-  const tested = titles.filter(t => !t.wip && !t.untested)
-  const untested = titles.filter(t => t.wip || t.untested)
+  // Sort titles
+  const sortFn = sortBy === 'name' ? (a, b) => a.title.localeCompare(b.title)
+    : sortBy === 'players' ? (a, b) => a.minPlayers - b.minPlayers || a.title.localeCompare(b.title)
+    : (a, b) => (b.maturity || 0) - (a.maturity || 0) || a.title.localeCompare(b.title)
+  const sorted = [...titles].sort(sortFn)
+  const tested = sorted.filter(t => (t.maturity || 0) >= 3)
+  const untested = sorted.filter(t => (t.maturity || 0) < 3)
 
   return (
     <div className="min-h-screen flex flex-col items-center p-6">
@@ -123,9 +128,18 @@ export default function GameSelector() {
         </div>
       )}
 
-      {/* ===== NEW GAME — tested titles ===== */}
-      <div className="w-full max-w-md mb-2">
+      {/* ===== NEW GAME ===== */}
+      <div className="w-full max-w-md mb-2 flex items-center justify-between">
         <SectionLabel>New Game</SectionLabel>
+        <div className="flex gap-1">
+          {[['rating', 'Rating'], ['name', 'A-Z'], ['players', 'Players']].map(([id, label]) => (
+            <button key={id} onClick={() => setSortBy(id)}
+              className={`text-[10px] px-1.5 py-0.5 rounded ${sortBy === id
+                ? 'bg-broker-gold text-broker-bg font-medium'
+                : 'text-broker-text-muted hover:text-white'
+              }`}>{label}</button>
+          ))}
+        </div>
       </div>
       {tested.length > 0 && (
         <div className="grid grid-cols-2 gap-3 w-full max-w-md">
@@ -211,21 +225,62 @@ function SectionLabel({ children }) {
   return <div className="text-[10px] text-broker-text-muted uppercase tracking-widest mb-1">{children}</div>
 }
 
+const WRENCH_LABELS = [
+  'Not verified',
+  'Config exists, complex mechanics',
+  'Verified against Ruby/PDF',
+  'Verified, standard mechanics',
+  'Import-tested against engine',
+  'Human-verified at the table',
+]
+
+function WrenchRating({ level }) {
+  const [showHelp, setShowHelp] = useState(false)
+  const max = 5
+  return (
+    <div className="relative inline-block">
+      <button onClick={e => { e.stopPropagation(); setShowHelp(!showHelp) }}
+        className="flex gap-px items-center" title={WRENCH_LABELS[level] || ''}>
+        {Array.from({ length: max }, (_, i) => (
+          <svg key={i} className={`w-3 h-3 ${i < level ? 'text-broker-gold' : 'text-broker-text-muted/20'}`}
+            viewBox="0 0 24 24" fill="currentColor" stroke="none">
+            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+          </svg>
+        ))}
+      </button>
+      {showHelp && (
+        <div className="absolute z-30 bottom-full left-0 mb-1 bg-broker-bg border border-broker-border rounded p-2 shadow-lg w-52"
+          onClick={e => e.stopPropagation()}>
+          <div className="text-[10px] text-broker-text-muted mb-1 font-bold">Wrench Rating</div>
+          {WRENCH_LABELS.map((label, i) => (
+            <div key={i} className={`flex items-center gap-1 text-[10px] ${i === level ? 'text-white font-bold' : 'text-broker-text-muted'}`}>
+              <span className="w-3 text-right">{i}</span>
+              <span className="flex gap-px">
+                {Array.from({ length: 5 }, (_, j) => (
+                  <svg key={j} className={`w-2 h-2 ${j < i ? 'text-broker-gold' : 'text-broker-text-muted/20'}`}
+                    viewBox="0 0 24 24" fill="currentColor"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+                ))}
+              </span>
+              <span>{label}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 function TitleButton({ t, onClick }) {
+  const m = t.maturity || 0
   return (
     <button onClick={onClick}
       className="bg-broker-surface hover:bg-broker-surface-hover border border-broker-border rounded-lg p-4 text-left transition-colors relative overflow-hidden">
-      {(t.wip || t.untested) && (
-        <svg className="absolute -bottom-2 -right-2 w-20 h-20 opacity-[0.07] text-broker-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
-        </svg>
-      )}
       <div className="text-xl font-bold text-broker-text">{t.title}</div>
       <div className="text-sm text-broker-text-muted mt-1">{t.subtitle}</div>
-      <div className="text-xs text-broker-text-muted mt-2">{t.minPlayers}–{t.maxPlayers} players</div>
-      {(t.wip || t.untested) && (
-        <div className="text-[10px] text-red-400/70 mt-1">untested</div>
-      )}
+      <div className="flex items-center justify-between mt-2">
+        <span className="text-xs text-broker-text-muted">{t.minPlayers}–{t.maxPlayers} players</span>
+        <WrenchRating level={m} />
+      </div>
     </button>
   )
 }

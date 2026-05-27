@@ -2,7 +2,7 @@ import { defaults } from './defaults.js'
 
 export const g18ms = {
   ...defaults,
-  titleId: 'g18ms', title: '18MS', subtitle: 'The Railroads Come to Mississippi', designer: 'Mark Derrick',
+  maturity: 3, titleId: 'g18ms', title: '18MS', subtitle: 'The Railroads Come to Mississippi', designer: 'Mark Derrick',
   location: 'Mississippi, USA', minPlayers: 2, maxPlayers: 4,
 
   bankCash: 10000,

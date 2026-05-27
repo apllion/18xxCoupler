@@ -3,7 +3,7 @@ import { defaults } from './defaults.js'
 export const g1889 = {
   ...defaults,
 
-  titleId: 'g1889',
+  maturity: 4, titleId: 'g1889',
   title: '1889',
   subtitle: 'Shikoku 1889',
   designer: 'Yasutaka Ikeda',

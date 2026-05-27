@@ -2,7 +2,7 @@ import { defaults } from './defaults.js'
 
 export const g18ireland = {
   ...defaults,
-  untested: true, titleId: 'g18ireland', title: '18Ireland', subtitle: 'Railways of Ireland', designer: 'Ian Scrivins',
+  maturity: 3, titleId: 'g18ireland', title: '18Ireland', subtitle: 'Railways of Ireland', designer: 'Ian Scrivins',
   location: 'Ireland', minPlayers: 3, maxPlayers: 6,
   bankCash: 4000, startingCash: { 3: 330, 4: 250, 5: 200, 6: 160 },
   certLimit: { 3: 16, 4: 12, 5: 10, 6: 8 },

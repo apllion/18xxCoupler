@@ -3,7 +3,7 @@ import { defaults } from './defaults.js'
 export const g18rhl = {
   ...defaults,
 
-  untested: true, titleId: 'g18rhl',
+  maturity: 2, titleId: 'g18rhl',
   title: '18Rhl',
   subtitle: 'Rhineland',
   designer: 'Wolfram Janich',

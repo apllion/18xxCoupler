@@ -3,7 +3,7 @@ import { defaults } from './defaults.js'
 export const g1880 = {
   ...defaults,
 
-  untested: true, titleId: 'g1880',
+  maturity: 2, titleId: 'g1880',
   title: '1880',
   subtitle: 'China',
   designer: 'Helmut Ohley, Leonhard Orgler',

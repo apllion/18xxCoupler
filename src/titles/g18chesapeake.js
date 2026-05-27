@@ -3,7 +3,7 @@ import { defaults } from './defaults.js'
 export const g18chesapeake = {
   ...defaults,
 
-  titleId: 'g18chesapeake',
+  maturity: 4, titleId: 'g18chesapeake',
   title: '18Chesapeake',
   subtitle: 'The Birth of American Railroads',
   designer: 'Scott Petersen',

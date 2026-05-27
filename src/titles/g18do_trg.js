@@ -3,7 +3,7 @@ import { defaults } from './defaults.js'
 export const g18do_trg = {
   ...defaults,
 
-  untested: true, titleId: 'g18do_trg', wip: true,
+  maturity: 0, titleId: 'g18do_trg',
   title: '18DO TRG',
   subtitle: 'Dortmund — The Railway Game',
   designer: 'Wolfram Janich & Michael Scharf',

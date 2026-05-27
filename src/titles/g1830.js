@@ -3,7 +3,7 @@ import { defaults } from './defaults.js'
 export const g1830 = {
   ...defaults,
 
-  titleId: 'g1830',
+  maturity: 4, titleId: 'g1830',
   title: '1830',
   subtitle: 'Railways & Robber Barons',
   designer: 'Francis Tresham',

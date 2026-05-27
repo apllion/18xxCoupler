@@ -3,7 +3,7 @@ import { defaults } from './defaults.js'
 export const g1847ae = {
   ...defaults,
 
-  untested: true, titleId: 'g1847ae',
+  maturity: 2, titleId: 'g1847ae',
   title: '1847 AE',
   subtitle: 'Pfalz — Anniversary Edition',
   designer: 'Wolfram Janich',

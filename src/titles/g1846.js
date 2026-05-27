@@ -3,7 +3,7 @@ import { defaults } from './defaults.js'
 export const g1846 = {
   ...defaults,
 
-  titleId: 'g1846',
+  maturity: 3, titleId: 'g1846',
   title: '1846',
   subtitle: 'The Race for the Midwest',
   designer: 'Thomas Lehmann',

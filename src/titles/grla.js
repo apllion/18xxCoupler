@@ -3,7 +3,7 @@ import { defaults } from './defaults.js'
 export const grla = {
   ...defaults,
 
-  untested: true, titleId: 'grla',
+  maturity: 0, titleId: 'grla',
   title: 'Railways of the Lost Atlas',
   subtitle: 'Build, Merge, Prosper',
   designer: 'Jacob Schacht & Kevin Delger',
