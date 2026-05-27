@@ -89,6 +89,18 @@ function RouteCalc({ game, fmt, m }) {
     setTrains(prev => prev.map(t => t.id === trainId ? { ...t, stops: [] } : t))
   }
 
+  // Custom stop buttons added via input
+  const [extraValues, setExtraValues] = useState([])
+  const allQuickValues = [...new Set([...quickValues, ...extraValues])].sort((a, b) => a - b)
+
+  const addCustomValue = (v) => {
+    const n = parseInt(v) || 0
+    if (n <= 0) return
+    if (!extraValues.includes(n) && !quickValues.includes(n)) {
+      setExtraValues(prev => [...prev, n].slice(-4))
+    }
+  }
+
   // --- Revenue ---
   const trainRev = (t) => t.stops.reduce((s, v) => s + v, 0) * (t.mult || 1)
   const total = trains.reduce((s, t) => s + trainRev(t), 0)
@@ -181,17 +193,31 @@ function RouteCalc({ game, fmt, m }) {
 
             {isActive ? (
               <>
-                {/* Active: stop value buttons */}
+                {/* Stop value buttons + custom input */}
                 <div className="flex flex-wrap gap-1 mb-1">
-                  {quickValues.map(v => (
+                  {allQuickValues.map(v => (
                     <button key={v} onClick={() => addStopToTrain(t.id, v)}
                       className={m
-                        ? 'text-xs bg-blue-900/50 text-blue-300 hover:bg-blue-800 px-2 py-1 rounded min-w-[2rem]'
-                        : 'text-xs bg-broker-surface-hover text-broker-text hover:text-white px-2 py-1 rounded min-w-[2rem]'
+                        ? `text-xs ${extraValues.includes(v) ? 'bg-green-900/50 text-green-300' : 'bg-blue-900/50 text-blue-300'} hover:bg-blue-800 px-2 py-1 rounded min-w-[2rem]`
+                        : `text-xs ${extraValues.includes(v) ? 'bg-blue-800 text-blue-200' : 'bg-broker-surface-hover text-broker-text'} hover:text-white px-2 py-1 rounded min-w-[2rem]`
                       }>{v}</button>
                   ))}
+                  <input type="number" value={customStop}
+                    onChange={e => setCustomStop(e.target.value)}
+                    onKeyDown={e => { if (e.key === 'Enter') {
+                      const v = parseInt(customStop) || 0
+                      if (v > 0) { addCustomValue(v); addStopToTrain(t.id, v); setCustomStop('') }
+                    }}}
+                    placeholder="+" className={`${nameInput} w-12`} />
+                  <button onClick={() => {
+                    const v = parseInt(customStop) || 0
+                    if (v > 0) { addCustomValue(v); addStopToTrain(t.id, v); setCustomStop('') }
+                  }} className={m
+                    ? 'text-[10px] bg-green-900/50 text-green-300 hover:bg-green-800 px-2 py-0.5 rounded'
+                    : 'text-[10px] bg-broker-surface-hover text-broker-text hover:text-white px-2 py-0.5 rounded'
+                  }>add</button>
                 </div>
-                {/* Multiplier + custom input */}
+                {/* Multiplier */}
                 <div className="flex flex-wrap gap-1 mb-1">
                   {[1, 2, 3, 4].map(x => (
                     <button key={x}
@@ -202,15 +228,6 @@ function RouteCalc({ game, fmt, m }) {
                           : (m ? 'bg-blue-900/30 text-blue-400' : 'bg-broker-bg text-broker-text-muted')
                       }`}>×{x}</button>
                   ))}
-                  <input type="number" value={customStop}
-                    onChange={e => setCustomStop(e.target.value)}
-                    onKeyDown={e => { if (e.key === 'Enter') { addStopToTrain(t.id, parseInt(customStop) || 0); setCustomStop('') } }}
-                    placeholder="other" className={`${nameInput} w-12`} />
-                  <button onClick={() => { addStopToTrain(t.id, parseInt(customStop) || 0); setCustomStop('') }}
-                    className={m
-                      ? 'text-[10px] bg-green-900/50 text-green-300 hover:bg-green-800 px-2 py-0.5 rounded'
-                      : 'text-[10px] bg-broker-surface-hover text-broker-text hover:text-white px-2 py-0.5 rounded'
-                    }>add</button>
                 </div>
                 {/* Route stops — with × to remove */}
                 {t.stops.length > 0 && (
