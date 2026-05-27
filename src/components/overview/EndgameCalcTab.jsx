@@ -208,7 +208,7 @@ export default function EndgameCalcTab() {
               {Array.from({ length: rounds }, (_, r) => (
                 <tr key={r}>
                   <td className={`${labelCls} px-1 ${r === rounds - 1 ? 'font-bold' : ''}`}>
-                    {r === 0 ? 'now' : `OR${r}`}
+                    {r === 0 ? 'now' : 'OR'}
                   </td>
                   {corps.map(c => {
                     const val = c.prices[r] ?? c.prices[c.prices.length - 1] ?? 0
