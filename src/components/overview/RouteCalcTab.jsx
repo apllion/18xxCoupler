@@ -185,36 +185,51 @@ function RouteCalc({ game, fmt, m }) {
 
   return (
     <>
-      {/* Corp selector */}
-      {game && game.corporations.filter(c => c.floated).length > 0 && (
-        <div className="flex flex-wrap gap-1">
-          {game.corporations.filter(c => c.floated).map(c => {
-            const isSel = corp.sym === c.sym
-            const hasSaved = !!savedRoutes[c.sym]
-            return (
-              <button key={c.sym}
-                onClick={() => useUIStore.getState().setActiveCorp(c.sym)}
-                className={`text-xs px-2 py-1 rounded font-medium transition-colors ${
-                  isSel ? 'ring-2 ring-white' : hasSaved ? 'opacity-80' : 'opacity-50'
-                }`}
-                style={{ backgroundColor: c.color, color: c.textColor || '#fff' }}>
-                {c.sym}
-                {hasSaved && !isSel && <span className="ml-0.5 text-[9px]">*</span>}
-              </button>
-            )
-          })}
-        </div>
-      )}
+      {/* Total revenue — always visible at top */}
+      <div className={m
+        ? 'bg-green-900/30 border border-green-800 rounded p-2 flex items-center gap-3 flex-wrap'
+        : 'bg-broker-surface border border-broker-border rounded-lg p-3 flex items-center gap-3 flex-wrap'
+      }>
+        <span className={`text-2xl font-bold ${m ? 'text-white' : 'text-white'}`}>{fmt(totalRevenue)}</span>
+        <span className={labelCls}>{fmt(Math.floor(totalRevenue / 10))}/share</span>
+        {trains.filter(t => t.route.length > 0).map(t => (
+          <span key={t.id} className="text-xs">{t.name}: {fmt(trainRevenue(t))}</span>
+        ))}
+        {routeBonus > 0 && <span className={labelCls}>+{routeBonus} bonus</span>}
+        {totalRevenue > 0 && game && corp.sym && (
+          <button onClick={() => {
+            useUIStore.getState().setRouteRevenue(corp.sym, totalRevenue)
+            useUIStore.getState().setActiveCorp(corp.sym)
+            useUIStore.getState().setActiveTab('corps')
+          }} className={m
+            ? 'ml-auto text-xs bg-green-800 text-green-200 hover:bg-green-700 px-3 py-1.5 rounded font-bold'
+            : 'ml-auto text-xs bg-green-700 text-white hover:bg-green-600 px-3 py-1.5 rounded font-bold'
+          }>→ {corp.sym} Pay/Withhold</button>
+        )}
+      </div>
 
-      {/* Corp header */}
-      <div className="flex items-center gap-2">
-        <span className={labelCls}>Corp:</span>
+      {/* Corp selector + manual entry */}
+      <div className="flex items-center gap-2 flex-wrap">
+        {game && game.corporations.filter(c => c.floated).map(c => {
+          const isSel = corp.sym === c.sym
+          const hasSaved = !!savedRoutes[c.sym]
+          return (
+            <button key={c.sym}
+              onClick={() => useUIStore.getState().setActiveCorp(c.sym)}
+              className={`text-xs px-2 py-1 rounded font-medium transition-colors ${
+                isSel ? 'ring-2 ring-white' : hasSaved ? 'opacity-80' : 'opacity-50'
+              }`}
+              style={{ backgroundColor: c.color, color: c.textColor || '#fff' }}>
+              {c.sym}{hasSaved && !isSel ? '*' : ''}
+            </button>
+          )
+        })}
         <input type="text" value={corp.sym}
           onChange={e => setCorp(prev => ({ ...prev, sym: e.target.value.toUpperCase() }))}
-          placeholder="SYM" className={`${nameInputCls} w-12 font-bold`} />
+          placeholder="CORP" className={`${nameInputCls} w-12 font-bold`} />
         <span className={labelCls}>Bonus:</span>
         <input type="number" value={routeBonus || ''} onChange={e => setRouteBonus(parseInt(e.target.value) || 0)}
-          placeholder="0" className={inputCls} title="Global route bonus (e.g. east-west connection)" />
+          placeholder="0" className={`${inputCls} w-10`} title="Route bonus (e.g. east-west)" />
       </div>
 
       {/* Stops */}
@@ -234,49 +249,61 @@ function RouteCalc({ game, fmt, m }) {
           <button onClick={() => addStop(newStop)} className={btnSmall}>+</button>
         </div>
 
-        {/* Stop chips */}
+        {/* Stop list */}
         {stops.length > 0 ? (
-          <div className="flex flex-wrap gap-1">
+          <div className="space-y-1">
             {stops.map((s, i) => {
               const owner = takenBy[i]
               const ownerTrain = owner ? trains.find(t => t.id === owner) : null
               const inActive = activeTrain && trains.find(t => t.id === activeTrain)?.route.includes(i)
               const takenByOther = owner && owner !== activeTrain
+              const effective = s.value * (s.mult || 1) + (s.bonus || 0)
 
+              // Routing mode — compact clickable chips
+              if (activeTrain) {
+                return (
+                  <span key={i} onClick={() => toggleStop(i)}
+                    className={`inline-flex items-center gap-1 rounded px-2 py-1 text-xs mr-1 mb-1 cursor-pointer transition-colors ${
+                      inActive
+                        ? (m ? 'bg-green-800 text-green-200 ring-1 ring-green-500' : 'bg-blue-600 text-white ring-1 ring-blue-400')
+                        : takenByOther
+                          ? (m ? 'bg-blue-900/20 text-blue-700' : 'bg-broker-bg text-broker-text-muted/30')
+                          : (m ? 'bg-blue-900/40 text-blue-300' : 'bg-broker-surface-hover text-broker-text')
+                    }`}>
+                    <span className="font-bold">{effective}</span>
+                    {s.name && <span className={m ? 'text-blue-500' : 'text-broker-text-muted'}>{s.name}</span>}
+                    {ownerTrain && !inActive && <span className="text-[9px] opacity-40">{ownerTrain.name}</span>}
+                  </span>
+                )
+              }
+
+              // Edit mode — one row per stop
               return (
-                <div key={i}
-                  onClick={() => activeTrain && toggleStop(i)}
-                  className={`flex items-center gap-0.5 rounded px-1.5 py-1 text-xs transition-colors ${
-                    inActive
-                      ? (m ? 'bg-green-800 text-green-200 ring-1 ring-green-500' : 'bg-blue-600 text-white ring-1 ring-blue-400')
-                      : takenByOther
-                        ? (m ? 'bg-blue-900/20 text-blue-700' : 'bg-broker-bg text-broker-text-muted/30')
-                        : (m ? 'bg-blue-900/40 text-blue-300' : 'bg-broker-surface-hover text-broker-text')
-                  } ${activeTrain ? 'cursor-pointer' : ''}`}>
-                  {/* Value */}
-                  {activeTrain ? (
-                    <span className="font-bold">{s.value}{s.mult > 1 ? `×${s.mult}` : ''}{s.bonus > 0 ? `+${s.bonus}` : ''}</span>
-                  ) : (
-                    <>
-                      <input type="number" value={s.value} onChange={e => setStopField(i, 'value', e.target.value)}
-                        onClick={e => e.stopPropagation()} className={`${inputCls} w-10`} />
-                      <span className={labelCls}>×</span>
-                      <input type="number" value={s.mult} onChange={e => setStopField(i, 'mult', e.target.value)}
-                        onClick={e => e.stopPropagation()} className={`${inputCls} w-6`} min="1" />
-                      <span className={labelCls}>+</span>
-                      <input type="number" value={s.bonus || ''} onChange={e => setStopField(i, 'bonus', e.target.value)}
-                        onClick={e => e.stopPropagation()} placeholder="0" className={`${inputCls} w-8`} />
-                      <input type="text" value={s.name} onChange={e => setStopField(i, 'name', e.target.value)}
-                        onClick={e => e.stopPropagation()} placeholder="name" className={`${nameInputCls} w-12`} />
-                      <button onClick={e => { e.stopPropagation(); removeStop(i) }} className="text-red-400 text-[10px]">×</button>
-                    </>
-                  )}
-                  {/* Show which train owns it */}
-                  {ownerTrain && !inActive && (
-                    <span className={m ? 'text-blue-600 text-[9px]' : 'text-broker-text-muted/40 text-[9px]'}>
-                      {ownerTrain.name}
+                <div key={i} className="flex items-center gap-1">
+                  <input type="number" value={s.value} onChange={e => setStopField(i, 'value', e.target.value)}
+                    className={`${inputCls} w-12`} />
+                  {s.mult > 1 && (
+                    <span className={`${labelCls} flex items-center gap-0.5`}>
+                      ×<input type="number" value={s.mult} onChange={e => setStopField(i, 'mult', e.target.value)}
+                        className={`${inputCls} w-8`} min="1" />
                     </span>
                   )}
+                  {s.bonus > 0 && (
+                    <span className={`${labelCls} flex items-center gap-0.5`}>
+                      +<input type="number" value={s.bonus} onChange={e => setStopField(i, 'bonus', e.target.value)}
+                        className={`${inputCls} w-10`} />
+                    </span>
+                  )}
+                  <button onClick={() => setStopField(i, 'mult', s.mult > 1 ? 1 : 2)}
+                    className={`text-[10px] px-1 py-0.5 rounded ${s.mult > 1 ? (m ? 'bg-green-900 text-green-300' : 'bg-blue-700 text-white') : (m ? 'text-blue-600' : 'text-broker-text-muted/40 hover:text-broker-text-muted')}`}
+                    title="Toggle multiplier">×</button>
+                  <button onClick={() => setStopField(i, 'bonus', s.bonus > 0 ? 0 : 20)}
+                    className={`text-[10px] px-1 py-0.5 rounded ${s.bonus > 0 ? (m ? 'bg-green-900 text-green-300' : 'bg-blue-700 text-white') : (m ? 'text-blue-600' : 'text-broker-text-muted/40 hover:text-broker-text-muted')}`}
+                    title="Toggle bonus">+</button>
+                  <input type="text" value={s.name} onChange={e => setStopField(i, 'name', e.target.value)}
+                    placeholder="" className={`${nameInputCls} w-14`} />
+                  {effective !== s.value && <span className={`${labelCls} font-bold`}>= {effective}</span>}
+                  <button onClick={() => removeStop(i)} className="text-red-400 text-[10px] ml-auto">×</button>
                 </div>
               )
             })}
@@ -367,37 +394,6 @@ function RouteCalc({ game, fmt, m }) {
         </div>
       </Panel>
 
-      {/* Total */}
-      <Panel m={m} title="">
-        <div className="flex items-center gap-3 flex-wrap">
-          <span className={`text-lg font-bold ${m ? 'text-white' : 'text-white'}`}>
-            {fmt(totalRevenue)}
-          </span>
-          <span className={labelCls}>{fmt(Math.floor(totalRevenue / 10))}/share</span>
-          {routeBonus > 0 && <span className={labelCls}>incl. +{routeBonus} bonus</span>}
-          {trains.filter(t => t.route.length > 0).map(t => (
-            <span key={t.id} className="text-xs">
-              {t.name}: {fmt(trainRevenue(t))}
-            </span>
-          ))}
-        </div>
-
-        {/* Send to corp */}
-        {totalRevenue > 0 && game && corp.sym && (
-          <button
-            onClick={() => {
-              useUIStore.getState().setRouteRevenue(corp.sym, totalRevenue)
-              useUIStore.getState().setActiveCorp(corp.sym)
-              useUIStore.getState().setActiveTab('corps')
-            }}
-            className={m
-              ? 'mt-2 w-full text-xs bg-green-900/80 text-green-300 hover:bg-green-800 px-3 py-2 rounded font-bold'
-              : 'mt-2 w-full text-xs bg-green-700 text-white hover:bg-green-600 px-3 py-2 rounded font-bold'
-            }>
-            {fmt(totalRevenue)} → {corp.sym} Pay / Withhold
-          </button>
-        )}
-      </Panel>
     </>
   )
 }
