@@ -17,7 +17,8 @@ export default function GameSelector() {
   const [importError, setImportError] = useState(null)
   const [importing, setImporting] = useState(false)
   const [showMore, setShowMore] = useState(false)
-  const [sortBy, setSortBy] = useState('rating') // 'rating' | 'name' | 'players'
+  const [sortBy, setSortBy] = useState('rating')
+  const [showLegend, setShowLegend] = useState(false)
 
   const savedList = Object.entries(savedGames)
     .map(([key, game]) => ({ key, game }))
@@ -54,12 +55,12 @@ export default function GameSelector() {
   const themeId = useThemeStore((s) => s.themeId)
   const setTheme = useThemeStore((s) => s.setTheme)
 
+  const [minRating, setMinRating] = useState(0)
+
   // Sort titles
   const sortFn = sortBy === 'name' ? (a, b) => a.title.localeCompare(b.title)
     : (a, b) => (b.maturity || 0) - (a.maturity || 0) || a.title.localeCompare(b.title)
-  const sorted = [...titles].sort(sortFn)
-  const tested = sorted.filter(t => (t.maturity || 0) >= 3)
-  const untested = sorted.filter(t => (t.maturity || 0) < 3)
+  const sorted = [...titles].sort(sortFn).filter(t => (t.maturity || 0) >= minRating)
 
   return (
     <div className="min-h-screen flex flex-col items-center p-6">
@@ -129,8 +130,8 @@ export default function GameSelector() {
 
       {/* ===== NEW GAME ===== */}
       <div className="w-full max-w-md mb-2 flex items-center justify-between">
-        <SectionLabel>New Game</SectionLabel>
-        <div className="flex gap-1">
+        <SectionLabel>New Game ({sorted.length})</SectionLabel>
+        <div className="flex gap-1 items-center">
           {[['rating', 'Rating'], ['name', 'A-Z']].map(([id, label]) => (
             <button key={id} onClick={() => setSortBy(id)}
               className={`text-[10px] px-1.5 py-0.5 rounded ${sortBy === id
@@ -138,30 +139,25 @@ export default function GameSelector() {
                 : 'text-broker-text-muted hover:text-white'
               }`}>{label}</button>
           ))}
-        </div>
-      </div>
-      {tested.length > 0 && (
-        <div className="grid grid-cols-2 gap-3 w-full max-w-md">
-          {tested.map((t) => (
-            <TitleButton key={t.titleId} t={t} onClick={() => navigate(`/setup/${t.titleId}`)} />
+          <span className="text-broker-text-muted/30 mx-0.5">|</span>
+          {[0, 1, 2, 3, 4].map(r => (
+            <button key={r} onClick={() => setMinRating(minRating === r ? 0 : r)}
+              className={`text-[10px] px-1 py-0.5 rounded ${minRating === r
+                ? 'bg-broker-gold text-broker-bg font-medium'
+                : 'text-broker-text-muted hover:text-white'
+              }`}>{r}+</button>
           ))}
         </div>
-      )}
-
-      {/* Untested titles — collapsed */}
-      {untested.length > 0 && (
-        <div className="w-full max-w-md mt-4">
-          <button onClick={() => setShowMore(!showMore)}
-            className="text-xs text-broker-text-muted hover:text-broker-text mb-2">
-            {showMore ? '▾' : '▸'} {untested.length} more titles (untested)
-          </button>
-          {showMore && (
-            <div className="grid grid-cols-2 gap-3">
-              {untested.map((t) => (
-                <TitleButton key={t.titleId} t={t} onClick={() => navigate(`/setup/${t.titleId}`)} />
-              ))}
-            </div>
-          )}
+      </div>
+      <div className="grid grid-cols-2 gap-3 w-full max-w-md">
+        {sorted.map((t) => (
+          <TitleButton key={t.titleId} t={t} onClick={() => navigate(`/setup/${t.titleId}`)}
+            onShowLegend={() => setShowLegend(true)} />
+        ))}
+      </div>
+      {sorted.length === 0 && (
+        <div className="text-xs text-broker-text-muted w-full max-w-md text-center py-4">
+          No titles at this rating. <button onClick={() => setMinRating(0)} className="underline">Show all</button>
         </div>
       )}
 
@@ -216,6 +212,8 @@ export default function GameSelector() {
           About / Legal / Impressum
         </button>
       </div>
+
+      {showLegend && <WrenchLegend onClose={() => setShowLegend(false)} />}
     </div>
   )
 }
@@ -233,43 +231,49 @@ const WRENCH_LABELS = [
   'Human-verified at the table',
 ]
 
-function WrenchRating({ level }) {
-  const [showHelp, setShowHelp] = useState(false)
-  const max = 5
+function WrenchIcon({ filled, size = 'w-3 h-3' }) {
   return (
-    <div className="relative inline-block">
-      <button onClick={e => { e.stopPropagation(); setShowHelp(!showHelp) }}
-        className="flex gap-px items-center" title={WRENCH_LABELS[level] || ''}>
-        {Array.from({ length: max }, (_, i) => (
-          <svg key={i} className={`w-3 h-3 ${i < level ? 'text-broker-gold' : 'text-broker-text-muted/20'}`}
-            viewBox="0 0 24 24" fill="currentColor" stroke="none">
-            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
-          </svg>
-        ))}
-      </button>
-      {showHelp && (
-        <div className="absolute z-30 bottom-full left-0 mb-1 bg-broker-bg border border-broker-border rounded p-2 shadow-lg w-52"
-          onClick={e => e.stopPropagation()}>
-          <div className="text-[10px] text-broker-text-muted mb-1 font-bold">Wrench Rating</div>
+    <svg className={`${size} ${filled ? 'text-broker-gold' : 'text-broker-text-muted/20'}`}
+      viewBox="0 0 24 24" fill="currentColor" stroke="none">
+      <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+    </svg>
+  )
+}
+
+function WrenchRating({ level, onShowLegend }) {
+  return (
+    <button onClick={e => { e.stopPropagation(); onShowLegend?.() }}
+      className="flex gap-px items-center" title={WRENCH_LABELS[level] || ''}>
+      {Array.from({ length: 5 }, (_, i) => <WrenchIcon key={i} filled={i < level} />)}
+    </button>
+  )
+}
+
+function WrenchLegend({ onClose }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60" onClick={onClose}>
+      <div className="bg-broker-bg border border-broker-border rounded-lg p-4 shadow-xl w-72 max-w-[90vw]"
+        onClick={e => e.stopPropagation()}>
+        <div className="text-sm text-white font-bold mb-3">Wrench Rating</div>
+        <div className="space-y-2">
           {WRENCH_LABELS.map((label, i) => (
-            <div key={i} className={`flex items-center gap-1 text-[10px] ${i === level ? 'text-white font-bold' : 'text-broker-text-muted'}`}>
-              <span className="w-3 text-right">{i}</span>
+            <div key={i} className="flex items-center gap-2">
+              <span className="w-4 text-right text-xs text-broker-text-muted">{i}</span>
               <span className="flex gap-px">
-                {Array.from({ length: 5 }, (_, j) => (
-                  <svg key={j} className={`w-2 h-2 ${j < i ? 'text-broker-gold' : 'text-broker-text-muted/20'}`}
-                    viewBox="0 0 24 24" fill="currentColor"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
-                ))}
+                {Array.from({ length: 5 }, (_, j) => <WrenchIcon key={j} filled={j < i} size="w-2.5 h-2.5" />)}
               </span>
-              <span>{label}</span>
+              <span className="text-xs text-broker-text">{label}</span>
             </div>
           ))}
         </div>
-      )}
+        <button onClick={onClose}
+          className="mt-3 w-full text-xs text-broker-text-muted hover:text-white py-1">Close</button>
+      </div>
     </div>
   )
 }
 
-function TitleButton({ t, onClick }) {
+function TitleButton({ t, onClick, onShowLegend }) {
   const m = t.maturity || 0
   return (
     <button onClick={onClick}
@@ -278,7 +282,7 @@ function TitleButton({ t, onClick }) {
       <div className="text-sm text-broker-text-muted mt-1">{t.subtitle}</div>
       <div className="flex items-center justify-between mt-2">
         <span className="text-xs text-broker-text-muted">{t.minPlayers}–{t.maxPlayers} players</span>
-        <WrenchRating level={m} />
+        <WrenchRating level={m} onShowLegend={onShowLegend} />
       </div>
     </button>
   )
