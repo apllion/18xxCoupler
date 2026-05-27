@@ -90,6 +90,7 @@ function RouteCalc({ game, fmt, m }) {
   }
 
   // Custom stop buttons added via input
+  const quickValues = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
   const [extraValues, setExtraValues] = useState([])
   const allQuickValues = [...new Set([...quickValues, ...extraValues])].sort((a, b) => a - b)
 
@@ -110,8 +111,6 @@ function RouteCalc({ game, fmt, m }) {
   const nameInput = m
     ? 'w-10 bg-black/30 border border-blue-800 rounded px-1 py-0.5 text-xs text-blue-300 focus:outline-none'
     : 'w-10 bg-broker-bg border border-broker-border rounded px-1 py-0.5 text-xs text-white focus:outline-none'
-  const quickValues = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
-
   return (
     <>
       {/* Total */}

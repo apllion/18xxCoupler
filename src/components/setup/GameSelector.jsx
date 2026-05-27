@@ -242,10 +242,10 @@ function WrenchIcon({ filled, size = 'w-3 h-3' }) {
 
 function WrenchRating({ level, onShowLegend }) {
   return (
-    <button onClick={e => { e.stopPropagation(); onShowLegend?.() }}
-      className="flex gap-px items-center" title={WRENCH_LABELS[level] || ''}>
+    <span onClick={e => { e.stopPropagation(); onShowLegend?.() }}
+      className="flex gap-px items-center cursor-pointer" title={WRENCH_LABELS[level] || ''}>
       {Array.from({ length: 5 }, (_, i) => <WrenchIcon key={i} filled={i < level} />)}
-    </button>
+    </span>
   )
 }
 
