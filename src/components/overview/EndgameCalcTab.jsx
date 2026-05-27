@@ -99,44 +99,36 @@ export default function EndgameCalcTab() {
   }
 
   // --- Live calculation ---
-  // Revenue per share = price at that round (the share value for that OR)
-  // Final price = last entered price
+  // Each OR: player receives price[r] per share per corp as dividend
+  // Final value = accumulated cash + shares × final price
   const calcResults = () => {
-    const simCash = players.map(p => p.cash)
-
-    // For each round, each corp pays per-share = that round's price / 10
-    // Actually: revenue = the price itself tells you value, dividends depend on revenue not price
-    // Simpler: the user enters the prices the corp will be at each round.
-    // The final price determines share value. The dividend each round = price[r] / 10 per share.
-    // But that's wrong — dividend is from route revenue, not price.
-    //
-    // Actually the RIGHT model: prices are just what the stock will be worth.
-    // The user enters them because they know the stock market grid.
-    // Final net worth = cash + shares × last price. That's it.
-    // Cash grows from dividends, but the user would need to enter revenue separately...
-    //
-    // Simplest correct model: final price = last entered price per corp.
-    // No dividend simulation needed — the user is saying "this is where prices will end up"
-    // and the result is just cash + shares × final prices.
-
     const finalPrices = {}
-    for (const c of corps) {
-      finalPrices[c.sym] = c.prices[c.prices.length - 1] || 0
-    }
+    for (const c of corps) finalPrices[c.sym] = c.prices[c.prices.length - 1] || 0
 
     const standings = players.map(p => {
-      let shareVal = 0
-      for (const c of corps) {
-        shareVal += (p.shares[c.sym] || 0) * (finalPrices[c.sym] || 0)
+      // Start with player's cash
+      let cash = p.cash
+      // Each round: player gets dividends = price[r] × number of shares for each corp
+      for (let r = 0; r < rounds; r++) {
+        for (const c of corps) {
+          const price = c.prices[r] ?? c.prices[c.prices.length - 1] ?? 0
+          const shares = p.shares[c.sym] || 0
+          cash += price * shares
+        }
       }
+      // Final share value at last price
+      let shareVal = 0
+      for (const c of corps) shareVal += (p.shares[c.sym] || 0) * (finalPrices[c.sym] || 0)
+
       const startShares = corps.reduce((s, c) => s + (p.shares[c.sym] || 0) * (c.prices[0] || 0), 0)
       return {
         name: p.name,
-        cash: p.cash,
+        startCash: p.cash,
+        endCash: cash,
         startShares,
         endShares: shareVal,
         startTotal: p.cash + startShares,
-        endTotal: p.cash + shareVal,
+        endTotal: cash + shareVal,
       }
     }).sort((a, b) => b.endTotal - a.endTotal)
 
@@ -175,16 +167,22 @@ export default function EndgameCalcTab() {
           {result.standings.map((p, i) => {
             const gain = p.endTotal - p.startTotal
             return (
-              <div key={i} className="flex items-center gap-2">
-                <span className={`w-4 font-bold ${i === 0 ? 'text-green-400' : m ? 'text-blue-400' : 'text-broker-text-muted'}`}>{i + 1}</span>
-                <span className={`w-16 truncate ${i === 0 ? 'text-green-400 font-bold' : m ? 'text-yellow-300' : 'text-broker-text'}`}>{p.name}</span>
-                <span className={m ? 'text-blue-300 w-14 text-right' : 'text-broker-text-muted w-14 text-right'}>{fmt(p.startTotal)}</span>
-                <span className={m ? 'text-blue-400' : 'text-broker-text-muted'}>→</span>
-                <span className={m ? 'text-white w-14 text-right font-bold' : 'text-white w-14 text-right font-bold'}>{fmt(p.endTotal)}</span>
-                <span className={`w-14 text-right text-xs ${gain > 0 ? 'text-green-400' : gain < 0 ? 'text-red-400' : ''}`}>
-                  {gain !== 0 ? (gain >= 0 ? '+' : '') + fmt(gain) : ''}
-                </span>
-                {i === 0 && <span className="text-green-400 text-xs font-bold">WINNER</span>}
+              <div key={i}>
+                <div className="flex items-center gap-2">
+                  <span className={`w-4 font-bold ${i === 0 ? 'text-green-400' : m ? 'text-blue-400' : 'text-broker-text-muted'}`}>{i + 1}</span>
+                  <span className={`w-16 truncate ${i === 0 ? 'text-green-400 font-bold' : m ? 'text-yellow-300' : 'text-broker-text'}`}>{p.name}</span>
+                  <span className={m ? 'text-blue-300 w-14 text-right' : 'text-broker-text-muted w-14 text-right'}>{fmt(p.startTotal)}</span>
+                  <span className={m ? 'text-blue-400' : 'text-broker-text-muted'}>→</span>
+                  <span className={m ? 'text-white w-14 text-right font-bold' : 'text-white w-14 text-right font-bold'}>{fmt(p.endTotal)}</span>
+                  <span className={`w-14 text-right text-xs ${gain > 0 ? 'text-green-400' : gain < 0 ? 'text-red-400' : ''}`}>
+                    {gain !== 0 ? (gain >= 0 ? '+' : '') + fmt(gain) : ''}
+                  </span>
+                  {i === 0 && <span className="text-green-400 text-xs font-bold">WINNER</span>}
+                </div>
+                <div className={m ? 'ml-6 text-[10px] text-blue-400 flex gap-3' : 'ml-6 text-[10px] text-broker-text-muted flex gap-3'}>
+                  <span>cash {fmt(p.startCash)}→{fmt(p.endCash)}</span>
+                  <span>shares {fmt(p.startShares)}→{fmt(p.endShares)}</span>
+                </div>
               </div>
             )
           })}
