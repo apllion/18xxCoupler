@@ -26,7 +26,7 @@ export const g18do_hsb = {
   // HSB uses two linear stock market tracks (railways + breweries)
   // Both have same values. Includes bankruptcy space.
   market: [
-    ['250','220','200','180','160','145','130','115','100','90','80','75','70','56','60','55','50','40','30','10'],
+    ['250','220','200','180','160','145','130','115','100','90','80','75','70','65','60','55','50','40','30','10'],
   ],
 
   phases: [
