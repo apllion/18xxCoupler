@@ -38,11 +38,11 @@ function RouteCalc({ game, fmt, m }) {
       if (c && c.trains.length > 0) {
         return {
           corp: { sym: c.sym, color: c.color },
-          trains: c.trains.map(t => ({ id: `${c.sym}-${t.id}`, name: t.name, stops: [] })),
+          trains: c.trains.map(t => ({ id: `${c.sym}-${t.id}`, name: t.name, stops: [], mult: t.multiplier || 1 })),
         }
       }
     }
-    return { corp: { sym: '', color: '#888' }, trains: [{ id: '1', name: '2', stops: [] }] }
+    return { corp: { sym: '', color: '#888' }, trains: [{ id: '1', name: '2', stops: [], mult: 1 }] }
   }
 
   const init = useMemo(initState, [activeSym])
@@ -73,7 +73,7 @@ function RouteCalc({ game, fmt, m }) {
   }, [corp.sym, trains])
 
   // --- Train ops ---
-  const addTrain = () => setTrains(prev => [...prev, { id: String(Date.now()), name: '', stops: [] }])
+  const addTrain = () => setTrains(prev => [...prev, { id: String(Date.now()), name: '', stops: [], mult: 1 }])
   const removeTrain = (idx) => {
     if (trains[idx]?.id === activeTrain) setActiveTrain(null)
     setTrains(prev => prev.filter((_, i) => i !== idx))
@@ -90,7 +90,7 @@ function RouteCalc({ game, fmt, m }) {
   }
 
   // --- Revenue ---
-  const trainRev = (t) => t.stops.reduce((s, v) => s + v, 0)
+  const trainRev = (t) => t.stops.reduce((s, v) => s + v, 0) * (t.mult || 1)
   const total = trains.reduce((s, t) => s + trainRev(t), 0)
 
   // --- Styles ---
@@ -185,20 +185,17 @@ function RouteCalc({ game, fmt, m }) {
                       }>{v}</button>
                   ))}
                 </div>
-                {/* Multiply route + custom input */}
+                {/* Multiplier + custom input */}
                 <div className="flex flex-wrap gap-1 mb-1">
-                  <button onClick={() => setTrains(prev => prev.map(x => x.id === t.id ? { ...x, stops: [...x.stops, ...x.stops] } : x))}
-                    disabled={t.stops.length === 0}
-                    className={m
-                      ? 'text-[10px] bg-blue-800 text-blue-300 hover:bg-blue-700 disabled:opacity-30 px-2 py-0.5 rounded'
-                      : 'text-[10px] bg-broker-surface-hover text-broker-text hover:text-white disabled:opacity-30 px-2 py-0.5 rounded'
-                    }>×2</button>
-                  <button onClick={() => setTrains(prev => prev.map(x => x.id === t.id ? { ...x, stops: [...x.stops, ...x.stops, ...x.stops] } : x))}
-                    disabled={t.stops.length === 0}
-                    className={m
-                      ? 'text-[10px] bg-blue-800 text-blue-300 hover:bg-blue-700 disabled:opacity-30 px-2 py-0.5 rounded'
-                      : 'text-[10px] bg-broker-surface-hover text-broker-text hover:text-white disabled:opacity-30 px-2 py-0.5 rounded'
-                    }>×3</button>
+                  {[1, 2, 3, 4].map(x => (
+                    <button key={x}
+                      onClick={() => setTrains(prev => prev.map(tr => tr.id === t.id ? { ...tr, mult: x } : tr))}
+                      className={`text-[10px] px-2 py-0.5 rounded font-medium ${
+                        (t.mult || 1) === x
+                          ? (m ? 'bg-green-700 text-white' : 'bg-blue-600 text-white')
+                          : (m ? 'bg-blue-900/30 text-blue-400' : 'bg-broker-bg text-broker-text-muted')
+                      }`}>×{x}</button>
+                  ))}
                   <input type="number" value={customStop}
                     onChange={e => setCustomStop(e.target.value)}
                     onKeyDown={e => { if (e.key === 'Enter') { addStopToTrain(t.id, parseInt(customStop) || 0); setCustomStop('') } }}
@@ -232,7 +229,7 @@ function RouteCalc({ game, fmt, m }) {
               /* Inactive: just show stops */
               t.stops.length > 0 && (
                 <div className={`text-[10px] ${m ? 'text-blue-400' : 'text-broker-text-muted'}`}>
-                  {t.stops.join(' + ')} = {fmt(rev)}
+                  {t.stops.join(' + ')}{(t.mult || 1) > 1 ? ` ×${t.mult}` : ''} = {fmt(rev)}
                 </div>
               )
             )}
