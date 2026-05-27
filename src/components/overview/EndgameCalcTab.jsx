@@ -24,10 +24,16 @@ export default function EndgameCalcTab() {
         for (const c of fCorps) shares[c.sym] = Math.round(playerSharePercent(p, c.sym) / 10)
         return { name: p.name, cash: p.cash, shares }
       })
-      const corps = fCorps.map(c => ({
-        sym: c.sym, color: c.color,
-        prices: [corpPrice(game.stockMarket, c.sym) || 0], // start with current price
-      }))
+      const corps = fCorps.map(c => {
+        let lastRev = 0
+        for (let i = game.actionLog.length - 1; i >= 0; i--) {
+          const a = game.actionLog[i].action
+          if ((a.type === 'PAY_DIVIDEND' || a.type === 'WITHHOLD_DIVIDEND' || a.type === 'HALF_DIVIDEND') && a.corpSym === c.sym) {
+            lastRev = a.totalRevenue || 0; break
+          }
+        }
+        return { sym: c.sym, color: c.color, revenue: lastRev, prices: [corpPrice(game.stockMarket, c.sym) || 0] }
+      })
       return { players, corps }
     }
     return {
@@ -37,8 +43,8 @@ export default function EndgameCalcTab() {
         { name: 'Player 3', cash: 0, shares: { A: 0, B: 0 } },
       ],
       corps: [
-        { sym: 'A', color: '#d81e3e', prices: [100] },
-        { sym: 'B', color: '#0189d1', prices: [100] },
+        { sym: 'A', color: '#d81e3e', revenue: 0, prices: [100] },
+        { sym: 'B', color: '#0189d1', revenue: 0, prices: [100] },
       ],
     }
   }, [])
@@ -51,7 +57,7 @@ export default function EndgameCalcTab() {
   const addCorp = () => {
     const sym = newCorpName.trim().toUpperCase() || String.fromCharCode(65 + corps.length)
     if (corps.some(c => c.sym === sym)) return
-    setCorps(prev => [...prev, { sym, color: '#888', prices: [100] }])
+    setCorps(prev => [...prev, { sym, color: '#888', revenue: 0, prices: [100] }])
     setPlayers(prev => prev.map(p => ({ ...p, shares: { ...p.shares, [sym]: 0 } })))
     setNewCorpName('')
   }
@@ -99,40 +105,26 @@ export default function EndgameCalcTab() {
   }
 
   // --- Live calculation ---
-  // Each OR: player receives price[r] per share per corp as dividend
-  // Final value = accumulated cash + shares × final price
+  // total = cash + (revenue × rounds) + sum(price[r]) × shares   per corp
   const calcResults = () => {
-    const finalPrices = {}
-    for (const c of corps) finalPrices[c.sym] = c.prices[c.prices.length - 1] || 0
-
     const standings = players.map(p => {
-      // Start with player's cash
-      let cash = p.cash
-      // Each round: player gets dividends = price[r] × number of shares for each corp
-      for (let r = 0; r < rounds; r++) {
-        for (const c of corps) {
-          const price = c.prices[r] ?? c.prices[c.prices.length - 1] ?? 0
-          const shares = p.shares[c.sym] || 0
-          cash += price * shares
+      let total = p.cash
+      for (const c of corps) {
+        const shares = p.shares[c.sym] || 0
+        if (shares === 0) continue
+        // Revenue income: revenue × number of rounds
+        total += (c.revenue || 0) * rounds
+        // Share value: sum of stock prices across all rounds × shares
+        let priceSum = 0
+        for (let r = 0; r < rounds; r++) {
+          priceSum += c.prices[r] ?? c.prices[c.prices.length - 1] ?? 0
         }
+        total += priceSum * shares
       }
-      // Final share value at last price
-      let shareVal = 0
-      for (const c of corps) shareVal += (p.shares[c.sym] || 0) * (finalPrices[c.sym] || 0)
+      return { name: p.name, startCash: p.cash, total }
+    }).sort((a, b) => b.total - a.total)
 
-      const startShares = corps.reduce((s, c) => s + (p.shares[c.sym] || 0) * (c.prices[0] || 0), 0)
-      return {
-        name: p.name,
-        startCash: p.cash,
-        endCash: cash,
-        startShares,
-        endShares: shareVal,
-        startTotal: p.cash + startShares,
-        endTotal: cash + shareVal,
-      }
-    }).sort((a, b) => b.endTotal - a.endTotal)
-
-    return { standings, finalPrices }
+    return { standings }
   }
 
   const result = calcResults()
@@ -164,28 +156,14 @@ export default function EndgameCalcTab() {
       {/* Standings — always at top, live */}
       <Panel m={m} title="">
         <div className="space-y-1">
-          {result.standings.map((p, i) => {
-            const gain = p.endTotal - p.startTotal
-            return (
-              <div key={i}>
-                <div className="flex items-center gap-2">
-                  <span className={`w-4 font-bold ${i === 0 ? 'text-green-400' : m ? 'text-blue-400' : 'text-broker-text-muted'}`}>{i + 1}</span>
-                  <span className={`w-16 truncate ${i === 0 ? 'text-green-400 font-bold' : m ? 'text-yellow-300' : 'text-broker-text'}`}>{p.name}</span>
-                  <span className={m ? 'text-blue-300 w-14 text-right' : 'text-broker-text-muted w-14 text-right'}>{fmt(p.startTotal)}</span>
-                  <span className={m ? 'text-blue-400' : 'text-broker-text-muted'}>→</span>
-                  <span className={m ? 'text-white w-14 text-right font-bold' : 'text-white w-14 text-right font-bold'}>{fmt(p.endTotal)}</span>
-                  <span className={`w-14 text-right text-xs ${gain > 0 ? 'text-green-400' : gain < 0 ? 'text-red-400' : ''}`}>
-                    {gain !== 0 ? (gain >= 0 ? '+' : '') + fmt(gain) : ''}
-                  </span>
-                  {i === 0 && <span className="text-green-400 text-xs font-bold">WINNER</span>}
-                </div>
-                <div className={m ? 'ml-6 text-[10px] text-blue-400 flex gap-3' : 'ml-6 text-[10px] text-broker-text-muted flex gap-3'}>
-                  <span>cash {fmt(p.startCash)}→{fmt(p.endCash)}</span>
-                  <span>shares {fmt(p.startShares)}→{fmt(p.endShares)}</span>
-                </div>
-              </div>
-            )
-          })}
+          {result.standings.map((p, i) => (
+            <div key={i} className="flex items-center gap-2">
+              <span className={`w-4 font-bold ${i === 0 ? 'text-green-400' : m ? 'text-blue-400' : 'text-broker-text-muted'}`}>{i + 1}</span>
+              <span className={`flex-1 truncate ${i === 0 ? 'text-green-400 font-bold' : m ? 'text-yellow-300' : 'text-broker-text'}`}>{p.name}</span>
+              <span className={m ? 'text-white text-lg font-bold' : 'text-white text-lg font-bold'}>{fmt(p.total)}</span>
+              {i === 0 && <span className="text-green-400 text-xs font-bold">WINNER</span>}
+            </div>
+          ))}
         </div>
       </Panel>
 
@@ -203,6 +181,7 @@ export default function EndgameCalcTab() {
             <thead>
               <tr>
                 <th className={`${labelCls} text-left px-1 w-12`}>Corp</th>
+                <th className={`${labelCls} text-right px-1`}>Rev</th>
                 {Array.from({ length: rounds }, (_, r) => (
                   <th key={r} className={`${labelCls} text-right px-1 ${r === rounds - 1 ? 'font-bold' : ''}`}>
                     {r === 0 ? 'now' : `OR${r}`}
@@ -215,6 +194,11 @@ export default function EndgameCalcTab() {
               {corps.map(c => (
                 <tr key={c.sym}>
                   <td className="px-1"><span style={{ color: c.color }} className="font-bold">{c.sym}</span></td>
+                  <td className="px-1">
+                    <input type="number" value={c.revenue || ''}
+                      onChange={e => setCorps(prev => prev.map(x => x.sym === c.sym ? { ...x, revenue: parseInt(e.target.value) || 0 } : x))}
+                      className={`${inputCls} w-12`} />
+                  </td>
                   {Array.from({ length: rounds }, (_, r) => {
                     const val = c.prices[r] ?? c.prices[c.prices.length - 1] ?? 0
                     return (
