@@ -56,7 +56,6 @@ export default function GameSelector() {
 
   // Sort titles
   const sortFn = sortBy === 'name' ? (a, b) => a.title.localeCompare(b.title)
-    : sortBy === 'players' ? (a, b) => a.minPlayers - b.minPlayers || a.title.localeCompare(b.title)
     : (a, b) => (b.maturity || 0) - (a.maturity || 0) || a.title.localeCompare(b.title)
   const sorted = [...titles].sort(sortFn)
   const tested = sorted.filter(t => (t.maturity || 0) >= 3)
@@ -132,7 +131,7 @@ export default function GameSelector() {
       <div className="w-full max-w-md mb-2 flex items-center justify-between">
         <SectionLabel>New Game</SectionLabel>
         <div className="flex gap-1">
-          {[['rating', 'Rating'], ['name', 'A-Z'], ['players', 'Players']].map(([id, label]) => (
+          {[['rating', 'Rating'], ['name', 'A-Z']].map(([id, label]) => (
             <button key={id} onClick={() => setSortBy(id)}
               className={`text-[10px] px-1.5 py-0.5 rounded ${sortBy === id
                 ? 'bg-broker-gold text-broker-bg font-medium'
