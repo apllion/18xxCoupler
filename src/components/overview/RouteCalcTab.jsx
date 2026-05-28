@@ -138,6 +138,7 @@ function RouteCalc({ game, fmt, m }) {
 
       {/* Corp selector */}
       <div className="flex items-center gap-2 flex-wrap">
+        {/* Game corps */}
         {game && game.corporations.filter(c => c.floated).map(c => (
           <button key={c.sym}
             onClick={() => useUIStore.getState().setActiveCorp(c.sym)}
@@ -146,36 +147,60 @@ function RouteCalc({ game, fmt, m }) {
             {c.sym}{savedRoutes[c.sym] && corp.sym !== c.sym ? '*' : ''}
           </button>
         ))}
-        {/* Saved routes for corps not in game */}
+        {/* Saved standalone corps */}
         {Object.keys(savedRoutes).filter(sym => !game || !game.corporations.some(c => c.sym === sym)).map(sym => (
-          <button key={sym}
-            onClick={() => { setCorp(savedRoutes[sym].corp); setTrains(savedRoutes[sym].trains); setActiveTrain(null) }}
-            className={`text-xs px-2 py-1 rounded font-medium ${corp.sym === sym ? 'ring-2 ring-white' : 'opacity-80'}`}
-            style={{ backgroundColor: savedRoutes[sym].corp?.color || '#888', color: '#fff' }}>
-            {sym}*
-          </button>
+          <span key={sym} className="inline-flex items-center gap-0">
+            <button
+              onClick={() => { setCorp(savedRoutes[sym].corp); setTrains(savedRoutes[sym].trains); setActiveTrain(null) }}
+              className={`text-xs px-2 py-1 rounded-l font-medium ${corp.sym === sym ? 'ring-2 ring-white' : 'opacity-80'}`}
+              style={{ backgroundColor: savedRoutes[sym].corp?.color || '#888', color: '#fff' }}>
+              {sym}
+            </button>
+            <button onClick={() => {
+              const key = `del-corp-${sym}`
+              if (pendingDelete === key) {
+                useUIStore.getState().saveRoutes(sym, undefined)
+                // switch away if deleting current
+                if (corp.sym === sym) { setCorp({ sym: '', color: '#888' }); setTrains([{ id: '1', name: '2', stops: [], mult: 1 }]) }
+                setPendingDelete(null)
+              } else {
+                setPendingDelete(key)
+                setTimeout(() => setPendingDelete(prev => prev === key ? null : prev), 1500)
+              }
+            }} className={`text-[9px] px-1 py-1 rounded-r transition-colors ${
+              pendingDelete === `del-corp-${sym}`
+                ? 'bg-red-600 text-white animate-pulse'
+                : (m ? 'bg-blue-900/50 text-blue-400' : 'bg-broker-bg text-broker-text-muted/40 hover:text-red-400')
+            }`}>{pendingDelete === `del-corp-${sym}` ? '×?' : '×'}</button>
+          </span>
         ))}
         {/* Add new corp */}
         <input type="text" value={newCorpName}
           onChange={e => setNewCorpName(e.target.value.toUpperCase())}
           onKeyDown={e => { if (e.key === 'Enter' && newCorpName.trim()) {
+            // Save current corp first
+            if (corp.sym) saveRoutes(corp.sym, { corp, trains })
             const sym = newCorpName.trim()
             setCorp({ sym, color: '#888' })
             setTrains([{ id: String(Date.now()), name: '2', stops: [], mult: 1 }])
             setActiveTrain(null)
             setNewCorpName('')
           }}}
-          placeholder="+" className={`${nameInput} w-10`} />
-        <button onClick={() => {
-          const sym = newCorpName.trim().toUpperCase() || 'NEW'
-          setCorp({ sym, color: '#888' })
-          setTrains([{ id: String(Date.now()), name: '2', stops: [], mult: 1 }])
-          setActiveTrain(null)
-          setNewCorpName('')
-        }} className={m
-          ? 'text-[10px] bg-green-900/50 text-green-300 hover:bg-green-800 px-2 py-0.5 rounded'
-          : 'text-[10px] bg-broker-surface-hover text-broker-text hover:text-white px-2 py-0.5 rounded'
-        }>+ Corp</button>
+          placeholder="corp" className={`${nameInput} w-12`} />
+        <button
+          disabled={!newCorpName.trim()}
+          onClick={() => {
+            if (!newCorpName.trim()) return
+            if (corp.sym) saveRoutes(corp.sym, { corp, trains })
+            const sym = newCorpName.trim().toUpperCase()
+            setCorp({ sym, color: '#888' })
+            setTrains([{ id: String(Date.now()), name: '2', stops: [], mult: 1 }])
+            setActiveTrain(null)
+            setNewCorpName('')
+          }} className={m
+            ? 'text-[10px] bg-green-900/50 text-green-300 hover:bg-green-800 disabled:opacity-30 px-2 py-0.5 rounded'
+            : 'text-[10px] bg-broker-surface-hover text-broker-text hover:text-white disabled:opacity-30 px-2 py-0.5 rounded'
+          }>+ Corp</button>
       </div>
 
       {/* Train cards */}
