@@ -249,6 +249,30 @@ export function moveSell(market, corpSym, percentSold, sellMovement = 'down_shar
 
 // --- Sold-out check ---
 // A corp is sold out if 0% remains in IPO and market pool
+// Project future prices: step right N times from a corp's current position.
+// Returns array of prices [current, +1, +2, ...] of length steps+1.
+// Does not mutate market.
+export function projectPrices(market, corpSym, steps) {
+  const pos = market.corpPositions[corpSym]
+  if (!pos) return []
+  const sim = { row: pos.row, col: pos.col }
+  const prices = [priceAt(market, sim.row, sim.col) || 0]
+  for (let i = 0; i < steps; i++) {
+    // Try right, then up if at right edge (sold-out style bump)
+    const row = market.grid[sim.row]
+    if (sim.col < row.length - 1 && row[sim.col + 1]) {
+      sim.col++
+    } else if (sim.row > 0) {
+      const prevRow = market.grid[sim.row - 1]
+      let col = Math.min(sim.col, prevRow.length - 1)
+      while (col >= 0 && !prevRow[col]) col--
+      if (col >= 0) { sim.row--; sim.col = col }
+    }
+    prices.push(priceAt(market, sim.row, sim.col) || 0)
+  }
+  return prices
+}
+
 export function isSoldOut(corp) {
   return corp.ipoShares <= 0 && corp.marketShares <= 0
 }

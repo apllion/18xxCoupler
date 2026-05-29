@@ -7,7 +7,7 @@ import { useState, useMemo } from 'react'
 import { useGameStore } from '../../store/gameStore.js'
 import { useUIStore } from '../../store/uiStore.js'
 import { formatCurrency } from '../../utils/currency.js'
-import { corpPrice } from '../../engine/stockMarket.js'
+import { corpPrice, projectPrices } from '../../engine/stockMarket.js'
 import { playerSharePercent } from '../../engine/player.js'
 
 export default function EndgameCalcTab() {
@@ -16,7 +16,7 @@ export default function EndgameCalcTab() {
   const m = skin === 'moderator'
   const fmt = (n) => formatCurrency(n, game?.title?.currencyFormat || '$')
 
-  const stateFromGame = () => {
+  const stateFromGame = (projectRounds = 3) => {
     if (!game || !game.corporations.some(c => c.floated)) return null
     const fCorps = game.corporations.filter(c => c.floated)
     const players = game.players.map(p => {
@@ -32,9 +32,11 @@ export default function EndgameCalcTab() {
           lastRev = a.totalRevenue || 0; break
         }
       }
-      return { sym: c.sym, color: c.color, revenue: lastRev, prices: [corpPrice(game.stockMarket, c.sym) || 0] }
+      // Project prices from stock market grid (step right assuming pay each OR)
+      const prices = projectPrices(game.stockMarket, c.sym, projectRounds)
+      return { sym: c.sym, color: c.color, revenue: lastRev, prices: prices.length > 0 ? prices : [corpPrice(game.stockMarket, c.sym) || 0] }
     })
-    return { players, corps }
+    return { players, corps, rounds: projectRounds + 1 }
   }
 
   const emptyState = {
@@ -49,18 +51,18 @@ export default function EndgameCalcTab() {
     ],
   }
 
-  const initState = useMemo(() => stateFromGame() || emptyState, [])
+  const initState = useMemo(() => stateFromGame(3) || emptyState, [])
 
   const [players, setPlayers] = useState(initState.players)
   const [corps, setCorps] = useState(initState.corps)
   const [newCorpName, setNewCorpName] = useState('')
 
   const loadFromGame = () => {
-    const s = stateFromGame()
+    const s = stateFromGame(rounds - 1)
     if (!s) return
     setPlayers(s.players)
     setCorps(s.corps)
-    setRounds(1)
+    if (s.rounds) setRounds(s.rounds)
   }
 
   // --- Corp helpers ---
@@ -88,8 +90,17 @@ export default function EndgameCalcTab() {
     }))
   }
   const addRound = () => {
-    setRounds(r => r + 1)
-    setCorps(prev => prev.map(c => ({ ...c, prices: [...c.prices, c.prices[c.prices.length - 1] || 0] })))
+    const newRounds = rounds + 1
+    setRounds(newRounds)
+    setCorps(prev => prev.map(c => {
+      // Try to project from stock market grid
+      if (game?.stockMarket?.corpPositions?.[c.sym]) {
+        const projected = projectPrices(game.stockMarket, c.sym, newRounds - 1)
+        if (projected.length >= newRounds) return { ...c, prices: projected.slice(0, newRounds) }
+      }
+      // Fallback: repeat last price
+      return { ...c, prices: [...c.prices, c.prices[c.prices.length - 1] || 0] }
+    }))
   }
   const removeRound = () => {
     if (rounds <= 1) return
