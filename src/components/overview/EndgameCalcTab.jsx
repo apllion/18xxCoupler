@@ -16,42 +16,52 @@ export default function EndgameCalcTab() {
   const m = skin === 'moderator'
   const fmt = (n) => formatCurrency(n, game?.title?.currencyFormat || '$')
 
-  const initState = useMemo(() => {
-    if (game && game.corporations.some(c => c.floated)) {
-      const fCorps = game.corporations.filter(c => c.floated)
-      const players = game.players.map(p => {
-        const shares = {}
-        for (const c of fCorps) shares[c.sym] = Math.round(playerSharePercent(p, c.sym) / 10)
-        return { name: p.name, cash: p.cash, shares }
-      })
-      const corps = fCorps.map(c => {
-        let lastRev = 0
-        for (let i = game.actionLog.length - 1; i >= 0; i--) {
-          const a = game.actionLog[i].action
-          if ((a.type === 'PAY_DIVIDEND' || a.type === 'WITHHOLD_DIVIDEND' || a.type === 'HALF_DIVIDEND') && a.corpSym === c.sym) {
-            lastRev = a.totalRevenue || 0; break
-          }
+  const stateFromGame = () => {
+    if (!game || !game.corporations.some(c => c.floated)) return null
+    const fCorps = game.corporations.filter(c => c.floated)
+    const players = game.players.map(p => {
+      const shares = {}
+      for (const c of fCorps) shares[c.sym] = Math.round(playerSharePercent(p, c.sym) / 10)
+      return { name: p.name, cash: p.cash, shares }
+    })
+    const corps = fCorps.map(c => {
+      let lastRev = 0
+      for (let i = game.actionLog.length - 1; i >= 0; i--) {
+        const a = game.actionLog[i].action
+        if ((a.type === 'PAY_DIVIDEND' || a.type === 'WITHHOLD_DIVIDEND' || a.type === 'HALF_DIVIDEND') && a.corpSym === c.sym) {
+          lastRev = a.totalRevenue || 0; break
         }
-        return { sym: c.sym, color: c.color, revenue: lastRev, prices: [corpPrice(game.stockMarket, c.sym) || 0] }
-      })
-      return { players, corps }
-    }
-    return {
-      players: [
-        { name: 'Player 1', cash: 0, shares: { A: 0, B: 0 } },
-        { name: 'Player 2', cash: 0, shares: { A: 0, B: 0 } },
-        { name: 'Player 3', cash: 0, shares: { A: 0, B: 0 } },
-      ],
-      corps: [
-        { sym: 'A', color: '#d81e3e', revenue: 0, prices: [100] },
-        { sym: 'B', color: '#0189d1', revenue: 0, prices: [100] },
-      ],
-    }
-  }, [])
+      }
+      return { sym: c.sym, color: c.color, revenue: lastRev, prices: [corpPrice(game.stockMarket, c.sym) || 0] }
+    })
+    return { players, corps }
+  }
+
+  const emptyState = {
+    players: [
+      { name: 'Player 1', cash: 0, shares: { A: 0, B: 0 } },
+      { name: 'Player 2', cash: 0, shares: { A: 0, B: 0 } },
+      { name: 'Player 3', cash: 0, shares: { A: 0, B: 0 } },
+    ],
+    corps: [
+      { sym: 'A', color: '#d81e3e', revenue: 0, prices: [100] },
+      { sym: 'B', color: '#0189d1', revenue: 0, prices: [100] },
+    ],
+  }
+
+  const initState = useMemo(() => stateFromGame() || emptyState, [])
 
   const [players, setPlayers] = useState(initState.players)
   const [corps, setCorps] = useState(initState.corps)
   const [newCorpName, setNewCorpName] = useState('')
+
+  const loadFromGame = () => {
+    const s = stateFromGame()
+    if (!s) return
+    setPlayers(s.players)
+    setCorps(s.corps)
+    setRounds(1)
+  }
 
   // --- Corp helpers ---
   const addCorp = () => {
@@ -149,9 +159,17 @@ export default function EndgameCalcTab() {
       ? 'font-mono text-xs p-2 space-y-3 overflow-y-auto bg-blue-950 text-blue-300 h-full'
       : 'text-sm p-3 space-y-4 overflow-y-auto bg-broker-bg h-full'
     }>
-      <h2 className={m ? 'text-green-400 font-bold' : 'text-white font-bold text-lg'}>
-        Endgame Calculator
-      </h2>
+      <div className="flex items-center gap-3">
+        <h2 className={m ? 'text-green-400 font-bold' : 'text-white font-bold text-lg'}>
+          Endgame Calculator
+        </h2>
+        {game && game.corporations.some(c => c.floated) && (
+          <button onClick={loadFromGame} className={m
+            ? 'text-[10px] bg-blue-800 text-blue-300 hover:bg-blue-700 px-2 py-0.5 rounded'
+            : 'text-[10px] bg-broker-surface-hover text-broker-text hover:text-white px-2 py-0.5 rounded'
+          }>Load from game</button>
+        )}
+      </div>
 
       {/* Standings — always at top, live */}
       <Panel m={m} title="">

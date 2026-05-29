@@ -53,6 +53,17 @@ function RouteCalc({ game, fmt, m }) {
   const [newCorpName, setNewCorpName] = useState('')
   const [pendingDelete, setPendingDelete] = useState(null) // 'trainId-stopIdx'
 
+  const loadFromGame = () => {
+    if (!game) return
+    const sym = corp.sym || useUIStore.getState().activeCorpSym
+    const c = sym && game.corporations.find(x => x.sym === sym && x.floated)
+    if (c && c.trains.length > 0) {
+      setCorp({ sym: c.sym, color: c.color })
+      setTrains(c.trains.map(t => ({ id: `${c.sym}-${t.id}`, name: t.name, stops: [], mult: t.multiplier || 1 })))
+      setActiveTrain(null)
+    }
+  }
+
   const handleStopDelete = (trainId, stopIdx) => {
     const key = `${trainId}-${stopIdx}`
     if (pendingDelete === key) {
@@ -114,6 +125,14 @@ function RouteCalc({ game, fmt, m }) {
     : 'w-10 bg-broker-bg border border-broker-border rounded px-1 py-0.5 text-xs text-white focus:outline-none'
   return (
     <>
+      {/* Load from game */}
+      {game && corp.sym && game.corporations.some(c => c.sym === corp.sym && c.floated) && (
+        <button onClick={loadFromGame} className={m
+          ? 'text-[10px] bg-blue-800 text-blue-300 hover:bg-blue-700 px-2 py-0.5 rounded self-start'
+          : 'text-[10px] bg-broker-surface-hover text-broker-text hover:text-white px-2 py-0.5 rounded self-start'
+        }>Load {corp.sym} trains from game</button>
+      )}
+
       {/* Total */}
       <div className={m
         ? 'bg-green-900/30 border border-green-800 rounded p-2 flex items-center gap-3 flex-wrap'
