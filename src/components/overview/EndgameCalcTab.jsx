@@ -1,14 +1,17 @@
 // EndgameCalcTab — endgame calculator.
-// Each corp: enter the stock prices it will hit round by round.
-// Number of prices = number of rounds. Results calculate live.
-// Players: cash + shares × final price = net worth.
+// Each corp: enter stock prices per round. Revenue fixed.
+// total = cash + (revenue × rounds) + sum(prices) × shares per corp
+// Results live, no button needed.
 
 import { useState, useMemo } from 'react'
 import { useGameStore } from '../../store/gameStore.js'
 import { useUIStore } from '../../store/uiStore.js'
 import { formatCurrency } from '../../utils/currency.js'
-import { corpPrice, priceAt, projectPrices } from '../../engine/stockMarket.js'
+import { corpPrice, projectPrices } from '../../engine/stockMarket.js'
 import { playerSharePercent } from '../../engine/player.js'
+
+// Common stock prices across 18xx games
+const COMMON_PRICES = [40, 50, 60, 67, 70, 76, 80, 82, 90, 100, 110, 112, 120, 124, 130, 137, 140, 150, 160, 170, 180, 200, 220, 250, 275, 300, 350, 400, 450, 500, 550]
 
 export default function EndgameCalcTab() {
   const game = useGameStore((s) => s.game)
@@ -32,7 +35,6 @@ export default function EndgameCalcTab() {
           lastRev = a.totalRevenue || 0; break
         }
       }
-      // Project prices from stock market grid (step right assuming pay each OR)
       const prices = projectPrices(game.stockMarket, c.sym, projectRounds)
       return { sym: c.sym, color: c.color, revenue: lastRev, prices: prices.length > 0 ? prices : [corpPrice(game.stockMarket, c.sym) || 0] }
     })
@@ -56,20 +58,7 @@ export default function EndgameCalcTab() {
   const [players, setPlayers] = useState(initState.players)
   const [corps, setCorps] = useState(initState.corps)
   const [newCorpName, setNewCorpName] = useState('')
-  const [pickerFor, setPickerFor] = useState(null) // { sym, roundIdx } — which cell is picking from market
-
-  // Get stock market prices reachable from a corp's current position
-  // Returns { currentRow, aboveRow, currentPos } for 2D markets
-  const getMarketPrices = (sym) => {
-    if (!game?.stockMarket?.grid) return null
-    const pos = game.stockMarket.corpPositions[sym]
-    if (!pos) return null
-    const grid = game.stockMarket.grid
-    const currentRow = grid[pos.row].filter(cell => cell).map(cell => cell.price)
-    const aboveRow = pos.row > 0 ? grid[pos.row - 1].filter(cell => cell).map(cell => cell.price) : null
-    const is1D = grid.length === 1
-    return { currentRow, aboveRow: is1D ? null : aboveRow, currentPrice: priceAt(game.stockMarket, pos.row, pos.col), currentCol: pos.col }
-  }
+  const [activeCell, setActiveCell] = useState(null) // { sym, roundIdx }
 
   const loadFromGame = () => {
     const s = stateFromGame(rounds - 1)
@@ -107,12 +96,10 @@ export default function EndgameCalcTab() {
     const newRounds = rounds + 1
     setRounds(newRounds)
     setCorps(prev => prev.map(c => {
-      // Try to project from stock market grid
       if (game?.stockMarket?.corpPositions?.[c.sym]) {
         const projected = projectPrices(game.stockMarket, c.sym, newRounds - 1)
         if (projected.length >= newRounds) return { ...c, prices: projected.slice(0, newRounds) }
       }
-      // Fallback: repeat last price
       return { ...c, prices: [...c.prices, c.prices[c.prices.length - 1] || 0] }
     }))
   }
@@ -140,16 +127,14 @@ export default function EndgameCalcTab() {
   }
 
   // --- Live calculation ---
-  // total = cash + (revenue × rounds) + sum(price[r]) × shares   per corp
+  // total = cash + (revenue × rounds) + sum(prices) × shares per corp
   const calcResults = () => {
     const standings = players.map(p => {
       let total = p.cash
       for (const c of corps) {
         const shares = p.shares[c.sym] || 0
         if (shares === 0) continue
-        // Revenue income: revenue × number of rounds
         total += (c.revenue || 0) * rounds
-        // Share value: sum of stock prices across all rounds × shares
         let priceSum = 0
         for (let r = 0; r < rounds; r++) {
           priceSum += c.prices[r] ?? c.prices[c.prices.length - 1] ?? 0
@@ -158,7 +143,6 @@ export default function EndgameCalcTab() {
       }
       return { name: p.name, startCash: p.cash, total }
     }).sort((a, b) => b.total - a.total)
-
     return { standings }
   }
 
@@ -185,9 +169,7 @@ export default function EndgameCalcTab() {
       : 'text-sm p-3 space-y-4 overflow-y-auto bg-broker-bg h-full'
     }>
       <div className="flex items-center gap-3">
-        <h2 className={m ? 'text-green-400 font-bold' : 'text-white font-bold text-lg'}>
-          Endgame Calculator
-        </h2>
+        <h2 className={m ? 'text-green-400 font-bold' : 'text-white font-bold text-lg'}>Endgame Calculator</h2>
         {game && game.corporations.some(c => c.floated) && (
           <button onClick={loadFromGame} className={m
             ? 'text-[10px] bg-blue-800 text-blue-300 hover:bg-blue-700 px-2 py-0.5 rounded'
@@ -196,7 +178,7 @@ export default function EndgameCalcTab() {
         )}
       </div>
 
-      {/* Standings — always at top, live */}
+      {/* Standings */}
       <Panel m={m} title="">
         <div className="space-y-1">
           {result.standings.map((p, i) => (
@@ -210,18 +192,16 @@ export default function EndgameCalcTab() {
         </div>
       </Panel>
 
-      {/* Stock price grid — transposed: rows=labels, columns=corps */}
+      {/* Stock prices grid */}
       <Panel m={m} title="">
         <div className="flex items-center gap-2 mb-2">
           <span className={m ? 'text-green-400 font-bold' : 'text-white font-medium'}>Stock Prices</span>
           <span className={labelCls}>{rounds} round{rounds !== 1 ? 's' : ''}</span>
-          <button onClick={removeRound} disabled={rounds <= 1}
-            className={`${btnSmall} disabled:opacity-30`}>−</button>
+          <button onClick={removeRound} disabled={rounds <= 1} className={`${btnSmall} disabled:opacity-30`}>−</button>
           <button onClick={addRound} className={btnSmall}>+</button>
         </div>
         <div className="overflow-x-auto">
           <table className="text-xs w-full">
-            {/* Header: corp names */}
             <thead>
               <tr>
                 <th className={`${labelCls} text-left px-1 w-12`} />
@@ -245,81 +225,55 @@ export default function EndgameCalcTab() {
                   </td>
                 ))}
               </tr>
-              {/* Separator */}
               <tr><td colSpan={corps.length + 1} className={m ? 'border-b border-blue-800 py-0.5' : 'border-b border-broker-border py-0.5'} /></tr>
-              {/* Price rows — one per round */}
+              {/* Price rows */}
               {Array.from({ length: rounds }, (_, r) => (
                 <tr key={r}>
-                  <td className={`${labelCls} px-1 ${r === rounds - 1 ? 'font-bold' : ''}`}>
-                    {r === 0 ? 'now' : 'OR'}
-                  </td>
+                  <td className={`${labelCls} px-1 ${r === rounds - 1 ? 'font-bold' : ''}`}>{r === 0 ? 'now' : 'OR'}</td>
                   {corps.map(c => {
                     const val = c.prices[r] ?? c.prices[c.prices.length - 1] ?? 0
-                    const isPicking = pickerFor?.sym === c.sym && pickerFor?.roundIdx === r
-                    const marketData = getMarketPrices(c.sym)
+                    const isActive = activeCell?.sym === c.sym && activeCell?.roundIdx === r
                     return (
-                      <td key={c.sym} className="px-1 relative">
-                        {marketData ? (
-                          <button
-                            onClick={() => setPickerFor(isPicking ? null : { sym: c.sym, roundIdx: r })}
-                            className={`w-full text-right text-xs px-1 py-0.5 rounded ${r === rounds - 1 ? 'font-bold' : ''} ${
-                              isPicking
-                                ? (m ? 'bg-green-800 text-green-200 ring-1 ring-green-500' : 'bg-blue-600 text-white ring-1 ring-blue-400')
-                                : (m ? 'bg-black/30 border border-blue-800 text-blue-300' : 'bg-broker-bg border border-broker-border text-white')
-                            }`}>
-                            {val}
-                          </button>
-                        ) : (
-                          <input type="number" value={val || ''}
-                            onChange={e => setPrice(c.sym, r, e.target.value)}
-                            className={`${inputCls} w-full ${r === rounds - 1 ? 'font-bold' : ''}`} />
-                        )}
+                      <td key={c.sym} className="px-1">
+                        <input type="number" value={val || ''}
+                          onChange={e => setPrice(c.sym, r, e.target.value)}
+                          onFocus={() => setActiveCell({ sym: c.sym, roundIdx: r })}
+                          onBlur={() => setTimeout(() => setActiveCell(prev => prev?.sym === c.sym && prev?.roundIdx === r ? null : prev), 200)}
+                          className={`${inputCls} w-full ${r === rounds - 1 ? 'font-bold' : ''} ${isActive ? (m ? 'border-green-500' : 'border-blue-500') : ''}`} />
                       </td>
                     )
                   })}
                 </tr>
               ))}
-              {/* Market row picker — shows below the table when active */}
             </tbody>
           </table>
         </div>
-        {/* Price picker from stock market */}
-        {pickerFor && (() => {
-          const marketData = getMarketPrices(pickerFor.sym)
-          if (!marketData) return null
-          const currentVal = corps.find(c => c.sym === pickerFor.sym)?.prices[pickerFor.roundIdx] ?? 0
-          const corpObj = corps.find(c => c.sym === pickerFor.sym)
-          const renderRow = (prices, label) => (
-            <div className="mb-1">
-              {label && <div className={`${labelCls} mb-0.5`}>{label}</div>}
-              <div className="flex flex-wrap gap-1">
-                {prices.map((price, i) => (
-                  <button key={i}
-                    onClick={() => { setPrice(pickerFor.sym, pickerFor.roundIdx, price); setPickerFor(null) }}
-                    className={`text-xs px-2 py-1 rounded min-w-[2.5rem] transition-colors ${
-                      price === currentVal
-                        ? (m ? 'bg-green-700 text-white font-bold ring-1 ring-green-400' : 'bg-blue-600 text-white font-bold ring-1 ring-blue-400')
-                        : price === marketData.currentPrice
-                          ? (m ? 'bg-blue-700 text-white' : 'bg-broker-surface text-white ring-1 ring-broker-border')
-                          : (m ? 'bg-blue-900/50 text-blue-300 hover:bg-blue-800' : 'bg-broker-surface-hover text-broker-text hover:text-white')
+
+        {/* Quick price buttons — click to fill active cell */}
+        {activeCell && (
+          <div className="mt-2">
+            <div className={`${labelCls} mb-1`}>
+              <span style={{ color: corps.find(c => c.sym === activeCell.sym)?.color }} className="font-bold">{activeCell.sym}</span>
+              {' '}{activeCell.roundIdx === 0 ? 'now' : 'OR'}
+            </div>
+            <div className="flex flex-wrap gap-1">
+              {COMMON_PRICES.map(p => {
+                const currentVal = corps.find(c => c.sym === activeCell.sym)?.prices[activeCell.roundIdx] ?? 0
+                return (
+                  <button key={p}
+                    onClick={() => setPrice(activeCell.sym, activeCell.roundIdx, p)}
+                    className={`text-[10px] px-1.5 py-0.5 rounded min-w-[2rem] transition-colors ${
+                      p === currentVal
+                        ? (m ? 'bg-green-700 text-white font-bold' : 'bg-blue-600 text-white font-bold')
+                        : (m ? 'bg-blue-900/50 text-blue-300 hover:bg-blue-800' : 'bg-broker-surface-hover text-broker-text hover:text-white')
                     }`}>
-                    {price}
+                    {p}
                   </button>
-                ))}
-              </div>
+                )
+              })}
             </div>
-          )
-          return (
-            <div className={m ? 'mt-2 p-2 bg-blue-900/40 rounded' : 'mt-2 p-2 bg-broker-bg rounded border border-broker-border'}>
-              <div className={`${labelCls} mb-1`}>
-                <span style={{ color: corpObj?.color }} className="font-bold">{pickerFor.sym}</span>
-                {' '}{pickerFor.roundIdx === 0 ? 'now' : 'OR'} — select price:
-              </div>
-              {marketData.aboveRow && renderRow(marketData.aboveRow, 'row above (right edge / sold out)')}
-              {renderRow(marketData.currentRow, marketData.aboveRow ? 'current row' : null)}
-            </div>
-          )
-        })()}
+          </div>
+        )}
 
         <div className="flex gap-1 items-center mt-2">
           <input type="text" value={newCorpName} onChange={e => setNewCorpName(e.target.value)}
@@ -331,8 +285,7 @@ export default function EndgameCalcTab() {
 
       {/* Players */}
       {players.map((p, pi) => {
-        const finalVal = corps.reduce((s, c) => s + (p.shares[c.sym] || 0) * (c.prices[c.prices.length - 1] || 0), 0)
-        const total = p.cash + finalVal
+        const total = result.standings.find(s => s.name === p.name)?.total || 0
         return (
           <Panel key={pi} m={m} title="">
             <div className="flex items-center gap-2 mb-1">
@@ -349,7 +302,6 @@ export default function EndgameCalcTab() {
                   <span style={{ color: c.color }} className="font-bold text-[10px]">{c.sym}</span>
                   <input type="number" value={p.shares[c.sym] || ''} onChange={e => setPlayerShares(pi, c.sym, e.target.value)}
                     className={`${inputCls} w-10`} min="0" />
-                  <span className={labelCls}>= {fmt((p.shares[c.sym] || 0) * (c.prices[c.prices.length - 1] || 0))}</span>
                 </div>
               ))}
             </div>
