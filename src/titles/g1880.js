@@ -4,7 +4,7 @@ export const g1880 = {
   ...defaults,
 
   maturity: 2, titleId: 'g1880',
-  gameInfo: '• Building permits gate track laying • Communist takeover event • Foreign investors • 3-7 players',
+  gameInfo: '• Building permits (A/B/C/D) gate which corps can lay track in each phase • Communist takeover at phase B3 closes stock market, reopens at phase C2 • 14 corps with 3 tokens each, 20% float, sell/buy stock rounds • 2D grid market (9x14) with letter-coded columns, 80% pool limit • 8 privates drafted, P6 grants BCR director cert and is the kingmaker pick • 11 phases (A1 through D3), float percent increases as phases advance • ¥37,860 bank, game ends after first 8-train triggers one more full OR set • 3-7 players, sweet spot 4-5p, long complex game (4-6 hours)',
   title: '1880',
   subtitle: 'China',
   designer: 'Helmut Ohley, Leonhard Orgler',

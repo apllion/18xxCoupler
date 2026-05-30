@@ -4,7 +4,7 @@ export const g18sj = {
   ...defaults,
 
   maturity: 2, titleId: 'g18sj',
-  gameInfo: '• Incremental cap switches to full at phase 5 • Nationalization events • Sell/buy/sell • KHJ minor',
+  gameInfo: '• Incremental capitalization switches to full at phase 5 (corps get remaining treasury) • Sell/buy/sell stock rounds like 1830, nationalization events at phases 4/6/D • 11 majors + 1 KHJ minor, 10 privates including two presidency grants • English auction, KHJ private controls minor corp that splits revenue • 2D grid market (11x17), game ends on bankruptcy, stock ceiling, or bank break • 7 phases (2-E), D-train has $300 trade-in, E-train variant at $1,300 • kr10,000 bank, cert limit depends on corps in play • 2-6 players, Sweden setting, Oscarian Era full-cap variant available',
   title: '18SJ',
   subtitle: 'Railways in the Frozen North',
   designer: 'Örjan Wennman',

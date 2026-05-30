@@ -4,7 +4,7 @@ export const grla = {
   ...defaults,
 
   maturity: 0, titleId: 'grla',
-  gameInfo: '• Procedural map • 12 unique minors merge into majors • Identity choice at merge • Fixed 4/6 cycles',
+  gameInfo: '• Procedurally generated map creates unique board each game • 12 unique minors with special abilities merge into 6 majors during Merger Rounds • Major identity chosen from two options at merge time (e.g. Atlas Railway vs Continental Railroad) • 40/20/20/20 minor shares, incremental cap, floats immediately on auction win • 1D single-row market (35 spaces), no cert limit, unlimited bank • English auction for minors, Merger Rounds after ORs from Green phase onward • 4 phases (Yellow/Green/Purple/Grey), 7 train types including infinite-distance • Fixed 4 cycles (short) or 6 cycles (long variant), 2-5 players',
   title: 'Railways of the Lost Atlas',
   subtitle: 'Build, Merge, Prosper',
   designer: 'Jacob Schacht & Kevin Delger',

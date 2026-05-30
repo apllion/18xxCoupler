@@ -4,7 +4,7 @@ export const gptg = {
   ...defaults,
 
   maturity: 0, titleId: 'gptg',
-  gameInfo: '• Strategy cards with station permits • Fixed 7 rounds • 20% shares • CEO salary • Corp mergers from Brown',
+  gameInfo: '• 8 color-coded strategy cards grant station permits and unique one-shot abilities • Fixed 7 rounds, all 20% shares (5 per corp), CEO earns $10/round salary • Corps can buy shares of other corps and start new corps during operations • Corp mergers available from Brown phase: two peers combine, shares convert 20% to 10% • Incremental capitalization, 20% float (CEO share only), unlimited bank and cert limit • 2D grid market (11x7 uniform rows), tax on 60%+ ownership of a single corp • Color-named trains (Yellow through RenGreen), priority auction for initial order • 2-4 players, generic setting, fast-playing portable game',
   title: 'PTG',
   subtitle: 'Pocket Train Game',
   designer: 'Jonas Jones',
