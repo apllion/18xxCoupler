@@ -68,6 +68,7 @@ export default function EndgameCalcTab() {
   const [newCorpName, setNewCorpName] = useState('')
   const [activeCell, setActiveCell] = useState(null) // { sym, roundIdx }
   const [customPrice, setCustomPrice] = useState('')
+  const [showCalc, setShowCalc] = useState(null) // playerIdx to show breakdown
   const [rounds, setRounds] = useState(() => Math.max(...initState.corps.map(c => c.prices.length), 1))
 
   const loadFromGame = () => {
@@ -340,6 +341,7 @@ export default function EndgameCalcTab() {
       {/* Players — cash input, shares +/- */}
       {players.map((p, pi) => {
         const total = result.standings.find(s => s.name === p.name)?.total || 0
+        const isOpen = showCalc === pi
         return (
           <Panel key={pi} m={m} title="">
             <div className="flex items-center gap-2 mb-1">
@@ -348,7 +350,9 @@ export default function EndgameCalcTab() {
               <span className={labelCls}>cash</span>
               <input type="number" value={p.cash || ''} onChange={e => setPlayerField(pi, 'cash', e.target.value)}
                 className={inputCls} />
-              <span className={`ml-auto font-bold ${m ? 'text-white' : 'text-white'}`}>{fmt(total)}</span>
+              <button onClick={() => setShowCalc(isOpen ? null : pi)}
+                className={`ml-auto font-bold ${m ? 'text-white' : 'text-white'} hover:underline`}
+                title="Show calculation">{fmt(total)}</button>
               <button onClick={() => removePlayer(pi)} className={`${btnCls} text-red-400`}>×</button>
             </div>
             <div className="flex flex-wrap gap-x-3 gap-y-1">
@@ -370,6 +374,45 @@ export default function EndgameCalcTab() {
                 )
               })}
             </div>
+            {/* Calculation breakdown */}
+            {isOpen && (
+              <div className={m ? 'mt-2 text-[10px] text-blue-400 space-y-0.5' : 'mt-2 text-[10px] text-broker-text-muted space-y-0.5'}>
+                <div>Cash: {fmt(p.cash)}</div>
+                {corps.map(c => {
+                  const shares = p.shares[c.sym] || 0
+                  if (shares === 0) return null
+                  const finalPrice = c.prices[c.prices.length - 1] ?? 0
+                  const divPerShare = Math.floor((c.revenue || 0) / 10)
+                  let priceSum = 0
+                  for (let r = 0; r < rounds; r++) priceSum += c.prices[r] ?? finalPrice
+
+                  if (shares > 0) {
+                    const divTotal = divPerShare * shares * rounds
+                    const shareVal = priceSum * shares
+                    const loansDebt = (c.loans || 0) * loanValue
+                    const loanDeduct = loansDebt > 0 ? Math.round(loansDebt * shares * 10 / 100) : 0
+                    return (
+                      <div key={c.sym}>
+                        <span style={{ color: c.color }} className="font-bold">{c.sym}</span>
+                        {': '}
+                        {divPerShare > 0 && <span>div {divPerShare}×{shares}×{rounds}={fmt(divTotal)} </span>}
+                        <span>+ val ({c.prices.slice(0, rounds).join('+')}){shares > 1 ? `×${shares}` : ''}={fmt(shareVal)}</span>
+                        {loanDeduct > 0 && <span className="text-red-400"> − loans {fmt(loanDeduct)}</span>}
+                      </div>
+                    )
+                  } else {
+                    const shortCost = priceSum * shares // negative
+                    return (
+                      <div key={c.sym}>
+                        <span style={{ color: c.color }} className="font-bold">{c.sym}</span>
+                        <span className="text-red-400"> SHORT: ({c.prices.slice(0, rounds).join('+')}){Math.abs(shares) > 1 ? `×${Math.abs(shares)}` : ''}={fmt(shortCost)}</span>
+                      </div>
+                    )
+                  }
+                })}
+                <div className="font-bold">= {fmt(total)}</div>
+              </div>
+            )}
           </Panel>
         )
       })}
