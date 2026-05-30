@@ -56,6 +56,16 @@ export default function EndgameCalcTab() {
   const [players, setPlayers] = useState(initState.players)
   const [corps, setCorps] = useState(initState.corps)
   const [newCorpName, setNewCorpName] = useState('')
+  const [pickerFor, setPickerFor] = useState(null) // { sym, roundIdx } — which cell is picking from market
+
+  // Get the stock market row for a corp (prices from current position rightward)
+  const getMarketRow = (sym) => {
+    if (!game?.stockMarket?.grid) return null
+    const pos = game.stockMarket.corpPositions[sym]
+    if (!pos) return null
+    const row = game.stockMarket.grid[pos.row]
+    return row.filter(cell => cell).map(cell => cell.price)
+  }
 
   const loadFromGame = () => {
     const s = stateFromGame(rounds - 1)
@@ -241,19 +251,66 @@ export default function EndgameCalcTab() {
                   </td>
                   {corps.map(c => {
                     const val = c.prices[r] ?? c.prices[c.prices.length - 1] ?? 0
+                    const isPicking = pickerFor?.sym === c.sym && pickerFor?.roundIdx === r
+                    const marketRow = getMarketRow(c.sym)
                     return (
-                      <td key={c.sym} className="px-1">
-                        <input type="number" value={val || ''}
-                          onChange={e => setPrice(c.sym, r, e.target.value)}
-                          className={`${inputCls} w-full ${r === rounds - 1 ? 'font-bold' : ''}`} />
+                      <td key={c.sym} className="px-1 relative">
+                        {marketRow ? (
+                          <button
+                            onClick={() => setPickerFor(isPicking ? null : { sym: c.sym, roundIdx: r })}
+                            className={`w-full text-right text-xs px-1 py-0.5 rounded ${r === rounds - 1 ? 'font-bold' : ''} ${
+                              isPicking
+                                ? (m ? 'bg-green-800 text-green-200 ring-1 ring-green-500' : 'bg-blue-600 text-white ring-1 ring-blue-400')
+                                : (m ? 'bg-black/30 border border-blue-800 text-blue-300' : 'bg-broker-bg border border-broker-border text-white')
+                            }`}>
+                            {val}
+                          </button>
+                        ) : (
+                          <input type="number" value={val || ''}
+                            onChange={e => setPrice(c.sym, r, e.target.value)}
+                            className={`${inputCls} w-full ${r === rounds - 1 ? 'font-bold' : ''}`} />
+                        )}
                       </td>
                     )
                   })}
                 </tr>
               ))}
+              {/* Market row picker — shows below the table when active */}
             </tbody>
           </table>
         </div>
+        {/* Price picker from market row */}
+        {pickerFor && (() => {
+          const marketRow = getMarketRow(pickerFor.sym)
+          if (!marketRow) return null
+          const currentVal = corps.find(c => c.sym === pickerFor.sym)?.prices[pickerFor.roundIdx] ?? 0
+          const corp = corps.find(c => c.sym === pickerFor.sym)
+          return (
+            <div className={m ? 'mt-2 p-2 bg-blue-900/40 rounded' : 'mt-2 p-2 bg-broker-bg rounded border border-broker-border'}>
+              <div className={`${labelCls} mb-1`}>
+                <span style={{ color: corp?.color }} className="font-bold">{pickerFor.sym}</span>
+                {' '}{pickerFor.roundIdx === 0 ? 'now' : 'OR'} — select price:
+              </div>
+              <div className="flex flex-wrap gap-1">
+                {marketRow.map((price, i) => (
+                  <button key={i}
+                    onClick={() => {
+                      setPrice(pickerFor.sym, pickerFor.roundIdx, price)
+                      setPickerFor(null)
+                    }}
+                    className={`text-xs px-2 py-1 rounded min-w-[2.5rem] transition-colors ${
+                      price === currentVal
+                        ? (m ? 'bg-green-700 text-white font-bold ring-1 ring-green-400' : 'bg-blue-600 text-white font-bold ring-1 ring-blue-400')
+                        : (m ? 'bg-blue-900/50 text-blue-300 hover:bg-blue-800' : 'bg-broker-surface-hover text-broker-text hover:text-white')
+                    }`}>
+                    {price}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )
+        })()}
+
         <div className="flex gap-1 items-center mt-2">
           <input type="text" value={newCorpName} onChange={e => setNewCorpName(e.target.value)}
             placeholder="Name" onKeyDown={e => e.key === 'Enter' && addCorp()}
