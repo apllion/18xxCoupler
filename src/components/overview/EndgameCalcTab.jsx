@@ -7,7 +7,7 @@ import { useState, useMemo } from 'react'
 import { useGameStore } from '../../store/gameStore.js'
 import { useUIStore } from '../../store/uiStore.js'
 import { formatCurrency } from '../../utils/currency.js'
-import { corpPrice, projectPrices } from '../../engine/stockMarket.js'
+import { corpPrice, priceAt, projectPrices } from '../../engine/stockMarket.js'
 import { playerSharePercent } from '../../engine/player.js'
 
 export default function EndgameCalcTab() {
@@ -58,13 +58,17 @@ export default function EndgameCalcTab() {
   const [newCorpName, setNewCorpName] = useState('')
   const [pickerFor, setPickerFor] = useState(null) // { sym, roundIdx } — which cell is picking from market
 
-  // Get the stock market row for a corp (prices from current position rightward)
-  const getMarketRow = (sym) => {
+  // Get stock market prices reachable from a corp's current position
+  // Returns { currentRow, aboveRow, currentPos } for 2D markets
+  const getMarketPrices = (sym) => {
     if (!game?.stockMarket?.grid) return null
     const pos = game.stockMarket.corpPositions[sym]
     if (!pos) return null
-    const row = game.stockMarket.grid[pos.row]
-    return row.filter(cell => cell).map(cell => cell.price)
+    const grid = game.stockMarket.grid
+    const currentRow = grid[pos.row].filter(cell => cell).map(cell => cell.price)
+    const aboveRow = pos.row > 0 ? grid[pos.row - 1].filter(cell => cell).map(cell => cell.price) : null
+    const is1D = grid.length === 1
+    return { currentRow, aboveRow: is1D ? null : aboveRow, currentPrice: priceAt(game.stockMarket, pos.row, pos.col), currentCol: pos.col }
   }
 
   const loadFromGame = () => {
@@ -252,10 +256,10 @@ export default function EndgameCalcTab() {
                   {corps.map(c => {
                     const val = c.prices[r] ?? c.prices[c.prices.length - 1] ?? 0
                     const isPicking = pickerFor?.sym === c.sym && pickerFor?.roundIdx === r
-                    const marketRow = getMarketRow(c.sym)
+                    const marketData = getMarketPrices(c.sym)
                     return (
                       <td key={c.sym} className="px-1 relative">
-                        {marketRow ? (
+                        {marketData ? (
                           <button
                             onClick={() => setPickerFor(isPicking ? null : { sym: c.sym, roundIdx: r })}
                             className={`w-full text-right text-xs px-1 py-0.5 rounded ${r === rounds - 1 ? 'font-bold' : ''} ${
@@ -279,34 +283,40 @@ export default function EndgameCalcTab() {
             </tbody>
           </table>
         </div>
-        {/* Price picker from market row */}
+        {/* Price picker from stock market */}
         {pickerFor && (() => {
-          const marketRow = getMarketRow(pickerFor.sym)
-          if (!marketRow) return null
+          const marketData = getMarketPrices(pickerFor.sym)
+          if (!marketData) return null
           const currentVal = corps.find(c => c.sym === pickerFor.sym)?.prices[pickerFor.roundIdx] ?? 0
-          const corp = corps.find(c => c.sym === pickerFor.sym)
-          return (
-            <div className={m ? 'mt-2 p-2 bg-blue-900/40 rounded' : 'mt-2 p-2 bg-broker-bg rounded border border-broker-border'}>
-              <div className={`${labelCls} mb-1`}>
-                <span style={{ color: corp?.color }} className="font-bold">{pickerFor.sym}</span>
-                {' '}{pickerFor.roundIdx === 0 ? 'now' : 'OR'} — select price:
-              </div>
+          const corpObj = corps.find(c => c.sym === pickerFor.sym)
+          const renderRow = (prices, label) => (
+            <div className="mb-1">
+              {label && <div className={`${labelCls} mb-0.5`}>{label}</div>}
               <div className="flex flex-wrap gap-1">
-                {marketRow.map((price, i) => (
+                {prices.map((price, i) => (
                   <button key={i}
-                    onClick={() => {
-                      setPrice(pickerFor.sym, pickerFor.roundIdx, price)
-                      setPickerFor(null)
-                    }}
+                    onClick={() => { setPrice(pickerFor.sym, pickerFor.roundIdx, price); setPickerFor(null) }}
                     className={`text-xs px-2 py-1 rounded min-w-[2.5rem] transition-colors ${
                       price === currentVal
                         ? (m ? 'bg-green-700 text-white font-bold ring-1 ring-green-400' : 'bg-blue-600 text-white font-bold ring-1 ring-blue-400')
-                        : (m ? 'bg-blue-900/50 text-blue-300 hover:bg-blue-800' : 'bg-broker-surface-hover text-broker-text hover:text-white')
+                        : price === marketData.currentPrice
+                          ? (m ? 'bg-blue-700 text-white' : 'bg-broker-surface text-white ring-1 ring-broker-border')
+                          : (m ? 'bg-blue-900/50 text-blue-300 hover:bg-blue-800' : 'bg-broker-surface-hover text-broker-text hover:text-white')
                     }`}>
                     {price}
                   </button>
                 ))}
               </div>
+            </div>
+          )
+          return (
+            <div className={m ? 'mt-2 p-2 bg-blue-900/40 rounded' : 'mt-2 p-2 bg-broker-bg rounded border border-broker-border'}>
+              <div className={`${labelCls} mb-1`}>
+                <span style={{ color: corpObj?.color }} className="font-bold">{pickerFor.sym}</span>
+                {' '}{pickerFor.roundIdx === 0 ? 'now' : 'OR'} — select price:
+              </div>
+              {marketData.aboveRow && renderRow(marketData.aboveRow, 'row above (right edge / sold out)')}
+              {renderRow(marketData.currentRow, marketData.aboveRow ? 'current row' : null)}
             </div>
           )
         })()}
