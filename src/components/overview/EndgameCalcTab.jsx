@@ -226,117 +226,88 @@ export default function EndgameCalcTab() {
         </div>
       </Panel>
 
-      {/* Stock prices — tap cells, pick from buttons */}
-      <Panel m={m} title="">
-        <div className="flex items-center gap-2 mb-2">
-          <span className={m ? 'text-green-400 font-bold' : 'text-white font-medium'}>Stock Prices</span>
-          <span className={labelCls}>{rounds} round{rounds !== 1 ? 's' : ''}</span>
-          <button onClick={removeRound} disabled={rounds <= 1} className={`${btnSmall} disabled:opacity-30`}>−</button>
-          <button onClick={addRound} className={btnSmall}>+</button>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="text-xs w-full">
-            <thead>
-              <tr>
-                <th className={`${labelCls} text-left px-1 w-12`} />
-                {corps.map(c => (
-                  <th key={c.sym} className="px-1 text-center">
-                    <span style={{ color: c.color }} className="font-bold">{c.sym}</span>
-                    <button onClick={() => removeCorp(c.sym)} className={`${btnCls} text-red-400 ml-0.5`}>×</button>
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {/* Revenue — normal inputs */}
-              <tr>
-                <td className={`${labelCls} px-1`}>Rev</td>
-                {corps.map(c => (
-                  <td key={c.sym} className="px-1">
-                    <input type="number" value={c.revenue || ''}
-                      onChange={e => setCorps(prev => prev.map(x => x.sym === c.sym ? { ...x, revenue: parseInt(e.target.value) || 0 } : x))}
-                      className={`${inputCls} w-full`} />
-                  </td>
-                ))}
-              </tr>
-              {/* Loans row — optional */}
-              {showExtras && (
-                <tr>
-                  <td className={`${labelCls} px-1`}>Loans</td>
-                  {corps.map(c => (
-                    <td key={c.sym} className="px-1">
-                      <div className="flex items-center justify-center gap-0.5">
-                        <button onClick={() => adjLoans(c.sym, -1)} disabled={(c.loans || 0) <= 0}
-                          className={`text-xs px-1 py-0.5 rounded disabled:opacity-20 ${m ? 'bg-blue-900/50 text-blue-300' : 'bg-broker-surface-hover text-broker-text'}`}>−</button>
-                        <span className={`text-xs w-4 text-center font-bold ${(c.loans || 0) > 0 ? 'text-red-400' : m ? 'text-blue-400' : 'text-broker-text-muted'}`}>{c.loans || 0}</span>
-                        <button onClick={() => adjLoans(c.sym, 1)}
-                          className={`text-xs px-1 py-0.5 rounded ${m ? 'bg-blue-900/50 text-blue-300' : 'bg-broker-surface-hover text-broker-text'}`}>+</button>
-                      </div>
-                    </td>
-                  ))}
-                </tr>
-              )}
-              <tr><td colSpan={corps.length + 1} className={m ? 'border-b border-blue-800 py-0.5' : 'border-b border-broker-border py-0.5'} /></tr>
-              {/* Price rows — tappable cells */}
-              {Array.from({ length: rounds }, (_, r) => (
-                <tr key={r}>
-                  <td className={`${labelCls} px-1 ${r === rounds - 1 ? 'font-bold' : ''}`}>{r === 0 ? 'now' : 'OR'}</td>
-                  {corps.map(c => {
-                    const val = c.prices[r] ?? c.prices[c.prices.length - 1] ?? 0
-                    const isActive = activeCell?.sym === c.sym && activeCell?.roundIdx === r
-                    return (
-                      <td key={c.sym} className="px-1">
-                        <button
-                          onClick={() => setActiveCell(isActive ? null : { sym: c.sym, roundIdx: r })}
-                          className={cellCls(isActive, r === rounds - 1)}>
-                          {val || '—'}
-                        </button>
-                      </td>
-                    )
-                  })}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+      {/* Round control */}
+      <div className="flex items-center gap-2">
+        <span className={m ? 'text-green-400 font-bold' : 'text-white font-medium'}>Corporations</span>
+        <span className={labelCls}>{rounds} round{rounds !== 1 ? 's' : ''}</span>
+        <button onClick={removeRound} disabled={rounds <= 1} className={`${btnSmall} disabled:opacity-30`}>−</button>
+        <button onClick={addRound} className={btnSmall}>+</button>
+        {!showExtras && (
+          <button onClick={() => setShowExtras(true)} className={`${btnSmall} ml-auto`}>Loans</button>
+        )}
+      </div>
 
-        {/* Price buttons — always visible when a cell is selected */}
-        {activeCell && (
-          <div className="mt-2">
-            <div className={`${labelCls} mb-1`}>
-              <span style={{ color: corps.find(c => c.sym === activeCell.sym)?.color }} className="font-bold">{activeCell.sym}</span>
-              {' '}{activeCell.roundIdx === 0 ? 'now' : 'OR'}
+      {/* Corp cards — one per corp */}
+      {corps.map(c => {
+        const isPickingHere = activeCell?.sym === c.sym
+        return (
+          <Panel key={c.sym} m={m} title="">
+            {/* Header: sym + rev + loans + delete */}
+            <div className="flex items-center gap-2 mb-1 flex-wrap">
+              <span style={{ color: c.color }} className="font-bold text-sm">{c.sym}</span>
+              <span className={labelCls}>rev</span>
+              <input type="number" value={c.revenue || ''}
+                onChange={e => setCorps(prev => prev.map(x => x.sym === c.sym ? { ...x, revenue: parseInt(e.target.value) || 0 } : x))}
+                className={`${inputCls} w-14`} />
+              {showExtras && (
+                <>
+                  <span className={labelCls}>loans</span>
+                  <button onClick={() => adjLoans(c.sym, -1)} disabled={(c.loans || 0) <= 0}
+                    className={`text-xs px-1 py-0.5 rounded disabled:opacity-20 ${m ? 'bg-blue-900/50 text-blue-300' : 'bg-broker-surface-hover text-broker-text'}`}>−</button>
+                  <span className={`text-xs w-4 text-center font-bold ${(c.loans || 0) > 0 ? 'text-red-400' : m ? 'text-blue-400' : 'text-broker-text-muted'}`}>{c.loans || 0}</span>
+                  <button onClick={() => adjLoans(c.sym, 1)}
+                    className={`text-xs px-1 py-0.5 rounded ${m ? 'bg-blue-900/50 text-blue-300' : 'bg-broker-surface-hover text-broker-text'}`}>+</button>
+                </>
+              )}
+              <button onClick={() => removeCorp(c.sym)} className={`${btnCls} text-red-400 ml-auto`}>×</button>
             </div>
+            {/* Prices — tappable buttons in a row */}
             <div className="flex flex-wrap gap-1">
-              {priceValues.map(v => {
-                const currentVal = corps.find(c => c.sym === activeCell.sym)?.prices[activeCell.roundIdx] ?? 0
+              {Array.from({ length: rounds }, (_, r) => {
+                const val = c.prices[r] ?? c.prices[c.prices.length - 1] ?? 0
+                const isActive = activeCell?.sym === c.sym && activeCell?.roundIdx === r
                 return (
-                  <button key={v} onClick={() => setPrice(activeCell.sym, activeCell.roundIdx, v)}
-                    className={`text-[10px] px-1.5 py-0.5 rounded min-w-[2rem] transition-colors ${
-                      v === currentVal
-                        ? (m ? 'bg-green-700 text-white font-bold' : 'bg-blue-600 text-white font-bold')
-                        : (m ? 'bg-blue-900/50 text-blue-300 hover:bg-blue-800' : 'bg-broker-surface-hover text-broker-text hover:text-white')
-                    }`}>{v}</button>
+                  <div key={r} className="flex flex-col items-center">
+                    <span className={`${labelCls} ${r === rounds - 1 ? 'font-bold' : ''}`}>{r === 0 ? 'now' : 'OR'}</span>
+                    <button
+                      onClick={() => setActiveCell(isActive ? null : { sym: c.sym, roundIdx: r })}
+                      className={cellCls(isActive, r === rounds - 1)}>
+                      {val || '—'}
+                    </button>
+                  </div>
                 )
               })}
-              <input type="number" value={customPrice}
-                onChange={e => setCustomPrice(e.target.value)}
-                onKeyDown={e => { if (e.key === 'Enter' && customPrice) { setPrice(activeCell.sym, activeCell.roundIdx, parseInt(customPrice) || 0); setCustomPrice('') } }}
-                placeholder="other" className={`${inputCls} w-12`} />
             </div>
-          </div>
-        )}
+            {/* Quick picks — inside this card */}
+            {isPickingHere && (
+              <div className="flex flex-wrap gap-1 mt-1">
+                {priceValues.map(v => {
+                  const currentVal = c.prices[activeCell.roundIdx] ?? 0
+                  return (
+                    <button key={v} onClick={() => setPrice(c.sym, activeCell.roundIdx, v)}
+                      className={`text-[10px] px-1.5 py-0.5 rounded min-w-[2rem] transition-colors ${
+                        v === currentVal
+                          ? (m ? 'bg-green-700 text-white font-bold' : 'bg-blue-600 text-white font-bold')
+                          : (m ? 'bg-blue-900/50 text-blue-300 hover:bg-blue-800' : 'bg-broker-surface-hover text-broker-text hover:text-white')
+                      }`}>{v}</button>
+                  )
+                })}
+                <input type="number" value={customPrice}
+                  onChange={e => setCustomPrice(e.target.value)}
+                  onKeyDown={e => { if (e.key === 'Enter' && customPrice) { setPrice(c.sym, activeCell.roundIdx, parseInt(customPrice) || 0); setCustomPrice('') } }}
+                  placeholder="other" className={`${inputCls} w-12`} />
+              </div>
+            )}
+          </Panel>
+        )
+      })}
 
-        <div className="flex gap-1 items-center mt-2">
-          <input type="text" value={newCorpName} onChange={e => setNewCorpName(e.target.value)}
-            placeholder="Name" onKeyDown={e => e.key === 'Enter' && addCorp()}
-            className={`${nameInputCls} w-14`} />
-          <button onClick={addCorp} className={btnSmall}>+ Corp</button>
-          {!showExtras && (
-            <button onClick={() => setShowExtras(true)} className={`${btnSmall} ml-auto`}>Loans</button>
-          )}
-        </div>
-      </Panel>
+      <div className="flex gap-1 items-center">
+        <input type="text" value={newCorpName} onChange={e => setNewCorpName(e.target.value)}
+          placeholder="Name" onKeyDown={e => e.key === 'Enter' && addCorp()}
+          className={`${nameInputCls} w-14`} />
+        <button onClick={addCorp} className={btnSmall}>+ Corp</button>
+      </div>
 
       {/* Players — cash input, shares +/- */}
       {players.map((p, pi) => {
