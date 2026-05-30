@@ -160,8 +160,8 @@ export default function EndgameCalcTab() {
         for (let r = 0; r < rounds; r++) priceSum += c.prices[r] ?? finalPrice
 
         if (shares > 0) {
-          // Long: dividends + share value - loan debt
-          total += (c.revenue || 0) * rounds
+          // Long: dividends (revenue/10 per share per round) + share value - loan debt
+          total += Math.floor((c.revenue || 0) / 10) * shares * rounds
           total += priceSum * shares
           const loansDebt = (c.loans || 0) * loanValue
           if (loansDebt > 0) total -= Math.round(loansDebt * shares * 10 / 100)
