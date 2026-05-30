@@ -58,7 +58,7 @@ export default function EndgameCalcTab() {
   const [players, setPlayers] = useState(initState.players)
   const [corps, setCorps] = useState(initState.corps)
   const [newCorpName, setNewCorpName] = useState('')
-  const [activeCell, setActiveCell] = useState(null) // { sym, roundIdx }
+  const [activeCell, setActiveCell] = useState(null) // { sym, roundIdx } or { type: 'rev', sym } or { type: 'cash', playerIdx }
 
   const loadFromGame = () => {
     const s = stateFromGame(rounds - 1)
@@ -221,7 +221,9 @@ export default function EndgameCalcTab() {
                   <td key={c.sym} className="px-1">
                     <input type="number" value={c.revenue || ''}
                       onChange={e => setCorps(prev => prev.map(x => x.sym === c.sym ? { ...x, revenue: parseInt(e.target.value) || 0 } : x))}
-                      className={`${inputCls} w-full`} />
+                      onFocus={() => setActiveCell({ type: 'rev', sym: c.sym })}
+                      onBlur={() => setTimeout(() => setActiveCell(prev => prev?.type === 'rev' && prev?.sym === c.sym ? null : prev), 200)}
+                      className={`${inputCls} w-full ${activeCell?.type === 'rev' && activeCell?.sym === c.sym ? (m ? 'border-green-500' : 'border-blue-500') : ''}`} />
                   </td>
                 ))}
               </tr>
@@ -249,31 +251,52 @@ export default function EndgameCalcTab() {
           </table>
         </div>
 
-        {/* Quick price buttons — click to fill active cell */}
-        {activeCell && (
-          <div className="mt-2">
-            <div className={`${labelCls} mb-1`}>
-              <span style={{ color: corps.find(c => c.sym === activeCell.sym)?.color }} className="font-bold">{activeCell.sym}</span>
-              {' '}{activeCell.roundIdx === 0 ? 'now' : 'OR'}
-            </div>
-            <div className="flex flex-wrap gap-1">
-              {COMMON_PRICES.map(p => {
-                const currentVal = corps.find(c => c.sym === activeCell.sym)?.prices[activeCell.roundIdx] ?? 0
-                return (
-                  <button key={p}
-                    onClick={() => setPrice(activeCell.sym, activeCell.roundIdx, p)}
+        {/* Quick value buttons — context-dependent */}
+        {activeCell && (() => {
+          // Determine values and setter based on active cell type
+          let values, currentVal, onPick, label
+          if (activeCell.type === 'rev') {
+            // Revenue: show common revenue values from game or defaults
+            const gameRevs = game ? [...new Set(
+              game.actionLog.filter(e => e.action.totalRevenue > 0).map(e => e.action.totalRevenue)
+            )].sort((a, b) => a - b) : []
+            values = gameRevs.length > 3 ? gameRevs : [20, 40, 60, 80, 100, 120, 140, 160, 180, 200, 240, 280, 320, 360, 400]
+            currentVal = corps.find(c => c.sym === activeCell.sym)?.revenue || 0
+            onPick = (v) => setCorps(prev => prev.map(c => c.sym === activeCell.sym ? { ...c, revenue: v } : c))
+            const corpObj = corps.find(c => c.sym === activeCell.sym)
+            label = <><span style={{ color: corpObj?.color }} className="font-bold">{activeCell.sym}</span> Rev</>
+          } else if (activeCell.type === 'cash') {
+            // Cash: show round numbers
+            values = [0, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500, 600, 700, 800, 900, 1000]
+            currentVal = players[activeCell.playerIdx]?.cash || 0
+            onPick = (v) => setPlayerField(activeCell.playerIdx, 'cash', v)
+            label = <><span className="font-bold">{players[activeCell.playerIdx]?.name}</span> Cash</>
+          } else {
+            // Stock price: from game's market grid or common defaults
+            values = game?.stockMarket?.grid
+              ? [...new Set(game.stockMarket.grid.flat().filter(c => c).map(c => c.price))].sort((a, b) => a - b)
+              : COMMON_PRICES
+            currentVal = corps.find(c => c.sym === activeCell.sym)?.prices[activeCell.roundIdx] ?? 0
+            onPick = (v) => setPrice(activeCell.sym, activeCell.roundIdx, v)
+            const corpObj = corps.find(c => c.sym === activeCell.sym)
+            label = <><span style={{ color: corpObj?.color }} className="font-bold">{activeCell.sym}</span> {activeCell.roundIdx === 0 ? 'now' : 'OR'}</>
+          }
+          return (
+            <div className="mt-2">
+              <div className={`${labelCls} mb-1`}>{label}</div>
+              <div className="flex flex-wrap gap-1">
+                {values.map(v => (
+                  <button key={v} onClick={() => onPick(v)}
                     className={`text-[10px] px-1.5 py-0.5 rounded min-w-[2rem] transition-colors ${
-                      p === currentVal
+                      v === currentVal
                         ? (m ? 'bg-green-700 text-white font-bold' : 'bg-blue-600 text-white font-bold')
                         : (m ? 'bg-blue-900/50 text-blue-300 hover:bg-blue-800' : 'bg-broker-surface-hover text-broker-text hover:text-white')
-                    }`}>
-                    {p}
-                  </button>
-                )
-              })}
+                    }`}>{v}</button>
+                ))}
+              </div>
             </div>
-          </div>
-        )}
+          )
+        })()}
 
         <div className="flex gap-1 items-center mt-2">
           <input type="text" value={newCorpName} onChange={e => setNewCorpName(e.target.value)}
@@ -292,7 +315,10 @@ export default function EndgameCalcTab() {
               <input type="text" value={p.name} onChange={e => setPlayerField(pi, 'name', e.target.value)}
                 className={`${nameInputCls} w-24 font-bold`} />
               <span className={labelCls}>cash</span>
-              <input type="number" value={p.cash || ''} onChange={e => setPlayerField(pi, 'cash', e.target.value)} className={inputCls} />
+              <input type="number" value={p.cash || ''} onChange={e => setPlayerField(pi, 'cash', e.target.value)}
+                onFocus={() => setActiveCell({ type: 'cash', playerIdx: pi })}
+                onBlur={() => setTimeout(() => setActiveCell(prev => prev?.type === 'cash' && prev?.playerIdx === pi ? null : prev), 200)}
+                className={`${inputCls} ${activeCell?.type === 'cash' && activeCell?.playerIdx === pi ? (m ? 'border-green-500' : 'border-blue-500') : ''}`} />
               <span className={`ml-auto font-bold ${m ? 'text-white' : 'text-white'}`}>{fmt(total)}</span>
               <button onClick={() => removePlayer(pi)} className={`${btnCls} text-red-400`}>×</button>
             </div>
