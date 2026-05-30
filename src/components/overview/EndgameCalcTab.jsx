@@ -20,9 +20,14 @@ export default function EndgameCalcTab() {
   const stateFromGame = (projectRounds = 3) => {
     if (!game || !game.corporations.some(c => c.floated)) return null
     const fCorps = game.corporations.filter(c => c.floated)
+    const loanValue = game.title.loans?.loanValue || 100
     const players = game.players.map(p => {
       const shares = {}
-      for (const c of fCorps) shares[c.sym] = Math.round(playerSharePercent(p, c.sym) / 10)
+      for (const c of fCorps) {
+        const long = Math.round(playerSharePercent(p, c.sym) / 10)
+        const shortCount = p.shares.filter(s => s.corpSym === c.sym && s.isShort).length
+        shares[c.sym] = shortCount > 0 ? -shortCount : long // negative = short
+      }
       return { name: p.name, cash: p.cash, shares }
     })
     const corps = fCorps.map(c => {
@@ -34,9 +39,11 @@ export default function EndgameCalcTab() {
         }
       }
       const prices = projectPrices(game.stockMarket, c.sym, projectRounds)
-      return { sym: c.sym, color: c.color, revenue: lastRev, prices: prices.length > 0 ? prices : [corpPrice(game.stockMarket, c.sym) || 0] }
+      return { sym: c.sym, color: c.color, revenue: lastRev, loans: c.loans || 0, prices: prices.length > 0 ? prices : [corpPrice(game.stockMarket, c.sym) || 0] }
     })
-    return { players, corps, rounds: projectRounds + 1 }
+    const hasLoans = !!game.title.loans
+    const hasShorts = !!game.title.shorts
+    return { players, corps, rounds: projectRounds + 1, hasLoans, hasShorts, loanValue }
   }
 
   const emptyState = {
@@ -46,15 +53,18 @@ export default function EndgameCalcTab() {
       { name: 'Player 3', cash: 0, shares: { A: 0, B: 0 } },
     ],
     corps: [
-      { sym: 'A', color: '#d81e3e', revenue: 0, prices: [100] },
-      { sym: 'B', color: '#0189d1', revenue: 0, prices: [100] },
+      { sym: 'A', color: '#d81e3e', revenue: 0, loans: 0, prices: [100] },
+      { sym: 'B', color: '#0189d1', revenue: 0, loans: 0, prices: [100] },
     ],
+    hasLoans: false, hasShorts: false, loanValue: 100,
   }
 
   const initState = useMemo(() => stateFromGame(3) || emptyState, [])
 
   const [players, setPlayers] = useState(initState.players)
   const [corps, setCorps] = useState(initState.corps)
+  const [showExtras, setShowExtras] = useState(initState.hasLoans || initState.hasShorts)
+  const [loanValue] = useState(initState.loanValue || 100)
   const [newCorpName, setNewCorpName] = useState('')
   const [activeCell, setActiveCell] = useState(null) // { sym, roundIdx }
   const [customPrice, setCustomPrice] = useState('')
@@ -79,7 +89,7 @@ export default function EndgameCalcTab() {
   const addCorp = () => {
     const sym = newCorpName.trim().toUpperCase() || String.fromCharCode(65 + corps.length)
     if (corps.some(c => c.sym === sym)) return
-    setCorps(prev => [...prev, { sym, color: '#888', revenue: 0, prices: [100] }])
+    setCorps(prev => [...prev, { sym, color: '#888', revenue: 0, loans: 0, prices: [100] }])
     setPlayers(prev => prev.map(p => ({ ...p, shares: { ...p.shares, [sym]: 0 } })))
     setNewCorpName('')
   }
@@ -118,8 +128,12 @@ export default function EndgameCalcTab() {
   const setPlayerField = (idx, field, val) => {
     setPlayers(prev => prev.map((p, i) => i === idx ? { ...p, [field]: field === 'name' ? val : (parseInt(val) || 0) } : p))
   }
+  // Shares: positive = long, negative = short. Can't have both.
   const adjShares = (idx, sym, delta) => {
-    setPlayers(prev => prev.map((p, i) => i === idx ? { ...p, shares: { ...p.shares, [sym]: Math.max(0, (p.shares[sym] || 0) + delta) } } : p))
+    setPlayers(prev => prev.map((p, i) => i === idx ? { ...p, shares: { ...p.shares, [sym]: (p.shares[sym] || 0) + delta } } : p))
+  }
+  const adjLoans = (sym, delta) => {
+    setCorps(prev => prev.map(c => c.sym === sym ? { ...c, loans: Math.max(0, (c.loans || 0) + delta) } : c))
   }
   const addPlayer = () => {
     const shares = {}
@@ -132,16 +146,29 @@ export default function EndgameCalcTab() {
   }
 
   // --- Live calculation ---
+  // Shares positive = long, negative = short
+  // Long:  + revenue × rounds + sum(prices) × shares - loan debt share
+  // Short: - sum(prices) × |shorts|
   const calcResults = () => {
     const standings = players.map(p => {
       let total = p.cash
       for (const c of corps) {
         const shares = p.shares[c.sym] || 0
         if (shares === 0) continue
-        total += (c.revenue || 0) * rounds
+        const finalPrice = c.prices[c.prices.length - 1] ?? 0
         let priceSum = 0
-        for (let r = 0; r < rounds; r++) priceSum += c.prices[r] ?? c.prices[c.prices.length - 1] ?? 0
-        total += priceSum * shares
+        for (let r = 0; r < rounds; r++) priceSum += c.prices[r] ?? finalPrice
+
+        if (shares > 0) {
+          // Long: dividends + share value - loan debt
+          total += (c.revenue || 0) * rounds
+          total += priceSum * shares
+          const loansDebt = (c.loans || 0) * loanValue
+          if (loansDebt > 0) total -= Math.round(loansDebt * shares * 10 / 100)
+        } else {
+          // Short: negative value (owes price × count)
+          total += priceSum * shares // shares is negative, so this subtracts
+        }
       }
       return { name: p.name, total }
     }).sort((a, b) => b.total - a.total)
@@ -231,6 +258,23 @@ export default function EndgameCalcTab() {
                   </td>
                 ))}
               </tr>
+              {/* Loans row — optional */}
+              {showExtras && (
+                <tr>
+                  <td className={`${labelCls} px-1`}>Loans</td>
+                  {corps.map(c => (
+                    <td key={c.sym} className="px-1">
+                      <div className="flex items-center justify-center gap-0.5">
+                        <button onClick={() => adjLoans(c.sym, -1)} disabled={(c.loans || 0) <= 0}
+                          className={`text-xs px-1 py-0.5 rounded disabled:opacity-20 ${m ? 'bg-blue-900/50 text-blue-300' : 'bg-broker-surface-hover text-broker-text'}`}>−</button>
+                        <span className={`text-xs w-4 text-center font-bold ${(c.loans || 0) > 0 ? 'text-red-400' : m ? 'text-blue-400' : 'text-broker-text-muted'}`}>{c.loans || 0}</span>
+                        <button onClick={() => adjLoans(c.sym, 1)}
+                          className={`text-xs px-1 py-0.5 rounded ${m ? 'bg-blue-900/50 text-blue-300' : 'bg-broker-surface-hover text-broker-text'}`}>+</button>
+                      </div>
+                    </td>
+                  ))}
+                </tr>
+              )}
               <tr><td colSpan={corps.length + 1} className={m ? 'border-b border-blue-800 py-0.5' : 'border-b border-broker-border py-0.5'} /></tr>
               {/* Price rows — tappable cells */}
               {Array.from({ length: rounds }, (_, r) => (
@@ -287,6 +331,9 @@ export default function EndgameCalcTab() {
             placeholder="Name" onKeyDown={e => e.key === 'Enter' && addCorp()}
             className={`${nameInputCls} w-14`} />
           <button onClick={addCorp} className={btnSmall}>+ Corp</button>
+          {!showExtras && (
+            <button onClick={() => setShowExtras(true)} className={`${btnSmall} ml-auto`}>Loans</button>
+          )}
         </div>
       </Panel>
 
@@ -305,17 +352,23 @@ export default function EndgameCalcTab() {
               <button onClick={() => removePlayer(pi)} className={`${btnCls} text-red-400`}>×</button>
             </div>
             <div className="flex flex-wrap gap-x-3 gap-y-1">
-              {corps.map(c => (
-                <div key={c.sym} className="flex items-center gap-0.5">
-                  <span style={{ color: c.color }} className="font-bold text-[10px] w-8">{c.sym}</span>
-                  <button onClick={() => adjShares(pi, c.sym, -1)}
-                    disabled={(p.shares[c.sym] || 0) <= 0}
-                    className={`text-xs px-1 py-0.5 rounded disabled:opacity-20 ${m ? 'bg-blue-900/50 text-blue-300' : 'bg-broker-surface-hover text-broker-text'}`}>−</button>
-                  <span className={`text-xs w-4 text-center font-bold ${m ? 'text-white' : 'text-white'}`}>{p.shares[c.sym] || 0}</span>
-                  <button onClick={() => adjShares(pi, c.sym, 1)}
-                    className={`text-xs px-1 py-0.5 rounded ${m ? 'bg-blue-900/50 text-blue-300' : 'bg-broker-surface-hover text-broker-text'}`}>+</button>
-                </div>
-              ))}
+              {corps.map(c => {
+                const val = p.shares[c.sym] || 0
+                const isShort = val < 0
+                return (
+                  <div key={c.sym} className="flex items-center gap-0.5">
+                    <span style={{ color: c.color }} className="font-bold text-[10px] w-8">{c.sym}</span>
+                    <button onClick={() => adjShares(pi, c.sym, -1)}
+                      className={`text-xs px-1 py-0.5 rounded ${m ? 'bg-blue-900/50 text-blue-300' : 'bg-broker-surface-hover text-broker-text'}`}>−</button>
+                    <span className={`text-xs w-4 text-center font-bold ${isShort ? 'text-red-400' : m ? 'text-white' : 'text-white'}`}>
+                      {val}
+                    </span>
+                    <button onClick={() => adjShares(pi, c.sym, 1)}
+                      className={`text-xs px-1 py-0.5 rounded ${m ? 'bg-blue-900/50 text-blue-300' : 'bg-broker-surface-hover text-broker-text'}`}>+</button>
+                    {isShort && <span className="text-[9px] text-red-400">S</span>}
+                  </div>
+                )
+              })}
             </div>
           </Panel>
         )
