@@ -4,6 +4,7 @@ export const g1860 = {
   ...defaults,
 
   maturity: 3, titleId: 'g1860',
+  gameInfo: '• No pool share limit • Sell anytime • English auction privates • Southern Railway forms at phase 9',
   title: '1860',
   subtitle: 'Railways on the Isle of Wight',
   designer: 'Mike Hutton',

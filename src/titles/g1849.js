@@ -4,6 +4,7 @@ export const g1849 = {
   ...defaults,
 
   maturity: 3, titleId: 'g1849',
+  gameInfo: '• Incremental cap, 20% float • Par price gates unlock by phase • Random corp order • 20/10/10/.../20 shares',
   title: '1849',
   subtitle: 'The Game of Sicilian Railways',
   designer: 'Federico Vellani',

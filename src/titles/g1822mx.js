@@ -4,6 +4,7 @@ export const g1822mx = {
   ...defaults,
 
   maturity: 1, titleId: 'g1822mx',
+  gameInfo: '• 1822 system in Mexico • 24 minors + 7 majors + NDEM national • Builder cubes • Port tiles',
   title: '1822MX',
   subtitle: 'The Railways of Mexico',
   designer: 'Scott Peterson',

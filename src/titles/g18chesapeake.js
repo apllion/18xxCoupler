@@ -4,6 +4,7 @@ export const g18chesapeake = {
   ...defaults,
 
   maturity: 4, titleId: 'g18chesapeake',
+  gameInfo: '• Streamlined 1830 variant • Sell/buy only • Random president via Vanderbilt private • 2p variant with 30% pres',
   title: '18Chesapeake',
   subtitle: 'The Birth of American Railroads',
   designer: 'Scott Petersen',

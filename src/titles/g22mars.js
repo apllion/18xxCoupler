@@ -2,7 +2,8 @@ import { defaults } from './defaults.js'
 
 export const g22mars = {
   ...defaults,
-  maturity: 1, titleId: 'g22mars', title: '22Mars', subtitle: 'Convict Camps, Mining, and Space Tourism', designer: 'Jonas Jones',
+  maturity: 1, titleId: 'g22mars',
+  gameInfo: '• Fixed 11 OR sequence • 20% shares only • Tax on 3+ shares in same corp • Revolt event • 7*/8* doubling trains', title: '22Mars', subtitle: 'Convict Camps, Mining, and Space Tourism', designer: 'Jonas Jones',
   location: 'Mars', minPlayers: 3, maxPlayers: 5,
 
   bankCash: 99999,

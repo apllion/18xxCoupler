@@ -2,7 +2,8 @@ import { defaults } from './defaults.js'
 
 export const g18ms = {
   ...defaults,
-  maturity: 3, titleId: 'g18ms', title: '18MS', subtitle: 'The Railroads Come to Mississippi', designer: 'Mark Derrick',
+  maturity: 3, titleId: 'g18ms',
+  gameInfo: '• Draft privates • Salvage value on early trains • Double-header D trains • 70% max ownership', title: '18MS', subtitle: 'The Railroads Come to Mississippi', designer: 'Mark Derrick',
   location: 'Mississippi, USA', minPlayers: 2, maxPlayers: 4,
 
   bankCash: 10000,

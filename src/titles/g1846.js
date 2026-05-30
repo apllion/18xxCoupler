@@ -4,6 +4,7 @@ export const g1846 = {
   ...defaults,
 
   maturity: 3, titleId: 'g1846',
+  gameInfo: '• Incremental cap, 20% float • Secret draft • 2 minors • Half pay • Share issuance for emergency buys',
   title: '1846',
   subtitle: 'The Race for the Midwest',
   designer: 'Thomas Lehmann',

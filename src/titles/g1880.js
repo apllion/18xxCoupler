@@ -4,6 +4,7 @@ export const g1880 = {
   ...defaults,
 
   maturity: 2, titleId: 'g1880',
+  gameInfo: '• Building permits gate track laying • Communist takeover event • Foreign investors • 3-7 players',
   title: '1880',
   subtitle: 'China',
   designer: 'Helmut Ohley, Leonhard Orgler',

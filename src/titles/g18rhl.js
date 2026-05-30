@@ -4,6 +4,7 @@ export const g18rhl = {
   ...defaults,
 
   maturity: 2, titleId: 'g18rhl',
+  gameInfo: '• English auction • Delayed RhE par via private • MKB has 3x20%+4x10% shares • CCE dual home stations',
   title: '18Rhl',
   subtitle: 'Rhineland',
   designer: 'Wolfram Janich',

@@ -4,6 +4,7 @@ export const g1830 = {
   ...defaults,
 
   maturity: 4, titleId: 'g1830',
+  gameInfo: '• Classic 18xx baseline • Full cap, sell/buy/sell • 6 privates with special abilities • D-train discounts',
   title: '1830',
   subtitle: 'Railways & Robber Barons',
   designer: 'Francis Tresham',

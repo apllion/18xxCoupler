@@ -2,7 +2,8 @@ import { defaults } from './defaults.js'
 
 export const g18gb = {
   ...defaults,
-  maturity: 2, titleId: 'g18gb', title: '18GB', subtitle: 'Railways of Great Britain', designer: 'Dave Berry',
+  maturity: 2, titleId: 'g18gb',
+  gameInfo: '• 5-share corps convert to 10-share • 40% president cert • Unlimited bank • Blue tile phase • X-trains', title: '18GB', subtitle: 'Railways of Great Britain', designer: 'Dave Berry',
   location: 'Great Britain', minPlayers: 2, maxPlayers: 6,
   bankCash: 99999, startingCash: { 2: 375, 3: 330, 4: 330, 5: 320, 6: 305 },
   certLimit: { 2: 19, 3: 14, 4: 14, 5: 14, 6: 12 },

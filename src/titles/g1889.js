@@ -4,6 +4,7 @@ export const g1889 = {
   ...defaults,
 
   maturity: 4, titleId: 'g1889',
+  gameInfo: '• Intro 18xx, Shikoku • Must sell in blocks • No emergency buy from others • 50% float',
   title: '1889',
   subtitle: 'Shikoku 1889',
   designer: 'Yasutaka Ikeda',

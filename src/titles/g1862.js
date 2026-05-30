@@ -2,7 +2,8 @@ import { defaults } from './defaults.js'
 
 export const g1862 = {
   ...defaults,
-  maturity: 1, titleId: 'g1862', title: '1862', subtitle: 'Railway Mania in the Eastern Counties', designer: 'Mike Hutton',
+  maturity: 1, titleId: 'g1862',
+  gameInfo: '• 20 corps, 30% president • Peer mergers • Unlimited-distance trains • Charter auction • LNER trigger', title: '1862', subtitle: 'Railway Mania in the Eastern Counties', designer: 'Mike Hutton',
   location: 'Eastern Counties, England', minPlayers: 2, maxPlayers: 8,
   bankCash: 15000,
   startingCash: { 2: 1200, 3: 800, 4: 600, 5: 480, 6: 400, 7: 345, 8: 300 },

@@ -4,6 +4,7 @@ export const grla = {
   ...defaults,
 
   maturity: 0, titleId: 'grla',
+  gameInfo: '• Procedural map • 12 unique minors merge into majors • Identity choice at merge • Fixed 4/6 cycles',
   title: 'Railways of the Lost Atlas',
   subtitle: 'Build, Merge, Prosper',
   designer: 'Jacob Schacht & Kevin Delger',

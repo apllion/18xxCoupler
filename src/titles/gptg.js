@@ -4,6 +4,7 @@ export const gptg = {
   ...defaults,
 
   maturity: 0, titleId: 'gptg',
+  gameInfo: '• Strategy cards with station permits • Fixed 7 rounds • 20% shares • CEO salary • Corp mergers from Brown',
   title: 'PTG',
   subtitle: 'Pocket Train Game',
   designer: 'Jonas Jones',

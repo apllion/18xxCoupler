@@ -4,6 +4,7 @@ export const g18sj = {
   ...defaults,
 
   maturity: 2, titleId: 'g18sj',
+  gameInfo: '• Incremental cap switches to full at phase 5 • Nationalization events • Sell/buy/sell • KHJ minor',
   title: '18SJ',
   subtitle: 'Railways in the Frozen North',
   designer: 'Örjan Wennman',

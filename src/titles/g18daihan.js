@@ -2,7 +2,8 @@ import { defaults } from './defaults.js'
 
 export const g18daihan = {
   ...defaults,
-  maturity: 2, titleId: 'g18daihan', title: '1899 Daihan', subtitle: 'Railways of the Korean Empire', designer: 'Geonil',
+  maturity: 2, titleId: 'g18daihan',
+  gameInfo: '• Executive cars (+1 train range) • Goods transport via ports • D-train purchase advances stock price', title: '1899 Daihan', subtitle: 'Railways of the Korean Empire', designer: 'Geonil',
   location: 'Korean Peninsula', minPlayers: 3, maxPlayers: 5,
   bankCash: 7600,
   startingCash: { 3: 440, 4: 400, 5: 380 },

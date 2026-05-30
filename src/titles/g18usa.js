@@ -2,7 +2,8 @@ import { defaults } from './defaults.js'
 
 export const g18usa = {
   ...defaults,
-  maturity: 2, titleId: 'g18usa', title: '18USA', subtitle: 'The Railroads Come of Age', designer: 'Edward Reece, Mark Hendrickson, Shawn Fox',
+  maturity: 2, titleId: 'g18usa',
+  gameInfo: '• Incremental cap, 20% float • Resource markers (coal, ore, oil) • Subsidy privates • 2-7 players', title: '18USA', subtitle: 'The Railroads Come of Age', designer: 'Edward Reece, Mark Hendrickson, Shawn Fox',
   location: 'United States', minPlayers: 2, maxPlayers: 7,
   bankCash: 99999, startingCash: { 2: 630, 3: 420, 4: 315, 5: 300, 6: 250, 7: 225 },
   certLimit: { 2: 32, 3: 21, 4: 16, 5: 16, 6: 13, 7: 11 },

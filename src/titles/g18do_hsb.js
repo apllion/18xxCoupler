@@ -4,6 +4,7 @@ export const g18do_hsb = {
   ...defaults,
 
   maturity: 0, titleId: 'g18do_hsb',
+  gameInfo: '• Railways + brewery corporations • Beer market with segments • Small breweries as privates • Fixed 6 rounds',
   title: '18DO HSB',
   subtitle: 'Dortmund — Heat, Sweat & Beer',
   designer: 'Wolfram Janich & Michael Scharf',

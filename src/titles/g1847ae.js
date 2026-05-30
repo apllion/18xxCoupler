@@ -4,6 +4,7 @@ export const g1847ae = {
   ...defaults,
 
   maturity: 2, titleId: 'g1847ae',
+  gameInfo: '• Incremental cap • Investor shares auto-exchange at 5+5 • Sequential corp founding • LFK earns 10% of train cost',
   title: '1847 AE',
   subtitle: 'Pfalz — Anniversary Edition',
   designer: 'Wolfram Janich',

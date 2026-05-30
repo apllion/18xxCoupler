@@ -19,6 +19,7 @@ export default function GameSelector() {
   const [showMore, setShowMore] = useState(false)
   const [sortBy, setSortBy] = useState('rating')
   const [showLegend, setShowLegend] = useState(false)
+  const [showInfo, setShowInfo] = useState(null) // title object
 
   const savedList = Object.entries(savedGames)
     .map(([key, game]) => ({ key, game }))
@@ -152,7 +153,7 @@ export default function GameSelector() {
       <div className="grid grid-cols-2 gap-3 w-full max-w-md">
         {sorted.map((t) => (
           <TitleButton key={t.titleId} t={t} onClick={() => navigate(`/setup/${t.titleId}`)}
-            onShowLegend={() => setShowLegend(true)} />
+            onShowLegend={() => setShowLegend(true)} onShowInfo={setShowInfo} />
         ))}
       </div>
       {sorted.length === 0 && (
@@ -214,6 +215,28 @@ export default function GameSelector() {
       </div>
 
       {showLegend && <WrenchLegend onClose={() => setShowLegend(false)} />}
+      {showInfo && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60" onClick={() => setShowInfo(null)}>
+          <div className="bg-broker-bg border border-broker-border rounded-lg p-4 shadow-xl w-80 max-w-[90vw]"
+            onClick={e => e.stopPropagation()}>
+            <div className="text-sm text-white font-bold mb-1">{showInfo.title}</div>
+            <div className="text-xs text-broker-text-muted mb-3">{showInfo.subtitle}</div>
+            <div className="text-xs text-broker-text space-y-1">
+              {(showInfo.gameInfo || '').split('•').filter(s => s.trim()).map((line, i) => (
+                <div key={i} className="flex gap-1">
+                  <span className="text-broker-text-muted">•</span>
+                  <span>{line.trim()}</span>
+                </div>
+              ))}
+            </div>
+            <div className="text-[10px] text-broker-text-muted mt-3">
+              {showInfo.minPlayers}–{showInfo.maxPlayers} players • {showInfo.designer}
+            </div>
+            <button onClick={() => setShowInfo(null)}
+              className="mt-3 w-full text-xs text-broker-text-muted hover:text-white py-1">Close</button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -273,12 +296,18 @@ function WrenchLegend({ onClose }) {
   )
 }
 
-function TitleButton({ t, onClick, onShowLegend }) {
+function TitleButton({ t, onClick, onShowLegend, onShowInfo }) {
   const m = t.maturity || 0
   return (
     <button onClick={onClick}
       className="bg-broker-surface hover:bg-broker-surface-hover border border-broker-border rounded-lg p-4 text-left transition-colors relative overflow-hidden">
-      <div className="text-xl font-bold text-broker-text">{t.title}</div>
+      <div className="flex items-center gap-2">
+        <span className="text-xl font-bold text-broker-text">{t.title}</span>
+        {t.gameInfo && (
+          <span onClick={e => { e.stopPropagation(); onShowInfo?.(t) }}
+            className="text-[10px] text-broker-text-muted/40 hover:text-broker-text-muted cursor-pointer">ℹ</span>
+        )}
+      </div>
       <div className="text-sm text-broker-text-muted mt-1">{t.subtitle}</div>
       <div className="flex items-center justify-between mt-2">
         <span className="text-xs text-broker-text-muted">{t.minPlayers}–{t.maxPlayers} players</span>

@@ -4,6 +4,7 @@ export const g18do_trg = {
   ...defaults,
 
   maturity: 0, titleId: 'g18do_trg',
+  gameInfo: '• Dortmund railway-only game • Beer cube transport • 50% pool limit • Triple-jump dividend movement',
   title: '18DO TRG',
   subtitle: 'Dortmund — The Railway Game',
   designer: 'Wolfram Janich & Michael Scharf',

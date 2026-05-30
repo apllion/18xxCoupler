@@ -2,7 +2,8 @@ import { defaults } from './defaults.js'
 
 export const g1822 = {
   ...defaults,
-  maturity: 1, titleId: 'g1822', title: '1822', subtitle: 'The Railways of Great Britain', designer: 'Simon Cutforth',
+  maturity: 1, titleId: 'g1822',
+  gameInfo: '• 30 minors + 10 majors + concessions • Bid box auction • L/2 train variants • Tax haven • Major acquires minor', title: '1822', subtitle: 'The Railways of Great Britain', designer: 'Simon Cutforth',
   location: 'Great Britain', minPlayers: 2, maxPlayers: 7,
   bankCash: 12000, startingCash: { 2: 900, 3: 700, 4: 525, 5: 420, 6: 350, 7: 300 },
   certLimit: { 2: 33, 3: 26, 4: 20, 5: 16, 6: 13, 7: 11 },

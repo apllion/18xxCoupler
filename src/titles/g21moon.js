@@ -2,7 +2,8 @@ import { defaults } from './defaults.js'
 
 export const g21moon = {
   ...defaults,
-  maturity: 2, titleId: 'g21moon', title: '21 Moon', subtitle: 'Lunar Railways', designer: 'Jonas Jones and Scott Petersen',
+  maturity: 2, titleId: 'g21moon',
+  gameInfo: '• Corps buy/sell shares in Corporate Round • Mineral resources • Incremental cap, 50% float • Lunar theme', title: '21 Moon', subtitle: 'Lunar Railways', designer: 'Jonas Jones and Scott Petersen',
   location: 'The Moon', minPlayers: 2, maxPlayers: 5,
   bankCash: 99999, startingCash: { 2: 600, 3: 540, 4: 410, 5: 340 }, certLimit: { 2: 15, 3: 15, 4: 12, 5: 10 },
   currencyFormat: '₡', capitalization: 'incremental', floatPercent: 50, sellBuyOrder: 'sell_buy',

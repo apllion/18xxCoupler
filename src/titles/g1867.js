@@ -4,6 +4,7 @@ export const g1867 = {
   ...defaults,
 
   maturity: 2, titleId: 'g1867',
+  gameInfo: '• 16 minors → 8 majors → national CN • Merger rounds • Half pay • Column market • Train discounts at phase 8',
   title: '1867',
   subtitle: 'Railways of Canada',
   designer: 'Ian D. Wilson',

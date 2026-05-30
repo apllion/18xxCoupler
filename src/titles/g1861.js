@@ -4,6 +4,7 @@ export const g1861 = {
   ...defaults,
 
   maturity: 2, titleId: 'g1861',
+  gameInfo: '• 16 minors → 8 majors → national RSR • Nationalization events • Bid box auction • Incremental cap, 20% float',
   title: '1861',
   subtitle: 'Railways of the Russian Empire',
   designer: 'Ian D. Wilson',

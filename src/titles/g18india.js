@@ -2,7 +2,8 @@ import { defaults } from './defaults.js'
 
 export const g18india = {
   ...defaults,
-  maturity: 1, titleId: 'g18india', title: '18India', subtitle: 'The Railways of the British Raj', designer: 'Michael Carter, Anthony Fryer, John Harres, Nick Neylon',
+  maturity: 1, titleId: 'g18india',
+  gameInfo: '• Corps buy shares of other corps • 30% float • Multiplier trains (3x2, 4x3) • No sell movement • All tiles from start', title: '18India', subtitle: 'The Railways of the British Raj', designer: 'Michael Carter, Anthony Fryer, John Harres, Nick Neylon',
   location: 'India', minPlayers: 2, maxPlayers: 5,
   bankCash: 9000, startingCash: { 2: 1100, 3: 733, 4: 550, 5: 440 },
   certLimit: { 2: 37, 3: 23, 4: 18, 5: 15 },
