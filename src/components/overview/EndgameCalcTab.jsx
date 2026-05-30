@@ -321,9 +321,13 @@ export default function EndgameCalcTab() {
               <span className={labelCls}>cash</span>
               <input type="number" value={p.cash || ''} onChange={e => setPlayerField(pi, 'cash', e.target.value)}
                 className={inputCls} />
+              <span className={`ml-auto font-bold ${m ? 'text-white' : 'text-white'}`}>{fmt(total)}</span>
               <button onClick={() => setShowCalc(isOpen ? null : pi)}
-                className={`ml-auto font-bold ${m ? 'text-white' : 'text-white'} hover:underline`}
-                title="Show calculation">{fmt(total)}</button>
+                className={`text-[10px] px-1.5 py-0.5 rounded ${isOpen
+                  ? (m ? 'bg-green-800 text-green-200' : 'bg-blue-600 text-white')
+                  : (m ? 'bg-blue-900/50 text-blue-300' : 'bg-broker-surface-hover text-broker-text-muted')
+                }`}
+                title="Show calculation">=</button>
               <button onClick={() => removePlayer(pi)} className={`${btnCls} text-red-400`}>×</button>
             </div>
             <div className="flex flex-wrap gap-x-3 gap-y-1">
