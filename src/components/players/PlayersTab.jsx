@@ -263,9 +263,6 @@ export default function PlayersTab() {
           ) : (
             <div className="text-xs text-broker-text-muted">No cards yet</div>
           )}
-          {game.title.strategyCards && (
-            <GiveCardPanel game={game} playerId={selected.id} playerCards={selected.cards || []} dispatch={dispatch} />
-          )}
         </div>
       )}
 
@@ -360,8 +357,7 @@ function SectionHeader({ title }) {
 
 function PlayerActions({ game, player, dispatch, fmt, goToCorp }) {
   const [parCorp, setParCorp] = useState(null) // corpSym being par'd
-  const [auctionBid, setAuctionBid] = useState('') // bid amount
-  const [auctionCard, setAuctionCard] = useState(null) // card id
+  const [payAmount, setPayAmount] = useState('') // pay to bank
 
   const floatedCorps = game.corporations.filter(c => c.floated)
   const unfloatedCorps = game.corporations.filter(c => !c.ipoed)
@@ -424,63 +420,46 @@ function PlayerActions({ game, player, dispatch, fmt, goToCorp }) {
         </div>
       )}
 
-      {/* Auction (title-specific — PTG priority auction, 1822 bidbox, etc.) */}
-      {(() => {
-        const hasCards = game.title.strategyCards?.length > 0
-        const hasPregameAuction = game.title.pregame?.some(s => s.type === 'priority' || s.type === 'english' || s.type === 'bidbox')
-        if (!hasCards && !hasPregameAuction) return null
+      {/* Pay to bank */}
+      <div className="flex items-center gap-2">
+        <span className="text-xs text-broker-text-muted">Pay bank:</span>
+        <input type="number" value={payAmount}
+          onChange={e => setPayAmount(e.target.value)}
+          placeholder="0"
+          className="w-16 bg-broker-bg border border-broker-border rounded px-2 py-1 text-sm text-broker-text text-right" />
+        <button onClick={() => {
+          const v = parseInt(payAmount) || 0
+          if (v > 0) { dispatch({ type: 'ADJUST_CASH', entityId: player.id, entityType: 'player', amount: -v }); setPayAmount('') }
+        }}
+          disabled={!(parseInt(payAmount) > 0)}
+          className="text-sm bg-amber-800 hover:bg-amber-700 disabled:opacity-30 text-white px-3 py-2 rounded">
+          Pay {parseInt(payAmount) > 0 ? fmt(parseInt(payAmount)) : ''}
+        </button>
+      </div>
 
+      {/* Take strategy card (PTG) */}
+      {game.title.strategyCards?.length > 0 && (() => {
         const allGiven = game.players.flatMap(p => (p.cards || []).map(c => c.id))
-        const availableCards = hasCards ? (game.title.strategyCards || []).filter(c => !allGiven.includes(c.id)) : []
+        const available = game.title.strategyCards.filter(c => !allGiven.includes(c.id))
+        if (available.length === 0) return null
         const cardColors = { blue: '#0189d1', white: '#cccccc', green: '#237333', red: '#d81e3e', purple: '#800080', black: '#333333', yellow: '#FFF500', grey: '#808080' }
-
-        const doAuction = () => {
-          const bidAmount = parseInt(auctionBid) || 0
-          if (bidAmount > 0) {
-            dispatch({ type: 'ADJUST_CASH', entityId: player.id, entityType: 'player', amount: -bidAmount })
-          }
-          if (auctionCard) {
-            const card = availableCards.find(c => c.id === auctionCard)
-            if (card) dispatch({ type: 'GIVE_CARD', playerId: player.id, card })
-          }
-          setAuctionBid(''); setAuctionCard(null)
-        }
-
         return (
           <div>
-            <div className="text-xs text-broker-text-muted mb-1 font-medium uppercase">Auction</div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-xs text-broker-text-muted">Bid:</span>
-              <input type="number" value={auctionBid}
-                onChange={e => setAuctionBid(e.target.value)}
-                placeholder="0"
-                className="w-16 bg-broker-bg border border-broker-border rounded px-2 py-1 text-sm text-broker-text text-right" />
+            <div className="text-xs text-broker-text-muted mb-1 font-medium uppercase">Take Strategy Card</div>
+            <div className="flex flex-wrap gap-1">
+              {available.map(card => {
+                const cc = cardColors[card.color] || '#888'
+                const ct = card.color === 'yellow' || card.color === 'white' ? '#000' : '#fff'
+                return (
+                  <button key={card.id} onClick={() => dispatch({ type: 'GIVE_CARD', playerId: player.id, card })}
+                    className="text-sm px-3 py-2 rounded font-medium hover:opacity-80"
+                    style={{ backgroundColor: cc, color: ct }}
+                    title={`${card.unique}\nPermit: ${card.permit}`}>
+                    {card.name}
+                  </button>
+                )
+              })}
             </div>
-            {hasCards && availableCards.length > 0 && (
-              <div className="mb-2">
-                <div className="text-xs text-broker-text-muted mb-1">Strategy card:</div>
-                <div className="flex flex-wrap gap-1">
-                  {availableCards.map(card => {
-                    const cc = cardColors[card.color] || '#888'
-                    const ct = card.color === 'yellow' || card.color === 'white' ? '#000' : '#fff'
-                    return (
-                      <button key={card.id} onClick={() => setAuctionCard(auctionCard === card.id ? null : card.id)}
-                        className={`text-sm px-3 py-2 rounded font-medium ${auctionCard === card.id ? 'ring-2 ring-white' : 'hover:opacity-80'}`}
-                        style={{ backgroundColor: cc, color: ct }}
-                        title={`${card.unique}\nPermit: ${card.permit}`}>
-                        {card.name}
-                      </button>
-                    )
-                  })}
-                </div>
-              </div>
-            )}
-            {(parseInt(auctionBid) > 0 || auctionCard) && (
-              <button onClick={doAuction}
-                className="text-sm bg-amber-800 hover:bg-amber-700 text-white px-3 py-2 rounded font-medium">
-                Confirm{parseInt(auctionBid) > 0 ? ` bid ${fmt(parseInt(auctionBid))}` : ''}{auctionCard ? ' + card' : ''}
-              </button>
-            )}
           </div>
         )
       })()}
