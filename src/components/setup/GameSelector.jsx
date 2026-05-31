@@ -83,8 +83,8 @@ export default function GameSelector() {
         ))}
       </div>
 
-      <div className="w-full max-w-md mt-2 mb-1 rounded-lg overflow-hidden bg-broker-bg">
-        <img src={import.meta.env.BASE_URL + 'logo.png'} alt="18xxCoupler" className="w-full mix-blend-lighten" />
+      <div className="w-full max-w-md mt-2 mb-1 rounded-lg overflow-hidden bg-black">
+        <img src={import.meta.env.BASE_URL + 'logo.png'} alt="18xxCoupler" className="w-full" />
       </div>
       <p className="text-[10px] text-broker-text-muted mb-6">
         v{typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '?'} · {typeof __BUILD_ID__ !== 'undefined' ? __BUILD_ID__ : '?'}
