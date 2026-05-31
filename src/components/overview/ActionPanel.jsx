@@ -405,16 +405,8 @@ function PanelContent({ panel, game, player, corp, unfloated, fmt, revenueInput,
             </Btn>
           ))}
         </div>
-        {/* Amount — value buttons */}
-        <div className={m ? 'text-blue-400 text-xs mb-0.5' : 'text-broker-text-muted text-xs mb-0.5'}>
-          Amount: {payAmount > 0 && <span className="font-bold text-white ml-1">{fmt(payAmount)}</span>}
-        </div>
-        <div className="flex gap-1 flex-wrap mb-1">
-          {[5, 10, 20, 30, 40, 50, 80, 100, 150, 200].map(v => (
-            <Btn key={v} m={m} v={payAmount === v ? 'green' : 'blue'} o={() => setPayAmount(v)}>{fmt(v)}</Btn>
-          ))}
-          <Btn m={m} v="blue" o={() => setPayAmount(0)}>Clear</Btn>
-        </div>
+        {/* Amount — value buttons + other */}
+        <ValuePicker m={m} value={payAmount} onChange={setPayAmount} label="Amount:" />
         {/* Confirm */}
         {payAmount > 0 && payFrom && (
           <Btn m={m} v="green" o={() => doPay()}>
@@ -838,6 +830,31 @@ function MergePanel({ game, corp, fmt, doAction, m }) {
   }
 
   return null
+}
+
+// Reusable value picker: tap buttons + custom "other" input. No keyboard needed for common values.
+function ValuePicker({ m, value, onChange, values = [5, 10, 20, 30, 40, 50, 80, 100, 150, 200], label }) {
+  const [custom, setCustom] = useState('')
+  return (
+    <div>
+      {label && <div className={m ? 'text-blue-400 text-xs mb-0.5' : 'text-broker-text-muted text-xs mb-0.5'}>
+        {label}{value > 0 && <span className={m ? ' text-white font-bold ml-1' : ' text-broker-text font-bold ml-1'}>{value}</span>}
+      </div>}
+      <div className="flex gap-1 flex-wrap">
+        {values.map(v => (
+          <Btn key={v} m={m} v={value === v ? 'green' : 'blue'} o={() => onChange(v)}>{v}</Btn>
+        ))}
+        <input type="number" value={custom} onChange={e => setCustom(e.target.value)}
+          onKeyDown={e => { if (e.key === 'Enter') { const v = parseInt(custom) || 0; if (v > 0) { onChange(v); setCustom('') } } }}
+          placeholder="other"
+          className={m
+            ? 'w-14 bg-black border border-green-800 rounded px-2 py-0.5 text-white text-center text-xs font-mono'
+            : 'w-14 bg-broker-bg border border-broker-border rounded px-2 py-0.5 text-broker-text text-center text-xs'
+          } />
+        {value > 0 && <Btn m={m} v="blue" o={() => onChange(0)}>Clear</Btn>}
+      </div>
+    </div>
+  )
 }
 
 function PriceInput({ m, label, value, onChange, onConfirm, onCancel }) {
