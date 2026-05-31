@@ -213,11 +213,16 @@ export default function PlayersTab() {
           <div className="text-xs text-broker-text-muted mb-2 font-medium uppercase">Strategy Cards</div>
           {selected.cards?.length > 0 ? (
             <div className="space-y-2">
-              {selected.cards.map((card) => (
-                <div key={card.id} className={`text-sm rounded p-2 ${card.used ? 'opacity-40 bg-broker-bg' : 'bg-broker-surface-hover'}`}>
+              {selected.cards.map((card) => {
+                const cardColor = { blue: '#0189d1', white: '#cccccc', green: '#237333', red: '#d81e3e', purple: '#800080', black: '#333333', yellow: '#FFF500', grey: '#808080' }[card.color] || '#888'
+                const cardTextColor = card.color === 'yellow' || card.color === 'white' ? '#000' : '#fff'
+                return (
+                <div key={card.id} className={`text-sm rounded p-2 ${card.used ? 'opacity-40 bg-broker-bg' : 'bg-broker-surface-hover'}`}
+                  style={{ borderLeft: `4px solid ${cardColor}` }}>
                   <div className="flex items-center gap-2">
+                    <span className="w-5 h-5 rounded-full flex-shrink-0 flex items-center justify-center text-[9px] font-bold"
+                      style={{ backgroundColor: cardColor, color: cardTextColor }}>{card.color[0].toUpperCase()}</span>
                     <span className="font-medium">{card.name}</span>
-                    <span className="text-xs text-broker-text-muted">({card.color})</span>
                     {card.used && <span className="text-xs text-red-400 ml-auto">{card.usedAs === 'unique_action' ? 'Used' : `→ ${card.assignedTo?.corpSym}`}</span>}
                   </div>
                   {!card.used && (
@@ -252,7 +257,8 @@ export default function PlayersTab() {
                   )}
                   <div className="text-xs text-broker-text-muted mt-1">Permit: {card.permit}</div>
                 </div>
-              ))}
+                )
+              })}
             </div>
           ) : (
             <div className="text-xs text-broker-text-muted">No cards yet</div>
@@ -516,14 +522,19 @@ function GiveCardPanel({ game, playerId, playerCards, dispatch }) {
     <div className="mt-2">
       <div className="text-xs text-broker-text-muted mb-1">Give card:</div>
       <div className="flex flex-wrap gap-1">
-        {available.map((card) => (
-          <button
-            key={card.id}
-            onClick={() => dispatch({ type: 'GIVE_CARD', playerId, card })}
-            className="text-xs bg-broker-surface-hover hover:bg-broker-surface px-2 py-1 rounded"
-            title={`${card.unique}\nPermit: ${card.permit}`}
-          >{card.name}</button>
-        ))}
+        {available.map((card) => {
+          const cc = { blue: '#0189d1', white: '#cccccc', green: '#237333', red: '#d81e3e', purple: '#800080', black: '#333333', yellow: '#FFF500', grey: '#808080' }[card.color] || '#888'
+          const ct = card.color === 'yellow' || card.color === 'white' ? '#000' : '#fff'
+          return (
+            <button
+              key={card.id}
+              onClick={() => dispatch({ type: 'GIVE_CARD', playerId, card })}
+              className="text-sm px-3 py-2 rounded font-medium hover:opacity-80"
+              style={{ backgroundColor: cc, color: ct }}
+              title={`${card.unique}\nPermit: ${card.permit}`}
+            >{card.name}</button>
+          )
+        })}
       </div>
     </div>
   )
