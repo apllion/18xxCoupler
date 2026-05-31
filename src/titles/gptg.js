@@ -13,7 +13,7 @@ export const gptg = {
   maxPlayers: 4,
 
   bankCash: 99999, // Not specified — effectively unlimited
-  startingCash: { 2: 500, 3: 400, 4: 300 }, // Placeholder — rules say "distribute based on player count"
+  startingCash: { 2: 340, 3: 230, 4: 180 },
   certLimit: { 2: 99, 3: 99, 4: 99 }, // Unlimited share ownership per rules
   currencyFormat: '$',
 
@@ -48,21 +48,21 @@ export const gptg = {
 
   phases: [
     { name: 'Yellow', trainLimit: 2, tiles: ['yellow'], operatingRounds: 1 },
-    { name: 'Green', on: 'Green', trainLimit: 2, tiles: ['yellow','green'], operatingRounds: 1 },
-    { name: 'Brown', on: 'Brown', trainLimit: 2, tiles: ['yellow','green','brown'], operatingRounds: 1 },
-    { name: 'Grey', on: 'Grey', trainLimit: 2, tiles: ['yellow','green','brown','gray'], operatingRounds: 1 },
-    { name: 'Black', on: 'Black', trainLimit: 2, tiles: ['yellow','green','brown','gray'], operatingRounds: 1 },
-    { name: 'Renovated', on: 'RenGreen', trainLimit: 2, tiles: ['yellow','green','brown','gray'], operatingRounds: 1 },
+    { name: 'Green', on: '3', trainLimit: 2, tiles: ['yellow','green'], operatingRounds: 1 },
+    { name: 'Brown', on: '4', trainLimit: 2, tiles: ['yellow','green','brown'], operatingRounds: 1 },
+    { name: 'Grey', on: '6', trainLimit: 2, tiles: ['yellow','green','brown','gray'], operatingRounds: 1 },
+    { name: 'Black', on: 'S', trainLimit: 2, tiles: ['yellow','green','brown','gray'], operatingRounds: 1 },
+    { name: 'Renovated', on: '3R', trainLimit: 2, tiles: ['yellow','green','brown','gray'], operatingRounds: 1 },
   ],
 
   trains: [
-    { name: 'Yellow', distance: 2, price: 120, rustsOn: 'Brown', num: 4 },
-    { name: 'Green', distance: 3, price: 170, rustsOn: 'Grey', num: 4 },
-    { name: 'Brown', distance: 4, price: 290, rustsOn: 'Black', num: 2 },
-    { name: 'Grey', distance: 6, price: 440, num: 2 },
-    { name: 'Black', distance: 99, price: 560, num: 3 },
-    { name: 'RenGreen', distance: 3, price: 300, num: 4, availableOn: 'Black',
-      desc: 'Renovated green trains. Available after last black train sold.' },
+    { name: '2', distance: 2, price: 120, rustsOn: '4', num: 4 },
+    { name: '3', distance: 3, price: 170, rustsOn: '6', num: 4 },
+    { name: '4', distance: 4, price: 290, rustsOn: 'S', num: 2 },
+    { name: '6', distance: 6, price: 440, num: 2 },
+    { name: 'S', distance: 99, price: 560, num: 3 },
+    { name: '3R', distance: 3, price: 300, num: 4, availableOn: 'S',
+      desc: 'Renovated 3-trains. Available after last S-train sold.' },
   ],
 
   // 8 companies, all identical structure
