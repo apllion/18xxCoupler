@@ -70,3 +70,9 @@ export function getCorpShares(state, corpSym) {
   const def = state.title.corporations?.find((c) => c.sym === corpSym)
   return def?.shares ?? state.title.shares ?? [20, 10, 10, 10, 10, 10, 10, 10, 10]
 }
+
+// Regular (non-president) share size for a corp. Used for price calculations.
+export function regularSharePercent(state, corpSym) {
+  const shares = getCorpShares(state, corpSym)
+  return shares[1] ?? shares[0] ?? 10
+}

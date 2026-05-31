@@ -1,5 +1,6 @@
 // SharePool — buy/sell shares between players, IPO, and market pool.
 // Advisory only — never blocks actions.
+import { regularSharePercent } from './corporation.js'
 
 export function buyShareFromIPO(state, playerId, corpSym, percent = 10) {
   const player = state.players.find((p) => p.id === playerId)
@@ -11,7 +12,7 @@ export function buyShareFromIPO(state, playerId, corpSym, percent = 10) {
   if (!player || !corp || !price) return
 
   // Market price = per-share price. Shares per cert = percent / baseShareSize.
-  const baseShare = state.title.shares?.[1] ?? 10
+  const baseShare = regularSharePercent(state, corpSym)
   const cost = price * (percent / baseShare)
   const isPresident = percent === 20 || (percent === (state.title.shares?.[0] ?? 20))
 
@@ -49,7 +50,7 @@ export function buyShareFromMarket(state, playerId, corpSym, percent = 10) {
 
   if (!player || !corp || !price) return
 
-  const baseShare = state.title.shares?.[1] ?? 10
+  const baseShare = regularSharePercent(state, corpSym)
   const cost = price * (percent / baseShare)
   player.cash -= cost
   corp.marketShares -= percent
@@ -65,7 +66,7 @@ export function sellShares(state, playerId, corpSym, percent = 10) {
 
   if (!player || !corp || !price) return
 
-  const baseShare = state.title.shares?.[1] ?? 10
+  const baseShare = regularSharePercent(state, corpSym)
   const revenue = price * (percent / baseShare)
   player.cash += revenue
   state.bank.cash -= revenue
@@ -94,7 +95,7 @@ export function corpBuyShareFromIPO(state, buyerCorpSym, targetCorpSym, percent 
 
   if (!buyer || !target || !price) return
 
-  const baseShare = state.title.shares?.[1] ?? 10; const cost = price * (percent / baseShare)
+  const baseShare = regularSharePercent(state, targetCorpSym); const cost = price * (percent / baseShare)
   buyer.cash -= cost
   state.bank.cash += cost
 
@@ -118,7 +119,7 @@ export function corpBuyShareFromMarket(state, buyerCorpSym, targetCorpSym, perce
 
   if (!buyer || !target || !price) return
 
-  const baseShare = state.title.shares?.[1] ?? 10; const cost = price * (percent / baseShare)
+  const baseShare = regularSharePercent(state, targetCorpSym); const cost = price * (percent / baseShare)
   buyer.cash -= cost
   target.marketShares -= percent
   state.bank.cash += cost
@@ -133,7 +134,7 @@ export function corpSellShares(state, sellerCorpSym, targetCorpSym, percent = 10
 
   if (!seller || !target || !price) return
 
-  const baseShare = state.title.shares?.[1] ?? 10; const revenue = price * (percent / baseShare)
+  const baseShare = regularSharePercent(state, targetCorpSym); const revenue = price * (percent / baseShare)
   seller.cash += revenue
   state.bank.cash -= revenue
 
