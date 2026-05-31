@@ -351,6 +351,53 @@ function PanelContent({ panel, game, player, corp, unfloated, fmt, revenueInput,
   }
 
   // Export train (1817, 18USA)
+  // Pay to bank
+  if (panel === 'paybank' && player) {
+    return (
+      <div>
+        <Title m={m}>Pay Bank — {player.name} ({fmt(player.cash)})</Title>
+        <div className="flex gap-1 flex-wrap mt-1">
+          {[5, 10, 20, 30, 40, 50, 100].map(v => (
+            <Btn key={v} m={m} v="blue" o={() => { doAction({ type: 'ADJUST_CASH', entityId: player.id, entityType: 'player', amount: -v }); onClose() }}>
+              {fmt(v)}
+            </Btn>
+          ))}
+        </div>
+        <PriceInput m={m} label="Other" value={revenueInput} onChange={setRevenueInput}
+          onConfirm={() => { const v = parseInt(revenueInput) || 0; if (v > 0) { doAction({ type: 'ADJUST_CASH', entityId: player.id, entityType: 'player', amount: -v }); onClose() } }}
+          onCancel={onClose} />
+      </div>
+    )
+  }
+
+  // Take strategy card
+  if (panel === 'takecard' && player) {
+    const allGiven = game.players.flatMap(p => (p.cards || []).map(c => c.id))
+    const available = (game.title.strategyCards || []).filter(c => !allGiven.includes(c.id))
+    const cardColors = { blue: '#0189d1', white: '#cccccc', green: '#237333', red: '#d81e3e', purple: '#800080', black: '#333333', yellow: '#FFF500', grey: '#808080' }
+    if (available.length === 0) return <Title m={m}>No cards available</Title>
+    return (
+      <div>
+        <Title m={m}>Take Strategy Card — {player.name}</Title>
+        <div className="flex gap-1 flex-wrap mt-1">
+          {available.map(card => {
+            const cc = cardColors[card.color] || '#888'
+            const ct = card.color === 'yellow' || card.color === 'white' ? '#000' : '#fff'
+            return (
+              <button key={card.id}
+                onClick={() => { doAction({ type: 'GIVE_CARD', playerId: player.id, card }); onClose() }}
+                className="text-sm px-3 py-2 rounded font-medium hover:opacity-80"
+                style={{ backgroundColor: cc, color: ct }}
+                title={`${card.unique}\nPermit: ${card.permit}`}>
+                {card.name}
+              </button>
+            )
+          })}
+        </div>
+      </div>
+    )
+  }
+
   if (panel === 'export') {
     const nextTrain = game.depot.upcoming[0]
     if (!nextTrain) return <Title m={m}>No trains to export</Title>
