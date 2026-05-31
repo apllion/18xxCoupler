@@ -351,44 +351,72 @@ function PanelContent({ panel, game, player, corp, unfloated, fmt, revenueInput,
   }
 
   // Export train (1817, 18USA)
-  // Pay — to bank or to corp
-  if (panel === 'paybank' && player) {
+  // Pay — from player or corp, to bank or corp
+  if (panel === 'paybank') {
     const floatedCorps = game.corporations.filter(c => c.floated)
-    const doPay = (amount, targetCorpSym) => {
-      if (amount <= 0) return
-      doAction({ type: 'ADJUST_CASH', entityId: player.id, entityType: 'player', amount: -amount })
-      if (targetCorpSym) {
-        doAction({ type: 'ADJUST_CASH', entityId: targetCorpSym, entityType: 'corporation', amount })
+    const [payAmount, setPayAmount] = useState(0)
+    const [payFrom, setPayFrom] = useState(player ? { type: 'player', id: player.id, label: player.name } : null)
+    const [payTo, setPayTo] = useState({ type: 'bank', label: 'Bank' })
+
+    const doPay = (amount) => {
+      const v = amount || payAmount
+      if (v <= 0 || !payFrom) return
+      doAction({ type: 'ADJUST_CASH', entityId: payFrom.id || payFrom.type, entityType: payFrom.type, amount: -v })
+      if (payTo.type === 'corporation') {
+        doAction({ type: 'ADJUST_CASH', entityId: payTo.id, entityType: 'corporation', amount: v })
       }
       onClose()
     }
+
+    const fromOptions = [
+      ...(player ? [{ type: 'player', id: player.id, label: player.name, cash: player.cash }] : []),
+      ...floatedCorps.map(c => ({ type: 'corporation', id: c.sym, label: c.sym, color: c.color, cash: c.cash })),
+    ]
+    const toOptions = [
+      { type: 'bank', label: 'Bank' },
+      ...floatedCorps.map(c => ({ type: 'corporation', id: c.sym, label: c.sym, color: c.color })),
+    ]
+
     return (
       <div>
-        <Title m={m}>Pay — {player.name} ({fmt(player.cash)})</Title>
-        <div className={m ? 'text-blue-400 text-xs mb-1' : 'text-broker-text-muted text-xs mb-1'}>To bank:</div>
+        <Title m={m}>Pay</Title>
+        {/* From */}
+        <div className={m ? 'text-blue-400 text-xs mb-0.5' : 'text-broker-text-muted text-xs mb-0.5'}>From:</div>
         <div className="flex gap-1 flex-wrap mb-1">
-          {[5, 10, 20, 30, 40, 50, 100].map(v => (
-            <Btn key={v} m={m} v="blue" o={() => doPay(v)}>{fmt(v)}</Btn>
+          {fromOptions.map(o => (
+            <Btn key={o.id} m={m} v={payFrom?.id === o.id ? 'green' : 'blue'}
+              o={() => setPayFrom(o)}>
+              {o.color ? <span style={{ color: o.color }} className="font-bold">{o.label}</span> : o.label}
+              {o.cash != null && <span className="ml-1 opacity-60">{fmt(o.cash)}</span>}
+            </Btn>
           ))}
         </div>
-        {floatedCorps.length > 0 && (
-          <>
-            <div className={m ? 'text-blue-400 text-xs mb-1 mt-1' : 'text-broker-text-muted text-xs mb-1 mt-1'}>To corp:</div>
-            <div className="flex gap-1 flex-wrap mb-1">
-              {floatedCorps.map(c => (
-                <Btn key={c.sym} m={m} v="green" o={() => {
-                  const v = parseInt(revenueInput) || 0
-                  if (v > 0) doPay(v, c.sym)
-                }}>
-                  <span style={{ color: c.color }} className="font-bold">{c.sym}</span>
-                </Btn>
-              ))}
-            </div>
-          </>
+        {/* To */}
+        <div className={m ? 'text-blue-400 text-xs mb-0.5' : 'text-broker-text-muted text-xs mb-0.5'}>To:</div>
+        <div className="flex gap-1 flex-wrap mb-1">
+          {toOptions.filter(o => !(o.type === payFrom?.type && o.id === payFrom?.id)).map(o => (
+            <Btn key={o.id || 'bank'} m={m} v={payTo?.id === o.id && payTo?.type === o.type ? 'green' : 'blue'}
+              o={() => setPayTo(o)}>
+              {o.color ? <span style={{ color: o.color }} className="font-bold">{o.label}</span> : o.label}
+            </Btn>
+          ))}
+        </div>
+        {/* Amount — value buttons */}
+        <div className={m ? 'text-blue-400 text-xs mb-0.5' : 'text-broker-text-muted text-xs mb-0.5'}>
+          Amount: {payAmount > 0 && <span className="font-bold text-white ml-1">{fmt(payAmount)}</span>}
+        </div>
+        <div className="flex gap-1 flex-wrap mb-1">
+          {[5, 10, 20, 30, 40, 50, 80, 100, 150, 200].map(v => (
+            <Btn key={v} m={m} v={payAmount === v ? 'green' : 'blue'} o={() => setPayAmount(v)}>{fmt(v)}</Btn>
+          ))}
+          <Btn m={m} v="blue" o={() => setPayAmount(0)}>Clear</Btn>
+        </div>
+        {/* Confirm */}
+        {payAmount > 0 && payFrom && (
+          <Btn m={m} v="green" o={() => doPay()}>
+            Pay {fmt(payAmount)} {payFrom.label} → {payTo.label}
+          </Btn>
         )}
-        <PriceInput m={m} label="Amount" value={revenueInput} onChange={setRevenueInput}
-          onConfirm={() => doPay(parseInt(revenueInput) || 0)}
-          onCancel={onClose} />
       </div>
     )
   }

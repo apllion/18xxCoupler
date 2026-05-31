@@ -83,11 +83,7 @@ export default function BrokerOverview() {
               {corps.map((c, ci) => (
                 <th key={c.sym} className={`px-2 text-center min-w-[48px] font-bold cursor-pointer bg-broker-surface ${ci === curCol ? '!bg-broker-surface-hover' : ''} ${!c.ipoed ? 'opacity-30' : ''}`}
                   style={{ color: c.color }}
-                  onClick={() => {
-                    setCurCol(ci)
-                    if (!c.ipoed && !c.floated) setPanel('par')
-                    else setPanel('corpdetail')
-                  }}>{c.sym}</th>
+                  onClick={() => setCurCol(ci)}>{c.sym}</th>
               ))}
             </tr>
           </thead>
@@ -97,7 +93,7 @@ export default function BrokerOverview() {
               return (
                 <tr key={p.id} className={`border-t border-broker-border/30 ${isRow ? 'bg-broker-surface-hover/50' : ''} hover:bg-broker-surface-hover/30`}>
                   <td className={`px-2 py-1 sticky left-0 z-10 cursor-pointer ${isRow ? 'bg-broker-surface-hover/50' : 'bg-broker-bg'} ${p.id === game.priorityDeal ? 'text-broker-gold font-bold' : 'text-broker-text font-medium'}`}
-                    onClick={() => { setCurRow(pi); setPanel('playerdetail') }}>
+                    onClick={() => setCurRow(pi)}>
                     {p.name}
                   </td>
                   <td className="px-2 text-right text-broker-text font-medium">
