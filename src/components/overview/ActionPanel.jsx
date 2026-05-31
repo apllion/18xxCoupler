@@ -21,7 +21,7 @@ export function ActionPanel({ panel, game, player, corp, unfloated, fmt, revenue
       <div className="flex justify-between items-start mb-1">
         <PanelContent panel={panel} game={game} player={player} corp={corp}
           unfloated={unfloated} fmt={fmt} revenueInput={revenueInput}
-          setRevenueInput={setRevenueInput} revRef={revRef} doAction={doAction} m={m} />
+          setRevenueInput={setRevenueInput} revRef={revRef} onClose={onClose} doAction={doAction} m={m} />
         <button onClick={onClose} className={m ? 'text-red-400 hover:text-red-200 text-xs ml-2' : 'text-broker-text-muted hover:text-white text-sm ml-2'}>
           Esc
         </button>
@@ -30,7 +30,7 @@ export function ActionPanel({ panel, game, player, corp, unfloated, fmt, revenue
   )
 }
 
-function PanelContent({ panel, game, player, corp, unfloated, fmt, revenueInput, setRevenueInput, revRef, doAction, m }) {
+function PanelContent({ panel, game, player, corp, unfloated, fmt, revenueInput, setRevenueInput, revRef, onClose, doAction, m }) {
   const price = corp ? corpPrice(game.stockMarket, corp.sym) || 0 : 0
   const [priceTarget, setPriceTarget] = useState(null) // { type, data } for inline price entry
   const [priceValue, setPriceValue] = useState('')
