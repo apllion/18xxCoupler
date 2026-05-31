@@ -98,6 +98,7 @@ export default function ModeratorOverview() {
               <th className="px-1 text-right min-w-[44px]">Cash</th>
               <th className="px-1 text-right min-w-[28px] cursor-pointer hover:text-purple-300" onClick={() => setPanel('private')}>Prv</th>
               <th className="px-1 text-center min-w-[32px]">Cert</th>
+              {game.title.taxThresholds && <th className="px-1 text-center text-[10px] text-red-400">Tax</th>}
               {corps.map((c, ci) => (
                 <th key={c.sym} className={`px-1 text-center min-w-[44px] cursor-pointer ${ci === curCol ? t.colHi : ''} ${!c.ipoed && !c.floated ? 'opacity-40' : ''}`}
                   style={{ color: c.color }}
@@ -129,6 +130,18 @@ export default function ModeratorOverview() {
                   </td>
                   <td className="px-1 text-right text-purple-300" title={privs?.map(c => c.sym).join(', ')}>{privs ? privs.length : '—'}</td>
                   <td className={`px-1 text-center ${playerCertCount(p) > game.certLimit ? 'text-red-400 font-bold' : t.text}`}>{playerCertCount(p)}/{game.certLimit}</td>
+                  {game.title.taxThresholds && (() => {
+                    let totalTax = 0
+                    for (const c of corps) {
+                      const pct = playerSharePercent(p, c.sym)
+                      for (const tx of game.title.taxThresholds) {
+                        if (pct >= tx.minPercent && pct <= tx.maxPercent) { totalTax += tx.tax; break }
+                      }
+                    }
+                    return totalTax > 0 ? (
+                      <td className="px-1 text-red-400 text-[10px] font-bold">T{totalTax}</td>
+                    ) : <td className="px-1" />
+                  })()}
                   {corps.map((c, ci) => {
                     const pct = playerSharePercent(p, c.sym)
                     const pres = isPresident(p, c.sym)

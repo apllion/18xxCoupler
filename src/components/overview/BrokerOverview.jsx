@@ -79,6 +79,7 @@ export default function BrokerOverview() {
               <th className="text-left px-2 py-1 sticky left-0 bg-broker-surface z-30 min-w-[90px] font-medium">Player</th>
               <th className="px-2 text-right min-w-[50px] font-medium">Cash</th>
               <th className="px-2 text-center min-w-[36px] font-medium">Cert</th>
+              {game.title.taxThresholds && <th className="px-1 text-center text-[10px] font-medium text-red-400">Tax</th>}
               {corps.map((c, ci) => (
                 <th key={c.sym} className={`px-2 text-center min-w-[48px] font-bold cursor-pointer bg-broker-surface ${ci === curCol ? '!bg-broker-surface-hover' : ''} ${!c.ipoed ? 'opacity-30' : ''}`}
                   style={{ color: c.color }}
@@ -106,6 +107,18 @@ export default function BrokerOverview() {
                     </InlineEdit>
                   </td>
                   <td className={`px-2 text-center ${playerCertCount(p) > game.certLimit ? 'text-red-400 font-bold' : 'text-broker-text-muted'}`}>{playerCertCount(p)}/{game.certLimit}</td>
+                  {game.title.taxThresholds && (() => {
+                    let totalTax = 0
+                    for (const c of corps) {
+                      const pct = playerSharePercent(p, c.sym)
+                      for (const t of game.title.taxThresholds) {
+                        if (pct >= t.minPercent && pct <= t.maxPercent) { totalTax += t.tax; break }
+                      }
+                    }
+                    return totalTax > 0 ? (
+                      <td className="px-1 text-red-400 text-[10px] font-bold">T{totalTax}</td>
+                    ) : <td className="px-1" />
+                  })()}
                   {corps.map((c, ci) => {
                     const pct = playerSharePercent(p, c.sym)
                     const pres = isPresident(p, c.sym)
