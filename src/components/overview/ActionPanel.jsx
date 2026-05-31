@@ -351,20 +351,43 @@ function PanelContent({ panel, game, player, corp, unfloated, fmt, revenueInput,
   }
 
   // Export train (1817, 18USA)
-  // Pay to bank
+  // Pay — to bank or to corp
   if (panel === 'paybank' && player) {
+    const floatedCorps = game.corporations.filter(c => c.floated)
+    const doPay = (amount, targetCorpSym) => {
+      if (amount <= 0) return
+      doAction({ type: 'ADJUST_CASH', entityId: player.id, entityType: 'player', amount: -amount })
+      if (targetCorpSym) {
+        doAction({ type: 'ADJUST_CASH', entityId: targetCorpSym, entityType: 'corporation', amount })
+      }
+      onClose()
+    }
     return (
       <div>
-        <Title m={m}>Pay Bank — {player.name} ({fmt(player.cash)})</Title>
-        <div className="flex gap-1 flex-wrap mt-1">
+        <Title m={m}>Pay — {player.name} ({fmt(player.cash)})</Title>
+        <div className={m ? 'text-blue-400 text-xs mb-1' : 'text-broker-text-muted text-xs mb-1'}>To bank:</div>
+        <div className="flex gap-1 flex-wrap mb-1">
           {[5, 10, 20, 30, 40, 50, 100].map(v => (
-            <Btn key={v} m={m} v="blue" o={() => { doAction({ type: 'ADJUST_CASH', entityId: player.id, entityType: 'player', amount: -v }); onClose() }}>
-              {fmt(v)}
-            </Btn>
+            <Btn key={v} m={m} v="blue" o={() => doPay(v)}>{fmt(v)}</Btn>
           ))}
         </div>
-        <PriceInput m={m} label="Other" value={revenueInput} onChange={setRevenueInput}
-          onConfirm={() => { const v = parseInt(revenueInput) || 0; if (v > 0) { doAction({ type: 'ADJUST_CASH', entityId: player.id, entityType: 'player', amount: -v }); onClose() } }}
+        {floatedCorps.length > 0 && (
+          <>
+            <div className={m ? 'text-blue-400 text-xs mb-1 mt-1' : 'text-broker-text-muted text-xs mb-1 mt-1'}>To corp:</div>
+            <div className="flex gap-1 flex-wrap mb-1">
+              {floatedCorps.map(c => (
+                <Btn key={c.sym} m={m} v="green" o={() => {
+                  const v = parseInt(revenueInput) || 0
+                  if (v > 0) doPay(v, c.sym)
+                }}>
+                  <span style={{ color: c.color }} className="font-bold">{c.sym}</span>
+                </Btn>
+              ))}
+            </div>
+          </>
+        )}
+        <PriceInput m={m} label="Amount" value={revenueInput} onChange={setRevenueInput}
+          onConfirm={() => doPay(parseInt(revenueInput) || 0)}
           onCancel={onClose} />
       </div>
     )
