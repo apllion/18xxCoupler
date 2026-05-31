@@ -278,13 +278,13 @@ export default function PlayersTab() {
                   <span className="flex-1 text-broker-text-muted truncate">{p.name}</span>
                   {!p.closed && p.revenue > 0 && (
                     <button onClick={() => dispatch({ type: 'COLLECT_REVENUE', companySym: p.sym })}
-                      className="text-[10px] bg-green-800 hover:bg-green-700 text-white px-1.5 py-0.5 rounded">
+                      className="text-sm bg-green-800 hover:bg-green-700 text-white px-3 py-2 rounded">
                       +{fmt(p.revenue)}
                     </button>
                   )}
                   {!p.closed && isConcession && targetCorp && !targetCorp.ipoed && (
                     <button onClick={() => dispatch({ type: 'CONVERT_CONCESSION', playerId: selected.id, companySym: p.sym, corpSym: targetCorp.sym })}
-                      className="text-[10px] bg-purple-800 hover:bg-purple-700 text-white px-1.5 py-0.5 rounded">
+                      className="text-sm bg-purple-800 hover:bg-purple-700 text-white px-3 py-2 rounded">
                       Convert
                     </button>
                   )}
@@ -387,26 +387,26 @@ function PlayerActions({ game, player, dispatch, fmt, goToCorp }) {
                   {hasIPO && (
                     <button onClick={() => canAfford && dispatch({ type: 'BUY_SHARE', playerId: player.id, corpSym: c.sym, source: 'ipo' })}
                       disabled={!canAfford}
-                      className="text-[10px] bg-blue-800 hover:bg-blue-700 disabled:opacity-30 text-white px-1.5 py-0.5 rounded">
+                      className="text-sm bg-blue-800 hover:bg-blue-700 disabled:opacity-30 text-white px-3 py-2 rounded">
                       IPO
                     </button>
                   )}
                   {hasMarket && (
                     <button onClick={() => canAfford && dispatch({ type: 'BUY_SHARE', playerId: player.id, corpSym: c.sym, source: 'market' })}
                       disabled={!canAfford}
-                      className="text-[10px] bg-blue-800 hover:bg-blue-700 disabled:opacity-30 text-white px-1.5 py-0.5 rounded">
+                      className="text-sm bg-blue-800 hover:bg-blue-700 disabled:opacity-30 text-white px-3 py-2 rounded">
                       Mkt
                     </button>
                   )}
                   {canSell && !isPres && (
                     <button onClick={() => dispatch({ type: 'SELL_SHARES', playerId: player.id, corpSym: c.sym })}
-                      className="text-[10px] bg-red-800 hover:bg-red-700 text-white px-1.5 py-0.5 rounded">
+                      className="text-sm bg-red-800 hover:bg-red-700 text-white px-3 py-2 rounded">
                       Sell
                     </button>
                   )}
                   {canSell && isPres && held > 20 && (
                     <button onClick={() => dispatch({ type: 'SELL_SHARES', playerId: player.id, corpSym: c.sym })}
-                      className="text-[10px] bg-red-800 hover:bg-red-700 text-white px-1.5 py-0.5 rounded">
+                      className="text-sm bg-red-800 hover:bg-red-700 text-white px-3 py-2 rounded">
                       Sell
                     </button>
                   )}
@@ -425,7 +425,7 @@ function PlayerActions({ game, player, dispatch, fmt, goToCorp }) {
             <div className="flex flex-wrap gap-1">
               {unfloatedCorps.map(c => (
                 <button key={c.sym} onClick={() => setParCorp(c.sym)}
-                  className="text-xs bg-broker-surface-hover hover:bg-broker-bg text-broker-text hover:text-white px-2 py-1 rounded flex items-center gap-1">
+                  className="text-sm bg-broker-surface-hover hover:bg-broker-bg text-broker-text hover:text-white px-3 py-2 rounded flex items-center gap-1">
                   <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: c.color }} />
                   {c.sym}
                 </button>
@@ -448,7 +448,7 @@ function PlayerActions({ game, player, dispatch, fmt, goToCorp }) {
                       }
                     }}
                       disabled={!canAfford}
-                      className={`text-xs px-2 py-1 rounded ${canAfford
+                      className={`text-sm px-3 py-2 rounded ${canAfford
                         ? 'bg-green-800 hover:bg-green-700 text-white'
                         : 'bg-broker-bg text-broker-text-muted/40'
                       }`}>
@@ -456,7 +456,7 @@ function PlayerActions({ game, player, dispatch, fmt, goToCorp }) {
                     </button>
                   )
                 })}
-                <button onClick={() => setParCorp(null)} className="text-xs text-broker-text-muted hover:text-white px-2">Cancel</button>
+                <button onClick={() => setParCorp(null)} className="text-sm text-broker-text-muted hover:text-white px-3 py-2">Cancel</button>
               </div>
             </div>
           )}
@@ -481,14 +481,14 @@ function PlayerActions({ game, player, dispatch, fmt, goToCorp }) {
                   <span className="text-[10px] text-broker-text-muted w-10 text-right">{fmt(price)}</span>
                   <button
                     onClick={() => dispatch({ type: 'SHORT_SELL', playerId: player.id, corpSym: c.sym })}
-                    className="text-[10px] bg-red-800 hover:bg-red-700 text-white px-1.5 py-0.5 rounded"
+                    className="text-sm bg-red-800 hover:bg-red-700 text-white px-3 py-2 rounded"
                   >
                     Short
                   </button>
                   {shortCount > 0 && (
                     <button
                       onClick={() => dispatch({ type: 'CLOSE_SHORT', playerId: player.id, corpSym: c.sym })}
-                      className="text-[10px] bg-green-800 hover:bg-green-700 text-white px-1.5 py-0.5 rounded"
+                      className="text-sm bg-green-800 hover:bg-green-700 text-white px-3 py-2 rounded"
                     >
                       Close ({shortCount})
                     </button>

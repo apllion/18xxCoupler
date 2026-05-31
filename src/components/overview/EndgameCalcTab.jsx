@@ -191,7 +191,7 @@ export default function EndgameCalcTab() {
     : 'text-[10px] bg-broker-surface-hover text-broker-text hover:text-white px-2 py-0.5 rounded'
 
   // Style for tappable price cells
-  const cellCls = (isActive, isFinal) => `text-xs text-right px-1.5 py-1 rounded cursor-pointer min-w-[2.5rem] transition-colors ${isFinal ? 'font-bold' : ''} ${
+  const cellCls = (isActive, isFinal) => `text-xs text-right px-1.5 py-2 rounded cursor-pointer min-w-[3rem] transition-colors ${isFinal ? 'font-bold' : ''} ${
     isActive
       ? (m ? 'bg-green-800 text-green-200 ring-1 ring-green-500' : 'bg-blue-600 text-white ring-1 ring-blue-400')
       : (m ? 'bg-black/30 text-blue-300 border border-blue-800' : 'bg-broker-bg text-white border border-broker-border')
@@ -206,8 +206,8 @@ export default function EndgameCalcTab() {
         <h2 className={m ? 'text-green-400 font-bold' : 'text-white font-bold text-lg'}>Endgame Calculator</h2>
         {game && game.corporations.some(c => c.floated) && (
           <button onClick={loadFromGame} className={m
-            ? 'text-[10px] bg-blue-800 text-blue-300 hover:bg-blue-700 px-2 py-0.5 rounded'
-            : 'text-[10px] bg-broker-surface-hover text-broker-text hover:text-white px-2 py-0.5 rounded'
+            ? 'text-xs bg-blue-800 text-blue-300 hover:bg-blue-700 px-3 py-1.5 rounded'
+            : 'text-xs bg-broker-surface-hover text-broker-text hover:text-white px-3 py-1.5 rounded'
           }>Load from game</button>
         )}
       </div>
@@ -230,8 +230,8 @@ export default function EndgameCalcTab() {
       <div className="flex items-center gap-2">
         <span className={m ? 'text-green-400 font-bold' : 'text-white font-medium'}>Corporations</span>
         <span className={labelCls}>{rounds} round{rounds !== 1 ? 's' : ''}</span>
-        <button onClick={removeRound} disabled={rounds <= 1} className={`${btnSmall} disabled:opacity-30`}>−</button>
-        <button onClick={addRound} className={btnSmall}>+</button>
+        <button onClick={removeRound} disabled={rounds <= 1} className={`${btnSmall} px-3 py-1.5 disabled:opacity-30`}>−</button>
+        <button onClick={addRound} className={`${btnSmall} px-3 py-1.5`}>+</button>
         {!showExtras && (
           <button onClick={() => setShowExtras(true)} className={`${btnSmall} ml-auto`}>Loans</button>
         )}
@@ -253,13 +253,13 @@ export default function EndgameCalcTab() {
                 <>
                   <span className={labelCls}>loans</span>
                   <button onClick={() => adjLoans(c.sym, -1)} disabled={(c.loans || 0) <= 0}
-                    className={`text-xs px-1 py-0.5 rounded disabled:opacity-20 ${m ? 'bg-blue-900/50 text-blue-300' : 'bg-broker-surface-hover text-broker-text'}`}>−</button>
+                    className={`text-lg px-3 py-1 rounded disabled:opacity-20 ${m ? 'bg-blue-900/50 text-blue-300' : 'bg-broker-surface-hover text-broker-text'}`}>−</button>
                   <span className={`text-xs w-4 text-center font-bold ${(c.loans || 0) > 0 ? 'text-red-400' : m ? 'text-blue-400' : 'text-broker-text-muted'}`}>{c.loans || 0}</span>
                   <button onClick={() => adjLoans(c.sym, 1)}
-                    className={`text-xs px-1 py-0.5 rounded ${m ? 'bg-blue-900/50 text-blue-300' : 'bg-broker-surface-hover text-broker-text'}`}>+</button>
+                    className={`text-lg px-3 py-1 rounded ${m ? 'bg-blue-900/50 text-blue-300' : 'bg-broker-surface-hover text-broker-text'}`}>+</button>
                 </>
               )}
-              <button onClick={() => removeCorp(c.sym)} className={`${btnCls} text-red-400 ml-auto`}>×</button>
+              <button onClick={() => removeCorp(c.sym)} className={`${btnCls} text-red-400 ml-auto text-sm px-2 py-1`}>×</button>
             </div>
             {/* Prices — tappable buttons in a row */}
             <div className="flex flex-wrap gap-1">
@@ -285,7 +285,7 @@ export default function EndgameCalcTab() {
                   const currentVal = c.prices[activeCell.roundIdx] ?? 0
                   return (
                     <button key={v} onClick={() => setPrice(c.sym, activeCell.roundIdx, v)}
-                      className={`text-[10px] px-1.5 py-0.5 rounded min-w-[2rem] transition-colors ${
+                      className={`text-sm px-2 py-1.5 rounded min-w-[2.5rem] transition-colors ${
                         v === currentVal
                           ? (m ? 'bg-green-700 text-white font-bold' : 'bg-blue-600 text-white font-bold')
                           : (m ? 'bg-blue-900/50 text-blue-300 hover:bg-blue-800' : 'bg-broker-surface-hover text-broker-text hover:text-white')
@@ -323,12 +323,12 @@ export default function EndgameCalcTab() {
                 className={inputCls} />
               <span className={`ml-auto font-bold ${m ? 'text-white' : 'text-white'}`}>{fmt(total)}</span>
               <button onClick={() => setShowCalc(isOpen ? null : pi)}
-                className={`text-[10px] px-1.5 py-0.5 rounded ${isOpen
+                className={`text-sm px-2 py-1 rounded ${isOpen
                   ? (m ? 'bg-green-800 text-green-200' : 'bg-blue-600 text-white')
                   : (m ? 'bg-blue-900/50 text-blue-300' : 'bg-broker-surface-hover text-broker-text-muted')
                 }`}
                 title="Show calculation">=</button>
-              <button onClick={() => removePlayer(pi)} className={`${btnCls} text-red-400`}>×</button>
+              <button onClick={() => removePlayer(pi)} className={`${btnCls} text-red-400 text-sm px-2 py-1`}>×</button>
             </div>
             <div className="flex flex-wrap gap-x-3 gap-y-1">
               {corps.map(c => {
@@ -338,12 +338,12 @@ export default function EndgameCalcTab() {
                   <div key={c.sym} className="flex items-center gap-0.5">
                     <span style={{ color: c.color }} className="font-bold text-[10px] w-8">{c.sym}</span>
                     <button onClick={() => adjShares(pi, c.sym, -1)}
-                      className={`text-xs px-1 py-0.5 rounded ${m ? 'bg-blue-900/50 text-blue-300' : 'bg-broker-surface-hover text-broker-text'}`}>−</button>
+                      className={`text-lg px-3 py-1 rounded ${m ? 'bg-blue-900/50 text-blue-300' : 'bg-broker-surface-hover text-broker-text'}`}>−</button>
                     <span className={`text-xs w-4 text-center font-bold ${isShort ? 'text-red-400' : m ? 'text-white' : 'text-white'}`}>
                       {val}
                     </span>
                     <button onClick={() => adjShares(pi, c.sym, 1)}
-                      className={`text-xs px-1 py-0.5 rounded ${m ? 'bg-blue-900/50 text-blue-300' : 'bg-broker-surface-hover text-broker-text'}`}>+</button>
+                      className={`text-lg px-3 py-1 rounded ${m ? 'bg-blue-900/50 text-blue-300' : 'bg-broker-surface-hover text-broker-text'}`}>+</button>
                     {isShort && <span className="text-[9px] text-red-400">S</span>}
                   </div>
                 )

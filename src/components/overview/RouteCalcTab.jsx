@@ -128,8 +128,8 @@ function RouteCalc({ game, fmt, m }) {
       {/* Load from game */}
       {game && corp.sym && game.corporations.some(c => c.sym === corp.sym && c.floated) && (
         <button onClick={loadFromGame} className={m
-          ? 'text-[10px] bg-blue-800 text-blue-300 hover:bg-blue-700 px-2 py-0.5 rounded self-start'
-          : 'text-[10px] bg-broker-surface-hover text-broker-text hover:text-white px-2 py-0.5 rounded self-start'
+          ? 'text-xs bg-blue-800 text-blue-300 hover:bg-blue-700 px-3 py-1.5 rounded self-start'
+          : 'text-xs bg-broker-surface-hover text-broker-text hover:text-white px-3 py-1.5 rounded self-start'
         }>Load {corp.sym} trains from game</button>
       )}
 
@@ -161,7 +161,7 @@ function RouteCalc({ game, fmt, m }) {
         {game && game.corporations.filter(c => c.floated).map(c => (
           <button key={c.sym}
             onClick={() => useUIStore.getState().setActiveCorp(c.sym)}
-            className={`text-xs px-2 py-1 rounded font-medium ${corp.sym === c.sym ? 'ring-2 ring-white' : savedRoutes[c.sym] ? 'opacity-80' : 'opacity-50'}`}
+            className={`text-xs px-3 py-1.5 rounded font-medium ${corp.sym === c.sym ? 'ring-2 ring-white' : savedRoutes[c.sym] ? 'opacity-80' : 'opacity-50'}`}
             style={{ backgroundColor: c.color, color: c.textColor || '#fff' }}>
             {c.sym}{savedRoutes[c.sym] && corp.sym !== c.sym ? '*' : ''}
           </button>
@@ -171,7 +171,7 @@ function RouteCalc({ game, fmt, m }) {
           <span key={sym} className="inline-flex items-center gap-0">
             <button
               onClick={() => { setCorp(savedRoutes[sym].corp); setTrains(savedRoutes[sym].trains); setActiveTrain(null) }}
-              className={`text-xs px-2 py-1 rounded-l font-medium ${corp.sym === sym ? 'ring-2 ring-white' : 'opacity-80'}`}
+              className={`text-xs px-3 py-1.5 rounded-l font-medium ${corp.sym === sym ? 'ring-2 ring-white' : 'opacity-80'}`}
               style={{ backgroundColor: savedRoutes[sym].corp?.color || '#888', color: '#fff' }}>
               {sym}
             </button>
@@ -217,8 +217,8 @@ function RouteCalc({ game, fmt, m }) {
             setActiveTrain(null)
             setNewCorpName('')
           }} className={m
-            ? 'text-[10px] bg-green-900/50 text-green-300 hover:bg-green-800 disabled:opacity-30 px-2 py-0.5 rounded'
-            : 'text-[10px] bg-broker-surface-hover text-broker-text hover:text-white disabled:opacity-30 px-2 py-0.5 rounded'
+            ? 'text-sm bg-green-900/50 text-green-300 hover:bg-green-800 disabled:opacity-30 px-3 py-1.5 rounded'
+            : 'text-sm bg-broker-surface-hover text-broker-text hover:text-white disabled:opacity-30 px-3 py-1.5 rounded'
           }>+ Corp</button>
       </div>
 
@@ -237,7 +237,7 @@ function RouteCalc({ game, fmt, m }) {
                 onChange={e => setTrains(prev => prev.map((x, j) => j === i ? { ...x, name: e.target.value } : x))}
                 placeholder="train" className={`${nameInput} font-bold`} />
               <button onClick={() => setActiveTrain(isActive ? null : t.id)}
-                className={`text-[10px] px-2 py-0.5 rounded font-medium ${isActive
+                className={`text-sm px-3 py-1.5 rounded font-medium ${isActive
                   ? (m ? 'bg-green-700 text-white' : 'bg-blue-600 text-white')
                   : (m ? 'bg-blue-800 text-blue-300' : 'bg-broker-surface-hover text-broker-text')
                 }`}>{isActive ? 'done' : 'edit'}</button>
@@ -246,7 +246,7 @@ function RouteCalc({ game, fmt, m }) {
                   const key = `clear-${t.id}`
                   if (pendingDelete === key) { clearTrain(t.id); setPendingDelete(null) }
                   else { setPendingDelete(key); setTimeout(() => setPendingDelete(prev => prev === key ? null : prev), 1500) }
-                }} className={`text-[10px] transition-colors ${pendingDelete === `clear-${t.id}` ? 'text-red-400 font-bold animate-pulse' : 'text-broker-text-muted hover:text-red-400'}`}>
+                }} className={`text-sm px-3 py-1.5 transition-colors ${pendingDelete === `clear-${t.id}` ? 'text-red-400 font-bold animate-pulse' : 'text-broker-text-muted hover:text-red-400'}`}>
                   {pendingDelete === `clear-${t.id}` ? 'clear?' : 'clear'}
                 </button>
               )}
@@ -269,8 +269,8 @@ function RouteCalc({ game, fmt, m }) {
                   {allQuickValues.map(v => (
                     <button key={v} onClick={() => addStopToTrain(t.id, v)}
                       className={m
-                        ? `text-xs ${extraValues.includes(v) ? 'bg-green-900/50 text-green-300' : 'bg-blue-900/50 text-blue-300'} hover:bg-blue-800 px-2 py-1 rounded min-w-[2rem]`
-                        : `text-xs ${extraValues.includes(v) ? 'bg-blue-800 text-blue-200' : 'bg-broker-surface-hover text-broker-text'} hover:text-white px-2 py-1 rounded min-w-[2rem]`
+                        ? `text-sm ${extraValues.includes(v) ? 'bg-green-900/50 text-green-300' : 'bg-blue-900/50 text-blue-300'} hover:bg-blue-800 px-3 py-2 rounded min-w-[2.5rem]`
+                        : `text-sm ${extraValues.includes(v) ? 'bg-blue-800 text-blue-200' : 'bg-broker-surface-hover text-broker-text'} hover:text-white px-3 py-2 rounded min-w-[2.5rem]`
                       }>{v}</button>
                   ))}
                   <input type="number" value={customStop}
@@ -284,8 +284,8 @@ function RouteCalc({ game, fmt, m }) {
                     const v = parseInt(customStop) || 0
                     if (v > 0) { addCustomValue(v); addStopToTrain(t.id, v); setCustomStop('') }
                   }} className={m
-                    ? 'text-[10px] bg-green-900/50 text-green-300 hover:bg-green-800 px-2 py-0.5 rounded'
-                    : 'text-[10px] bg-broker-surface-hover text-broker-text hover:text-white px-2 py-0.5 rounded'
+                    ? 'text-sm bg-green-900/50 text-green-300 hover:bg-green-800 px-3 py-1.5 rounded'
+                    : 'text-sm bg-broker-surface-hover text-broker-text hover:text-white px-3 py-1.5 rounded'
                   }>add</button>
                 </div>
                 {/* Multiplier */}
@@ -293,7 +293,7 @@ function RouteCalc({ game, fmt, m }) {
                   {[1, 2, 3, 4].map(x => (
                     <button key={x}
                       onClick={() => setTrains(prev => prev.map(tr => tr.id === t.id ? { ...tr, mult: x } : tr))}
-                      className={`text-[10px] px-2 py-0.5 rounded font-medium ${
+                      className={`text-sm px-3 py-1.5 rounded font-medium ${
                         (t.mult || 1) === x
                           ? (m ? 'bg-green-700 text-white' : 'bg-blue-600 text-white')
                           : (m ? 'bg-blue-900/30 text-blue-400' : 'bg-broker-bg text-broker-text-muted')
@@ -307,7 +307,7 @@ function RouteCalc({ game, fmt, m }) {
                       const isAlarm = pendingDelete === `${t.id}-${si}`
                       return (
                         <button key={si} onClick={() => handleStopDelete(t.id, si)}
-                          className={`text-xs px-2 py-0.5 rounded font-bold transition-colors ${
+                          className={`text-xs px-3 py-1.5 rounded font-bold transition-colors ${
                             isAlarm
                               ? 'bg-red-600 text-white animate-pulse'
                               : m ? 'bg-green-800 text-green-200' : 'bg-blue-600 text-white'
@@ -334,8 +334,8 @@ function RouteCalc({ game, fmt, m }) {
       <div className="flex gap-2">
         <button onClick={addTrain}
           className={m
-            ? 'text-[10px] bg-green-900/50 text-green-300 hover:bg-green-800 px-2 py-1 rounded'
-            : 'text-[10px] bg-broker-surface-hover text-broker-text hover:text-white px-2 py-1 rounded'
+            ? 'text-sm bg-green-900/50 text-green-300 hover:bg-green-800 px-3 py-1.5 rounded'
+            : 'text-sm bg-broker-surface-hover text-broker-text hover:text-white px-3 py-1.5 rounded'
           }>+ Train</button>
         {game && game.corporations.filter(c => c.floated && c.sym !== corp.sym).length > 0 && (
           <span className={labelCls + ' self-center'}>or switch corp above</span>

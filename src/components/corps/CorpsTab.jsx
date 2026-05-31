@@ -106,14 +106,14 @@ export default function CorpsTab() {
           {game.companies?.length > 0 && (
             <button
               onClick={handleCollectAll}
-              className="text-xs bg-green-900 hover:bg-green-800 text-green-200 px-2 py-1 rounded"
+              className="text-sm bg-green-900 hover:bg-green-800 text-green-200 px-3 py-2 rounded"
             >
               Collect Privates
             </button>
           )}
           <button
             onClick={handleSoldOutAdjust}
-            className="text-xs bg-broker-green hover:bg-broker-green-light text-broker-gold px-2 py-1 rounded"
+            className="text-sm bg-broker-green hover:bg-broker-green-light text-broker-gold px-3 py-2 rounded"
           >
             Sold-out ↑
           </button>
@@ -122,7 +122,7 @@ export default function CorpsTab() {
 
       {/* Corp operating order with nav */}
       <div className="flex items-center gap-2">
-        <button onClick={prevCorp} className="text-broker-text-muted hover:text-broker-gold px-2 py-1">◀</button>
+        <button onClick={prevCorp} className="text-broker-text-muted hover:text-broker-gold px-3 py-2">◀</button>
         <div className="flex gap-1 overflow-x-auto flex-1">
           {operatingOrder.map((c, i) => (
             <button
@@ -142,7 +142,7 @@ export default function CorpsTab() {
             </button>
           ))}
         </div>
-        <button onClick={nextCorp} className="text-broker-text-muted hover:text-broker-gold px-2 py-1">▶</button>
+        <button onClick={nextCorp} className="text-broker-text-muted hover:text-broker-gold px-3 py-2">▶</button>
       </div>
 
       <div className="text-xs text-broker-text-muted text-center">
@@ -328,7 +328,7 @@ function CorpDetail({ game, corp, dispatch, fmt, onNext, plusPlus }) {
                   trainId: t.id,
                   price: game.title.executiveCars.price ?? 0,
                 })}
-                className="text-xs bg-yellow-900 hover:bg-yellow-800 text-yellow-200 px-2 py-1 rounded mr-1"
+                className="text-sm bg-yellow-900 hover:bg-yellow-800 text-yellow-200 px-3 py-2 rounded mr-1"
               >
                 {t.name} +EC
               </button>
@@ -387,7 +387,7 @@ function CorpDetail({ game, corp, dispatch, fmt, onNext, plusPlus }) {
             <button
               key={v}
               onClick={() => setRevenue(String(v))}
-              className="bg-broker-surface-hover hover:bg-broker-surface-hover text-xs px-2 py-1 rounded"
+              className="bg-broker-surface-hover hover:bg-broker-surface-hover text-sm px-3 py-2 rounded"
             >
               {v}
             </button>
@@ -506,7 +506,7 @@ function CorpDetail({ game, corp, dispatch, fmt, onNext, plusPlus }) {
           {game.depot?.upcoming?.[0] ? (
             <button
               onClick={() => dispatch({ type: 'EXPORT_TRAIN' })}
-              className="text-xs bg-amber-800 hover:bg-amber-700 text-white px-3 py-1.5 rounded"
+              className="text-sm bg-amber-800 hover:bg-amber-700 text-white px-3 py-2 rounded"
             >
               Export {game.depot.upcoming[0].name}-train ({fmt(game.depot.upcoming[0].price)})
             </button>
@@ -520,7 +520,7 @@ function CorpDetail({ game, corp, dispatch, fmt, onNext, plusPlus }) {
       {game.title.loans && corp.liquidated !== true && (corp.loans || 0) > 0 && (
         <button
           onClick={() => dispatch({ type: 'LIQUIDATE_CORP', corpSym: corp.sym })}
-          className="w-full text-xs bg-red-900 hover:bg-red-800 text-red-300 px-3 py-2 rounded"
+          className="w-full text-sm bg-red-900 hover:bg-red-800 text-red-300 px-3 py-2 rounded"
         >
           Liquidate {corp.sym}
         </button>
@@ -540,7 +540,7 @@ function CorpDetail({ game, corp, dispatch, fmt, onNext, plusPlus }) {
               {nationals.map(n => (
                 <button key={n.sym}
                   onClick={() => dispatch({ type: 'NATIONALIZE_CORP', corpSym: corp.sym, nationalSym: n.sym })}
-                  className="text-xs bg-purple-800 hover:bg-purple-700 text-white px-3 py-1.5 rounded"
+                  className="text-sm bg-purple-800 hover:bg-purple-700 text-white px-3 py-2 rounded"
                 >
                   → {n.sym}
                 </button>
@@ -665,7 +665,7 @@ function CorpSharePanel({ game, corp, dispatch, fmt }) {
                     <button
                       onClick={() => canAfford && handleCorpBuy(c.sym, 'ipo')}
                       disabled={!canAfford}
-                      className={`text-xs px-2 py-1 rounded ${
+                      className={`text-sm px-3 py-2 rounded ${
                         canAfford
                           ? 'bg-blue-800 hover:bg-blue-700 text-blue-200'
                           : 'bg-broker-surface-hover text-broker-text-muted cursor-not-allowed'
@@ -678,7 +678,7 @@ function CorpSharePanel({ game, corp, dispatch, fmt }) {
                     <button
                       onClick={() => canAfford && handleCorpBuy(c.sym, 'market')}
                       disabled={!canAfford}
-                      className={`text-xs px-2 py-1 rounded ${
+                      className={`text-sm px-3 py-2 rounded ${
                         canAfford
                           ? 'bg-blue-800 hover:bg-blue-700 text-blue-200'
                           : 'bg-broker-surface-hover text-broker-text-muted cursor-not-allowed'
@@ -709,7 +709,7 @@ function CorpSharePanel({ game, corp, dispatch, fmt }) {
                 <span className="text-xs text-broker-text-muted">{pct}%</span>
                 <button
                   onClick={() => handleCorpSell(sym)}
-                  className="text-xs px-2 py-1 rounded bg-red-900 hover:bg-red-800 text-red-200"
+                  className="text-sm px-3 py-2 rounded bg-red-900 hover:bg-red-800 text-red-200"
                 >
                   Sell → +{fmt(price)}
                 </button>
@@ -860,7 +860,7 @@ function MergerPanel({ game, corp, dispatch, fmt }) {
                 {(mergerType === 'ptg_combine') && (
                   <button
                     onClick={() => handlePTGMerge(t.sym)}
-                    className="ml-auto text-xs bg-purple-800 hover:bg-purple-700 px-2 py-1 rounded text-purple-200"
+                    className="ml-auto text-sm bg-purple-800 hover:bg-purple-700 px-3 py-2 rounded text-purple-200"
                   >
                     Merge
                   </button>
@@ -868,7 +868,7 @@ function MergerPanel({ game, corp, dispatch, fmt }) {
                 {(mergerType === '1862_peer') && (
                   <button
                     onClick={() => handle1862Merge(t.sym)}
-                    className="ml-auto text-xs bg-purple-800 hover:bg-purple-700 px-2 py-1 rounded text-purple-200"
+                    className="ml-auto text-sm bg-purple-800 hover:bg-purple-700 px-3 py-2 rounded text-purple-200"
                   >
                     Merge (absorb)
                   </button>
@@ -876,7 +876,7 @@ function MergerPanel({ game, corp, dispatch, fmt }) {
                 {(mergerType === '1822_acquire') && (
                   <button
                     onClick={() => setMergeTarget(t.sym)}
-                    className="ml-auto text-xs bg-purple-800 hover:bg-purple-700 px-2 py-1 rounded text-purple-200"
+                    className="ml-auto text-sm bg-purple-800 hover:bg-purple-700 px-3 py-2 rounded text-purple-200"
                   >
                     Acquire
                   </button>
@@ -884,7 +884,7 @@ function MergerPanel({ game, corp, dispatch, fmt }) {
                 {(mergerType === '1867_minor_major') && (
                   <button
                     onClick={() => handle1867Convert(t.sym)}
-                    className="ml-auto text-xs bg-purple-800 hover:bg-purple-700 px-2 py-1 rounded text-purple-200"
+                    className="ml-auto text-sm bg-purple-800 hover:bg-purple-700 px-3 py-2 rounded text-purple-200"
                   >
                     Convert
                   </button>
@@ -892,7 +892,7 @@ function MergerPanel({ game, corp, dispatch, fmt }) {
                 {(mergerType === '1867_merge_minors') && (
                   <button
                     onClick={() => setMergeTarget(t.sym)}
-                    className="ml-auto text-xs bg-purple-800 hover:bg-purple-700 px-2 py-1 rounded text-purple-200"
+                    className="ml-auto text-sm bg-purple-800 hover:bg-purple-700 px-3 py-2 rounded text-purple-200"
                   >
                     Merge
                   </button>
@@ -900,7 +900,7 @@ function MergerPanel({ game, corp, dispatch, fmt }) {
                 {(mergerType === 'rla_merge') && (
                   <button
                     onClick={() => setMergeTarget(t.sym)}
-                    className="ml-auto text-xs bg-purple-800 hover:bg-purple-700 px-2 py-1 rounded text-purple-200"
+                    className="ml-auto text-sm bg-purple-800 hover:bg-purple-700 px-3 py-2 rounded text-purple-200"
                   >
                     Merge
                   </button>
@@ -923,7 +923,7 @@ function MergerPanel({ game, corp, dispatch, fmt }) {
               <button
                 key={n}
                 onClick={() => setPaymentShares(n)}
-                className={`text-xs px-2 py-1 rounded ${
+                className={`text-sm px-3 py-2 rounded ${
                   paymentShares === n
                     ? 'bg-purple-700 text-white'
                     : 'bg-broker-surface-hover text-broker-text-muted'
@@ -946,13 +946,13 @@ function MergerPanel({ game, corp, dispatch, fmt }) {
           <div className="flex gap-2">
             <button
               onClick={handle1822Acquire}
-              className="text-xs bg-purple-800 hover:bg-purple-700 px-3 py-1 rounded text-white"
+              className="text-sm bg-purple-800 hover:bg-purple-700 px-3 py-2 rounded text-white"
             >
               Confirm Acquisition
             </button>
             <button
               onClick={() => { setMergeTarget(null); setPaymentShares(0); setCashDiff('') }}
-              className="text-xs text-broker-text-muted hover:text-broker-text px-2 py-1"
+              className="text-sm text-broker-text-muted hover:text-broker-text px-3 py-2"
             >
               Cancel
             </button>
@@ -976,7 +976,7 @@ function MergerPanel({ game, corp, dispatch, fmt }) {
                 <button
                   key={c.sym}
                   onClick={() => setSelectedMajor(c.sym)}
-                  className={`w-full text-left text-xs px-2 py-1 rounded flex items-center gap-2 ${
+                  className={`w-full text-left text-sm px-3 py-2 rounded flex items-center gap-2 ${
                     selectedMajor === c.sym
                       ? 'bg-purple-700 text-white'
                       : 'bg-broker-surface-hover text-broker-text-muted hover:text-white'
@@ -1004,13 +1004,13 @@ function MergerPanel({ game, corp, dispatch, fmt }) {
                 setSelectedMajor(null)
               }}
               disabled={!selectedMajor}
-              className="text-xs bg-purple-800 hover:bg-purple-700 disabled:opacity-30 px-3 py-1 rounded text-white"
+              className="text-sm bg-purple-800 hover:bg-purple-700 disabled:opacity-30 px-3 py-2 rounded text-white"
             >
               Confirm Merger
             </button>
             <button
               onClick={() => { setMergeTarget(null); setSelectedMajor(null) }}
-              className="text-xs text-broker-text-muted hover:text-broker-text px-2 py-1"
+              className="text-sm text-broker-text-muted hover:text-broker-text px-3 py-2"
             >
               Cancel
             </button>
@@ -1034,7 +1034,7 @@ function MergerPanel({ game, corp, dispatch, fmt }) {
                 <button
                   key={c.sym}
                   onClick={() => { setSelectedMajor(c.sym); setSelectedIdentity(null) }}
-                  className={`w-full text-left text-xs px-2 py-1 rounded flex items-center gap-2 ${
+                  className={`w-full text-left text-sm px-3 py-2 rounded flex items-center gap-2 ${
                     selectedMajor === c.sym
                       ? 'bg-purple-700 text-white'
                       : 'bg-broker-surface-hover text-broker-text-muted hover:text-white'
@@ -1061,7 +1061,7 @@ function MergerPanel({ game, corp, dispatch, fmt }) {
                     <button
                       key={name}
                       onClick={() => setSelectedIdentity(name)}
-                      className={`text-xs px-2 py-1 rounded ${
+                      className={`text-sm px-3 py-2 rounded ${
                         selectedIdentity === name
                           ? 'bg-purple-700 text-white'
                           : 'bg-broker-surface-hover text-broker-text-muted hover:text-white'
@@ -1092,13 +1092,13 @@ function MergerPanel({ game, corp, dispatch, fmt }) {
                 setSelectedIdentity(null)
               }}
               disabled={!selectedMajor}
-              className="text-xs bg-purple-800 hover:bg-purple-700 disabled:opacity-30 px-3 py-1 rounded text-white"
+              className="text-sm bg-purple-800 hover:bg-purple-700 disabled:opacity-30 px-3 py-2 rounded text-white"
             >
               Confirm Merger
             </button>
             <button
               onClick={() => { setMergeTarget(null); setSelectedMajor(null); setSelectedIdentity(null) }}
-              className="text-xs text-broker-text-muted hover:text-broker-text px-2 py-1"
+              className="text-sm text-broker-text-muted hover:text-broker-text px-3 py-2"
             >
               Cancel
             </button>
@@ -1131,21 +1131,21 @@ function LoanPanel({ game, corp, dispatch, fmt }) {
         <button
           onClick={() => dispatch({ type: 'TAKE_LOAN', corpSym: corp.sym })}
           disabled={!canTake}
-          className="text-xs bg-blue-800 hover:bg-blue-700 disabled:opacity-30 disabled:cursor-not-allowed text-white px-3 py-1.5 rounded"
+          className="text-sm bg-blue-800 hover:bg-blue-700 disabled:opacity-30 disabled:cursor-not-allowed text-white px-3 py-2 rounded"
         >
           Take Loan (+{fmt(loanValue)})
         </button>
         <button
           onClick={() => dispatch({ type: 'REPAY_LOAN', corpSym: corp.sym })}
           disabled={!canRepay}
-          className="text-xs bg-green-800 hover:bg-green-700 disabled:opacity-30 disabled:cursor-not-allowed text-white px-3 py-1.5 rounded"
+          className="text-sm bg-green-800 hover:bg-green-700 disabled:opacity-30 disabled:cursor-not-allowed text-white px-3 py-2 rounded"
         >
           Repay Loan (-{fmt(loanValue)})
         </button>
         {interest > 0 && (
           <button
             onClick={() => dispatch({ type: 'PAY_INTEREST', corpSym: corp.sym })}
-            className="text-xs bg-red-800 hover:bg-red-700 text-white px-3 py-1.5 rounded"
+            className="text-sm bg-red-800 hover:bg-red-700 text-white px-3 py-2 rounded"
           >
             Pay Interest ({fmt(interest)})
           </button>
@@ -1177,7 +1177,7 @@ function ConversionPanel({ game, corp, dispatch }) {
         {canConvertTo5 && (
           <button
             onClick={() => dispatch({ type: 'CONVERT_CORP', corpSym: corp.sym, targetSize: '5share' })}
-            className="text-xs bg-purple-800 hover:bg-purple-700 text-white px-3 py-1.5 rounded"
+            className="text-sm bg-purple-800 hover:bg-purple-700 text-white px-3 py-2 rounded"
           >
             Convert to 5-share
           </button>
@@ -1185,7 +1185,7 @@ function ConversionPanel({ game, corp, dispatch }) {
         {canConvertTo10 && (
           <button
             onClick={() => dispatch({ type: 'CONVERT_CORP', corpSym: corp.sym, targetSize: '10share' })}
-            className="text-xs bg-purple-800 hover:bg-purple-700 text-white px-3 py-1.5 rounded"
+            className="text-sm bg-purple-800 hover:bg-purple-700 text-white px-3 py-2 rounded"
           >
             Convert to 10-share
           </button>
@@ -1222,7 +1222,7 @@ function BuyFromCorpPanel({ otherCorpTrains, buyerCash, onBuy, fmt }) {
               <span className="text-sm">{t.name}-train</span>
               <button
                 onClick={() => setBuyingFrom({ corpSym: c.sym, trainName: t.name })}
-                className="ml-auto text-xs bg-broker-surface-hover hover:bg-broker-surface-hover px-2 py-1 rounded"
+                className="ml-auto text-sm bg-broker-surface-hover hover:bg-broker-surface-hover px-3 py-2 rounded"
               >
                 Buy
               </button>
@@ -1245,13 +1245,13 @@ function BuyFromCorpPanel({ otherCorpTrains, buyerCash, onBuy, fmt }) {
           />
           <button
             onClick={handleConfirm}
-            className="text-xs bg-blue-800 hover:bg-blue-700 px-3 py-1 rounded text-white"
+            className="text-sm bg-blue-800 hover:bg-blue-700 px-3 py-2 rounded text-white"
           >
             Confirm
           </button>
           <button
             onClick={() => setBuyingFrom(null)}
-            className="text-xs text-broker-text-muted hover:text-broker-text px-2 py-1"
+            className="text-sm text-broker-text-muted hover:text-broker-text px-3 py-2"
           >
             Cancel
           </button>
@@ -1409,7 +1409,7 @@ function IssueRedeemPanel({ game, corp, dispatch, fmt }) {
         {canIssue && (
           <button
             onClick={() => dispatch({ type: 'ISSUE_SHARES', corpSym: corp.sym, percent: 10 })}
-            className="text-xs bg-blue-800 hover:bg-blue-700 text-white px-3 py-1.5 rounded"
+            className="text-sm bg-blue-800 hover:bg-blue-700 text-white px-3 py-2 rounded"
           >
             Issue Share (+{fmt(issuePrice)} to corp)
           </button>
@@ -1417,7 +1417,7 @@ function IssueRedeemPanel({ game, corp, dispatch, fmt }) {
         {canRedeem && (
           <button
             onClick={() => dispatch({ type: 'REDEEM_SHARES', corpSym: corp.sym, percent: 10 })}
-            className="text-xs bg-green-800 hover:bg-green-700 text-white px-3 py-1.5 rounded"
+            className="text-sm bg-green-800 hover:bg-green-700 text-white px-3 py-2 rounded"
           >
             Redeem Share (-{fmt(redeemPrice)} from corp)
           </button>
@@ -1447,7 +1447,7 @@ function PlaceTokenPanel({ game, corp, dispatch, fmt }) {
       </div>
       <div className="flex gap-1 text-xs text-broker-text-muted mb-2">
         {corp.tokens.map((cost, i) => (
-          <span key={i} className={`px-1.5 py-0.5 rounded ${i < placed ? 'bg-green-900 text-green-300' : 'bg-broker-surface-hover'}`}>
+          <span key={i} className={`px-3 py-1 rounded ${i < placed ? 'bg-green-900 text-green-300' : 'bg-broker-surface-hover'}`}>
             {fmt(cost)}
           </span>
         ))}
@@ -1455,7 +1455,7 @@ function PlaceTokenPanel({ game, corp, dispatch, fmt }) {
       <button
         onClick={() => dispatch({ type: 'PLACE_TOKEN', corpSym: corp.sym, cost: nextTokenCost })}
         disabled={!canAfford}
-        className="text-xs bg-blue-800 hover:bg-blue-700 disabled:opacity-30 disabled:cursor-not-allowed text-white px-3 py-1.5 rounded"
+        className="text-sm bg-blue-800 hover:bg-blue-700 disabled:opacity-30 disabled:cursor-not-allowed text-white px-3 py-2 rounded"
       >
         Place Token ({fmt(nextTokenCost)})
       </button>

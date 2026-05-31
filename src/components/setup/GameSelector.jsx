@@ -71,7 +71,7 @@ export default function GameSelector() {
           <button
             key={t.id}
             onClick={() => setTheme(t.id)}
-            className={`text-xs px-2 py-1 rounded transition-colors ${
+            className={`text-sm px-3 py-1.5 rounded transition-colors ${
               themeId === t.id
                 ? 'bg-broker-gold text-broker-bg font-medium'
                 : 'bg-broker-surface text-broker-text-muted hover:bg-broker-surface-hover'
@@ -135,7 +135,7 @@ export default function GameSelector() {
         <div className="flex gap-1 items-center">
           {[['rating', 'Rating'], ['name', 'A-Z']].map(([id, label]) => (
             <button key={id} onClick={() => setSortBy(id)}
-              className={`text-[10px] px-1.5 py-0.5 rounded ${sortBy === id
+              className={`text-xs px-2 py-1 rounded ${sortBy === id
                 ? 'bg-broker-gold text-broker-bg font-medium'
                 : 'text-broker-text-muted hover:text-white'
               }`}>{label}</button>
@@ -143,7 +143,7 @@ export default function GameSelector() {
           <span className="text-broker-text-muted/30 mx-0.5">|</span>
           {[0, 1, 2, 3, 4].map(r => (
             <button key={r} onClick={() => setMinRating(minRating === r ? 0 : r)}
-              className={`text-[10px] px-1 py-0.5 rounded ${minRating === r
+              className={`text-xs px-2 py-1 rounded ${minRating === r
                 ? 'bg-broker-gold text-broker-bg font-medium'
                 : 'text-broker-text-muted hover:text-white'
               }`}>{r}+</button>
@@ -233,7 +233,7 @@ export default function GameSelector() {
               {showInfo.minPlayers}–{showInfo.maxPlayers} players • {showInfo.designer}
             </div>
             <button onClick={() => setShowInfo(null)}
-              className="mt-3 w-full text-xs text-broker-text-muted hover:text-white py-1">Close</button>
+              className="mt-3 w-full text-xs text-broker-text-muted hover:text-white py-2 px-3">Close</button>
           </div>
         </div>
       )}
@@ -290,7 +290,7 @@ function WrenchLegend({ onClose }) {
           ))}
         </div>
         <button onClick={onClose}
-          className="mt-3 w-full text-xs text-broker-text-muted hover:text-white py-1">Close</button>
+          className="mt-3 w-full text-xs text-broker-text-muted hover:text-white py-2 px-3">Close</button>
       </div>
     </div>
   )
@@ -305,7 +305,7 @@ function TitleButton({ t, onClick, onShowLegend, onShowInfo }) {
         <span className="text-xl font-bold text-broker-text">{t.title}</span>
         {t.gameInfo && (
           <span onClick={e => { e.stopPropagation(); onShowInfo?.(t) }}
-            className="text-[10px] text-broker-text-muted/40 hover:text-broker-text-muted cursor-pointer">ℹ</span>
+            className="text-sm p-1 text-broker-text-muted/40 hover:text-broker-text-muted cursor-pointer">ℹ</span>
         )}
       </div>
       <div className="text-sm text-broker-text-muted mt-1">{t.subtitle}</div>
