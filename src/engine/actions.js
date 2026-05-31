@@ -77,7 +77,7 @@ export function applyAction(state, action) {
       break
     case 'SET_PRIORITY': {
       // Give priority deal marker to a player
-      state.priorityPlayerId = action.playerId
+      state.priorityDeal = action.playerId
       break
     }
     // Super-umpire direct edit actions
