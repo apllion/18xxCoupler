@@ -362,6 +362,7 @@ function PlayerActions({ game, player, dispatch, fmt, goToCorp }) {
   const [parCorp, setParCorp] = useState(null) // corpSym being par'd
   const [parPrice, setParPrice] = useState(null) // { price, row, col }
   const [parCard, setParCard] = useState(null) // card id (for PTG)
+  const [parBid, setParBid] = useState('') // auction bid amount
 
   const floatedCorps = game.corporations.filter(c => c.floated)
   const unfloatedCorps = game.corporations.filter(c => !c.ipoed)
@@ -433,12 +434,16 @@ function PlayerActions({ game, player, dispatch, fmt, goToCorp }) {
 
         const doPar = () => {
           if (!parCorp || !parPrice) return
+          const bidAmount = parseInt(parBid) || 0
+          if (bidAmount > 0) {
+            dispatch({ type: 'ADJUST_CASH', entityId: player.id, entityType: 'player', amount: -bidAmount })
+          }
           dispatch({ type: 'PAR_SHARE', playerId: player.id, corpSym: parCorp, parPrice: parPrice.price, row: parPrice.row, col: parPrice.col })
           if (parCard) {
             const card = availableCards.find(c => c.id === parCard)
             if (card) dispatch({ type: 'GIVE_CARD', playerId: player.id, card })
           }
-          setParCorp(null); setParPrice(null); setParCard(null)
+          setParCorp(null); setParPrice(null); setParCard(null); setParBid('')
         }
 
         return (
@@ -458,6 +463,17 @@ function PlayerActions({ game, player, dispatch, fmt, goToCorp }) {
                 </button>
               ))}
             </div>
+
+            {/* Bid (optional — priority auction) */}
+            {parCorp && (
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-xs text-broker-text-muted">Bid:</span>
+                <input type="number" value={parBid}
+                  onChange={e => setParBid(e.target.value)}
+                  placeholder="0"
+                  className="w-16 bg-broker-bg border border-broker-border rounded px-2 py-1 text-sm text-broker-text text-right" />
+              </div>
+            )}
 
             {/* Step 2: pick price */}
             {parCorp && (
@@ -512,7 +528,7 @@ function PlayerActions({ game, player, dispatch, fmt, goToCorp }) {
               <div className="flex gap-2">
                 <button onClick={doPar}
                   className="text-sm bg-green-800 hover:bg-green-700 text-white px-3 py-2 rounded font-medium">
-                  Par {parCorp} @ {fmt(parPrice.price)}{parCard ? ' + card' : ''}
+                  Par {parCorp} @ {fmt(parPrice.price)}{parseInt(parBid) > 0 ? ` bid ${fmt(parseInt(parBid))}` : ''}{parCard ? ' + card' : ''}
                 </button>
                 <button onClick={() => { setParCorp(null); setParPrice(null); setParCard(null) }}
                   className="text-sm text-broker-text-muted hover:text-broker-text px-3 py-2">Cancel</button>
