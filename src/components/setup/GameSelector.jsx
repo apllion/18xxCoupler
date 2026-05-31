@@ -84,7 +84,7 @@ export default function GameSelector() {
       </div>
 
       <img src={import.meta.env.BASE_URL + 'logo.png'} alt="18xxCoupler"
-        className="w-full max-w-md mt-2 mb-1 rounded-xl" />
+        className="w-full max-w-md mt-2 mb-1 rounded-xl mix-blend-screen" />
       <p className="text-[10px] text-broker-text-muted mb-6">
         v{typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '?'} · {typeof __BUILD_ID__ !== 'undefined' ? __BUILD_ID__ : '?'}
       </p>
@@ -306,8 +306,8 @@ function TitleButton({ t, onClick, onShowLegend, onShowInfo }) {
         <span className="text-xl font-bold text-broker-text">{t.title}</span>
         {t.gameInfo && (
           <span onClick={e => { e.stopPropagation(); onShowInfo?.(t) }}
-            className="text-sm p-1 text-broker-text-muted/40 hover:text-broker-gold cursor-pointer" title="Game info">
-            <svg className="w-4 h-4 inline" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+            className="p-1 text-broker-text-muted/40 hover:text-broker-gold cursor-pointer" title="Game info">
+            <svg className="w-6 h-6 inline" viewBox="0 0 24 24" fill="currentColor" stroke="none">
               <path d="M12 2C9.5 2 8 3.5 8 5c0 .5.1 1 .3 1.4L7 8h10l-1.3-1.6c.2-.4.3-.9.3-1.4 0-1.5-1.5-3-4-3zM6 9v2h1v7H6v2h12v-2h-1v-7h1V9H6zm4 2h4v7h-4v-7z"/>
             </svg>
           </span>
