@@ -16,8 +16,13 @@ export function buyShareFromIPO(state, playerId, corpSym, percent = 10) {
   player.cash -= cost
   corp.ipoShares -= percent
 
-  // Both full and incremental: player pays bank. Corp gets money on float.
-  state.bank.cash += cost
+  if (state.title.capitalization === 'incremental') {
+    // Incremental: player pays corp treasury
+    corp.cash += cost
+  } else {
+    // Full: player pays bank
+    state.bank.cash += cost
+  }
 
   player.shares.push({ corpSym, percent, isPresident })
 
@@ -25,10 +30,13 @@ export function buyShareFromIPO(state, playerId, corpSym, percent = 10) {
   const soldPercent = 100 - corp.ipoShares
   if (!corp.floated && soldPercent >= corp.floatPercent) {
     corp.floated = true
-    // Corp receives par * 10 from bank on float (both full and incremental)
-    const capitalization = corp.parPrice * 10
-    corp.cash += capitalization
-    state.bank.cash -= capitalization
+    if (state.title.capitalization !== 'incremental') {
+      // Full cap: corp receives par × 10 from bank on float
+      const capitalization = corp.parPrice * 10
+      corp.cash += capitalization
+      state.bank.cash -= capitalization
+    }
+    // Incremental: no lump sum — corp already received each share payment
   }
 }
 
