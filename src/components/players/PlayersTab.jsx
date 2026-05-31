@@ -360,7 +360,8 @@ function SectionHeader({ title }) {
 
 function PlayerActions({ game, player, dispatch, fmt, goToCorp }) {
   const [parCorp, setParCorp] = useState(null) // corpSym being par'd
-  const [parPrice, setParPrice] = useState(null)
+  const [parPrice, setParPrice] = useState(null) // { price, row, col }
+  const [parCard, setParCard] = useState(null) // card id (for PTG)
 
   const floatedCorps = game.corporations.filter(c => c.floated)
   const unfloatedCorps = game.corporations.filter(c => !c.ipoed)
@@ -424,50 +425,102 @@ function PlayerActions({ game, player, dispatch, fmt, goToCorp }) {
       )}
 
       {/* Par — start new corp */}
-      {unfloatedCorps.length > 0 && availablePars.length > 0 && (
-        <div>
-          <div className="text-xs text-broker-text-muted mb-1 font-medium uppercase">Par New Corporation</div>
-          {!parCorp ? (
-            <div className="flex flex-wrap gap-1">
+      {unfloatedCorps.length > 0 && availablePars.length > 0 && (() => {
+        const hasCards = game.title.strategyCards?.length > 0
+        const allGiven = game.players.flatMap(p => (p.cards || []).map(c => c.id))
+        const availableCards = hasCards ? (game.title.strategyCards || []).filter(c => !allGiven.includes(c.id)) : []
+        const cardColors = { blue: '#0189d1', white: '#cccccc', green: '#237333', red: '#d81e3e', purple: '#800080', black: '#333333', yellow: '#FFF500', grey: '#808080' }
+
+        const doPar = () => {
+          if (!parCorp || !parPrice) return
+          dispatch({ type: 'PAR_SHARE', playerId: player.id, corpSym: parCorp, parPrice: parPrice.price, row: parPrice.row, col: parPrice.col })
+          if (parCard) {
+            const card = availableCards.find(c => c.id === parCard)
+            if (card) dispatch({ type: 'GIVE_CARD', playerId: player.id, card })
+          }
+          setParCorp(null); setParPrice(null); setParCard(null)
+        }
+
+        return (
+          <div>
+            <div className="text-xs text-broker-text-muted mb-1 font-medium uppercase">Par New Corporation</div>
+
+            {/* Step 1: pick corp */}
+            <div className="flex flex-wrap gap-1 mb-2">
               {unfloatedCorps.map(c => (
-                <button key={c.sym} onClick={() => setParCorp(c.sym)}
-                  className="text-sm bg-broker-surface-hover hover:bg-broker-bg text-broker-text hover:text-broker-text px-3 py-2 rounded flex items-center gap-1">
+                <button key={c.sym} onClick={() => { setParCorp(c.sym); setParPrice(null); setParCard(null) }}
+                  className={`text-sm px-3 py-2 rounded flex items-center gap-1 ${parCorp === c.sym
+                    ? 'ring-2 ring-white'
+                    : 'bg-broker-surface-hover text-broker-text hover:text-broker-text'
+                  }`}>
                   <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: c.color }} />
                   {c.sym}
                 </button>
               ))}
             </div>
-          ) : (
-            <div>
-              <div className="text-xs text-broker-text mb-1">
-                Par <span className="font-bold">{parCorp}</span> at:
+
+            {/* Step 2: pick price */}
+            {parCorp && (
+              <div className="mb-2">
+                <div className={"text-xs text-broker-text-muted" + ' mb-1'}>Par price:</div>
+                <div className="flex flex-wrap gap-1">
+                  {availablePars.map(p => {
+                    const cost = p.price * 2
+                    const canAfford = player.cash >= cost
+                    return (
+                      <button key={p.price} onClick={() => canAfford && setParPrice(p)}
+                        disabled={!canAfford}
+                        className={`text-sm px-3 py-2 rounded ${parPrice?.price === p.price
+                          ? 'bg-green-700 text-white ring-2 ring-green-400'
+                          : canAfford ? 'bg-green-800 hover:bg-green-700 text-white' : 'bg-broker-bg text-broker-text-muted/40'
+                        }`}>
+                        {fmt(p.price)} ({fmt(cost)})
+                      </button>
+                    )
+                  })}
+                </div>
               </div>
-              <div className="flex flex-wrap gap-1">
-                {availablePars.map(p => {
-                  const cost = p.price * 2 // president cert = 2 shares
-                  const canAfford = player.cash >= cost
-                  return (
-                    <button key={p.price} onClick={() => {
-                      if (canAfford) {
-                        dispatch({ type: 'PAR_SHARE', playerId: player.id, corpSym: parCorp, parPrice: p.price, row: p.row, col: p.col })
-                        setParCorp(null)
-                      }
-                    }}
-                      disabled={!canAfford}
-                      className={`text-sm px-3 py-2 rounded ${canAfford
-                        ? 'bg-green-800 hover:bg-green-700 text-white'
-                        : 'bg-broker-bg text-broker-text-muted/40'
-                      }`}>
-                      {fmt(p.price)} ({fmt(cost)})
-                    </button>
-                  )
-                })}
-                <button onClick={() => setParCorp(null)} className="text-sm text-broker-text-muted hover:text-broker-text px-3 py-2">Cancel</button>
+            )}
+
+            {/* Step 3: pick strategy card (PTG) */}
+            {parCorp && parPrice && hasCards && availableCards.length > 0 && (
+              <div className="mb-2">
+                <div className={"text-xs text-broker-text-muted" + ' mb-1'}>Strategy card:</div>
+                <div className="flex flex-wrap gap-1">
+                  {availableCards.map(card => {
+                    const cc = cardColors[card.color] || '#888'
+                    const ct = card.color === 'yellow' || card.color === 'white' ? '#000' : '#fff'
+                    return (
+                      <button key={card.id} onClick={() => setParCard(parCard === card.id ? null : card.id)}
+                        className={`text-sm px-3 py-2 rounded font-medium ${parCard === card.id ? 'ring-2 ring-white' : 'hover:opacity-80'}`}
+                        style={{ backgroundColor: cc, color: ct }}
+                        title={`${card.unique}\nPermit: ${card.permit}`}>
+                        {card.name}
+                      </button>
+                    )
+                  })}
+                  <button onClick={() => setParCard(null)}
+                    className={`text-sm px-3 py-2 rounded ${!parCard ? 'ring-2 ring-white bg-broker-surface-hover text-broker-text' : 'text-broker-text-muted'}`}>
+                    None
+                  </button>
+                </div>
               </div>
-            </div>
-          )}
-        </div>
-      )}
+            )}
+
+            {/* Confirm / Cancel */}
+            {parCorp && parPrice && (
+              <div className="flex gap-2">
+                <button onClick={doPar}
+                  className="text-sm bg-green-800 hover:bg-green-700 text-white px-3 py-2 rounded font-medium">
+                  Par {parCorp} @ {fmt(parPrice.price)}{parCard ? ' + card' : ''}
+                </button>
+                <button onClick={() => { setParCorp(null); setParPrice(null); setParCard(null) }}
+                  className="text-sm text-broker-text-muted hover:text-broker-text px-3 py-2">Cancel</button>
+              </div>
+            )}
+          </div>
+        )
+      })()}
 
       {/* Short Sell / Close Short (1817) */}
       {game.title.shorts && floatedCorps.length > 0 && (
