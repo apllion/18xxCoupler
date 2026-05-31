@@ -636,7 +636,8 @@ function handlePar(state, { playerId, corpSym, parPrice, row, col }) {
 
   const corpShares = getCorpShares(state, corpSym)
   const presPercent = corpShares[0] ?? 20
-  const cost = (parPrice * presPercent) / 10
+  const baseShare = state.title.shares?.[1] ?? 10
+  const cost = parPrice * (presPercent / baseShare)
   player.cash -= cost
   corp.ipoShares -= presPercent
 
