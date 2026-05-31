@@ -579,20 +579,20 @@ function CorpSharePanel({ game, corp, dispatch, fmt }) {
   }
 
   // Available shares to buy: from IPO and market of other (or own) corps
+  // Plus unfloated corps if corpCanBuyPresident (PTG: corp can start new corps)
   const buyOptions = game.corporations
-    .filter((c) => c.ipoed)
+    .filter((c) => c.ipoed || (title.corpCanBuyPresident && !c.ipoed && c.sym !== corp.sym))
     .map((c) => {
-      const price = corpPrice(game.stockMarket, c.sym)
+      const price = c.ipoed ? corpPrice(game.stockMarket, c.sym) : null
       const hasIPO = c.ipoShares > 0
       const hasMarket = c.marketShares > 0
       const isSelf = c.sym === corp.sym
-      if (!price) return null
-      if (isSelf && !title.corpCanBuyOwnShares) return hasMarket || hasIPO ? null : null
-      // Filter out president-only shares if not allowed
-      return { corp: c, price, hasIPO, hasMarket, isSelf }
+      const canStart = !c.ipoed && title.corpCanBuyPresident
+      if (!price && !canStart) return null
+      if (isSelf && !title.corpCanBuyOwnShares) return null
+      return { corp: c, price, hasIPO, hasMarket, isSelf, canStart }
     })
     .filter(Boolean)
-    // Filter self shares based on title rules
     .filter((o) => !o.isSelf || title.corpCanBuyOwnShares)
 
   // Holdings this corp can sell
@@ -648,10 +648,10 @@ function CorpSharePanel({ game, corp, dispatch, fmt }) {
         <div className="mb-2">
           <div className="text-xs text-broker-text-muted mb-1">Buy Share:</div>
           <div className="space-y-1">
-            {buyOptions.map(({ corp: c, price, hasIPO, hasMarket, isSelf }) => {
+            {buyOptions.map(({ corp: c, price, hasIPO, hasMarket, isSelf, canStart }) => {
               const shareSize = title.shares?.[1] ?? 10
-              const cost = (price * shareSize) / 10
-              const canAfford = corp.cash >= cost
+              const cost = price ? (price * shareSize) / 10 : 0
+              const canAfford = price ? corp.cash >= cost : false
               return (
                 <div key={c.sym} className="flex items-center gap-2">
                   <span
@@ -685,6 +685,18 @@ function CorpSharePanel({ game, corp, dispatch, fmt }) {
                       }`}
                     >
                       Mkt {fmt(price)}
+                    </button>
+                  )}
+                  {canStart && (
+                    <button
+                      onClick={() => {
+                        // Corp buys CEO share — triggers PAR for the target corp
+                        // The corp pays from its treasury, needs a par price selection
+                        dispatch({ type: 'CORP_BUY_SHARE', buyerCorpSym: corp.sym, targetCorpSym: c.sym, source: 'ipo', percent: title.shares?.[0] ?? 20 })
+                      }}
+                      className="text-sm px-3 py-2 rounded bg-green-800 hover:bg-green-700 text-white"
+                    >
+                      Start {c.sym}
                     </button>
                   )}
                 </div>

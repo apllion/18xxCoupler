@@ -65,7 +65,7 @@ const ACTIONS = [
   },
 
   // Pay to bank — auctions, fees, any cash-to-bank transfer
-  { id: 'paybank', label: 'Pay Bank', mLabel: 'Pay', round: 'any', always: true },
+  { id: 'paybank', label: 'Pay', mLabel: 'Pay', round: 'any', always: true },
   // Strategy cards — PTG
   { id: 'takecard', label: 'Card', mLabel: 'Card', round: 'any', gate: (g) => !!g.title.strategyCards },
 
