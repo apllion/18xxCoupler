@@ -260,7 +260,7 @@ function CorpDetail({ game, corp, dispatch, fmt, onNext, plusPlus }) {
           </div>
         </div>
         <div className="flex gap-4 text-sm text-broker-text flex-wrap">
-          <div>Treasury: <span className="font-medium text-white">{fmt(corp.cash)}</span></div>
+          <div>Treasury: <span className="font-medium text-broker-text">{fmt(corp.cash)}</span></div>
           <div>President: {president
             ? <button onClick={() => goToPlayer(president.id)} className="font-medium hover:underline">{president.name}</button>
             : <span className="font-medium">—</span>
@@ -1123,7 +1123,7 @@ function LoanPanel({ game, corp, dispatch, fmt }) {
     <div className="bg-broker-surface rounded-lg p-3">
       <div className="text-xs text-broker-text-muted mb-2 font-medium uppercase">Loans</div>
       <div className="flex gap-4 text-sm mb-2">
-        <div>Loans: <span className="font-medium text-white">{loans}/{max}</span></div>
+        <div>Loans: <span className="font-medium text-broker-text">{loans}/{max}</span></div>
         <div>Rate: <span className="font-medium text-yellow-300">{rate}%</span></div>
         {interest > 0 && <div>Interest due: <span className="font-medium text-red-300">{fmt(interest)}</span></div>}
       </div>
@@ -1340,7 +1340,7 @@ function DividendAdvisorPanel({ advisor, fmt }) {
             opt.label === 'Half' ? 'bg-yellow-900/30' :
             'bg-orange-900/30'
           }`}>
-            <div className="font-medium text-white mb-1">{opt.label}</div>
+            <div className="font-medium text-broker-text mb-1">{opt.label}</div>
             <div className="space-y-0.5 text-broker-text-muted">
               <div>
                 Price: {fmt(opt.newPrice)}
@@ -1401,9 +1401,9 @@ function IssueRedeemPanel({ game, corp, dispatch, fmt }) {
     <div className="bg-broker-surface rounded-lg p-3">
       <div className="text-xs text-broker-text-muted mb-2 font-medium uppercase">Issue / Redeem Shares</div>
       <div className="flex gap-4 text-sm mb-2">
-        <div>IPO: <span className="font-medium text-white">{corp.ipoShares}%</span></div>
-        <div>Market: <span className="font-medium text-white">{corp.marketShares}%</span></div>
-        <div>Price: <span className="font-medium text-white">{fmt(currentPrice)}</span></div>
+        <div>IPO: <span className="font-medium text-broker-text">{corp.ipoShares}%</span></div>
+        <div>Market: <span className="font-medium text-broker-text">{corp.marketShares}%</span></div>
+        <div>Price: <span className="font-medium text-broker-text">{fmt(currentPrice)}</span></div>
       </div>
       <div className="flex gap-2">
         {canIssue && (
@@ -1441,9 +1441,9 @@ function PlaceTokenPanel({ game, corp, dispatch, fmt }) {
     <div className="bg-broker-surface rounded-lg p-3">
       <div className="text-xs text-broker-text-muted mb-2 font-medium uppercase">Tokens</div>
       <div className="flex gap-4 text-sm mb-2">
-        <div>Placed: <span className="font-medium text-white">{placed}/{total}</span></div>
-        <div>Remaining: <span className="font-medium text-white">{remaining}</span></div>
-        <div>Next cost: <span className="font-medium text-white">{fmt(nextTokenCost)}</span></div>
+        <div>Placed: <span className="font-medium text-broker-text">{placed}/{total}</span></div>
+        <div>Remaining: <span className="font-medium text-broker-text">{remaining}</span></div>
+        <div>Next cost: <span className="font-medium text-broker-text">{fmt(nextTokenCost)}</span></div>
       </div>
       <div className="flex gap-1 text-xs text-broker-text-muted mb-2">
         {corp.tokens.map((cost, i) => (

@@ -135,7 +135,7 @@ export default function PlayersTab() {
                   ? 'bg-broker-gold text-broker-bg'
                   : locked
                     ? 'bg-broker-surface text-broker-text-muted opacity-30'
-                    : 'bg-broker-surface text-broker-text-muted hover:text-white'
+                    : 'bg-broker-surface text-broker-text-muted hover:text-broker-text'
               }`}
             >
               {p.name}
@@ -156,7 +156,7 @@ export default function PlayersTab() {
         <div className="flex justify-between text-sm text-broker-text-muted">
           <span>Shares: {fmt(totalShareValue)}</span>
           {totalPrivateValue > 0 && <span>Privates: {fmt(totalPrivateValue)}</span>}
-          <span className="text-white font-medium">Net: {fmt(netWorth)}</span>
+          <span className="text-broker-text font-medium">Net: {fmt(netWorth)}</span>
         </div>
       </div>
 
@@ -425,7 +425,7 @@ function PlayerActions({ game, player, dispatch, fmt, goToCorp }) {
             <div className="flex flex-wrap gap-1">
               {unfloatedCorps.map(c => (
                 <button key={c.sym} onClick={() => setParCorp(c.sym)}
-                  className="text-sm bg-broker-surface-hover hover:bg-broker-bg text-broker-text hover:text-white px-3 py-2 rounded flex items-center gap-1">
+                  className="text-sm bg-broker-surface-hover hover:bg-broker-bg text-broker-text hover:text-broker-text px-3 py-2 rounded flex items-center gap-1">
                   <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: c.color }} />
                   {c.sym}
                 </button>
@@ -456,7 +456,7 @@ function PlayerActions({ game, player, dispatch, fmt, goToCorp }) {
                     </button>
                   )
                 })}
-                <button onClick={() => setParCorp(null)} className="text-sm text-broker-text-muted hover:text-white px-3 py-2">Cancel</button>
+                <button onClick={() => setParCorp(null)} className="text-sm text-broker-text-muted hover:text-broker-text px-3 py-2">Cancel</button>
               </div>
             </div>
           )}

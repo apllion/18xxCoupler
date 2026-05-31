@@ -18,7 +18,7 @@ export default function RouteCalcTab() {
       ? 'font-mono text-xs p-2 space-y-3 overflow-y-auto bg-blue-950 text-blue-300 h-full'
       : 'text-sm p-3 space-y-4 overflow-y-auto bg-broker-bg h-full'
     }>
-      <h2 className={m ? 'text-green-400 font-bold' : 'text-white font-bold text-lg'}>Route Calculator</h2>
+      <h2 className={m ? 'text-green-400 font-bold' : 'text-broker-text font-bold text-lg'}>Route Calculator</h2>
       <RouteCalc game={game} fmt={fmt} m={m} />
     </div>
   )
@@ -138,7 +138,7 @@ function RouteCalc({ game, fmt, m }) {
         ? 'bg-green-900/30 border border-green-800 rounded p-2 flex items-center gap-3 flex-wrap'
         : 'bg-broker-surface border border-broker-border rounded-lg p-3 flex items-center gap-3 flex-wrap'
       }>
-        <span className={`text-2xl font-bold ${m ? 'text-white' : 'text-white'}`}>{fmt(total)}</span>
+        <span className={`text-2xl font-bold ${m ? 'text-white' : 'text-broker-text'}`}>{fmt(total)}</span>
         <span className={labelCls}>{fmt(Math.floor(total / 10))}/share</span>
         {trains.filter(t => t.stops.length > 0).map(t => (
           <span key={t.id} className="text-xs">{t.name || '?'}: {fmt(trainRev(t))}</span>
@@ -250,7 +250,7 @@ function RouteCalc({ game, fmt, m }) {
                   {pendingDelete === `clear-${t.id}` ? 'clear?' : 'clear'}
                 </button>
               )}
-              <span className={`ml-auto text-lg font-bold ${m ? 'text-white' : 'text-white'}`}>
+              <span className={`ml-auto text-lg font-bold ${m ? 'text-white' : 'text-broker-text'}`}>
                 {rev > 0 ? fmt(rev) : '—'}
               </span>
               <button onClick={() => {

@@ -203,7 +203,7 @@ export default function EndgameCalcTab() {
       : 'text-sm p-3 space-y-4 overflow-y-auto bg-broker-bg h-full'
     }>
       <div className="flex items-center gap-3">
-        <h2 className={m ? 'text-green-400 font-bold' : 'text-white font-bold text-lg'}>Endgame Calculator</h2>
+        <h2 className={m ? 'text-green-400 font-bold' : 'text-broker-text font-bold text-lg'}>Endgame Calculator</h2>
         {game && game.corporations.some(c => c.floated) && (
           <button onClick={loadFromGame} className={m
             ? 'text-xs bg-blue-800 text-blue-300 hover:bg-blue-700 px-3 py-1.5 rounded'
@@ -219,7 +219,7 @@ export default function EndgameCalcTab() {
             <div key={i} className="flex items-center gap-2">
               <span className={`w-4 font-bold ${i === 0 ? 'text-green-400' : m ? 'text-blue-400' : 'text-broker-text-muted'}`}>{i + 1}</span>
               <span className={`flex-1 truncate ${i === 0 ? 'text-green-400 font-bold' : m ? 'text-yellow-300' : 'text-broker-text'}`}>{p.name}</span>
-              <span className={m ? 'text-white text-lg font-bold' : 'text-white text-lg font-bold'}>{fmt(p.total)}</span>
+              <span className={m ? 'text-white text-lg font-bold' : 'text-broker-text text-lg font-bold'}>{fmt(p.total)}</span>
               {i === 0 && <span className="text-green-400 text-xs font-bold">WINNER</span>}
             </div>
           ))}
@@ -228,7 +228,7 @@ export default function EndgameCalcTab() {
 
       {/* Round control */}
       <div className="flex items-center gap-2">
-        <span className={m ? 'text-green-400 font-bold' : 'text-white font-medium'}>Corporations</span>
+        <span className={m ? 'text-green-400 font-bold' : 'text-broker-text font-medium'}>Corporations</span>
         <span className={labelCls}>{rounds} round{rounds !== 1 ? 's' : ''}</span>
         <button onClick={removeRound} disabled={rounds <= 1} className={`${btnSmall} px-3 py-1.5 disabled:opacity-30`}>−</button>
         <button onClick={addRound} className={`${btnSmall} px-3 py-1.5`}>+</button>
@@ -321,7 +321,7 @@ export default function EndgameCalcTab() {
               <span className={labelCls}>cash</span>
               <input type="number" value={p.cash || ''} onChange={e => setPlayerField(pi, 'cash', e.target.value)}
                 className={inputCls} />
-              <span className={`ml-auto font-bold ${m ? 'text-white' : 'text-white'}`}>{fmt(total)}</span>
+              <span className={`ml-auto font-bold ${m ? 'text-white' : 'text-broker-text'}`}>{fmt(total)}</span>
               <button onClick={() => setShowCalc(isOpen ? null : pi)}
                 className={`text-sm px-2 py-1 rounded ${isOpen
                   ? (m ? 'bg-green-800 text-green-200' : 'bg-blue-600 text-white')
@@ -339,7 +339,7 @@ export default function EndgameCalcTab() {
                     <span style={{ color: c.color }} className="font-bold text-[10px] w-8">{c.sym}</span>
                     <button onClick={() => adjShares(pi, c.sym, -1)}
                       className={`text-lg px-3 py-1 rounded ${m ? 'bg-blue-900/50 text-blue-300' : 'bg-broker-surface-hover text-broker-text'}`}>−</button>
-                    <span className={`text-xs w-4 text-center font-bold ${isShort ? 'text-red-400' : m ? 'text-white' : 'text-white'}`}>
+                    <span className={`text-xs w-4 text-center font-bold ${isShort ? 'text-red-400' : m ? 'text-white' : 'text-broker-text'}`}>
                       {val}
                     </span>
                     <button onClick={() => adjShares(pi, c.sym, 1)}
