@@ -355,7 +355,11 @@ function PanelContent({ panel, game, player, corp, unfloated, fmt, revenueInput,
   if (panel === 'paybank') {
     const floatedCorps = game.corporations.filter(c => c.floated)
     const [payAmount, setPayAmount] = useState(0)
-    const [payFrom, setPayFrom] = useState(player ? { type: 'player', id: player.id, label: player.name } : null)
+    const [payFrom, setPayFrom] = useState(
+      corp?.floated ? { type: 'corporation', id: corp.sym, label: corp.sym, color: corp.color, cash: corp.cash }
+      : player ? { type: 'player', id: player.id, label: player.name, cash: player.cash }
+      : null
+    )
     const [payTo, setPayTo] = useState({ type: 'bank', label: 'Bank' })
 
     const doPay = (amount) => {
