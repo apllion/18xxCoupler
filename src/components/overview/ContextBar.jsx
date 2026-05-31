@@ -38,7 +38,6 @@ export function ContextBar({ game, selPlayer, selCorp, myPlayerId, setPanel, doA
     },
     discard: () => setPanel('discard'),
     removetoken: () => selCorp && doAction({ type: 'REMOVE_TOKEN', corpSym: selCorp.sym }),
-    bankrupt: () => selPlayer && doAction({ type: 'PLAYER_BANKRUPT', playerId: selPlayer.id }),
     advance: () => doAction({ type: 'ADVANCE_ROUND' }),
     collect: () => doAction({ type: 'COLLECT_ALL_REVENUE' }),
     soldout: () => doAction({ type: 'SOLD_OUT_ADJUST' }),

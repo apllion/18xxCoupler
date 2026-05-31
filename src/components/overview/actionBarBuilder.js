@@ -75,11 +75,6 @@ const ACTIONS = [
   // Merger actions — title and round specific
   { id: 'merge', label: 'Merge', mLabel: 'Merge', round: 'any', gate: (g) => !!g.title.merger },
 
-  // Player bankrupt
-  { id: 'bankrupt', label: 'Bankrupt', mLabel: 'Bankr', round: 'any',
-    gate: (g) => g.players.some(p => !p.bankrupt)
-  },
-
   // Round management — always
   { id: 'advance', label: 'Advance', mLabel: '[A]dv', key: 'a', round: 'any', always: true, category: 'round' },
   { id: 'collect', label: 'Collect', mLabel: '[C]oll', key: 'c', round: 'any', always: true, category: 'round' },
