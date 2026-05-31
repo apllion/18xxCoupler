@@ -72,7 +72,11 @@ export function getCorpShares(state, corpSym) {
 }
 
 // Regular (non-president) share size for a corp. Used for price calculations.
+// After merger, actual shares in play may differ from title definition.
 export function regularSharePercent(state, corpSym) {
+  const corp = state.corporations.find(c => c.sym === corpSym)
+  // If merged, shares are 10% (converted from 20%)
+  if (corp?.isMerged) return 10
   const shares = getCorpShares(state, corpSym)
   return shares[1] ?? shares[0] ?? 10
 }
