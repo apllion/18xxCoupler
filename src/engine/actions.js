@@ -75,7 +75,17 @@ export function applyAction(state, action) {
     case 'ADJUST_CASH':
       handleAdjustCash(state, action)
       break
+    case 'SET_PRIORITY': {
+      // Give priority deal marker to a player
+      state.priorityPlayerId = action.playerId
+      break
+    }
     // Super-umpire direct edit actions
+    case 'SET_PLAYER_NAME': {
+      const p = state.players.find(pl => pl.id === action.playerId)
+      if (p && action.name) p.name = action.name
+      break
+    }
     case 'SET_CASH': {
       if (action.entityType === 'player') {
         const p = state.players.find(pl => pl.id === action.entityId)
@@ -1107,6 +1117,12 @@ function describeAction(state, action) {
       const to = action.toSource || playerName(action.toPlayerId)
       return `Move ${action.percent}%${action.isPresident ? 'P' : ''} ${action.corpSym} from ${from} to ${to}`
     }
+    case 'SET_PRIORITY': {
+      const pp = state.players.find(p => p.id === action.playerId)
+      return `Priority deal → ${pp?.name || action.playerId}`
+    }
+    case 'SET_PLAYER_NAME':
+      return `Rename ${action.playerId} to ${action.name}`
     case 'SET_CASH':
       return `Set ${action.entityId} cash to ${fmt(action.value)}`
     case 'SET_SHARES':
