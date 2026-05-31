@@ -5,7 +5,7 @@
 import { useState, useEffect } from 'react'
 import { sha256, GATE_HASH } from '../../utils/passphrase.js'
 
-const STORAGE_KEY = '18xxBroker_access'
+const STORAGE_KEY = '18xxCoupler_access'
 
 export default function PassphraseGate({ children }) {
   const [granted, setGranted] = useState(false)
@@ -44,7 +44,7 @@ export default function PassphraseGate({ children }) {
         <div className="w-full max-w-sm">
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-8 shadow-2xl">
             <img src={import.meta.env.BASE_URL + 'logo.png'} alt="" className="w-20 mx-auto mb-4 opacity-80" />
-            <h1 className="text-xl font-bold text-white text-center mb-1">18xxBroker</h1>
+            <h1 className="text-xl font-bold text-white text-center mb-1">18xxCoupler</h1>
             <p className="text-gray-500 text-sm text-center mb-6">
               Private invitation only
             </p>

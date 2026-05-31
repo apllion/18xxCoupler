@@ -1,5 +1,5 @@
 {
-  "name": "18xx-broker",
+  "name": "18xx-coupler",
   "private": true,
   "version": "0.5.1",
   "type": "module",
@@ -7,8 +7,8 @@
     "dev": "vite --host",
     "build": "vite build",
     "build:pp": "VITE_PLUSPLUS=1 vite build",
-    "deploy:broker": "vite build && gh-pages -d dist",
-    "deploy:pp": "VITE_PLUSPLUS=1 vite build --outDir dist-pp && gh-pages -d dist-pp -b gh-pages -r git@github.com:apllion/18xxBrokerPlusPlus.git",
+    "deploy:coupler": "vite build && gh-pages -d dist",
+    "deploy:pp": "VITE_PLUSPLUS=1 vite build --outDir dist-pp && gh-pages -d dist-pp -b gh-pages -r git@github.com:apllion/18xxCouplerPlusPlus.git",
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",

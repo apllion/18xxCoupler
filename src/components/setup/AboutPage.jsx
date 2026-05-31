@@ -7,7 +7,7 @@ export default function AboutPage({ onEnter }) {
 
   return (
     <div className="min-h-screen bg-broker-bg text-broker-text p-6 max-w-2xl mx-auto">
-      <h1 className="text-3xl font-bold text-white mb-2">18xxBroker</h1>
+      <h1 className="text-3xl font-bold text-white mb-2">18xxCoupler</h1>
       <p className="text-broker-text-muted mb-6">A table companion app for 18xx board games</p>
 
       <button onClick={onEnter}
@@ -20,7 +20,7 @@ export default function AboutPage({ onEnter }) {
         <div>
           <h2 className="text-lg font-bold text-white mb-2">What is this?</h2>
           <p>
-            18xxBroker is a free, open-source financial moderator for 18xx railroad board games.
+            18xxCoupler is a free, open-source financial moderator for 18xx railroad board games.
             It tracks money, shares, trains, and stock prices at your game table.
             It does not replace the board game — you still need the physical game to play.
           </p>
@@ -48,7 +48,7 @@ export default function AboutPage({ onEnter }) {
           <h2 className="text-lg font-bold text-white mb-2">Game Credits & Intellectual Property</h2>
           <p className="mb-2">
             18xx games are the intellectual property of their respective designers and publishers.
-            18xxBroker is a financial tracking tool and does not include any copyrighted game
+            18xxCoupler is a financial tracking tool and does not include any copyrighted game
             content. The following titles are supported, with acknowledgment to their creators:
           </p>
           <div className="bg-broker-surface rounded-lg p-3 space-y-1 max-h-64 overflow-y-auto">
@@ -68,7 +68,7 @@ export default function AboutPage({ onEnter }) {
         <div>
           <h2 className="text-lg font-bold text-white mb-2">18xx.games Integration</h2>
           <p>
-            18xxBroker can import game data from{' '}
+            18xxCoupler can import game data from{' '}
             <a href="https://18xx.games" className="text-broker-gold hover:underline" target="_blank" rel="noopener">18xx.games</a>,
             an open-source platform by Toby Mao (MIT License). Game import replays financial
             actions only — no map, tile, or route data is used. This feature requires an
@@ -90,7 +90,7 @@ export default function AboutPage({ onEnter }) {
 
           <p className="font-medium mt-3">2. Overview</p>
           <p>
-            18xxBroker runs entirely in your browser. We do not operate servers, do not
+            18xxCoupler runs entirely in your browser. We do not operate servers, do not
             create user accounts, and do not collect personal data for our own purposes.
             No cookies, no analytics, no advertising.
           </p>
@@ -183,8 +183,8 @@ export default function AboutPage({ onEnter }) {
         <div>
           <h2 className="text-lg font-bold text-white mb-2">Open Source</h2>
           <p>
-            18xxBroker is open source. Source code is available on{' '}
-            <a href="https://github.com/droste/18xxBroker" className="text-broker-gold hover:underline" target="_blank" rel="noopener">GitHub</a>.
+            18xxCoupler is open source. Source code is available on{' '}
+            <a href="https://github.com/droste/18xxCoupler" className="text-broker-gold hover:underline" target="_blank" rel="noopener">GitHub</a>.
             Contributions welcome.
           </p>
           <p className="mt-1">

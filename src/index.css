@@ -1,18 +1,18 @@
 @import "tailwindcss";
 
-/* ── Theme: Broker (dark green & gold) ── */
+/* ── Theme: Coupler (teal & orange — matches logo) ── */
 .theme-broker {
-  --color-broker-bg: #0f1f15;
-  --color-broker-surface: #1a2e21;
-  --color-broker-surface-hover: #243a2b;
-  --color-broker-border: #2d4a35;
-  --color-broker-text: #f0ead6;
-  --color-broker-text-muted: #a8a08c;
-  --color-broker-gold: #c8a23c;
-  --color-broker-gold-dim: #8b7328;
-  --color-broker-green: #2d5a3f;
-  --color-broker-green-light: #3a7a52;
-  --color-broker-accent: #d4a843;
+  --color-broker-bg: #0a1a1a;
+  --color-broker-surface: #142828;
+  --color-broker-surface-hover: #1e3838;
+  --color-broker-border: #2a4a4a;
+  --color-broker-text: #e8e4d8;
+  --color-broker-text-muted: #8a9a9a;
+  --color-broker-gold: #f58121;
+  --color-broker-gold-dim: #c06818;
+  --color-broker-green: #1a4a4a;
+  --color-broker-green-light: #2a6a5a;
+  --color-broker-accent: #f59542;
 }
 
 /* ── Theme: Dark (classic dark mode) ── */

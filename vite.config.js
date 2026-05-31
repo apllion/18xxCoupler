@@ -17,7 +17,7 @@ export default defineConfig({
     tailwindcss(),
     ...(process.env.NO_SSL ? [] : [basicSsl()]),
   ],
-  base: '/18xxBroker/',
+  base: '/18xxCoupler/',
   server: {
     proxy: {
       '/18xx-games-api': {

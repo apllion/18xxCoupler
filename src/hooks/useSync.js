@@ -4,7 +4,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { joinRoom } from 'trystero/nostr'
 
-const APP_ID = '18xx-broker-v1'
+const APP_ID = '18xx-coupler-v1'
 
 // Actions that are purely local UI and should not be broadcast
 const LOCAL_ONLY = new Set([])
@@ -38,7 +38,7 @@ function getSharedState(game) {
   }
 }
 
-const ROOM_KEY = '18xxBroker_room'
+const ROOM_KEY = '18xxCoupler_room'
 
 function saveRoomInfo(code, isCreator) {
   try { localStorage.setItem(ROOM_KEY, JSON.stringify({ code, isCreator })) } catch {}

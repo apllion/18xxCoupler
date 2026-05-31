@@ -41,7 +41,7 @@ export default function RoomBar({ roomId, peerCount, status, createRoom, joinRoo
             className="bg-blue-800 hover:bg-blue-700 text-white px-2 py-0.5 rounded">
             Reconnect
           </button>
-          <button onClick={() => { localStorage.removeItem('18xxBroker_room') ; location.reload() }}
+          <button onClick={() => { localStorage.removeItem('18xxCoupler_room') ; location.reload() }}
             className="text-broker-text-muted hover:text-red-300 px-1">
             Dismiss
           </button>

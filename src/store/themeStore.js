@@ -4,14 +4,14 @@
 
 import { create } from 'zustand'
 
-const STORAGE_KEY = '18xxBroker_theme'
+const STORAGE_KEY = '18xxCoupler_theme'
 
 const savedTheme = (() => {
   try { return localStorage.getItem(STORAGE_KEY) || 'broker' } catch { return 'broker' }
 })()
 
 export const themes = {
-  broker: { id: 'broker', label: 'Broker', desc: 'Dark green & gold' },
+  broker: { id: 'broker', label: 'Coupler', desc: 'Teal & orange' },
   dark:   { id: 'dark',   label: 'Dark',   desc: 'Classic dark mode' },
   light:  { id: 'light',  label: 'Light',  desc: 'Light mode' },
 }

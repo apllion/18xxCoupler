@@ -1,5 +1,5 @@
 // Import game data from 18xx.games JSON format.
-// Replays financial actions through the 18xxBroker engine to reconstruct state.
+// Replays financial actions through the 18xxCoupler engine to reconstruct state.
 
 import { createGame } from './setup.js'
 import { applyAction } from './actions.js'

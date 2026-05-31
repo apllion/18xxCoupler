@@ -1,7 +1,7 @@
 // Persistence — localStorage save/load, JSON export/import.
 // Only persist what's needed to replay: titleId, player names, action log, createdAt.
 
-const STORAGE_KEY = '18xxBroker_games'
+const STORAGE_KEY = '18xxCoupler_games'
 
 export function saveGame(game) {
   try {
