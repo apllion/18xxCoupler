@@ -84,7 +84,8 @@ export default function GameSelector() {
       </div>
 
       <img src={import.meta.env.BASE_URL + 'logo.png'} alt="18xxCoupler"
-        className="w-full max-w-md mt-2 mb-1 rounded-xl mix-blend-screen" />
+        className="w-full max-w-md mt-2 mb-1 rounded-xl"
+        style={{ mixBlendMode: themeId === 'light' ? 'normal' : 'lighten' }} />
       <p className="text-[10px] text-broker-text-muted mb-6">
         v{typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '?'} · {typeof __BUILD_ID__ !== 'undefined' ? __BUILD_ID__ : '?'}
       </p>
