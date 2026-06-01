@@ -12,6 +12,7 @@ import PlayersTab from '../players/PlayersTab.jsx'
 import SummaryTab from '../summary/SummaryTab.jsx'
 import BeerMarketTab from '../beer/BeerMarketTab.jsx'
 import OverviewTab from '../overview/OverviewTab.jsx'
+import ActionLog from '../overview/ActionLog.jsx'
 import EndgameCalcTab from '../overview/EndgameCalcTab.jsx'
 import RouteCalcTab from '../overview/RouteCalcTab.jsx'
 // PlusPlus: analysis tab (stripped from Broker build)
@@ -57,6 +58,7 @@ export default function GameShell() {
       <div className="flex flex-col h-screen pb-12">
         {roomBar}
         <OverviewTab />
+        <ActionLog />
         <BottomNav />
       </div>
     )
@@ -71,6 +73,7 @@ export default function GameShell() {
       <main className="flex-1 overflow-y-auto pb-16">
         <TabComponent />
       </main>
+      <ActionLog />
       <BottomNav />
     </div>
   )

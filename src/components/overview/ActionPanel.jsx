@@ -917,6 +917,9 @@ function SettingsPanel({ m, game, doAction }) {
         <div>
           <div className={labelColor}>Tools</div>
           <div className="flex gap-1 flex-wrap">
+            <Btn m={m} v={useUIStore.getState().showLog ? 'green' : 'blue'} o={() => useUIStore.getState().toggleLog()}>
+              {useUIStore.getState().showLog ? 'Log ✓' : 'Log'}
+            </Btn>
             {game?.actionLog?.length > 0 && !inReplay && <Btn m={m} v="blue" o={() => enterReplay()}>Replay</Btn>}
             {inReplay && <Btn m={m} v="red" o={() => exitReplay()}>Exit Replay</Btn>}
             {game && <Btn m={m} v="green" o={() => exportGamePdf(game)}>Export PDF</Btn>}

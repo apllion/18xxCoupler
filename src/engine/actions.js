@@ -27,6 +27,7 @@ export function applyAction(state, action) {
     timestamp: Date.now(),
     action,
     description: describeAction(state, action),
+    source: action._source || null, // device/view that dispatched
   }
 
   switch (action.type) {
