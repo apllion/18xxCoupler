@@ -375,12 +375,17 @@ function PlayerActions({ game, player, dispatch, fmt, goToCorp }) {
           <div className="space-y-1">
             {floatedCorps.map(c => {
               const price = corpPrice(game.stockMarket, c.sym) || 0
+              const shares = getCorpShares(game, c.sym)
+              const regPct = shares[1] ?? shares[0] ?? 10
+              const presPct = shares[0] ?? 20
               const hasIPO = c.ipoShares > 0
               const hasMarket = c.marketShares > 0
               const canAfford = player.cash >= price
               const held = playerSharePercent(player, c.sym)
               const canSell = held > 0
               const isPres = player.shares.some(s => s.corpSym === c.sym && s.isPresident)
+              // President can only sell if they'd still hold more than another player (or enough to not lose presidency)
+              const canPresSell = isPres && held > presPct
               return (
                 <div key={c.sym} className="flex items-center gap-1 flex-wrap">
                   <button onClick={() => goToCorp(c.sym)} className="flex items-center gap-1 w-16">
@@ -391,29 +396,23 @@ function PlayerActions({ game, player, dispatch, fmt, goToCorp }) {
                   <span className="text-[10px] text-broker-text-muted w-8 text-right">{held}%</span>
                   {isPres && <span className="text-[9px] text-yellow-400">P</span>}
                   {hasIPO && (
-                    <button onClick={() => canAfford && dispatch({ type: 'BUY_SHARE', playerId: player.id, corpSym: c.sym, source: 'ipo' })}
+                    <button onClick={() => canAfford && dispatch({ type: 'BUY_SHARE', playerId: player.id, corpSym: c.sym, source: 'ipo', percent: regPct })}
                       disabled={!canAfford}
                       className="text-sm bg-blue-800 hover:bg-blue-700 disabled:opacity-30 text-white px-3 py-2 rounded">
-                      IPO
+                      IPO {regPct}%
                     </button>
                   )}
                   {hasMarket && (
-                    <button onClick={() => canAfford && dispatch({ type: 'BUY_SHARE', playerId: player.id, corpSym: c.sym, source: 'market' })}
+                    <button onClick={() => canAfford && dispatch({ type: 'BUY_SHARE', playerId: player.id, corpSym: c.sym, source: 'market', percent: regPct })}
                       disabled={!canAfford}
                       className="text-sm bg-blue-800 hover:bg-blue-700 disabled:opacity-30 text-white px-3 py-2 rounded">
-                      Mkt
+                      Mkt {regPct}%
                     </button>
                   )}
-                  {canSell && !isPres && (
-                    <button onClick={() => dispatch({ type: 'SELL_SHARES', playerId: player.id, corpSym: c.sym })}
+                  {canSell && (!isPres || canPresSell) && (
+                    <button onClick={() => dispatch({ type: 'SELL_SHARES', playerId: player.id, corpSym: c.sym, percent: regPct })}
                       className="text-sm bg-red-800 hover:bg-red-700 text-white px-3 py-2 rounded">
-                      Sell
-                    </button>
-                  )}
-                  {canSell && isPres && held > 20 && (
-                    <button onClick={() => dispatch({ type: 'SELL_SHARES', playerId: player.id, corpSym: c.sym })}
-                      className="text-sm bg-red-800 hover:bg-red-700 text-white px-3 py-2 rounded">
-                      Sell
+                      Sell {regPct}%
                     </button>
                   )}
                 </div>
@@ -701,6 +700,44 @@ function CorpOps({ game, corp, dispatch, fmt, isSub }) {
               Redeem {regShare}%
             </button>
           )}
+        </div>
+      )}
+
+      {/* Loans (1817, etc.) */}
+      {game.title.loans && corp.floated && (
+        <div className="flex gap-2 mt-1">
+          <button onClick={() => dispatch({ type: 'TAKE_LOAN', corpSym: corp.sym })}
+            className="flex-1 text-sm bg-broker-surface-hover text-broker-text-muted hover:text-broker-text rounded px-3 py-2">
+            Take Loan (+{fmt(game.title.loans.loanValue || 100)})
+          </button>
+          {(corp.loans || 0) > 0 && (
+            <button onClick={() => dispatch({ type: 'REPAY_LOAN', corpSym: corp.sym })}
+              className="flex-1 text-sm bg-broker-surface-hover text-broker-text-muted hover:text-broker-text rounded px-3 py-2">
+              Repay Loan
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Corp share trading (PTG, 21Moon, 18India) */}
+      {game.title.corpCanBuyShares && corp.floated && (
+        <div className="mt-1">
+          <div className="text-xs text-broker-text-muted mb-1">Corp Trading:</div>
+          <div className="flex gap-1 flex-wrap">
+            {game.corporations.filter(c => c.ipoed && c.sym !== corp.sym).map(c => {
+              const tPrice = corpPrice(game.stockMarket, c.sym) || 0
+              const canBuy = corp.cash >= tPrice && (c.ipoShares > 0 || c.marketShares > 0)
+              return (
+                <button key={c.sym} onClick={() => canBuy && dispatch({
+                  type: 'CORP_BUY_SHARE', buyerCorpSym: corp.sym, targetCorpSym: c.sym,
+                  source: c.ipoShares > 0 ? 'ipo' : 'market', percent: regularSharePercent(game, c.sym)
+                })} disabled={!canBuy}
+                  className="text-sm bg-broker-surface-hover text-broker-text-muted hover:text-broker-text disabled:opacity-30 rounded px-3 py-2">
+                  <span style={{ color: c.color }} className="font-bold">{c.sym}</span> {fmt(tPrice)}
+                </button>
+              )
+            })}
+          </div>
         </div>
       )}
     </div>
