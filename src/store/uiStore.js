@@ -9,6 +9,7 @@ export const useUIStore = create((set) => ({
   myPlayerId: null,         // "I am this player" — locks share actions to this player
   activeCorpSym: null,      // which corp is selected in Corps tab
   showLog: import.meta.env.DEV,
+  showToasts: true,
   turnTracking: 'off',      // 'on' | 'off' — dormant for now
   plusPlus: !!import.meta.env.VITE_PLUSPLUS || import.meta.env.DEV,
 

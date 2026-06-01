@@ -923,6 +923,9 @@ function SettingsPanel({ m, game, doAction }) {
             <Btn m={m} v={useUIStore.getState().showLog ? 'green' : 'blue'} o={() => useUIStore.getState().toggleLog()}>
               {useUIStore.getState().showLog ? 'Log ✓' : 'Log'}
             </Btn>
+            <Btn m={m} v={useUIStore.getState().showToasts ? 'green' : 'blue'} o={() => useUIStore.setState(s => ({ showToasts: !s.showToasts }))}>
+              {useUIStore.getState().showToasts ? 'Toasts ✓' : 'Toasts'}
+            </Btn>
             {game?.actionLog?.length > 0 && !inReplay && <Btn m={m} v="blue" o={() => enterReplay()}>Replay</Btn>}
             {inReplay && <Btn m={m} v="red" o={() => exitReplay()}>Exit Replay</Btn>}
             {game && <Btn m={m} v="green" o={() => exportGamePdf(game)}>Export PDF</Btn>}

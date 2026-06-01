@@ -8,8 +8,8 @@ import { useGameStore } from '../store/gameStore.js'
 import { useUIStore } from '../store/uiStore.js'
 import { useSyncContext } from './SyncContext.jsx'
 
-// Device ID — stable per browser session
-const DEVICE_ID = typeof window !== 'undefined'
+// Device ID — stable per browser session, exported for toast comparison
+export const DEVICE_ID = typeof window !== 'undefined'
   ? (sessionStorage.getItem('deviceId') || (() => { const id = Math.random().toString(36).slice(2, 8); sessionStorage.setItem('deviceId', id); return id })())
   : 'server'
 
