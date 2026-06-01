@@ -274,39 +274,27 @@ function WrenchRating({ level, onShowLegend }) {
 }
 
 function WrenchLegend({ title, onClose }) {
+  if (!title?.implemented) return null
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60" onClick={onClose}>
       <div className="bg-broker-bg border border-broker-border rounded-lg p-4 shadow-xl w-80 max-w-[90vw]"
         onClick={e => e.stopPropagation()}>
-        {/* Title-specific implemented info */}
-        {title?.implemented && (
-          <div className="mb-3">
-            <div className="text-sm text-broker-text font-bold mb-1">{title.title} — What's Working</div>
-            <div className="text-xs text-broker-text space-y-0.5">
-              {title.implemented.split('•').filter(s => s.trim()).map((line, i) => (
-                <div key={i} className="flex gap-1">
-                  <span className="text-green-400">✓</span>
-                  <span>{line.trim()}</span>
-                </div>
-              ))}
-            </div>
-            <div className={`mt-2 mb-2 border-b ${title ? 'border-broker-border' : ''}`} />
-          </div>
-        )}
-        <div className="text-sm text-broker-text font-bold mb-3">Wrench Rating</div>
-        <div className="space-y-2">
-          {WRENCH_LABELS.map((label, i) => (
-            <div key={i} className="flex items-center gap-2">
-              <span className="w-4 text-right text-xs text-broker-text-muted">{i}</span>
-              <span className="flex gap-px">
-                {Array.from({ length: 5 }, (_, j) => <WrenchIcon key={j} filled={j < i} size="w-2.5 h-2.5" />)}
-              </span>
-              <span className="text-xs text-broker-text">{label}</span>
+        <div className="flex items-center gap-2 mb-2">
+          <span className="text-sm text-broker-text font-bold">{title.title}</span>
+          <span className="flex gap-px">
+            {Array.from({ length: 5 }, (_, i) => <WrenchIcon key={i} filled={i < (title.maturity || 0)} />)}
+          </span>
+        </div>
+        <div className="text-xs text-broker-text space-y-0.5">
+          {title.implemented.split('•').filter(s => s.trim()).map((line, i) => (
+            <div key={i} className="flex gap-1">
+              <span className="text-green-400">✓</span>
+              <span>{line.trim()}</span>
             </div>
           ))}
         </div>
         <button onClick={onClose}
-          className="mt-3 w-full text-xs text-broker-text-muted hover:text-white py-2 px-3">Close</button>
+          className="mt-3 w-full text-xs text-broker-text-muted hover:text-broker-text py-2 px-3">Close</button>
       </div>
     </div>
   )
