@@ -5,7 +5,10 @@ import { useDispatch } from '../../hooks/useDispatch.js'
 import { formatCurrency } from '../../utils/currency.js'
 import { corpPrice, parPrices } from '../../engine/stockMarket.js'
 import { playerNetWorth } from '../../engine/rules/netWorth.js'
-import { playerSharePercent } from '../../engine/player.js'
+import { playerSharePercent, isPresident } from '../../engine/player.js'
+import { currentPhase, trainLimit } from '../../engine/phase.js'
+import { nextAvailableTrains, remainingCount } from '../../engine/depot.js'
+import { getCorpShares, regularSharePercent } from '../../engine/corporation.js'
 // PlusPlus only — advisor tips (stripped from Broker build)
 const PP = !!import.meta.env.VITE_PLUSPLUS || import.meta.env.DEV
 const playerAdvisorTips = PP ? (await import('../../engine/rules/advisorTips.js')).playerAdvisorTips : null
@@ -549,6 +552,156 @@ function PlayerActions({ game, player, dispatch, fmt, goToCorp }) {
 
       {floatedCorps.length === 0 && unfloatedCorps.length === 0 && (
         <div className="text-xs text-broker-text-muted">No corporations available</div>
+      )}
+
+      {/* My Corps — OR actions for corps this player is president of */}
+      {(() => {
+        // Direct presidencies
+        const myCorps = floatedCorps.filter(c => isPresident(player, c.sym))
+        // Subsidiaries: corps owned by my corps (corp-held president shares)
+        const subsidiaries = []
+        for (const mc of myCorps) {
+          for (const c of floatedCorps) {
+            if (c.sym === mc.sym) continue
+            const held = (mc.sharesHeld || []).filter(s => s.corpSym === c.sym && s.isPresident)
+            if (held.length > 0 && !myCorps.some(m => m.sym === c.sym) && !subsidiaries.some(s => s.sym === c.sym)) {
+              subsidiaries.push(c)
+            }
+          }
+        }
+        const allMyCorps = [...myCorps, ...subsidiaries]
+        if (allMyCorps.length === 0) return null
+
+        return (
+          <div>
+            <div className="text-xs text-broker-text-muted mb-1 font-medium uppercase">My Corps — Operations</div>
+            {allMyCorps.map(c => (
+              <CorpOps key={c.sym} game={game} corp={c} dispatch={dispatch} fmt={fmt}
+                isSub={subsidiaries.includes(c)} />
+            ))}
+          </div>
+        )
+      })()}
+    </div>
+  )
+}
+
+// Compact corp operations panel for player view
+function CorpOps({ game, corp, dispatch, fmt, isSub }) {
+  const [revenue, setRevenue] = useState('')
+  const [showTrains, setShowTrains] = useState(false)
+
+  const price = corpPrice(game.stockMarket, corp.sym) || 0
+  const phase = currentPhase(game.phaseManager)
+  const tLimit = trainLimit(game.phaseManager)
+  const revNum = parseInt(revenue, 10) || 0
+  const regShare = regularSharePercent(game, corp.sym)
+  const perShare = revNum > 0 ? Math.floor(revNum / (100 / regShare)) : 0
+
+  return (
+    <div className="bg-broker-surface rounded-lg p-3 mb-2">
+      {/* Header */}
+      <div className="flex items-center gap-2 mb-2">
+        <span className="w-3 h-3 rounded-full" style={{ backgroundColor: corp.color }} />
+        <span className="font-bold text-broker-text">{corp.sym}</span>
+        {isSub && <span className="text-[10px] text-broker-text-muted">(subsidiary)</span>}
+        <span className="text-xs text-broker-text-muted">{fmt(price)}</span>
+        <span className="text-xs text-broker-text-muted ml-auto">Treasury: {fmt(corp.cash)}</span>
+      </div>
+
+      {/* Trains */}
+      <div className="flex items-center gap-2 mb-2 flex-wrap">
+        <span className="text-xs text-broker-text-muted">Trains ({corp.trains.length}/{tLimit}):</span>
+        {corp.trains.length === 0
+          ? <span className="text-xs text-red-400 font-bold">NONE</span>
+          : corp.trains.map(t => (
+            <span key={t.id} className="text-xs bg-broker-surface-hover px-2 py-1 rounded font-medium text-broker-text">{t.name}</span>
+          ))
+        }
+        <button onClick={() => setShowTrains(!showTrains)}
+          className="text-sm bg-broker-surface-hover text-broker-text hover:text-broker-text px-3 py-2 rounded ml-auto">
+          {showTrains ? 'Hide' : 'Buy Train'}
+        </button>
+      </div>
+
+      {/* Buy train — expandable */}
+      {showTrains && (
+        <div className="mb-2 space-y-1">
+          {nextAvailableTrains(game.depot).map(t => {
+            const canAfford = corp.cash >= t.price
+            const count = remainingCount(game.depot, t.name)
+            return (
+              <button key={t.name}
+                onClick={() => canAfford && dispatch({ type: 'BUY_TRAIN', corpSym: corp.sym, trainName: t.name, price: t.price, fromDepot: true })}
+                disabled={!canAfford}
+                className={`w-full flex items-center justify-between px-3 py-2 rounded text-sm ${
+                  canAfford ? 'bg-broker-surface-hover text-broker-text hover:text-broker-text' : 'bg-broker-bg text-broker-text-muted/40'
+                }`}>
+                <span className="font-medium">{t.name}-train</span>
+                <span>{fmt(t.price)} ({count} left)</span>
+              </button>
+            )
+          })}
+        </div>
+      )}
+
+      {/* Revenue + Pay/Withhold */}
+      <div className="flex items-center gap-2 flex-wrap">
+        <input type="number" value={revenue} onChange={e => setRevenue(e.target.value)}
+          placeholder="Revenue"
+          className="w-20 bg-broker-bg border border-broker-border rounded px-2 py-2 text-sm text-broker-text text-center" />
+        <button onClick={() => { if (revNum > 0) { dispatch({ type: 'PAY_DIVIDEND', corpSym: corp.sym, totalRevenue: revNum }); setRevenue('') } }}
+          disabled={revNum <= 0}
+          className="text-sm bg-green-800 hover:bg-green-700 disabled:opacity-30 text-white px-3 py-2 rounded flex-1">
+          Pay{revNum > 0 ? ` ${fmt(perShare)}/sh` : ''}
+        </button>
+        {game.title.halfPay && (
+          <button onClick={() => { if (revNum > 0) { dispatch({ type: 'HALF_DIVIDEND', corpSym: corp.sym, totalRevenue: revNum }); setRevenue('') } }}
+            disabled={revNum <= 0}
+            className="text-sm bg-yellow-800 hover:bg-yellow-700 disabled:opacity-30 text-white px-3 py-2 rounded">
+            Half
+          </button>
+        )}
+        <button onClick={() => { if (revNum > 0) { dispatch({ type: 'WITHHOLD_DIVIDEND', corpSym: corp.sym, totalRevenue: revNum }); setRevenue('') } }}
+          disabled={revNum <= 0}
+          className="text-sm bg-orange-800 hover:bg-orange-700 disabled:opacity-30 text-white px-3 py-2 rounded">
+          W/H
+        </button>
+      </div>
+
+      {/* Route calc link */}
+      {corp.trains.length > 0 && (
+        <button onClick={() => { useUIStore.getState().setActiveCorp(corp.sym); useUIStore.getState().setActiveTab('routes') }}
+          className="w-full text-sm bg-broker-surface-hover text-broker-text-muted hover:text-broker-text rounded px-3 py-2 mt-2">
+          Route Calculator →
+        </button>
+      )}
+
+      {/* Place token */}
+      {corp.tokensPlaced < corp.tokens.length && (
+        <button onClick={() => dispatch({ type: 'PLACE_TOKEN', corpSym: corp.sym, cost: corp.tokens[corp.tokensPlaced] || 0 })}
+          disabled={corp.cash < (corp.tokens[corp.tokensPlaced] || 0)}
+          className="w-full text-sm bg-broker-surface-hover text-broker-text-muted hover:text-broker-text disabled:opacity-30 rounded px-3 py-2 mt-1">
+          Place Token ({fmt(corp.tokens[corp.tokensPlaced] || 0)}) — {corp.tokensPlaced}/{corp.tokens.length}
+        </button>
+      )}
+
+      {/* Issue/Redeem (incremental cap) */}
+      {game.title.capitalization === 'incremental' && (
+        <div className="flex gap-2 mt-1">
+          {corp.ipoShares > 0 && (
+            <button onClick={() => dispatch({ type: 'ISSUE_SHARES', corpSym: corp.sym, percent: regShare })}
+              className="flex-1 text-sm bg-broker-surface-hover text-broker-text-muted hover:text-broker-text rounded px-3 py-2">
+              Issue {regShare}%
+            </button>
+          )}
+          {corp.marketShares > 0 && (
+            <button onClick={() => dispatch({ type: 'REDEEM_SHARES', corpSym: corp.sym, percent: regShare })}
+              className="flex-1 text-sm bg-broker-surface-hover text-broker-text-muted hover:text-broker-text rounded px-3 py-2">
+              Redeem {regShare}%
+            </button>
+          )}
+        </div>
       )}
     </div>
   )
