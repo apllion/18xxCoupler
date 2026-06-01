@@ -30,8 +30,10 @@ import { g18ireland } from './g18ireland.js'
 import { g18gb } from './g18gb.js'
 import { g1817 } from './g1817.js'
 import { g1822ca } from './g1822ca.js'
+import { g18general } from './g18general.js'
 
 export const titles = {
+  g18general,
   g1822,
   g1822mx,
   g1830,

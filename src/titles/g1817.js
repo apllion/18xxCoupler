@@ -3,7 +3,9 @@ import { defaults } from './defaults.js'
 export const g1817 = {
   ...defaults,
   maturity: 1, titleId: 'g1817',
-  gameInfo: '• Loans with escalating interest rates, short selling of shares • Corps start as 2-share, convert to 5-share then 10-share via Merger & Conversion Round • Incremental capitalization, 20% float, $200 seed money per corp • Selling shares causes NO stock price movement • Train export: if no train bought in an OR, next available train is removed • Selection auction for 11 privates (coal mines, mail contracts, bridges) • 1D single-row market (32 spaces), unlimited bank, 8 phases • 20 corps, 3-12 players, game ends when 8-train triggers final rounds', title: '1817', subtitle: 'NYSE', designer: 'Craig Bartell, Tim Flowers',
+  gameInfo: '• Loans with escalating interest rates, short selling of shares • Corps start as 2-share, convert to 5-share then 10-share via Merger & Conversion Round • Incremental capitalization, 20% float, $200 seed money per corp • Selling shares causes NO stock price movement • Train export: if no train bought in an OR, next available train is removed • Selection auction for 11 privates (coal mines, mail contracts, bridges) • 1D single-row market (32 spaces), unlimited bank, 8 phases • 20 corps, 3-12 players, game ends when 8-train triggers final rounds',
+  implemented: 'Shares • Loans • Shorts • Corp sizing 2/5/10 • Mergers • Train export • Half pay',
+  title: '1817', subtitle: 'NYSE', designer: 'Craig Bartell, Tim Flowers',
   location: 'Northeast USA', minPlayers: 3, maxPlayers: 12,
   bankCash: 99999,
   startingCash: { 3: 420, 4: 315, 5: 252, 6: 210, 7: 180, 8: 158, 9: 140, 10: 126, 11: 115, 12: 105 },

@@ -18,7 +18,7 @@ export default function GameSelector() {
   const [importing, setImporting] = useState(false)
   const [showMore, setShowMore] = useState(false)
   const [sortBy, setSortBy] = useState('rating')
-  const [showLegend, setShowLegend] = useState(false)
+  const [showLegend, setShowLegend] = useState(null) // title object or true for generic
   const [showInfo, setShowInfo] = useState(null) // title object
 
   const savedList = Object.entries(savedGames)
@@ -154,7 +154,7 @@ export default function GameSelector() {
       <div className="grid grid-cols-2 gap-3 w-full max-w-md">
         {sorted.map((t) => (
           <TitleButton key={t.titleId} t={t} onClick={() => navigate(`/setup/${t.titleId}`)}
-            onShowLegend={() => setShowLegend(true)} onShowInfo={setShowInfo} />
+            onShowLegend={setShowLegend} onShowInfo={setShowInfo} />
         ))}
       </div>
       {sorted.length === 0 && (
@@ -215,7 +215,7 @@ export default function GameSelector() {
         </button>
       </div>
 
-      {showLegend && <WrenchLegend onClose={() => setShowLegend(false)} />}
+      {showLegend && <WrenchLegend title={showLegend === true ? null : showLegend} onClose={() => setShowLegend(null)} />}
       {showInfo && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60" onClick={() => setShowInfo(null)}>
           <div className="bg-broker-bg border border-broker-border rounded-lg p-4 shadow-xl w-80 max-w-[90vw]"
@@ -273,12 +273,27 @@ function WrenchRating({ level, onShowLegend }) {
   )
 }
 
-function WrenchLegend({ onClose }) {
+function WrenchLegend({ title, onClose }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60" onClick={onClose}>
-      <div className="bg-broker-bg border border-broker-border rounded-lg p-4 shadow-xl w-72 max-w-[90vw]"
+      <div className="bg-broker-bg border border-broker-border rounded-lg p-4 shadow-xl w-80 max-w-[90vw]"
         onClick={e => e.stopPropagation()}>
-        <div className="text-sm text-white font-bold mb-3">Wrench Rating</div>
+        {/* Title-specific implemented info */}
+        {title?.implemented && (
+          <div className="mb-3">
+            <div className="text-sm text-broker-text font-bold mb-1">{title.title} — What's Working</div>
+            <div className="text-xs text-broker-text space-y-0.5">
+              {title.implemented.split('•').filter(s => s.trim()).map((line, i) => (
+                <div key={i} className="flex gap-1">
+                  <span className="text-green-400">✓</span>
+                  <span>{line.trim()}</span>
+                </div>
+              ))}
+            </div>
+            <div className={`mt-2 mb-2 border-b ${title ? 'border-broker-border' : ''}`} />
+          </div>
+        )}
+        <div className="text-sm text-broker-text font-bold mb-3">Wrench Rating</div>
         <div className="space-y-2">
           {WRENCH_LABELS.map((label, i) => (
             <div key={i} className="flex items-center gap-2">
@@ -316,7 +331,10 @@ function TitleButton({ t, onClick, onShowLegend, onShowInfo }) {
       <div className="text-sm text-broker-text-muted mt-1">{t.subtitle}</div>
       <div className="flex items-center justify-between mt-2">
         <span className="text-xs text-broker-text-muted">{t.minPlayers}–{t.maxPlayers} players</span>
-        <WrenchRating level={m} onShowLegend={onShowLegend} />
+        <span onClick={e => { e.stopPropagation(); onShowLegend?.(t) }}
+          className="flex gap-px items-center cursor-pointer" title={t.implemented || WRENCH_LABELS[m]}>
+          {Array.from({ length: 5 }, (_, i) => <WrenchIcon key={i} filled={i < m} />)}
+        </span>
       </div>
     </button>
   )

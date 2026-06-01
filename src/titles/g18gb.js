@@ -3,7 +3,9 @@ import { defaults } from './defaults.js'
 export const g18gb = {
   ...defaults,
   maturity: 2, titleId: 'g18gb',
-  gameInfo: '• Corps start as 5-share (40/20/20/20) and can convert to 10-share • 40% president certificate, full capitalization, unlimited bank • Unique blue tile phase between green and brown • X-trains (4X/5X/6X) replace conventional late-game trains • 12 corps (1-2 tokens each), 9 privates with blocking/bonus abilities • 1D single-row market (22 spaces), sell/buy stock rounds, 100% pool allowed • 7 phases (2+1 through 6X), train counts scale by player count • Waterfall auction, 2-6 players, Great Britain setting', title: '18GB', subtitle: 'Railways of Great Britain', designer: 'Dave Berry',
+  gameInfo: '• Corps start as 5-share (40/20/20/20) and can convert to 10-share • 40% president certificate, full capitalization, unlimited bank • Unique blue tile phase between green and brown • X-trains (4X/5X/6X) replace conventional late-game trains • 12 corps (1-2 tokens each), 9 privates with blocking/bonus abilities • 1D single-row market (22 spaces), sell/buy stock rounds, 100% pool allowed • 7 phases (2+1 through 6X), train counts scale by player count • Waterfall auction, 2-6 players, Great Britain setting',
+  implemented: 'Shares • Dividends • 5→10 share conversion (config)',
+  title: '18GB', subtitle: 'Railways of Great Britain', designer: 'Dave Berry',
   location: 'Great Britain', minPlayers: 2, maxPlayers: 6,
   bankCash: 99999, startingCash: { 2: 375, 3: 330, 4: 330, 5: 320, 6: 305 },
   certLimit: { 2: 19, 3: 14, 4: 14, 5: 14, 6: 12 },

@@ -3,7 +3,9 @@ import { defaults } from './defaults.js'
 export const g18daihan = {
   ...defaults,
   maturity: 2, titleId: 'g18daihan',
-  gameInfo: '• Full capitalization, 50% float, 8 corps with 2-4 tokens each • Executive car tokens attach to trains for +1 stop range (12 available) • Goods transport via ports adds bonus revenue, Korean Peninsula setting • D-train purchase advances stock price 1-3 spaces, signals game end • 1D single-row market (24 spaces), sell drops one row per share sold • 7 privates via waterfall auction, 6 phases (2/3/4/5/6/D) • ￦7,600 bank, game ends on bank break, bankruptcy, or D-train trigger • 3-5 players, stations scale with par price (2 at low par, 3 at high)', title: '1899 Daihan', subtitle: 'Railways of the Korean Empire', designer: 'Geonil',
+  gameInfo: '• Full capitalization, 50% float, 8 corps with 2-4 tokens each • Executive car tokens attach to trains for +1 stop range (12 available) • Goods transport via ports adds bonus revenue, Korean Peninsula setting • D-train purchase advances stock price 1-3 spaces, signals game end • 1D single-row market (24 spaces), sell drops one row per share sold • 7 privates via waterfall auction, 6 phases (2/3/4/5/6/D) • ￦7,600 bank, game ends on bank break, bankruptcy, or D-train trigger • 3-5 players, stations scale with par price (2 at low par, 3 at high)',
+  implemented: 'Shares • Dividends • Executive cars (partial) • Goods transport (config)',
+  title: '1899 Daihan', subtitle: 'Railways of the Korean Empire', designer: 'Geonil',
   location: 'Korean Peninsula', minPlayers: 3, maxPlayers: 5,
   bankCash: 7600,
   startingCash: { 3: 440, 4: 400, 5: 380 },

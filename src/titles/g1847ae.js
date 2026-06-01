@@ -5,6 +5,7 @@ export const g1847ae = {
 
   maturity: 2, titleId: 'g1847ae',
   gameInfo: '• Incremental capitalization, 50% float, sequential corp founding order • Investor shares (from privates) auto-exchange into corp shares at 5+5 phase • LFK private company earns 10% of every train purchase price in the game • Non-standard shares: some corps have 20/10/20/10/10/10/20 splits • 7 corps + LFK entity, English auction for 10 privates including presidency grants • 2D grid market (7x16), sell moves down (blocked), must sell in blocks • 8 phases with paired trains (3/3+3, 4/4+4, 5/5+5, 6E/6+6) • M8,000 bank, 3-5 players, Pfalz Germany setting',
+  implemented: 'Shares • Dividends • Non-standard shares • Investor conversion (config)',
   title: '1847 AE',
   subtitle: 'Pfalz — Anniversary Edition',
   designer: 'Wolfram Janich',

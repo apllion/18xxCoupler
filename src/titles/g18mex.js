@@ -3,7 +3,9 @@ import { defaults } from './defaults.js'
 export const g18mex = {
   ...defaults,
   maturity: 3, titleId: 'g18mex',
-  gameInfo: '• Full capitalization, 50% float, NdM national merges at phase 5 • 3 minors (A/B/C) close at phase 3.5, owners get 5-10% NdM/UdY shares • NdM has non-standard shares including 5% certs, MNR private forces NdM par • 8 corps (1-4 tokens each), 7 privates, sell/buy stock rounds • 2D grid market (8x15), sell drops one row per 10% sold • 8 phases (2/3/3.5/4/5/6/6.5/4D), 4D replaces D-train • Game ends on bank break, bankruptcy, or stock market ceiling hit • $9,000 bank, best at 3-5 players, sweet spot 4p', title: '18MEX', subtitle: 'National Railways of Mexico', designer: 'Mark Derrick',
+  gameInfo: '• Full capitalization, 50% float, NdM national merges at phase 5 • 3 minors (A/B/C) close at phase 3.5, owners get 5-10% NdM/UdY shares • NdM has non-standard shares including 5% certs, MNR private forces NdM par • 8 corps (1-4 tokens each), 7 privates, sell/buy stock rounds • 2D grid market (8x15), sell drops one row per 10% sold • 8 phases (2/3/3.5/4/5/6/6.5/4D), 4D replaces D-train • Game ends on bank break, bankruptcy, or stock market ceiling hit • $9,000 bank, best at 3-5 players, sweet spot 4p',
+  implemented: 'Shares • Dividends • Auto stock movement • NdM merger • 5% shares',
+  title: '18MEX', subtitle: 'National Railways of Mexico', designer: 'Mark Derrick',
   location: 'Mexico', minPlayers: 3, maxPlayers: 5,
   bankCash: 9000, startingCash: { 3: 625, 4: 500, 5: 450 },
   certLimit: { 3: 19, 4: 14, 5: 11 },

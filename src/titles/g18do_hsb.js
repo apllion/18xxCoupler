@@ -5,6 +5,7 @@ export const g18do_hsb = {
 
   maturity: 0, titleId: 'g18do_hsb',
   gameInfo: '• Dual economy: railway corps AND brewery corps on separate stock tracks • Beer market with 6 segments determines brewery income, export at top tier • 7 railway corps + 6 brewery corps (HHW/DHB-B at 5p only) • Small breweries purchased in starting round act as private companies • Full capitalization, 50% float, 50% pool limit, ownership caps at 60-70% • Non-standard brewery shares (30/10/.../20 and 40/10/.../20 splits) • Fixed 6 rounds, M13,000 bank, capex cards serve as both trains and brewery equipment • 3-5 players, Dortmund Germany setting, game ends after fixed rounds',
+  implemented: 'Shares • Dividends • Beer market NOT working • Brewery corps (config)',
   title: '18DO HSB',
   subtitle: 'Dortmund — Heat, Sweat & Beer',
   designer: 'Wolfram Janich & Michael Scharf',

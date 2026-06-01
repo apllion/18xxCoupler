@@ -5,6 +5,7 @@ export const g1861 = {
 
   maturity: 2, titleId: 'g1861',
   gameInfo: '• 16 minors (100% single-share) merge into 8 majors, then nationalize into RSR • Incremental capitalization, 20% float for majors, 100% for minors • Bid box auction for 5 privates with route-bonus abilities • 2D grid market (10x19) with merge columns, or optional 1D column variant • 7 phases (2-8), trainless corps get nationalized at phases 4/6/8 • Phase 8 forces all remaining minors into RSR national • Sell moves down (blocked by president), game ends on bank break or final phase • ₽15,000 bank, 2-6 players, sibling to 1867 (same designer)',
+  implemented: 'Shares • Dividends • Minors/Majors/National • Nationalization • Auto stock movement',
   title: '1861',
   subtitle: 'Railways of the Russian Empire',
   designer: 'Ian D. Wilson',

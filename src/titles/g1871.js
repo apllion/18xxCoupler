@@ -3,7 +3,9 @@ import { defaults } from './defaults.js'
 export const g1871 = {
   ...defaults,
   maturity: 2, titleId: 'g1871',
-  gameInfo: '• 7 mainline corps + 6 branch lines + PEIR national railway • Full capitalization, 60% float, unlimited bank, half pay allowed • English auction for 12 privates including concessions and share grants • Salvage value on 2+/3+/4+ trains ($20/$30/$60 returned on rust) • 2D grid market (7x15), sell moves down per share, first-to-pass SR order • 10 phases (2H through D), many train tiers with rapid rusting • PEIR has 5x20% shares and starts with $200 from King\'s Mail private • 3-4 players only, Prince Edward Island setting', title: '1871', subtitle: 'The Old Prince', designer: 'Lucas Boyd',
+  gameInfo: '• 7 mainline corps + 6 branch lines + PEIR national railway • Full capitalization, 60% float, unlimited bank, half pay allowed • English auction for 12 privates including concessions and share grants • Salvage value on 2+/3+/4+ trains ($20/$30/$60 returned on rust) • 2D grid market (7x15), sell moves down per share, first-to-pass SR order • 10 phases (2H through D), many train tiers with rapid rusting • PEIR has 5x20% shares and starts with $200 from King\'s Mail private • 3-4 players only, Prince Edward Island setting',
+  implemented: 'Shares • Dividends • Branch corps • PEIR national • Train salvage',
+  title: '1871', subtitle: 'The Old Prince', designer: 'Lucas Boyd',
   location: 'Prince Edward Island', minPlayers: 3, maxPlayers: 4,
   bankCash: 99999, startingCash: { 3: 580, 4: 480 }, certLimit: { 3: 20, 4: 16 },
   currencyFormat: '$', capitalization: 'full', floatPercent: 60, sellBuyOrder: 'sell_buy', sellMovement: 'down_block', halfPay: true, nextSRPlayerOrder: 'first_to_pass',

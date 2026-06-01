@@ -3,7 +3,9 @@ import { defaults } from './defaults.js'
 export const g18ireland = {
   ...defaults,
   maturity: 3, titleId: 'g18ireland',
-  gameInfo: '• 14 minors (40/20/20/20 shares) merge into 7 majors after 4H phase • Majors can IPO only after 6H train purchased • Incremental capitalization, 20% float for majors, 40% for minors • 2D grid market (8x15), £4,000 bank (optional £5,000 variant) • 6 phases (2/4/6/8/10/D), minors cannot start after 8H • Waterfall auction for 11 privates, DKR private starts a minor • Narrow gauge tile abilities on several privates • 3-6 players, merger timing is the strategic crux', title: '18Ireland', subtitle: 'Railways of Ireland', designer: 'Ian Scrivins',
+  gameInfo: '• 14 minors (40/20/20/20 shares) merge into 7 majors after 4H phase • Majors can IPO only after 6H train purchased • Incremental capitalization, 20% float for majors, 40% for minors • 2D grid market (8x15), £4,000 bank (optional £5,000 variant) • 6 phases (2/4/6/8/10/D), minors cannot start after 8H • Waterfall auction for 11 privates, DKR private starts a minor • Narrow gauge tile abilities on several privates • 3-6 players, merger timing is the strategic crux',
+  implemented: 'Shares • Dividends • Auto stock movement • Minor→Major mergers',
+  title: '18Ireland', subtitle: 'Railways of Ireland', designer: 'Ian Scrivins',
   location: 'Ireland', minPlayers: 3, maxPlayers: 6,
   bankCash: 4000, startingCash: { 3: 330, 4: 250, 5: 200, 6: 160 },
   certLimit: { 3: 16, 4: 12, 5: 10, 6: 8 },

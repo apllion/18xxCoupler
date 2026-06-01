@@ -5,6 +5,7 @@ export const g1830 = {
 
   maturity: 4, titleId: 'g1830',
   gameInfo: '• Classic 18xx baseline, the standard all others reference • Full capitalization, 60% float (6 of 10 shares) • Sell/buy/sell stock rounds enable aggressive stock manipulation • 8 corps (2-4 tokens each), 6 privates with special abilities • 2D grid market (11x19), selling drops one row per share • 6 phases (2/3/4/5/6/D), D-train available from phase 6 with $300 trade-in discount • Privates close at phase 5, bank breaks at $12,000 • Best at 3-5 players, sweet spot 4p',
+  implemented: 'Shares • Dividends • Auto stock movement • Privates • D-train trade-in • 2D market',
   title: '1830',
   subtitle: 'Railways & Robber Barons',
   designer: 'Francis Tresham',

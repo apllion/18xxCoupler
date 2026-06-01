@@ -5,6 +5,7 @@ export const g18rhl = {
 
   maturity: 2, titleId: 'g18rhl',
   gameInfo: '• Full capitalization, 50% float, English auction for 7 privates • RhE corp has delayed par (70/75/80 only) via director private with deferred payment • MKB has non-standard shares (3x20% + 4x10%), 60% float • CCE has dual home stations (Koln and Krefeld) • 8 corps (1-4 tokens each), sell/buy stock rounds, no emergency buy from others • 2D grid market (6x17), sell moves down (blocked), game ends on bank break • 6 phases (2/3/4/5/6/8), privates close at phase 5 • M9,000 bank, 3-5 players, Rhineland Germany setting',
+  implemented: 'Shares • Dividends • Non-standard shares (MKB) • Delayed par',
   title: '18Rhl',
   subtitle: 'Rhineland',
   designer: 'Wolfram Janich',
