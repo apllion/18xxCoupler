@@ -14,9 +14,21 @@ export default function BottomNav() {
   const hasPrivates = game?.companies?.length > 0
 
   const mainTabs = [
-    { id: 'overview', label: '⌂' },
-    { id: 'corps', label: 'Corps' },
-    { id: 'players', label: 'Players' },
+    { id: 'overview', label: 'Overview', icon: (
+      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
+      </svg>
+    )},
+    { id: 'corps', label: 'Corps', icon: (
+      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M4 19h4V9H4z"/><circle cx="6" cy="7" r="2"/><path d="M10 19h10v-2l-3-3h-4l-3 3z"/><circle cx="15" cy="11" r="2"/><path d="M20 19v-6l-2-2"/>
+      </svg>
+    )},
+    { id: 'players', label: 'Players', icon: (
+      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+      </svg>
+    )},
   ]
 
   const moreItems = [
@@ -63,22 +75,26 @@ export default function BottomNav() {
         {mainTabs.map(tab => (
           <button key={tab.id}
             onClick={() => { setActiveTab(tab.id); setMenuOpen(false) }}
-            className={`flex-1 py-3 text-sm font-medium transition-colors ${
+            className={`flex-1 py-1.5 flex flex-col items-center gap-0.5 transition-colors ${
               activeTab === tab.id
-                ? 'text-white bg-broker-surface-hover'
+                ? 'text-broker-gold'
                 : 'text-broker-text-muted hover:text-broker-text'
             }`}>
-            {tab.label}
+            {tab.icon}
+            <span className="text-[10px]">{tab.label}</span>
           </button>
         ))}
         <button
           onClick={() => setMenuOpen(!menuOpen)}
-          className={`flex-1 py-3 text-sm font-medium transition-colors ${
+          className={`flex-1 py-1.5 flex flex-col items-center gap-0.5 transition-colors ${
             isMore || menuOpen
-              ? 'text-white bg-broker-surface-hover'
+              ? 'text-broker-gold'
               : 'text-broker-text-muted hover:text-broker-text'
           }`}>
-          {isMore ? moreItems.find(m => m.id === activeTab)?.label?.split(' ')[0] || '☰' : '☰'}
+          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+            <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+          </svg>
+          <span className="text-[10px]">{isMore ? moreItems.find(m => m.id === activeTab)?.label?.split(' ')[0] || 'More' : 'More'}</span>
         </button>
       </nav>
     </>
