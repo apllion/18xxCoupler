@@ -84,7 +84,8 @@ export default function GameSelector() {
       </div>
 
       <img src={import.meta.env.BASE_URL + 'logo.png'} alt="18xxCoupler"
-        className="w-full max-w-md mt-2 mb-1 rounded-xl" />
+        className="w-full max-w-md mt-2 rounded-xl" />
+      <p className="text-sm text-broker-text-muted italic mb-1">Steam meets Screens</p>
       <p className="text-[10px] text-broker-text-muted mb-6">
         v{typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '?'} · {typeof __BUILD_ID__ !== 'undefined' ? __BUILD_ID__ : '?'}
       </p>
