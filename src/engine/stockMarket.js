@@ -247,6 +247,7 @@ export function moveSell(market, corpSym, percentSold, sellMovement = 'down_shar
       break
 
     case 'down_block':
+    case 'down_block_pres':
       // Move down once regardless of how many sold
       stepDown(market, pos)
       break
