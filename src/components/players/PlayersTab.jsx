@@ -487,7 +487,10 @@ function PlayerActions({ game, player, dispatch, fmt, goToCorp }) {
               </div>
               <div className="flex flex-wrap gap-1">
                 {availablePars.map(p => {
-                  const cost = p.price * 2
+                  const corpShares = parCorp ? getCorpShares(game, parCorp) : [20, 10]
+                  const presPct = corpShares[0] ?? 20
+                  const basePct = corpShares[1] ?? corpShares[0] ?? 10
+                  const cost = p.price * (presPct / basePct)
                   const canAfford = player.cash >= cost
                   return (
                     <button key={p.price} onClick={() => {

@@ -3,6 +3,7 @@
 
 import { useState } from 'react'
 import { playerSharePercent, corpPrice, parPrices, nextAvailableTrains } from './useOverviewData.js'
+import { getCorpShares } from '../../engine/corporation.js'
 import { useUIStore } from '../../store/uiStore.js'
 import { useGameStore } from '../../store/gameStore.js'
 import { useThemeStore, themes as brokerThemes } from '../../store/themeStore.js'
@@ -540,7 +541,6 @@ function PanelContent({ panel, game, player, corp, unfloated, fmt, revenueInput,
 function ParPanel({ player, unfloated, game, fmt, doAction, m }) {
   const [selectedCorp, setSelectedCorp] = useState(null)
   const prices = parPrices(game.stockMarket)
-  const presPercent = game.title.shares?.[0] ?? 20
 
   return (
     <div>
@@ -569,7 +569,10 @@ function ParPanel({ player, unfloated, game, fmt, doAction, m }) {
           </span>
           <div className="flex gap-1 mt-1 flex-wrap">
             {prices.map(pp => {
-              const cost = (pp.price * presPercent) / 10
+              const corpShares = selectedCorp ? getCorpShares(game, selectedCorp) : [20, 10]
+              const presPercent = corpShares[0] ?? 20
+              const baseShare = corpShares[1] ?? corpShares[0] ?? 10
+              const cost = pp.price * (presPercent / baseShare)
               const ok = player.cash >= cost
               return (
                 <Btn key={pp.price} m={m} v={ok ? 'green' : 'disabled'}
