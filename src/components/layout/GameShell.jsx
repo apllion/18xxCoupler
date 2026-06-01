@@ -9,7 +9,6 @@ import MarketTab from '../market/MarketTab.jsx'
 import CorpsTab from '../corps/CorpsTab.jsx'
 import PrivatesTab from '../privates/PrivatesTab.jsx'
 import PlayersTab from '../players/PlayersTab.jsx'
-import SummaryTab from '../summary/SummaryTab.jsx'
 import BeerMarketTab from '../beer/BeerMarketTab.jsx'
 import OverviewTab from '../overview/OverviewTab.jsx'
 import ActionLog from '../overview/ActionLog.jsx'
@@ -30,7 +29,6 @@ const TAB_COMPONENTS = {
   players: PlayersTab,
   privates: PrivatesTab,
   beer: BeerMarketTab,
-  summary: SummaryTab,
 }
 
 export default function GameShell() {
