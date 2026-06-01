@@ -11,7 +11,6 @@ import PrivatesTab from '../privates/PrivatesTab.jsx'
 import PlayersTab from '../players/PlayersTab.jsx'
 import BeerMarketTab from '../beer/BeerMarketTab.jsx'
 import OverviewTab from '../overview/OverviewTab.jsx'
-import ActionLog from '../overview/ActionLog.jsx'
 import ActionToast from './ActionToast.jsx'
 import EndgameCalcTab from '../overview/EndgameCalcTab.jsx'
 import RouteCalcTab from '../overview/RouteCalcTab.jsx'
@@ -29,6 +28,7 @@ const TAB_COMPONENTS = {
   players: PlayersTab,
   privates: PrivatesTab,
   beer: BeerMarketTab,
+  log: (await import('../overview/ActionLog.jsx')).default,
 }
 
 export default function GameShell() {
@@ -58,7 +58,6 @@ export default function GameShell() {
         {roomBar}
         <OverviewTab />
         <ActionToast />
-        <ActionLog />
         <BottomNav />
       </div>
     )
