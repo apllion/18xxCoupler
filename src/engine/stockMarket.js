@@ -156,7 +156,7 @@ export function moveUp(market, corpSym, steps = 1) {
 //   undefined / 'standard': withhold=left, pay<price=right1, pay>=price=right2
 //   'trg_triple_jump': withhold=left(down if at edge), pay<price=none, pay>=price=right1, pay>=3x=right2
 // Returns positive for right moves, -1 for left, -2 for down
-export function moveDividend(market, corpSym, perShare, dividendMovement) {
+export function moveDividend(market, corpSym, perShare, dividendMovement, totalRevenue) {
   const pos = market.corpPositions[corpSym]
   if (!pos) return 0
   const currentPrice = priceAt(market, pos.row, pos.col)
@@ -186,21 +186,21 @@ export function moveDividend(market, corpSym, perShare, dividendMovement) {
   }
 
   if (dividendMovement === 'ptg_triple') {
-    // PTG rules:
+    // PTG rules: compare TOTAL REVENUE vs share price
     // withhold: left 1
-    // pay < 0.5× price: left 1
-    // pay >= 0.5× price and < 3× price: right 1
-    // pay >= 3× price: right 2
+    // revenue < 0.5× share price: left 1
+    // revenue >= 0.5× and < 3× share price: right 1
+    // revenue >= 3× share price: right 2
+    const rev = totalRevenue ?? perShare * 10 // fallback for backward compat
     if (perShare <= 0) {
       stepLeft(market, pos)
       return -1
     }
-    const revenue = perShare * 10 // total revenue (perShare is per-share, price is per-share)
-    if (revenue < currentPrice * 0.5) {
+    if (rev < currentPrice * 0.5) {
       stepLeft(market, pos)
       return -1
     }
-    if (revenue >= currentPrice * 3) {
+    if (rev >= currentPrice * 3) {
       let moved = 0
       if (stepRight(market, pos)) moved++
       if (stepRight(market, pos)) moved++

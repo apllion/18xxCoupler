@@ -4,7 +4,7 @@
 import { buyShareFromIPO, buyShareFromMarket, sellShares, corpBuyShareFromIPO, corpBuyShareFromMarket, corpSellShares } from './sharePool.js'
 import { placeCorpOnMarket, moveDividend, moveSell, moveRight, moveLeft, moveSoldOutCorps, corpPrice } from './stockMarket.js'
 import { buyAvailableTrain, rustTrains } from './depot.js'
-import { addTrain, getCorpShares } from './corporation.js'
+import { addTrain, getCorpShares, regularSharePercent } from './corporation.js'
 import { advanceToPhase, phaseForTrain } from './phase.js'
 import { collectRevenue, collectAllRevenue, closeAllCompanies, assignPrivate, closePrivate } from './privateCompany.js'
 import { transferFromBank, transferToBank } from './bank.js'
@@ -697,7 +697,9 @@ function handlePayDividend(state, { corpSym, totalRevenue }) {
   const corp = state.corporations.find((c) => c.sym === corpSym)
   if (!corp) return
 
-  const perShare = Math.floor(totalRevenue / 10)
+  const regShare = regularSharePercent(state, corpSym)
+  const numShares = 100 / regShare // e.g., 5 for 20% shares, 10 for 10%
+  const perShare = Math.floor(totalRevenue / numShares)
 
   // Pay each player for their shares
   for (const player of state.players) {
@@ -705,7 +707,7 @@ function handlePayDividend(state, { corpSym, totalRevenue }) {
       .filter((s) => s.corpSym === corpSym)
       .reduce((sum, s) => sum + s.percent, 0)
     if (pct > 0) {
-      const payout = perShare * (pct / 10)
+      const payout = perShare * (pct / regShare)
       player.cash += payout
       state.bank.cash -= payout
     }
@@ -718,7 +720,7 @@ function handlePayDividend(state, { corpSym, totalRevenue }) {
       .filter((s) => s.corpSym === corpSym)
       .reduce((sum, s) => sum + s.percent, 0)
     if (pct > 0) {
-      const payout = perShare * (pct / 10)
+      const payout = perShare * (pct / regShare)
       holder.cash += payout
       state.bank.cash -= payout
     }
@@ -726,15 +728,16 @@ function handlePayDividend(state, { corpSym, totalRevenue }) {
 
   // IPO shares: money goes to corp (full cap) or bank (incremental)
   if (corp.ipoShares > 0 && state.title.capitalization === 'full') {
-    const ipoPayout = perShare * (corp.ipoShares / 10)
+    const ipoPayout = perShare * (corp.ipoShares / regShare)
     corp.cash += ipoPayout
     state.bank.cash -= ipoPayout
   }
 
   // Market shares: dividends go to bank (already there, no transfer needed)
 
-  // Price movement: title-aware (standard double jump, or TRG triple jump, etc.)
-  moveDividend(state.stockMarket, corpSym, perShare, state.title.dividendMovement)
+  // Price movement: title-aware
+  // perShare is per actual share, totalRevenue passed for PTG-style comparison
+  moveDividend(state.stockMarket, corpSym, perShare, state.title.dividendMovement, totalRevenue)
 }
 
 function handleWithholdDividend(state, { corpSym, totalRevenue }) {
@@ -753,8 +756,10 @@ function handleHalfDividend(state, { corpSym, totalRevenue }) {
   const corp = state.corporations.find((c) => c.sym === corpSym)
   if (!corp) return
 
+  const regShare = regularSharePercent(state, corpSym)
+  const numShares = 100 / regShare
   const halfRevenue = Math.floor(totalRevenue / 2)
-  const perShare = Math.floor(halfRevenue / 10)
+  const perShare = Math.floor(halfRevenue / numShares)
 
   // Pay shareholders their half
   for (const player of state.players) {
@@ -762,7 +767,7 @@ function handleHalfDividend(state, { corpSym, totalRevenue }) {
       .filter((s) => s.corpSym === corpSym)
       .reduce((sum, s) => sum + s.percent, 0)
     if (pct > 0) {
-      const payout = perShare * (pct / 10)
+      const payout = perShare * (pct / regShare)
       player.cash += payout
       state.bank.cash -= payout
     }
@@ -775,7 +780,7 @@ function handleHalfDividend(state, { corpSym, totalRevenue }) {
       .filter((s) => s.corpSym === corpSym)
       .reduce((sum, s) => sum + s.percent, 0)
     if (pct > 0) {
-      const payout = perShare * (pct / 10)
+      const payout = perShare * (pct / regShare)
       holder.cash += payout
       state.bank.cash -= payout
     }
