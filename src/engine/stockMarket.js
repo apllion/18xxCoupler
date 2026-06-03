@@ -187,27 +187,27 @@ export function moveDividend(market, corpSym, perShare, dividendMovement, totalR
 
   if (dividendMovement === 'ptg_triple') {
     // PTG rules: compare TOTAL REVENUE vs share price
-    // withhold: left 1
-    // revenue < 0.5× share price: left 1
-    // revenue >= 0.5× and < 3× share price: right 1
-    // revenue >= 3× share price: right 2
-    const rev = totalRevenue ?? perShare * 10 // fallback for backward compat
+    // withhold: left 1 (handled in handleWithholdDividend)
+    // pay < 0.5× share price: left 1 (down if can't go left)
+    // pay >= 0.5× and < 3× share price: right 1 (up if can't go right)
+    // pay >= 3× share price: right 2 (up if can't go right)
+    const rev = totalRevenue ?? perShare * 10
     if (perShare <= 0) {
-      stepLeft(market, pos)
+      if (!stepLeft(market, pos)) stepDown(market, pos)
       return -1
     }
     if (rev < currentPrice * 0.5) {
-      stepLeft(market, pos)
+      if (!stepLeft(market, pos)) stepDown(market, pos)
       return -1
     }
     if (rev >= currentPrice * 3) {
       let moved = 0
-      if (stepRight(market, pos)) moved++
-      if (stepRight(market, pos)) moved++
+      if (stepRight(market, pos) || stepUp(market, pos)) moved++
+      if (stepRight(market, pos) || stepUp(market, pos)) moved++
       return moved
     }
-    // >= 0.5x but < 3x: right 1
-    if (stepRight(market, pos)) return 1
+    // >= 0.5x but < 3x: right 1, up if can't go right
+    if (stepRight(market, pos) || stepUp(market, pos)) return 1
     return 0
   }
 

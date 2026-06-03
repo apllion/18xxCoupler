@@ -2,7 +2,7 @@
 // applyAction mutates state and returns a log entry.
 
 import { buyShareFromIPO, buyShareFromMarket, sellShares, corpBuyShareFromIPO, corpBuyShareFromMarket, corpSellShares } from './sharePool.js'
-import { placeCorpOnMarket, moveDividend, moveSell, moveRight, moveLeft, moveSoldOutCorps, corpPrice } from './stockMarket.js'
+import { placeCorpOnMarket, moveDividend, moveSell, moveRight, moveLeft, moveDown, moveSoldOutCorps, corpPrice } from './stockMarket.js'
 import { buyAvailableTrain, rustTrains } from './depot.js'
 import { addTrain, getCorpShares, regularSharePercent } from './corporation.js'
 import { advanceToPhase, phaseForTrain } from './phase.js'
@@ -193,6 +193,26 @@ export function applyAction(state, action) {
       else { state.stockMarket.corpPositions[action.corpSym] = { row: action.row, col: action.col } }
       break
     }
+    case 'REORDER_CORP_AT_PRICE': {
+      // Move corp up or down within its cell (same row,col). direction: -1 = up (left in game terms), +1 = down (right)
+      const positions = state.stockMarket.corpPositions
+      const target = positions[action.corpSym]
+      if (!target) break
+      // Find all corps at same cell
+      const atSame = Object.entries(positions)
+        .filter(([, p]) => p.row === target.row && p.col === target.col)
+        .sort((a, b) => (a[1].order ?? 0) - (b[1].order ?? 0))
+      // Assign sequential orders if not set
+      atSame.forEach(([, p], i) => { p.order = i })
+      const idx = atSame.findIndex(([sym]) => sym === action.corpSym)
+      const swapIdx = idx + action.direction
+      if (swapIdx >= 0 && swapIdx < atSame.length) {
+        const myOrder = atSame[idx][1].order
+        atSame[idx][1].order = atSame[swapIdx][1].order
+        atSame[swapIdx][1].order = myOrder
+      }
+      break
+    }
     case 'ADD_TRAIN_MANUAL': {
       const atc = state.corporations.find(co => co.sym === action.corpSym)
       if (atc) { atc.trains.push({ name: action.trainName, id: `manual_${Date.now()}`, distance: 0, price: 0 }) }
@@ -284,6 +304,9 @@ export function applyAction(state, action) {
       break
     case 'USE_CARD_ACTION':
       handleUseCardAction(state, action)
+      break
+    case 'RETURN_CARD':
+      handleReturnCard(state, action)
       break
     case 'BUY_EXECUTIVE_CAR':
       handleBuyExecutiveCar(state, action)
@@ -994,6 +1017,30 @@ function handleUseCardAction(state, { playerId, cardId }) {
   player.cards[cardIdx].usedAs = 'unique_action'
 }
 
+function handleReturnCard(state, { playerId, cardId }) {
+  const player = state.players.find((p) => p.id === playerId)
+  if (!player) return
+
+  const cardIdx = player.cards.findIndex((c) => c.id === cardId)
+  if (cardIdx < 0) return
+
+  const card = player.cards[cardIdx]
+
+  // If assigned to a train, remove the attachment
+  if (card.assignedTo) {
+    const corp = state.corporations.find((c) => c.sym === card.assignedTo.corpSym)
+    if (corp) {
+      const train = corp.trains.find((t) => t.id === card.assignedTo.trainId)
+      if (train && train.attachment?.id === cardId) {
+        train.attachment = null
+      }
+    }
+  }
+
+  // Remove card from player entirely
+  player.cards.splice(cardIdx, 1)
+}
+
 function handleBuyExecutiveCar(state, { corpSym, trainId, price }) {
   const corp = state.corporations.find((c) => c.sym === corpSym)
   if (!corp) return
@@ -1076,6 +1123,8 @@ function describeAction(state, action) {
       return `${playerName(action.playerId)} assigns ${action.cardId} to ${action.corpSym} ${action.trainId}`
     case 'USE_CARD_ACTION':
       return `${playerName(action.playerId)} uses ${action.cardId} unique action`
+    case 'RETURN_CARD':
+      return `${playerName(action.playerId)} returns ${action.cardId}`
     case 'BUY_EXECUTIVE_CAR':
       return `${action.corpSym} buys executive car for ${action.trainId}${action.price ? ` (${fmt(action.price)})` : ''}`
     case 'TAKE_LOAN':

@@ -17,7 +17,9 @@ export { playerSharePercent, playerCertCount, isPresident, corpPrice, parPrices,
 export function useOverviewData() {
   const game = useGameStore((s) => s.game)
   const undo = useGameStore((s) => s.undo)
+  const redo = useGameStore((s) => s.redo)
   const canUndo = useGameStore((s) => s.canUndo)
+  const canRedo = useGameStore((s) => s.canRedo)
   const dispatch = useDispatch()
 
   const fullLog = useGameStore((s) => s.fullLog)
@@ -180,7 +182,7 @@ export function useOverviewData() {
       if (key === 'F5') { e.preventDefault(); setPanel('buyprivate') }
       if (key === 'F6') { e.preventDefault(); setPanel('settings') }
     }
-  }, [game, corps, selPlayer, selCorp, panel, canUndo, undo, unfloated, inReplay, fullLog])
+  }, [game, corps, selPlayer, selCorp, panel, canUndo, undo, canRedo, redo, unfloated, inReplay, fullLog])
 
   useEffect(() => { rootRef.current?.focus() }, [])
   useEffect(() => { cursorRef.current?.scrollIntoView({ block: 'nearest', inline: 'nearest' }) }, [curRow, curCol])
@@ -193,7 +195,7 @@ export function useOverviewData() {
     revRef, rootRef, cursorRef, onKeyDown, closePanel, doAction,
     inReplay, fullLog, enterReplay, exitReplay, replayTo, enterWhatIf,
     isWhatIf, whatIfSnapshot, exitWhatIf: useGameStore.getState().exitWhatIf,
-    canUndo, undo, dispatch,
+    canUndo, undo, canRedo, redo, dispatch,
     isSR, isOR, isPre, rt,
     superUmpire: useUIStore.getState().autoConfig?.superUmpire || false,
   }

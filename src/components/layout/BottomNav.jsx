@@ -21,7 +21,7 @@ export default function BottomNav() {
     )},
     { id: 'corps', label: 'Corps', icon: (
       <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/>
+        <rect x="1" y="11" width="16" height="6" rx="2"/><rect x="4" y="7" width="4" height="4"/><circle cx="5" cy="19" r="2"/><circle cx="13" cy="19" r="2"/><path d="M17 14h4l2 3h-6"/>
       </svg>
     )},
     { id: 'players', label: 'Players', icon: (

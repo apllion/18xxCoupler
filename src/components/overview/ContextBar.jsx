@@ -34,8 +34,7 @@ export function ContextBar({ game, selPlayer, selCorp, myPlayerId, setPanel, doA
     closeshort: () => setPanel('closeshort'),
     token: () => {
       if (!selCorp || selCorp.tokensPlaced >= selCorp.tokens.length) return
-      const cost = selCorp.tokens[selCorp.tokensPlaced] || 0
-      doAction({ type: 'PLACE_TOKEN', corpSym: selCorp.sym, price: cost })
+      setPanel('token')
     },
     discard: () => setPanel('discard'),
     removetoken: () => selCorp && doAction({ type: 'REMOVE_TOKEN', corpSym: selCorp.sym }),

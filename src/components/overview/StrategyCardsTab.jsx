@@ -3,10 +3,12 @@
 
 import { useGameStore } from '../../store/gameStore.js'
 import { useUIStore } from '../../store/uiStore.js'
+import { useDispatch } from '../../hooks/useDispatch.js'
 
 export default function StrategyCardsTab() {
   const game = useGameStore((s) => s.game)
   const skin = useUIStore((s) => s.skin)
+  const dispatch = useDispatch()
   const m = skin === 'moderator'
 
   if (!game || !game.title.strategyCards?.length) return null
@@ -75,16 +77,33 @@ export default function StrategyCardsTab() {
                 <div><span className="font-medium">Unique:</span> {card.unique}</div>
               </div>
 
+              {/* Assign to player or corp */}
+              {!holder && (
+                <div className={`mt-2 flex gap-1 flex-wrap`}>
+                  {game.players.map(p => (
+                    <button key={p.id}
+                      onClick={() => dispatch({ type: 'GIVE_CARD', playerId: p.id, card })}
+                      className={`text-[10px] px-2 py-0.5 rounded ${m ? 'bg-blue-800 text-blue-300 hover:bg-blue-700' : 'bg-broker-surface-hover text-broker-text-muted hover:text-white'}`}>
+                      → {p.name}
+                    </button>
+                  ))}
+                </div>
+              )}
+
               {/* Holder info */}
               {holder && (
-                <div className={`mt-2 text-xs ${m ? 'text-blue-400' : 'text-broker-text-muted'}`}>
-                  Held by <span className={m ? 'text-white' : 'text-broker-text'}>{holder.playerName}</span>
-                  {assignedTo && (
-                    <span> — attached to {assignedTo.corpSym} train</span>
-                  )}
-                  {usedAs === 'unique_action' && (
-                    <span> — unique action used</span>
-                  )}
+                <div className={`mt-2 text-xs flex items-center gap-2 ${m ? 'text-blue-400' : 'text-broker-text-muted'}`}>
+                  <span>
+                    Held by <span className={m ? 'text-white' : 'text-broker-text'}>{holder.playerName}</span>
+                    {assignedTo && <span> — attached to {assignedTo.corpSym} train</span>}
+                    {usedAs === 'unique_action' && <span> — unique action used</span>}
+                  </span>
+                  <button
+                    onClick={() => dispatch({ type: 'RETURN_CARD', playerId: holder.playerId, cardId: card.id })}
+                    className={`ml-auto text-[10px] px-2 py-0.5 rounded ${m ? 'bg-blue-800 text-blue-300 hover:bg-blue-700' : 'bg-broker-surface-hover text-broker-text-muted hover:text-white'}`}
+                  >
+                    Return
+                  </button>
                 </div>
               )}
             </div>

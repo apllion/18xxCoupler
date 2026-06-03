@@ -13,18 +13,21 @@ const ZONE_COLORS = {
   normal: 'bg-broker-surface text-broker-text',
 }
 
-export default function MarketGrid() {
+export default function MarketGrid({ movingCorp, onCellClick, onReorder }) {
   const game = useGameStore((s) => s.game)
   if (!game) return null
 
   const { grid, corpPositions } = game.stockMarket
 
-  // Build a map of which corps are at which position
+  // Build a map of which corps are at which position, sorted by order
   const corpsAt = {}
   for (const [sym, pos] of Object.entries(corpPositions)) {
     const key = `${pos.row},${pos.col}`
     if (!corpsAt[key]) corpsAt[key] = []
-    corpsAt[key].push(sym)
+    corpsAt[key].push({ sym, order: pos.order ?? 0 })
+  }
+  for (const key of Object.keys(corpsAt)) {
+    corpsAt[key].sort((a, b) => a.order - b.order)
   }
 
   return (
@@ -41,30 +44,49 @@ export default function MarketGrid() {
                 const key = `${ri},${ci}`
                 const corps = corpsAt[key] || []
                 const zoneClass = ZONE_COLORS[cell.zone] || ZONE_COLORS.normal
+                const isTarget = !!onCellClick && !!movingCorp
 
                 return (
                   <td
                     key={ci}
+                    onClick={() => isTarget && onCellClick(ri, ci)}
                     className={`w-12 h-10 border border-broker-border text-center relative ${zoneClass} ${
                       cell.canPar ? 'ring-1 ring-inset ring-broker-gold' : ''
-                    }`}
+                    } ${isTarget ? 'cursor-pointer hover:ring-2 hover:ring-amber-400' : ''}`}
                   >
                     <div className="text-[10px] leading-tight">{cell.price}</div>
                     {corps.length > 0 && (
-                      <div className="flex gap-0.5 justify-center mt-0.5">
-                        {corps.map((sym) => {
-                          const corp = game.corporations.find((c) => c.sym === sym)
+                      <div className="flex gap-0.5 justify-center mt-0.5 items-center">
+                        {corps.map((entry, idx) => {
+                          const corp = game.corporations.find((c) => c.sym === entry.sym)
+                          const isSelected = movingCorp === entry.sym
                           return (
-                            <div
-                              key={sym}
-                              className="w-3 h-3 rounded-full text-[6px] flex items-center justify-center font-bold cursor-pointer hover:ring-1 hover:ring-white"
-                              style={{ backgroundColor: corp?.color, color: corp?.textColor || '#fff' }}
-                              title={sym}
-                              onClick={() => {
-                                useUIStore.getState().setActiveCorp(sym)
-                                useUIStore.getState().setActiveTab('corps')
-                              }}
-                            />
+                            <span key={entry.sym} className="inline-flex flex-col items-center">
+                              {/* Up arrow (left in game terms) */}
+                              {isSelected && onReorder && idx > 0 && (
+                                <button onClick={(e) => { e.stopPropagation(); onReorder(entry.sym, -1) }}
+                                  className="text-[7px] text-amber-400 leading-none hover:text-white">▲</button>
+                              )}
+                              <div
+                                className={`w-3 h-3 rounded-full text-[6px] flex items-center justify-center font-bold cursor-pointer hover:ring-1 hover:ring-white ${
+                                  isSelected ? 'ring-2 ring-amber-400 animate-pulse' : ''
+                                }`}
+                                style={{ backgroundColor: corp?.color, color: corp?.textColor || '#fff' }}
+                                title={entry.sym}
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  if (!onCellClick) {
+                                    useUIStore.getState().setActiveCorp(entry.sym)
+                                    useUIStore.getState().setActiveTab('corps')
+                                  }
+                                }}
+                              />
+                              {/* Down arrow (right in game terms) */}
+                              {isSelected && onReorder && idx < corps.length - 1 && (
+                                <button onClick={(e) => { e.stopPropagation(); onReorder(entry.sym, 1) }}
+                                  className="text-[7px] text-amber-400 leading-none hover:text-white">▼</button>
+                              )}
+                            </span>
                           )
                         })}
                       </div>

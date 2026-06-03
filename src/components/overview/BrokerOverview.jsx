@@ -1,5 +1,6 @@
 // BrokerOverview — Modern slim overview. Broker theme colors, clean typography.
 
+import { useState, useRef, useEffect } from 'react'
 import { useOverviewData, playerSharePercent, playerCertCount, isPresident } from './useOverviewData.js'
 import { useUIStore } from '../../store/uiStore.js'
 import { ActionPanel } from './ActionPanel.jsx'
@@ -8,8 +9,11 @@ import { InlineEdit } from './InlineEdit.jsx'
 
 export default function BrokerOverview() {
   const d = useOverviewData()
+  const [confirmAdvance, setConfirmAdvance] = useState(false)
+  const confirmTimer = useRef(null)
+  useEffect(() => () => clearTimeout(confirmTimer.current), [])
   if (!d.game) return null
-  const { game, fmt, phase, label, limit, corps, unfloated, depotGroups, lastRevenue, corpPrivates, playerPrivates, lastAction, selPlayer, myPlayerId, selCorp, curRow, setCurRow, curCol, setCurCol, panel, setPanel, revenueInput, setRevenueInput, revRef, rootRef, cursorRef, onKeyDown, closePanel, doAction, inReplay, fullLog, enterReplay, exitReplay, replayTo, enterWhatIf, isWhatIf, exitWhatIf, canUndo, undo, isSR, isOR, isPre, superUmpire } = d
+  const { game, fmt, phase, label, limit, corps, unfloated, depotGroups, lastRevenue, corpPrivates, playerPrivates, lastAction, selPlayer, myPlayerId, selCorp, curRow, setCurRow, curCol, setCurCol, panel, setPanel, revenueInput, setRevenueInput, revRef, rootRef, cursorRef, onKeyDown, closePanel, doAction, inReplay, fullLog, enterReplay, exitReplay, replayTo, enterWhatIf, isWhatIf, exitWhatIf, canUndo, undo, canRedo, redo, isSR, isOR, isPre, superUmpire } = d
   const su = superUmpire
 
   const curIdx = game.actionLog.length - 1
@@ -25,9 +29,20 @@ export default function BrokerOverview() {
       }`}>
         <div className="flex items-center gap-3">
           <span className="font-bold text-lg text-white">{game.title.title}</span>
-          <span className={`text-sm font-medium px-2 py-0.5 rounded ${
-            isSR ? 'bg-green-800 text-green-200' : isOR ? 'bg-amber-800 text-amber-200' : 'bg-broker-surface-hover text-broker-text-muted'
-          }`}>{isSR ? label : isOR ? label : 'Setup'}</span>
+          <button onClick={() => {
+            if (confirmAdvance) {
+              clearTimeout(confirmTimer.current)
+              setConfirmAdvance(false)
+              doAction({ type: 'ADVANCE_ROUND' })
+            } else {
+              setConfirmAdvance(true)
+              confirmTimer.current = setTimeout(() => setConfirmAdvance(false), 2000)
+            }
+          }}
+            className={`text-sm font-medium px-2 py-0.5 rounded cursor-pointer transition-all ${
+            confirmAdvance ? 'bg-red-700 text-white animate-pulse' :
+            isSR ? 'bg-green-800 text-green-200 hover:brightness-125' : isOR ? 'bg-amber-800 text-amber-200 hover:brightness-125' : 'bg-broker-surface-hover text-broker-text-muted'
+          }`}>{confirmAdvance ? 'Tap to confirm' : `${isSR ? label : isOR ? label : 'Setup'} →`}</button>
           <span className="text-xs text-broker-text-muted">Phase {phase.name} / Limit {limit}</span>
         </div>
         <div className="flex items-center gap-2">
@@ -47,6 +62,7 @@ export default function BrokerOverview() {
             ))}
           </span>
           <button onClick={() => canUndo() && undo()} className="text-xs text-broker-text-muted hover:text-white px-1">Undo</button>
+          <button onClick={() => canRedo() && redo()} className="text-xs text-broker-text-muted hover:text-white px-1">Redo</button>
           <button onClick={() => setPanel(panel === 'settings' ? null : 'settings')} className="text-xs text-broker-text-muted hover:text-white bg-broker-surface-hover px-2 py-0.5 rounded">Settings</button>
         </div>
       </div>
@@ -94,7 +110,19 @@ export default function BrokerOverview() {
                 <tr key={p.id} className={`border-t border-broker-border/30 ${isRow ? 'bg-broker-surface-hover/50' : ''} hover:bg-broker-surface-hover/30`}>
                   <td className={`px-2 py-1 sticky left-0 z-10 cursor-pointer ${isRow ? 'bg-broker-surface-hover/50' : 'bg-broker-bg'} ${p.id === game.priorityDeal ? 'text-broker-gold font-bold' : 'text-broker-text font-medium'}`}
                     onClick={() => setCurRow(pi)}>
-                    {p.name}
+                    <div>{p.name}</div>
+                    {/* Player-owned privates */}
+                    {playerPrivates[p.id]?.length > 0 && (
+                      <div className="text-[9px] text-purple-300 leading-tight">{playerPrivates[p.id].map(c => c.sym).join(' ')}</div>
+                    )}
+                    {/* Player-held strategy cards */}
+                    {p.cards?.length > 0 && (
+                      <div className="flex gap-0.5 mt-0.5">{p.cards.map(c => (
+                        <span key={c.id} className={`w-2 h-2 rounded-full inline-block ${c.used ? 'opacity-30' : ''}`}
+                          style={{ backgroundColor: c.color === 'white' ? '#e5e5e5' : c.color }}
+                          title={`${c.name}${c.used ? ' (used)' : ''}`} />
+                      ))}</div>
+                    )}
                   </td>
                   <td className="px-2 text-right text-broker-text font-medium">
                     <InlineEdit value={p.cash} enabled={su} skin="broker"
@@ -184,6 +212,27 @@ export default function BrokerOverview() {
                 {c.tokensPlaced}/{c.tokens.length}
               </InlineEdit>} />
             {game.title.loans && <BRow extraCols={game.title.taxThresholds ? 1 : 0} l="Loans" corps={corps} cc={curCol} r={c => !c.floated ? '' : c.loans ? <span className="text-red-400 font-bold">{c.loans}</span> : '0'} />}
+            {/* Privates owned by corps */}
+            {game.companies?.some(co => co.ownerType === 'corporation' && !co.closed) && (
+              <BRow extraCols={game.title.taxThresholds ? 1 : 0} l="Privates" corps={corps} cc={curCol} r={c => {
+                const owned = (corpPrivates[c.sym] || [])
+                return owned.length > 0 ? <span className="text-purple-300 text-[9px]">{owned.join(' ')}</span> : ''
+              }} />
+            )}
+            {/* Cards attached to corp trains */}
+            {game.title.strategyCards?.length > 0 && (
+              <BRow extraCols={game.title.taxThresholds ? 1 : 0} l="Cards" corps={corps} cc={curCol} r={c => {
+                if (!c.floated) return ''
+                const attached = c.trains.filter(t => t.attachment).map(t => t.attachment)
+                return attached.length > 0
+                  ? <span className="flex gap-0.5 justify-center">{attached.map((a, i) => (
+                      <span key={i} className="w-2 h-2 rounded-full inline-block"
+                        style={{ backgroundColor: a.color === 'white' ? '#e5e5e5' : a.color }}
+                        title={a.name} />
+                    ))}</span>
+                  : ''
+              }} />
+            )}
           </tbody>
         </table>
       </div>
