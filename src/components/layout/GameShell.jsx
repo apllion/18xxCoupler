@@ -57,11 +57,11 @@ export default function GameShell() {
     />
   )
 
-  // Overview — has bottom nav for detail views
+  // Overview — only show room bar when connected
   if (activeTab === 'overview') {
     return (
       <div className="flex flex-col h-screen pb-12">
-        {roomBar}
+        {sync?.roomId && roomBar}
         <OverviewTab />
         <ActionToast />
         <BottomNav />

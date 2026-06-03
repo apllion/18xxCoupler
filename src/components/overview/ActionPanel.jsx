@@ -8,6 +8,7 @@ import { useUIStore } from '../../store/uiStore.js'
 import { useGameStore } from '../../store/gameStore.js'
 import { useThemeStore, themes as brokerThemes } from '../../store/themeStore.js'
 import { exportGamePdf } from '../../utils/exportPdf.js'
+import { exportGame } from '../../utils/persistence.js'
 import { CorpCard } from './CorpCard.jsx'
 import { PlayerCard } from './PlayerCard.jsx'
 
@@ -94,6 +95,36 @@ function PanelContent({ panel, game, player, corp, unfloated, fmt, revenueInput,
               <span className={m ? 'text-blue-400 text-xs' : 'text-broker-text-muted text-xs'}>{fmt(perShare)}/share</span>
             </>
           )}
+        </div>
+      </div>
+    )
+  }
+
+  // Token placement
+  if (panel === 'token' && corp) {
+    const placed = corp.tokensPlaced || 0
+    const total = corp.tokens.length
+    const remaining = total - placed
+    const defaultCost = placed < total ? (corp.tokens[placed] || 0) : 0
+    if (remaining <= 0) return <div><Title m={m}><span style={{ color: corp.color }}>{corp.sym}</span> Tokens</Title><span className={m ? 'text-blue-400' : 'text-broker-text-muted'}>All tokens placed</span></div>
+    return (
+      <div>
+        <Title m={m}><span style={{ color: corp.color }}>{corp.sym}</span> Place Token ({placed}/{total})</Title>
+        <div className="flex items-center gap-2 mt-1">
+          <input type="number" value={priceValue} onChange={e => setPriceValue(e.target.value)}
+            placeholder={String(defaultCost)}
+            className={m
+              ? 'w-20 bg-black border border-green-800 rounded px-2 py-1 text-white text-center text-sm font-mono'
+              : 'w-24 bg-broker-bg border border-broker-border rounded px-2 py-1.5 text-white text-center'
+            } />
+          <Btn m={m} v="green" o={() => {
+            const cost = priceValue !== '' ? (parseInt(priceValue, 10) || 0) : defaultCost
+            doAction({ type: 'PLACE_TOKEN', corpSym: corp.sym, price: cost })
+            setPriceValue('')
+          }}>Place ({fmt(priceValue !== '' ? (parseInt(priceValue, 10) || 0) : defaultCost)})</Btn>
+          <span className={m ? 'text-blue-400 text-xs' : 'text-broker-text-muted text-xs'}>
+            default: {fmt(defaultCost)}
+          </span>
         </div>
       </div>
     )
@@ -920,15 +951,22 @@ function SettingsPanel({ m, game, doAction }) {
         <div>
           <div className={labelColor}>Tools</div>
           <div className="flex gap-1 flex-wrap">
-            <Btn m={m} v={useUIStore.getState().showLog ? 'green' : 'blue'} o={() => useUIStore.getState().toggleLog()}>
-              {useUIStore.getState().showLog ? 'Log ✓' : 'Log'}
-            </Btn>
             <Btn m={m} v={useUIStore.getState().showToasts ? 'green' : 'blue'} o={() => useUIStore.setState(s => ({ showToasts: !s.showToasts }))}>
               {useUIStore.getState().showToasts ? 'Toasts ✓' : 'Toasts'}
             </Btn>
             {game?.actionLog?.length > 0 && !inReplay && <Btn m={m} v="blue" o={() => enterReplay()}>Replay</Btn>}
             {inReplay && <Btn m={m} v="red" o={() => exitReplay()}>Exit Replay</Btn>}
             {game && <Btn m={m} v="green" o={() => exportGamePdf(game)}>Export PDF</Btn>}
+            {game && <Btn m={m} v="blue" o={() => {
+              const json = exportGame(game)
+              const blob = new Blob([json], { type: 'application/json' })
+              const url = URL.createObjectURL(blob)
+              const a = document.createElement('a')
+              a.href = url
+              a.download = `${game.title.titleId}_${new Date().toISOString().slice(0,10)}.json`
+              a.click()
+              URL.revokeObjectURL(url)
+            }}>Export JSON</Btn>}
           </div>
         </div>
         <div className="flex-1 min-w-[200px]">

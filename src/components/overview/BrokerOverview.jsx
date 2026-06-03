@@ -47,7 +47,7 @@ export default function BrokerOverview() {
             ))}
           </span>
           <button onClick={() => canUndo() && undo()} className="text-xs text-broker-text-muted hover:text-white px-1">Undo</button>
-          <button onClick={() => setPanel('settings')} className="text-xs text-broker-text-muted hover:text-white bg-broker-surface-hover px-2 py-0.5 rounded">Settings</button>
+          <button onClick={() => setPanel(panel === 'settings' ? null : 'settings')} className="text-xs text-broker-text-muted hover:text-white bg-broker-surface-hover px-2 py-0.5 rounded">Settings</button>
         </div>
       </div>
 
@@ -169,14 +169,16 @@ export default function BrokerOverview() {
               if (c.trains.length === 0) return <span className="text-red-400 font-bold">none</span>
               return <span className="font-medium text-white">{c.trains.map(t => t.name).join(' ')}</span>
             }} />
-            <BRow extraCols={game.title.taxThresholds ? 1 : 0} l="Revenue" corps={corps} cc={curCol} onClick={(sym, ci) => { setCurCol(ci); setPanel('revenue'); setTimeout(() => revRef.current?.focus(), 50) }} r={c => {
+            <BRow extraCols={game.title.taxThresholds ? 1 : 0} l="Revenue" corps={corps} cc={curCol} onClick={(sym, ci) => { setCurCol(ci); setPanel(panel === 'revenue' ? null : 'revenue'); if (panel !== 'revenue') setTimeout(() => revRef.current?.focus(), 50) }} r={c => {
               if (!c.floated) return ''
               const rev = lastRevenue[c.sym]
               if (!rev) return ''
               const color = rev.type === 'WITHHOLD_DIVIDEND' ? 'text-red-400' : 'text-green-400'
               return <span className={color}>{rev.type === 'WITHHOLD_DIVIDEND' ? 'W' : rev.type === 'HALF_DIVIDEND' ? 'H' : ''} {fmt(rev.amount)}</span>
             }} />
-            <BRow extraCols={game.title.taxThresholds ? 1 : 0} l="Tokens" corps={corps} cc={curCol} r={c => !c.floated ? '' :
+            <BRow extraCols={game.title.taxThresholds ? 1 : 0} l="Tokens" corps={corps} cc={curCol}
+              onClick={(sym, ci) => { setCurCol(ci); setPanel(panel === 'token' ? null : 'token') }}
+              r={c => !c.floated ? '' :
               <InlineEdit value={c.tokensPlaced} enabled={su} skin="broker"
                 onSave={v => doAction({ type: 'SET_CORP_FIELD', corpSym: c.sym, field: 'tokensPlaced', value: v })}>
                 {c.tokensPlaced}/{c.tokens.length}

@@ -1450,6 +1450,7 @@ function IssueRedeemPanel({ game, corp, dispatch, fmt }) {
 }
 
 function PlaceTokenPanel({ game, corp, dispatch, fmt }) {
+  const [customCost, setCustomCost] = useState('')
   const placed = corp.tokensPlaced || 0
   const total = corp.tokens.length
   const remaining = total - placed
@@ -1474,13 +1475,24 @@ function PlaceTokenPanel({ game, corp, dispatch, fmt }) {
           </span>
         ))}
       </div>
-      <button
-        onClick={() => dispatch({ type: 'PLACE_TOKEN', corpSym: corp.sym, cost: nextTokenCost })}
-        disabled={!canAfford}
-        className="text-sm bg-blue-800 hover:bg-blue-700 disabled:opacity-30 disabled:cursor-not-allowed text-white px-3 py-2 rounded"
-      >
-        Place Token ({fmt(nextTokenCost)})
-      </button>
+      {(() => {
+        const cost = customCost !== '' ? (parseInt(customCost, 10) || 0) : nextTokenCost
+        return (
+          <div className="flex gap-2">
+            <input type="number" value={customCost}
+              onChange={e => setCustomCost(e.target.value)}
+              placeholder={String(nextTokenCost)}
+              className="w-20 bg-broker-bg border border-broker-border rounded px-3 py-2 text-white text-center text-sm" />
+            <button
+              onClick={() => { dispatch({ type: 'PLACE_TOKEN', corpSym: corp.sym, price: cost }); setCustomCost('') }}
+              disabled={corp.cash < cost}
+              className="flex-1 text-sm bg-blue-800 hover:bg-blue-700 disabled:opacity-30 disabled:cursor-not-allowed text-white px-3 py-2 rounded"
+            >
+              Place Token ({fmt(cost)})
+            </button>
+          </div>
+        )
+      })()}
     </div>
   )
 }

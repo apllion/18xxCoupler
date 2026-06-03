@@ -1,9 +1,11 @@
 // RoundTrackerTab — dedicated view for round/turn/phase tracking.
 // Shows current round, turn order, phase info, and modification actions.
 
+import { useState } from 'react'
 import { useGameStore } from '../../store/gameStore.js'
 import { useUIStore } from '../../store/uiStore.js'
 import { useDispatch } from '../../hooks/useDispatch.js'
+import { useSyncContext } from '../../hooks/SyncContext.jsx'
 import { roundLabel } from '../../engine/roundTracker.js'
 import { currentPhase } from '../../engine/phase.js'
 import { corpPrice } from '../../engine/stockMarket.js'
@@ -14,6 +16,7 @@ const OR_STEPS = ['Track', 'Token', 'Routes', 'Dividend', 'Trains']
 export default function RoundTrackerTab() {
   const game = useGameStore((s) => s.game)
   const dispatch = useDispatch()
+  const sync = useSyncContext()
 
   if (!game) return null
 
@@ -286,6 +289,93 @@ export default function RoundTrackerTab() {
           )}
         </div>
       </div>
+
+      {/* Sync / Room */}
+      <SyncSection sync={sync} />
+    </div>
+  )
+}
+
+function SyncSection({ sync }) {
+  const [joinCode, setJoinCode] = useState('')
+  const [showJoin, setShowJoin] = useState(false)
+
+  if (!sync) return null
+
+  if (sync.roomId) {
+    return (
+      <div className="bg-broker-surface rounded-lg p-3 border border-broker-border">
+        <div className="text-broker-text font-medium mb-2">Multi-Device Sync</div>
+        <div className="flex items-center gap-2">
+          <span className={`w-2 h-2 rounded-full ${sync.status === 'connected' ? 'bg-green-400' : 'bg-amber-400 animate-pulse'}`} />
+          <span className="font-mono font-bold text-white tracking-wider">{sync.roomId}</span>
+          <span className="text-broker-text-muted text-xs">
+            {sync.peerCount > 0 ? `${sync.peerCount + 1} devices` : 'waiting...'}
+          </span>
+          <button onClick={sync.leaveRoom}
+            className="ml-auto text-xs text-broker-text-muted hover:text-red-300 px-2 py-1 rounded bg-broker-surface-hover">
+            Leave
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  if (sync.savedRoom) {
+    return (
+      <div className="bg-broker-surface rounded-lg p-3 border border-broker-border">
+        <div className="text-broker-text font-medium mb-2">Multi-Device Sync</div>
+        <div className="flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-amber-400" />
+          <span className="text-broker-text-muted text-xs">Previous room:</span>
+          <span className="font-mono font-bold text-white tracking-wider">{sync.savedRoom.code}</span>
+          <button onClick={sync.rejoinRoom}
+            className="text-xs bg-blue-800 hover:bg-blue-700 text-white px-2 py-1 rounded">
+            Reconnect
+          </button>
+          <button onClick={() => { localStorage.removeItem('18xxCoupler_room'); location.reload() }}
+            className="text-xs text-broker-text-muted hover:text-red-300 px-1">
+            Dismiss
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="bg-broker-surface rounded-lg p-3 border border-broker-border">
+      <div className="text-broker-text font-medium mb-2">Multi-Device Sync</div>
+      <p className="text-broker-text-muted text-xs mb-2">
+        Create or join a room to sync game state across devices in real time.
+      </p>
+      {showJoin ? (
+        <div className="flex items-center gap-2">
+          <input type="text" value={joinCode}
+            onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
+            placeholder="ROOM CODE" maxLength={6} autoFocus
+            className="flex-1 bg-broker-bg border border-broker-border rounded px-3 py-2 text-sm text-white font-mono tracking-wider placeholder-broker-text-muted" />
+          <button onClick={() => { if (joinCode.trim().length >= 4) { sync.joinRoom(joinCode); setShowJoin(false) } }}
+            disabled={joinCode.trim().length < 4}
+            className="text-sm bg-blue-800 hover:bg-blue-700 text-white px-3 py-2 rounded disabled:opacity-40">
+            Join
+          </button>
+          <button onClick={() => setShowJoin(false)}
+            className="text-sm text-broker-text-muted hover:text-white px-2">
+            Cancel
+          </button>
+        </div>
+      ) : (
+        <div className="flex gap-2">
+          <button onClick={sync.createRoom}
+            className="flex-1 text-sm bg-broker-green hover:bg-broker-green-light text-broker-gold px-3 py-2 rounded">
+            Create Room
+          </button>
+          <button onClick={() => setShowJoin(true)}
+            className="flex-1 text-sm bg-broker-surface-hover hover:bg-broker-surface text-broker-text-muted hover:text-white px-3 py-2 rounded">
+            Join Room
+          </button>
+        </div>
+      )}
     </div>
   )
 }
