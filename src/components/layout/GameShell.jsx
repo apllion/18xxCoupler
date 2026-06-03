@@ -16,6 +16,7 @@ import EndgameCalcTab from '../overview/EndgameCalcTab.jsx'
 import RouteCalcTab from '../overview/RouteCalcTab.jsx'
 import LoanChartTab from '../overview/LoanChartTab.jsx'
 import StrategyCardsTab from '../overview/StrategyCardsTab.jsx'
+import RoundTrackerTab from '../overview/RoundTrackerTab.jsx'
 // PlusPlus: analysis tab (stripped from Broker build)
 const PP = !!import.meta.env.VITE_PLUSPLUS || import.meta.env.DEV
 const AnalysisTab = PP ? (await import('../overview/AnalysisTab.jsx')).default : null
@@ -30,6 +31,7 @@ const TAB_COMPONENTS = {
   players: PlayersTab,
   privates: PrivatesTab,
   beer: BeerMarketTab,
+  rounds: RoundTrackerTab,
   loanchart: LoanChartTab,
   cards: StrategyCardsTab,
   log: (await import('../overview/ActionLog.jsx')).default,
@@ -67,12 +69,10 @@ export default function GameShell() {
     )
   }
 
-  // Detail tabs
+  // Detail tabs — no RoomBar or TurnStatus (those are for overview only)
   return (
     <div className="flex flex-col h-screen">
       <Header syncDispatch={sync?.syncDispatch} />
-      {roomBar}
-      <TurnStatus />
       <main className="flex-1 overflow-y-auto pb-16">
         <TabComponent />
       </main>

@@ -13,6 +13,7 @@ export const useGameStore = create(
   immer((set, get) => ({
     game: null,
     saveKey: null,
+    redoStack: [],
 
     // Start a new game (with optional variant)
     startGame: (titleId, playerNames, userVariant = null) => {
@@ -69,6 +70,8 @@ export const useGameStore = create(
         if (!state.game) return
         applyAction(state.game, action)
       })
+      // New action clears redo stack (fork)
+      set({ redoStack: [] })
       // Don't persist during what-if — changes are exploratory
       const { game, whatIfSnapshot } = get()
       if (game && !whatIfSnapshot) saveGame(game)
@@ -77,6 +80,10 @@ export const useGameStore = create(
     undo: () => {
       const { game } = get()
       if (!game || game.actionLog.length === 0) return
+
+      // Save the popped action for redo
+      const poppedAction = game.actionLog[game.actionLog.length - 1].action
+      const { redoStack } = get()
 
       const title = getTitle(game.title.titleId)
       const playerNames = game.originalPlayerNames || game.players.map((p) => p.name)
@@ -89,13 +96,32 @@ export const useGameStore = create(
         applyAction(freshGame, action)
       }
 
-      set({ game: freshGame })
+      set({ game: freshGame, redoStack: [...redoStack, poppedAction] })
       saveGame(freshGame)
+    },
+
+    redo: () => {
+      const { game, redoStack } = get()
+      if (!game || redoStack.length === 0) return
+
+      const actionToRedo = redoStack[redoStack.length - 1]
+      set((state) => {
+        applyAction(state.game, actionToRedo)
+      })
+      set({ redoStack: redoStack.slice(0, -1) })
+
+      const { game: updatedGame, whatIfSnapshot } = get()
+      if (updatedGame && !whatIfSnapshot) saveGame(updatedGame)
     },
 
     canUndo: () => {
       const { game } = get()
       return game && game.actionLog.length > 0
+    },
+
+    canRedo: () => {
+      const { redoStack } = get()
+      return redoStack.length > 0
     },
 
     endGame: () => {

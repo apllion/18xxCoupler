@@ -36,6 +36,7 @@ export default function BottomNav() {
 
   const moreItems = [
     { id: 'market', label: 'Stock Market' },
+    { id: 'rounds', label: 'Rounds & Turns' },
     ...(hasPrivates ? [{ id: 'privates', label: 'Private Companies' }] : []),
     ...(hasBeer ? [{ id: 'beer', label: 'Beer Market' }] : []),
     ...(hasLoans ? [{ id: 'loanchart', label: 'Loan Chart' }] : []),

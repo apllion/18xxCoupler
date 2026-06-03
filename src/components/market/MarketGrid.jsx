@@ -1,4 +1,5 @@
 import { useGameStore } from '../../store/gameStore.js'
+import { useUIStore } from '../../store/uiStore.js'
 
 const ZONE_COLORS = {
   yellow: 'bg-yellow-900/40 text-yellow-300',
@@ -56,9 +57,13 @@ export default function MarketGrid() {
                           return (
                             <div
                               key={sym}
-                              className="w-3 h-3 rounded-full text-[6px] flex items-center justify-center font-bold"
+                              className="w-3 h-3 rounded-full text-[6px] flex items-center justify-center font-bold cursor-pointer hover:ring-1 hover:ring-white"
                               style={{ backgroundColor: corp?.color, color: corp?.textColor || '#fff' }}
                               title={sym}
+                              onClick={() => {
+                                useUIStore.getState().setActiveCorp(sym)
+                                useUIStore.getState().setActiveTab('corps')
+                              }}
                             />
                           )
                         })}

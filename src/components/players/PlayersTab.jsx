@@ -592,6 +592,7 @@ function PlayerActions({ game, player, dispatch, fmt, goToCorp }) {
 function CorpOps({ game, corp, dispatch, fmt, isSub }) {
   const [revenue, setRevenue] = useState('')
   const [showTrains, setShowTrains] = useState(false)
+  const [tokenCost, setTokenCost] = useState('')
 
   const price = corpPrice(game.stockMarket, corp.sym) || 0
   const phase = currentPhase(game.phaseManager)
@@ -671,22 +672,50 @@ function CorpOps({ game, corp, dispatch, fmt, isSub }) {
         </button>
       </div>
 
-      {/* Route calc link */}
-      {corp.trains.length > 0 && (
-        <button onClick={() => { useUIStore.getState().setActiveCorp(corp.sym); useUIStore.getState().setActiveTab('routes') }}
-          className="w-full text-sm bg-broker-surface-hover text-broker-text-muted hover:text-broker-text rounded px-3 py-2 mt-2">
-          Route Calculator →
-        </button>
-      )}
+      {/* Route calc link + use saved revenue */}
+      {corp.trains.length > 0 && (() => {
+        const saved = useUIStore.getState().savedRoutes[corp.sym]
+        const lastRev = saved ? saved.trains.reduce((s, t) => {
+          let base = 0
+          for (const si of (t.route || [])) {
+            const st = saved.stops[si]
+            if (st) base += st.value * (st.mult || 1) + (st.bonus || 0)
+          }
+          return s + base * (t.multiplier || 1) + (t.bonus || 0)
+        }, 0) + (saved.routeBonus || 0) : 0
+        return (
+          <div className="flex gap-1 mt-2">
+            <button onClick={() => { useUIStore.getState().setActiveCorp(corp.sym); useUIStore.getState().setActiveTab('routes') }}
+              className="flex-1 text-sm bg-broker-surface-hover text-broker-text-muted hover:text-broker-text rounded px-3 py-2">
+              Route Calculator →
+            </button>
+            {lastRev > 0 && (
+              <button onClick={() => setRevenue(String(lastRev))}
+                className="text-sm bg-green-900 hover:bg-green-800 text-green-200 px-3 py-2 rounded font-medium">
+                Use {fmt(lastRev)}
+              </button>
+            )}
+          </div>
+        )
+      })()}
 
       {/* Place token */}
-      {corp.tokensPlaced < corp.tokens.length && (
-        <button onClick={() => dispatch({ type: 'PLACE_TOKEN', corpSym: corp.sym, cost: corp.tokens[corp.tokensPlaced] || 0 })}
-          disabled={corp.cash < (corp.tokens[corp.tokensPlaced] || 0)}
-          className="w-full text-sm bg-broker-surface-hover text-broker-text-muted hover:text-broker-text disabled:opacity-30 rounded px-3 py-2 mt-1">
-          Place Token ({fmt(corp.tokens[corp.tokensPlaced] || 0)}) — {corp.tokensPlaced}/{corp.tokens.length}
-        </button>
-      )}
+      {corp.tokensPlaced < corp.tokens.length && (() => {
+        const defaultCost = corp.tokens[corp.tokensPlaced] || 0
+        const cost = tokenCost !== '' ? (parseInt(tokenCost, 10) || 0) : defaultCost
+        return (
+          <div className="flex gap-1 mt-1">
+            <input type="number" value={tokenCost} onChange={e => setTokenCost(e.target.value)}
+              placeholder={String(defaultCost)}
+              className="w-16 bg-broker-bg border border-broker-border rounded px-2 py-2 text-sm text-broker-text text-center" />
+            <button onClick={() => { dispatch({ type: 'PLACE_TOKEN', corpSym: corp.sym, price: cost }); setTokenCost('') }}
+              disabled={corp.cash < cost}
+              className="flex-1 text-sm bg-broker-surface-hover text-broker-text-muted hover:text-broker-text disabled:opacity-30 rounded px-3 py-2">
+              Place Token ({fmt(cost)}) — {corp.tokensPlaced}/{corp.tokens.length}
+            </button>
+          </div>
+        )
+      })()}
 
       {/* Issue/Redeem (incremental cap) */}
       {game.title.capitalization === 'incremental' && (

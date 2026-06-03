@@ -18,7 +18,7 @@ import { shortSell, closeShort } from './shorts.js'
 let actionSeq = 0
 
 // Actions that mutate state but shouldn't be logged (turn navigation)
-const SILENT_ACTIONS = new Set(['NEXT_TURN', 'PREV_TURN', 'SR_PASS', 'SR_ACTED', 'SET_TURN_QUEUE', 'SET_OR_STEP', 'OR_NEXT_CORP'])
+const SILENT_ACTIONS = new Set(['NEXT_TURN', 'PREV_TURN', 'SET_TURN_QUEUE', 'SET_OR_STEP', 'OR_NEXT_CORP'])
 
 export function applyAction(state, action) {
   const silent = SILENT_ACTIONS.has(action.type)
@@ -727,8 +727,8 @@ function handlePayDividend(state, { corpSym, totalRevenue }) {
     }
   }
 
-  // IPO shares: money goes to corp (full cap) or bank (incremental)
-  if (corp.ipoShares > 0 && state.title.capitalization === 'full') {
+  // IPO shares: dividends on unsold shares go to corp treasury
+  if (corp.ipoShares > 0) {
     const ipoPayout = perShare * (corp.ipoShares / regShare)
     corp.cash += ipoPayout
     state.bank.cash -= ipoPayout

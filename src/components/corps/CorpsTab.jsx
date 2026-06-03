@@ -349,20 +349,30 @@ function CorpDetail({ game, corp, dispatch, fmt, onNext, plusPlus }) {
           return s + base * (t.multiplier || 1) + (t.bonus || 0)
         }, 0) + (saved.routeBonus || 0) : 0
         return (
-          <button
-            onClick={() => {
-              useUIStore.getState().setActiveCorp(corp.sym)
-              useUIStore.getState().setActiveTab('routes')
-            }}
-            className="w-full bg-broker-surface hover:bg-broker-surface-hover text-broker-text hover:text-white rounded-lg px-3 py-2 text-sm transition-colors flex items-center justify-between"
-          >
-            <span>Route Calculator</span>
-            <span className="text-xs text-broker-text-muted">
-              {corp.trains.map(t => t.name).join(', ')}
-              {lastRev > 0 && <span className="text-white ml-2">last: {fmt(lastRev)}</span>}
-              {' →'}
-            </span>
-          </button>
+          <div className="flex gap-1">
+            <button
+              onClick={() => {
+                useUIStore.getState().setActiveCorp(corp.sym)
+                useUIStore.getState().setActiveTab('routes')
+              }}
+              className="flex-1 bg-broker-surface hover:bg-broker-surface-hover text-broker-text hover:text-white rounded-lg px-3 py-2 text-sm transition-colors flex items-center justify-between"
+            >
+              <span>Route Calculator</span>
+              <span className="text-xs text-broker-text-muted">
+                {corp.trains.map(t => t.name).join(', ')}
+                {lastRev > 0 && <span className="text-white ml-2">last: {fmt(lastRev)}</span>}
+                {' →'}
+              </span>
+            </button>
+            {lastRev > 0 && (
+              <button
+                onClick={() => setRevenue(String(lastRev))}
+                className="bg-green-900 hover:bg-green-800 text-green-200 px-3 py-2 rounded-lg text-sm font-medium"
+              >
+                Use {fmt(lastRev)}
+              </button>
+            )}
+          </div>
         )
       })()}
 

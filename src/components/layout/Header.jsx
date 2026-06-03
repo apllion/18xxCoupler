@@ -12,8 +12,10 @@ export default function Header() {
   const game = useGameStore((s) => s.game)
   const dispatch = useDispatch()
   const undo = useGameStore((s) => s.undo)
+  const redo = useGameStore((s) => s.redo)
   const canUndo = useGameStore((s) => s.canUndo)
-  const toggleLog = useUIStore((s) => s.toggleLog)
+  const canRedo = useGameStore((s) => s.canRedo)
+
 
   // What-if mode
   const whatIfSnapshot = useGameStore((s) => s.whatIfSnapshot)
@@ -168,15 +170,19 @@ export default function Header() {
 
             {/* Guided / Open toggle — dormant */}
 
-            <button onClick={toggleLog} className="text-broker-text-muted hover:text-broker-gold text-xs">
-              Log
-            </button>
-            <button
+<button
               onClick={handleUndo}
               disabled={!canUndo()}
               className="bg-broker-surface-hover hover:bg-broker-surface-hover disabled:opacity-30 disabled:cursor-not-allowed text-white px-2 py-1 rounded text-xs font-medium"
             >
               Undo
+            </button>
+            <button
+              onClick={() => redo()}
+              disabled={!canRedo()}
+              className="bg-broker-surface-hover hover:bg-broker-surface-hover disabled:opacity-30 disabled:cursor-not-allowed text-white px-2 py-1 rounded text-xs font-medium"
+            >
+              Redo
             </button>
           </div>
         </div>
