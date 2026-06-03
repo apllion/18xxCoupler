@@ -743,6 +743,146 @@ function CorpOps({ game, corp, dispatch, fmt, isSub }) {
           </div>
         </div>
       )}
+
+      {/* Buy train from other corps */}
+      {showTrains && (() => {
+        const otherCorpTrains = game.corporations.filter(c => c.sym !== corp.sym && c.floated && c.trains.length > 0)
+        if (otherCorpTrains.length === 0) return null
+        return (
+          <div className="mt-1">
+            <div className="text-xs text-broker-text-muted mb-1">Buy from corp:</div>
+            <div className="flex gap-1 flex-wrap">
+              {otherCorpTrains.map(c => c.trains.map(t => (
+                <button key={`${c.sym}-${t.id}`}
+                  onClick={() => dispatch({ type: 'BUY_TRAIN', corpSym: corp.sym, trainName: t.name, price: t.price || 1, fromCorpSym: c.sym })}
+                  className="text-sm bg-broker-surface-hover text-broker-text-muted hover:text-broker-text rounded px-3 py-2">
+                  <span style={{ color: c.color }} className="font-bold">{c.sym}</span> {t.name}
+                </button>
+              )))}
+            </div>
+          </div>
+        )
+      })()}
+
+      {/* Discard train */}
+      {corp.trains.length > 0 && (
+        <div className="mt-1">
+          <div className="text-xs text-broker-text-muted mb-1">Discard:</div>
+          <div className="flex gap-1 flex-wrap">
+            {corp.trains.map(t => (
+              <button key={t.id} onClick={() => dispatch({ type: 'DISCARD_TRAIN', corpSym: corp.sym, trainName: t.name })}
+                className="text-sm bg-red-900/50 text-red-300 hover:bg-red-800 rounded px-3 py-2">
+                {t.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Executive cars (18Dai-Han) */}
+      {game.title.executiveCars && corp.trains.some(t => !t.attachment) && (
+        <div className="mt-1">
+          <div className="text-xs text-broker-text-muted mb-1">Executive Car:</div>
+          <div className="flex gap-1 flex-wrap">
+            {corp.trains.filter(t => !t.attachment).map(t => (
+              <button key={t.id}
+                onClick={() => dispatch({ type: 'BUY_EXECUTIVE_CAR', corpSym: corp.sym, trainId: t.id, price: game.title.executiveCars.price ?? 0 })}
+                className="text-sm bg-broker-surface-hover text-broker-text-muted hover:text-broker-text rounded px-3 py-2">
+                {t.name} +EC
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Train export (1817) */}
+      {game.title.trainExport && game.depot?.upcoming?.[0] && (
+        <button onClick={() => dispatch({ type: 'EXPORT_TRAIN' })}
+          className="w-full text-sm bg-amber-900/50 text-amber-300 hover:bg-amber-800 rounded px-3 py-2 mt-1">
+          Export {game.depot.upcoming[0].name}-train
+        </button>
+      )}
+
+      {/* Merger (all types) */}
+      {game.title.merger && corp.floated && (() => {
+        const mergerType = game.title.merger.type
+        const targets = game.corporations.filter(c => c.sym !== corp.sym && c.floated)
+        if (targets.length === 0) return null
+        return (
+          <div className="mt-1">
+            <div className="text-xs text-broker-text-muted mb-1">Merge:</div>
+            <div className="flex gap-1 flex-wrap">
+              {targets.map(t => (
+                <button key={t.sym}
+                  onClick={() => dispatch({ type: 'MERGE_CORPS', topCorpSym: corp.sym, bottomCorpSym: t.sym })}
+                  className="text-sm bg-purple-900/50 text-purple-300 hover:bg-purple-800 rounded px-3 py-2">
+                  + <span style={{ color: t.color }} className="font-bold">{t.sym}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )
+      })()}
+
+      {/* Nationalize (1861, 1867, 1880) */}
+      {(() => {
+        const nationals = game.corporations.filter(c => c.type === 'national')
+        if (nationals.length === 0 || corp.type === 'national') return null
+        return (
+          <div className="mt-1">
+            <div className="text-xs text-broker-text-muted mb-1">Nationalize:</div>
+            <div className="flex gap-1 flex-wrap">
+              {nationals.map(n => (
+                <button key={n.sym}
+                  onClick={() => dispatch({ type: 'NATIONALIZE_CORP', corpSym: corp.sym, nationalSym: n.sym })}
+                  className="text-sm bg-purple-900/50 text-purple-300 hover:bg-purple-800 rounded px-3 py-2">
+                  → {n.sym}
+                </button>
+              ))}
+            </div>
+          </div>
+        )
+      })()}
+
+      {/* Liquidate (1817) */}
+      {game.title.loans && corp.floated && (corp.loans || 0) > 0 && corp.liquidated !== true && (
+        <button onClick={() => dispatch({ type: 'LIQUIDATE_CORP', corpSym: corp.sym })}
+          className="w-full text-sm bg-red-900/50 text-red-300 hover:bg-red-800 rounded px-3 py-2 mt-1">
+          Liquidate {corp.sym}
+        </button>
+      )}
+
+      {/* Corp sizing/conversion (1817) */}
+      {game.title.corpSizing?.enabled && corp.floated && (() => {
+        const phase = currentPhase(game.phaseManager)
+        const allowedSizes = phase.corpSizes || []
+        const currentSize = corp.corpSize || '2share'
+        const canTo5 = currentSize === '2share' && allowedSizes.includes('5share')
+        const canTo10 = currentSize === '5share' && allowedSizes.includes('10share')
+        if (!canTo5 && !canTo10) return null
+        return (
+          <div className="flex gap-2 mt-1">
+            {canTo5 && (
+              <button onClick={() => dispatch({ type: 'CONVERT_CORP', corpSym: corp.sym, targetSize: '5share' })}
+                className="flex-1 text-sm bg-purple-900/50 text-purple-300 hover:bg-purple-800 rounded px-3 py-2">
+                → 5-share
+              </button>
+            )}
+            {canTo10 && (
+              <button onClick={() => dispatch({ type: 'CONVERT_CORP', corpSym: corp.sym, targetSize: '10share' })}
+                className="flex-1 text-sm bg-purple-900/50 text-purple-300 hover:bg-purple-800 rounded px-3 py-2">
+                → 10-share
+              </button>
+            )}
+          </div>
+        )
+      })()}
+
+      {/* Sold-out adjust */}
+      <button onClick={() => dispatch({ type: 'SOLD_OUT_ADJUST' })}
+        className="w-full text-sm bg-broker-surface-hover text-broker-text-muted hover:text-broker-text rounded px-3 py-2 mt-1">
+        Sold-out ↑
+      </button>
     </div>
   )
 }
