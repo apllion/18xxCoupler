@@ -31,10 +31,15 @@ export default function BottomNav() {
     )},
   ]
 
+  const hasLoans = !!game?.title?.loans
+  const hasCards = game?.title?.strategyCards?.length > 0
+
   const moreItems = [
     { id: 'market', label: 'Stock Market' },
     ...(hasPrivates ? [{ id: 'privates', label: 'Private Companies' }] : []),
     ...(hasBeer ? [{ id: 'beer', label: 'Beer Market' }] : []),
+    ...(hasLoans ? [{ id: 'loanchart', label: 'Loan Chart' }] : []),
+    ...(hasCards ? [{ id: 'cards', label: 'Strategy Cards' }] : []),
     { id: 'routes', label: 'Route Calculator' },
     { id: 'endgame', label: 'Endgame Calculator' },
     { id: 'log', label: 'Action Log' },

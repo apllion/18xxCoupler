@@ -14,6 +14,8 @@ import OverviewTab from '../overview/OverviewTab.jsx'
 import ActionToast from './ActionToast.jsx'
 import EndgameCalcTab from '../overview/EndgameCalcTab.jsx'
 import RouteCalcTab from '../overview/RouteCalcTab.jsx'
+import LoanChartTab from '../overview/LoanChartTab.jsx'
+import StrategyCardsTab from '../overview/StrategyCardsTab.jsx'
 // PlusPlus: analysis tab (stripped from Broker build)
 const PP = !!import.meta.env.VITE_PLUSPLUS || import.meta.env.DEV
 const AnalysisTab = PP ? (await import('../overview/AnalysisTab.jsx')).default : null
@@ -28,6 +30,8 @@ const TAB_COMPONENTS = {
   players: PlayersTab,
   privates: PrivatesTab,
   beer: BeerMarketTab,
+  loanchart: LoanChartTab,
+  cards: StrategyCardsTab,
   log: (await import('../overview/ActionLog.jsx')).default,
 }
 
@@ -73,7 +77,6 @@ export default function GameShell() {
         <TabComponent />
       </main>
       <ActionToast />
-      <ActionLog />
       <BottomNav />
     </div>
   )
