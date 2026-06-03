@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { allTitles } from '../../titles/index.js'
 import { useGameStore } from '../../store/gameStore.js'
 import { useSyncContext } from '../../hooks/SyncContext.jsx'
-import { loadAllGames, deleteGame, importGame } from '../../utils/persistence.js'
+import { loadAllGames, deleteGame, importGame, exportGame } from '../../utils/persistence.js'
 import { useThemeStore, themes } from '../../store/themeStore.js'
 
 export default function GameSelector() {
@@ -124,7 +124,18 @@ export default function GameSelector() {
                     </div>
                     <div className="text-xs text-broker-text-muted">{players} · {actions} actions</div>
                   </button>
-                  <button onClick={() => handleDelete(key)} className="text-broker-gold-dim hover:text-red-400 ml-3 px-2 py-1 text-sm">×</button>
+                  <button onClick={(e) => {
+                    e.stopPropagation()
+                    const json = exportGame(game)
+                    const blob = new Blob([json], { type: 'application/json' })
+                    const url = URL.createObjectURL(blob)
+                    const a = document.createElement('a')
+                    a.href = url
+                    a.download = `${game.title?.titleId || 'game'}_${new Date(game.createdAt).toISOString().slice(0,10)}.json`
+                    a.click()
+                    URL.revokeObjectURL(url)
+                  }} className="text-broker-text-muted hover:text-broker-gold ml-2 px-2 py-1 text-xs">↓</button>
+                  <button onClick={() => handleDelete(key)} className="text-broker-text-muted hover:text-red-400 px-2 py-1 text-sm">×</button>
                 </div>
               )
             })}
