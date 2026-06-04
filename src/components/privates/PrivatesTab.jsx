@@ -29,20 +29,20 @@ export default function PrivatesTab() {
         </button>
       )}
 
-      {/* Open companies */}
       <div className="space-y-2">
         {openCompanies.map((c) => (
           <PrivateCard key={c.sym} company={c} game={game} dispatch={dispatch} fmt={fmt} />
         ))}
       </div>
 
-      {/* Closed companies */}
       {closedCompanies.length > 0 && (
         <div>
           <div className="text-xs text-broker-text-muted font-medium uppercase mb-2">Closed</div>
           {closedCompanies.map((c) => (
-            <div key={c.sym} className="text-sm text-broker-gold-dim py-1">
-              {c.sym} — {c.name}
+            <div key={c.sym} className="text-sm text-broker-gold-dim py-1 flex items-center justify-between">
+              <span>{c.sym} — {c.name}</span>
+              <button onClick={() => dispatch({ type: 'ASSIGN_PRIVATE', companySym: c.sym, toType: 'player', toId: game.players[0]?.id })}
+                className="text-[10px] text-broker-text-muted hover:text-white px-1">reopen</button>
             </div>
           ))}
         </div>
@@ -52,40 +52,18 @@ export default function PrivatesTab() {
 }
 
 function PrivateCard({ company, game, dispatch, fmt }) {
-  const [buyMode, setBuyMode] = useState(false)
-  const [buyPrice, setBuyPrice] = useState(String(company.value))
   const [sellMode, setSellMode] = useState(false)
   const [sellPrice, setSellPrice] = useState(String(company.value))
-  const [sellCorpSym, setSellCorpSym] = useState('')
 
   const ownerName = company.ownerId
     ? (company.ownerType === 'player'
       ? game.players.find((p) => p.id === company.ownerId)?.name
       : company.ownerId)
-    : 'Unowned'
-
-  function handleBuy(playerId) {
-    const price = parseInt(buyPrice, 10)
-    if (!price || price <= 0) return
-    dispatch({ type: 'BUY_PRIVATE', playerId, companySym: company.sym, price })
-    setBuyMode(false)
-  }
-
-  function handleSell() {
-    const price = parseInt(sellPrice, 10)
-    if (!price || !sellCorpSym || !company.ownerId) return
-    dispatch({
-      type: 'SELL_PRIVATE',
-      companySym: company.sym,
-      fromPlayerId: company.ownerId,
-      toCorpSym: sellCorpSym,
-      price,
-    })
-    setSellMode(false)
-  }
+    : null
 
   return (
     <div className="bg-broker-surface rounded-lg p-3">
+      {/* Header */}
       <div className="flex items-start justify-between">
         <div>
           <div className="font-medium">{company.sym} — {company.name}</div>
@@ -100,77 +78,78 @@ function PrivateCard({ company, game, dispatch, fmt }) {
               Grants: {company.sharesGranted.map((s) => `${s.percent}% ${s.corpSym}`).join(', ')}
             </div>
           )}
-          <div className="text-xs text-broker-text-muted mt-1">{company.desc}</div>
+          {company.desc && <div className="text-xs text-broker-text-muted mt-1">{company.desc}</div>}
         </div>
-        <div className="text-sm text-broker-text flex-shrink-0 ml-3">{ownerName}</div>
+        <div className="text-sm flex-shrink-0 ml-3">
+          {ownerName
+            ? <span className="text-broker-text">{ownerName}</span>
+            : <span className="text-broker-text-muted">Unowned</span>
+          }
+        </div>
       </div>
 
-      <div className="flex gap-2 mt-2">
-        {!company.ownerId && (
-          <button
-            onClick={() => setBuyMode(!buyMode)}
-            className="text-xs bg-broker-surface-hover hover:bg-broker-surface-hover px-2 py-1 rounded"
-          >
-            Buy
+      {/* Actions */}
+      <div className="flex gap-1 mt-2 flex-wrap">
+        {/* Unowned: assign to player */}
+        {!company.ownerId && game.players.map(p => (
+          <button key={p.id}
+            onClick={() => dispatch({ type: 'ASSIGN_PRIVATE', companySym: company.sym, toId: p.id, toType: 'player' })}
+            className="text-[10px] px-2 py-1 rounded bg-broker-surface-hover text-broker-text-muted hover:text-white">
+            → {p.name}
           </button>
-        )}
+        ))}
+
+        {/* Unowned: assign to corp */}
+        {!company.ownerId && game.corporations.filter(c => c.floated).map(c => (
+          <button key={c.sym}
+            onClick={() => dispatch({ type: 'ASSIGN_PRIVATE', companySym: company.sym, toId: c.sym, toType: 'corporation' })}
+            className="text-[10px] px-2 py-1 rounded font-bold"
+            style={{ backgroundColor: c.color, color: c.textColor || '#fff' }}>
+            → {c.sym}
+          </button>
+        ))}
+
+        {/* Owned by player: sell to corp */}
         {company.ownerId && company.ownerType === 'player' && company.canSellToCorp !== false && (
-          <button
-            onClick={() => setSellMode(!sellMode)}
-            className="text-xs bg-broker-surface-hover hover:bg-broker-surface-hover px-2 py-1 rounded"
-          >
+          <button onClick={() => setSellMode(!sellMode)}
+            className="text-[10px] px-2 py-1 rounded bg-broker-surface-hover text-broker-text-muted hover:text-white">
             Sell to Corp
           </button>
         )}
+
+        {/* Owned: return to bank */}
+        {company.ownerId && (
+          <button onClick={() => dispatch({ type: 'RETURN_PRIVATE', companySym: company.sym })}
+            className="text-[10px] px-2 py-1 rounded bg-broker-surface-hover text-broker-text-muted hover:text-white">
+            Return
+          </button>
+        )}
+
+        {/* Close */}
+        {company.ownerId && !company.neverCloses && (
+          <button onClick={() => dispatch({ type: 'CLOSE_PRIVATE', companySym: company.sym })}
+            className="text-[10px] px-2 py-1 rounded bg-broker-surface-hover text-red-400/70 hover:text-red-400">
+            Close
+          </button>
+        )}
       </div>
 
-      {buyMode && (
-        <div className="mt-2 flex gap-2 items-center">
-          <input
-            type="number"
-            value={buyPrice}
-            onChange={(e) => setBuyPrice(e.target.value)}
-            className="w-20 bg-broker-bg border border-broker-border rounded px-2 py-1 text-sm text-white"
-          />
-          {game.players.map((p) => (
-            <button
-              key={p.id}
-              onClick={() => handleBuy(p.id)}
-              className="text-xs bg-blue-800 hover:bg-blue-700 px-2 py-1 rounded text-white"
-            >
-              {p.name}
-            </button>
-          ))}
-        </div>
-      )}
-
+      {/* Sell to corp flow */}
       {sellMode && (
         <div className="mt-2 flex gap-2 items-center flex-wrap">
-          <input
-            type="number"
-            value={sellPrice}
-            onChange={(e) => setSellPrice(e.target.value)}
-            className="w-20 bg-broker-bg border border-broker-border rounded px-2 py-1 text-sm text-white"
-          />
+          <input type="number" value={sellPrice} onChange={(e) => setSellPrice(e.target.value)}
+            className="w-20 bg-broker-bg border border-broker-border rounded px-2 py-1 text-sm text-white" />
           <span className="text-xs text-broker-text-muted">to</span>
           {game.corporations.filter((c) => c.floated).map((c) => (
-            <button
-              key={c.sym}
+            <button key={c.sym}
               onClick={() => {
                 const price = parseInt(sellPrice, 10)
                 if (!price || !company.ownerId) return
-                dispatch({
-                  type: 'SELL_PRIVATE',
-                  companySym: company.sym,
-                  fromPlayerId: company.ownerId,
-                  toCorpSym: c.sym,
-                  price,
-                })
+                dispatch({ type: 'SELL_PRIVATE', companySym: company.sym, fromPlayerId: company.ownerId, toCorpSym: c.sym, price })
                 setSellMode(false)
               }}
               className="text-xs px-2 py-1 rounded font-medium"
-              style={{ backgroundColor: c.color, color: c.textColor || '#fff' }}
-            >
+              style={{ backgroundColor: c.color, color: c.textColor || '#fff' }}>
               {c.sym}
             </button>
           ))}

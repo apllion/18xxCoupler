@@ -64,6 +64,47 @@ export function applyAction(state, action) {
     case 'SELL_PRIVATE':
       handleSellPrivate(state, action)
       break
+    case 'RETURN_PRIVATE': {
+      const company = state.companies.find((c) => c.sym === action.companySym)
+      if (!company || !company.ownerId) break
+      // Remove from current owner
+      if (company.ownerType === 'player') {
+        const owner = state.players.find((p) => p.id === company.ownerId)
+        if (owner) owner.privates = owner.privates.filter((s) => s !== action.companySym)
+      }
+      company.ownerId = null
+      company.ownerType = null
+      break
+    }
+    case 'CLOSE_PRIVATE': {
+      const company = state.companies.find((c) => c.sym === action.companySym)
+      if (!company) break
+      if (company.ownerId && company.ownerType === 'player') {
+        const owner = state.players.find((p) => p.id === company.ownerId)
+        if (owner) owner.privates = owner.privates.filter((s) => s !== action.companySym)
+      }
+      company.ownerId = null
+      company.ownerType = null
+      company.closed = true
+      break
+    }
+    case 'ASSIGN_PRIVATE': {
+      const company = state.companies.find((c) => c.sym === action.companySym)
+      if (!company) break
+      // Remove from current owner if any
+      if (company.ownerId && company.ownerType === 'player') {
+        const prev = state.players.find((p) => p.id === company.ownerId)
+        if (prev) prev.privates = prev.privates.filter((s) => s !== action.companySym)
+      }
+      // Assign to new owner
+      if (action.toType === 'player') {
+        const toPlayer = state.players.find((p) => p.id === action.toId)
+        if (toPlayer) { toPlayer.privates.push(action.companySym); assignPrivate(company, action.toId, 'player') }
+      } else if (action.toType === 'corporation') {
+        assignPrivate(company, action.toId, 'corporation')
+      }
+      break
+    }
     case 'COLLECT_REVENUE':
       handleCollectRevenue(state, action)
       break
@@ -1103,6 +1144,12 @@ function describeAction(state, action) {
       return `${playerName(action.playerId)} buys ${action.companySym} for ${fmt(action.price)}`
     case 'SELL_PRIVATE':
       return `${playerName(action.fromPlayerId)} sells ${action.companySym} to ${action.toCorpSym} for ${fmt(action.price)}`
+    case 'RETURN_PRIVATE':
+      return `${action.companySym} returned to bank`
+    case 'CLOSE_PRIVATE':
+      return `${action.companySym} closed`
+    case 'ASSIGN_PRIVATE':
+      return `${action.companySym} assigned to ${action.toType === 'player' ? playerName(action.toId) : action.toId}`
     case 'COLLECT_REVENUE':
       return `${action.companySym} collects revenue`
     case 'COLLECT_ALL_REVENUE':
