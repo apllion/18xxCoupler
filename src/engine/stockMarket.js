@@ -228,7 +228,7 @@ export function moveDividend(market, corpSym, perShare, dividendMovement, totalR
 }
 
 // --- Sell movement (title-aware) ---
-// sellMovement config: 'down_share' | 'down_per_10' | 'left_block_pres' | 'down_block' | 'none'
+// sellMovement config: 'down_share' | 'down_per_10' | 'down_per_sale' | 'left_block_pres' | 'down_block' | 'none'
 export function moveSell(market, corpSym, percentSold, sellMovement = 'down_share') {
   const pos = market.corpPositions[corpSym]
   if (!pos) return
@@ -246,6 +246,7 @@ export function moveSell(market, corpSym, percentSold, sellMovement = 'down_shar
       }
       break
 
+    case 'down_per_sale':
     case 'down_block':
     case 'down_block_pres':
       // Move down once regardless of how many sold
