@@ -4,7 +4,6 @@
 
 import { useMemo, useState } from 'react'
 import { useGameStore } from '../../store/gameStore.js'
-import { useUIStore } from '../../store/uiStore.js'
 import { formatCurrency } from '../../utils/currency.js'
 import { corpPrice, isSoldOut } from '../../engine/stockMarket.js'
 import { playerSharePercent } from '../../engine/player.js'
@@ -21,8 +20,6 @@ const analysisData = analysisDataRaw || {}
 
 export default function AnalysisTab() {
   const game = useGameStore((s) => s.game)
-  const skin = useUIStore((s) => s.skin)
-  const m = skin === 'moderator'
 
   if (!game) return null
 
@@ -39,18 +36,15 @@ export default function AnalysisTab() {
     <button key={id} onClick={() => setView(id)}
       className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
         view === id
-          ? (m ? 'bg-green-900 text-green-300' : 'bg-blue-600 text-white')
-          : (m ? 'text-blue-400 hover:text-blue-300' : 'text-broker-text-muted hover:text-broker-text')
+          ? ('bg-blue-600 text-white')
+          : ('text-broker-text-muted hover:text-broker-text')
       }`}>{label}</button>
   )
 
   return (
-    <div className={m
-      ? 'font-mono text-xs p-2 space-y-3 overflow-y-auto bg-blue-950 text-blue-300 h-full'
-      : 'text-sm p-3 space-y-4 overflow-y-auto bg-broker-bg h-full'
-    }>
+    <div className='text-sm p-3 space-y-4 overflow-y-auto bg-broker-bg h-full'>
       <div className="flex items-center gap-3 flex-wrap">
-        <h2 className={m ? 'text-green-400 font-bold' : 'text-white font-bold text-lg'}>
+        <h2 className="text-white font-bold text-lg">
           ++ Analysis — {game.title.title}
         </h2>
         <div className="flex gap-1 flex-wrap">
@@ -66,33 +60,33 @@ export default function AnalysisTab() {
       {/* FINANCIAL — computed from game state + title config              */}
       {/* ================================================================ */}
       {view === 'financial' && <>
-        <PositionMeter game={game} skin={skin} />
-        <WinnerProfile game={game} fmt={fmt} m={m} titleData={titleData} />
+        <PositionMeter game={game} />
+        <WinnerProfile game={game} fmt={fmt} titleData={titleData} />
 
-        <Section m={m} title="Timing & Tempo" />
-        <BankBreak game={game} fmt={fmt} m={m} />
-        <TrainRush game={game} fmt={fmt} m={m} phase={phase} />
-        <PhasePressure game={game} fmt={fmt} m={m} phase={phase} />
-        <GameClock game={game} fmt={fmt} m={m} />
-        <OREfficiency game={game} fmt={fmt} m={m} />
-        <FloatSpeed game={game} fmt={fmt} m={m} titleData={titleData} />
+        <Section title="Timing & Tempo" />
+        <BankBreak game={game} fmt={fmt} />
+        <TrainRush game={game} fmt={fmt} phase={phase} />
+        <PhasePressure game={game} fmt={fmt} phase={phase} />
+        <GameClock game={game} fmt={fmt} />
+        <OREfficiency game={game} fmt={fmt} />
+        <FloatSpeed game={game} fmt={fmt} titleData={titleData} />
 
-        <Section m={m} title="Share Market" />
-        <SoldOutTracker game={game} fmt={fmt} m={m} />
-        <DumpAlert game={game} fmt={fmt} m={m} />
-        <ShortSqueeze game={game} fmt={fmt} m={m} />
+        <Section title="Share Market" />
+        <SoldOutTracker game={game} fmt={fmt} />
+        <DumpAlert game={game} fmt={fmt} />
+        <ShortSqueeze game={game} fmt={fmt} />
 
-        <Section m={m} title="Money Flow" />
-        <IncomeInequality game={game} fmt={fmt} m={m} />
-        <CapitalVelocity game={game} fmt={fmt} m={m} />
-        <WithholdBreakeven game={game} fmt={fmt} m={m} />
+        <Section title="Money Flow" />
+        <IncomeInequality game={game} fmt={fmt} />
+        <CapitalVelocity game={game} fmt={fmt} />
+        <WithholdBreakeven game={game} fmt={fmt} />
 
-        <Section m={m} title="Strategic" />
-        <EmergencyExposure game={game} fmt={fmt} m={m} />
-        <DividendProjection game={game} fmt={fmt} m={m} />
-        <CorpQuality game={game} fmt={fmt} m={m} />
-        <TrainTimingMatrix game={game} fmt={fmt} m={m} />
-        <EndgameProjection game={game} fmt={fmt} m={m} />
+        <Section title="Strategic" />
+        <EmergencyExposure game={game} fmt={fmt} />
+        <DividendProjection game={game} fmt={fmt} />
+        <CorpQuality game={game} fmt={fmt} />
+        <TrainTimingMatrix game={game} fmt={fmt} />
+        <EndgameProjection game={game} fmt={fmt} />
       </>}
 
       {/* ================================================================ */}
@@ -100,14 +94,14 @@ export default function AnalysisTab() {
       {/* ================================================================ */}
       {view === 'statistical' && <>
         {hasStats ? <>
-          <Section m={m} title="Historical Statistics" />
-          <ParGuide data={titleData} fmt={fmt} m={m} title={game.title.title} />
-          {titleData.privates && <PrivateValuation data={titleData} game={game} fmt={fmt} m={m} />}
-          {titleData.corp_win_rate && <CorpWinCorrelation data={titleData} game={game} fmt={fmt} m={m} />}
-          {titleData.player_count && <PlayerCountImpact data={titleData} game={game} fmt={fmt} m={m} />}
+          <Section title="Historical Statistics" />
+          <ParGuide data={titleData} fmt={fmt} title={game.title.title} />
+          {titleData.privates && <PrivateValuation data={titleData} game={game} fmt={fmt} />}
+          {titleData.corp_win_rate && <CorpWinCorrelation data={titleData} game={game} fmt={fmt} />}
+          {titleData.player_count && <PlayerCountImpact data={titleData} game={game} fmt={fmt} />}
         </> : (
-          <Panel m={m} title="No Statistical Data">
-            <span className={m ? 'text-blue-400' : 'text-broker-text-muted'}>
+          <Panel title="No Statistical Data">
+            <span className="text-broker-text-muted">
               No 18xx.games statistics available for {game.title.title}.
               Data covers: {Object.keys(analysisData).join(', ') || 'none'}.
             </span>
@@ -118,14 +112,14 @@ export default function AnalysisTab() {
       {/* ================================================================ */}
       {/* REVIEW — post-game learning, decision grading                   */}
       {/* ================================================================ */}
-      {view === 'review' && <Review game={game} fmt={fmt} m={m} titleData={titleData} />}
+      {view === 'review' && <Review game={game} fmt={fmt} titleData={titleData} />}
 
       {/* ================================================================ */}
       {/* MAP — computed from game map state (future)                      */}
       {/* ================================================================ */}
       {view === 'map' && (
-        <Panel m={m} title="Map Analysis">
-          <span className={m ? 'text-blue-400' : 'text-broker-text-muted'}>
+        <Panel title="Map Analysis">
+          <span className="text-broker-text-muted">
             Map analysis requires route and token data.
             {hasMap ? ' Computing...' : ' Not available for this game yet.'}
           </span>
@@ -136,8 +130,8 @@ export default function AnalysisTab() {
       {/* MAP STATS — historical map/route data from 18xx.games (future)  */}
       {/* ================================================================ */}
       {view === 'mapstats' && (
-        <Panel m={m} title="Map Statistics">
-          <span className={m ? 'text-blue-400' : 'text-broker-text-muted'}>
+        <Panel title="Map Statistics">
+          <span className="text-broker-text-muted">
             Historical map statistics (optimal routes, token placement) not yet available.
           </span>
         </Panel>
@@ -149,23 +143,20 @@ export default function AnalysisTab() {
 // =========================================================================
 // SECTION HEADER
 // =========================================================================
-function Section({ m, title }) {
+function Section({ title }) {
   return (
-    <div className={m
-      ? 'text-green-600 text-[10px] uppercase tracking-widest border-b border-blue-800 pb-0.5 mt-2'
-      : 'text-broker-text-muted text-[10px] uppercase tracking-widest border-b border-broker-border pb-1 mt-3'
-    }>{title}</div>
+    <div className='text-broker-text-muted text-[10px] uppercase tracking-widest border-b border-broker-border pb-1 mt-3'>{title}</div>
   )
 }
 
 // =========================================================================
 // WINNER PROFILE — synthesizes all metrics into per-player scorecard
 // =========================================================================
-function WinnerProfile({ game, fmt, m, titleData }) {
+function WinnerProfile({ game, fmt, titleData }) {
   if (game.players.length < 2) return null
   const worths = allNetWorths(game)
   const corps = game.corporations.filter(c => c.floated)
-  if (corps.length === 0) return <Panel m={m} title="Winner Profile"><span className={m ? 'text-blue-400' : 'text-broker-text-muted'}>No corps floated yet</span></Panel>
+  if (corps.length === 0) return <Panel title="Winner Profile"><span className="text-broker-text-muted">No corps floated yet</span></Panel>
 
   // Score each corp for quality (reused logic)
   const corpScores = {}
@@ -273,7 +264,7 @@ function WinnerProfile({ game, fmt, m, titleData }) {
   const divergence = leader && bestScorer && leader.playerId !== bestScorer.id
 
   return (
-    <Panel m={m} title="Winner Profile">
+    <Panel title="Winner Profile">
       <div className="space-y-2">
         {players.map((p, i) => {
           const barPct = maxComposite > 0 ? Math.round((p.composite / maxComposite) * 100) : 0
@@ -281,15 +272,15 @@ function WinnerProfile({ game, fmt, m, titleData }) {
           return (
             <div key={p.id}>
               <div className="flex items-center gap-2">
-                <span className={`w-4 ${isLeading ? 'text-green-400 font-bold' : m ? 'text-blue-400' : 'text-broker-text-muted'}`}>{i + 1}</span>
-                <span className={`w-16 truncate ${isLeading ? 'text-green-400 font-bold' : m ? 'text-yellow-300' : 'text-broker-text'}`}>{p.name}</span>
-                <div className={`flex-1 h-3 rounded ${m ? 'bg-blue-900' : 'bg-broker-surface-hover'}`}>
+                <span className={`w-4 ${isLeading ? 'text-green-400 font-bold' : 'text-broker-text-muted'}`}>{i + 1}</span>
+                <span className={`w-16 truncate ${isLeading ? 'text-green-400 font-bold' : 'text-broker-text'}`}>{p.name}</span>
+                <div className={`flex-1 h-3 rounded bg-broker-surface-hover`}>
                   <div className={`h-3 rounded ${isLeading ? 'bg-green-600' : 'bg-blue-600'}`} style={{ width: barPct + '%' }} />
                 </div>
-                <span className={m ? 'text-white w-8 text-right font-bold' : 'text-white w-8 text-right font-bold'}>{p.composite}</span>
-                <span className={m ? 'text-blue-400 w-14 text-right' : 'text-broker-text-muted w-14 text-right'}>{fmt(p.total)}</span>
+                <span className="text-white w-8 text-right font-bold">{p.composite}</span>
+                <span className="text-broker-text-muted w-14 text-right">{fmt(p.total)}</span>
               </div>
-              <div className={m ? 'ml-6 text-[10px] text-blue-400 flex flex-wrap gap-x-3' : 'ml-6 text-[10px] text-broker-text-muted flex flex-wrap gap-x-3'}>
+              <div className="ml-6 text-[10px] text-broker-text-muted flex flex-wrap gap-x-3">
                 <span>+{fmt(p.incomePerOR)}/OR</span>
                 <span>portfolio {p.portfolioScore}</span>
                 <span>{p.presidencies} pres</span>
@@ -307,7 +298,7 @@ function WinnerProfile({ game, fmt, m, titleData }) {
           {bestScorer.name} has the strongest play profile but {leader.name} leads in net worth
         </div>
       )}
-      <div className={m ? 'text-blue-400 mt-1 text-[10px]' : 'text-broker-text-muted text-xs mt-1'}>
+      <div className="text-broker-text-muted text-xs mt-1">
         Score: income (3) + portfolio (2) + cash mgmt (1) + presidency (2) + diversity (1) - risk
       </div>
     </Panel>
@@ -319,7 +310,7 @@ function WinnerProfile({ game, fmt, m, titleData }) {
 // =========================================================================
 
 // --- Bank Break Countdown ---
-function BankBreak({ game, fmt, m }) {
+function BankBreak({ game, fmt }) {
   const bankTotal = typeof game.title.bankCash === 'number'
     ? game.title.bankCash
     : (game.title.bankCash[game.playerCount] || 8000)
@@ -340,25 +331,25 @@ function BankBreak({ game, fmt, m }) {
   const orsRemaining = estORPayment > 0 ? Math.ceil(game.bank.cash / estORPayment) : '?'
 
   return (
-    <Panel m={m} title="Bank Break Countdown">
+    <Panel title="Bank Break Countdown">
       <div className="flex items-center gap-2">
-        <div className={`flex-1 h-3 rounded ${m ? 'bg-blue-900' : 'bg-broker-surface-hover'}`}>
+        <div className={`flex-1 h-3 rounded bg-broker-surface-hover`}>
           <div className={`h-3 rounded ${pct < 20 ? 'bg-red-500' : pct < 40 ? 'bg-yellow-500' : 'bg-green-500'}`}
             style={{ width: pct + '%' }} />
         </div>
-        <span className={m ? 'text-white' : 'text-white font-medium'}>{fmt(game.bank.cash)}</span>
-        <span className={m ? 'text-blue-400' : 'text-broker-text-muted'}>{pct}%</span>
+        <span className="text-white font-medium">{fmt(game.bank.cash)}</span>
+        <span className="text-broker-text-muted">{pct}%</span>
       </div>
-      <div className={m ? 'text-blue-400 mt-1' : 'text-broker-text-muted text-xs mt-1'}>
+      <div className="text-broker-text-muted text-xs mt-1">
         ~{orsRemaining} ORs remaining {avgPayoutPerOR > 0 ? `(avg ${fmt(avgPayoutPerOR)}/div x ${floatedCorps} corps)` : '(no dividend data yet)'}
-        {pct < 20 && <span className={m ? ' text-red-400' : ' text-red-400 font-medium'}> — Bank breaking soon!</span>}
+        {pct < 20 && <span className=" text-red-400 font-medium"> — Bank breaking soon!</span>}
       </div>
     </Panel>
   )
 }
 
 // --- Train Rush Clock ---
-function TrainRush({ game, fmt, m, phase }) {
+function TrainRush({ game, fmt, phase }) {
   const depot = game.depot
   const tiers = []
   const seen = new Set()
@@ -382,30 +373,30 @@ function TrainRush({ game, fmt, m, phase }) {
   }
 
   return (
-    <Panel m={m} title="Train Rush Clock">
+    <Panel title="Train Rush Clock">
       <div className="space-y-1">
         {tiers.map(t => {
           const urgency = t.count <= 1 ? 'high' : t.count <= 3 ? 'medium' : 'low'
           return (
             <div key={t.name} className="flex items-center gap-2">
-              <span className={m ? 'text-white font-bold w-8' : 'text-white font-medium w-8'}>{t.name}</span>
-              <div className={`flex-1 h-2 rounded ${m ? 'bg-blue-900' : 'bg-broker-surface-hover'}`}>
+              <span className="text-white font-medium w-8">{t.name}</span>
+              <div className={`flex-1 h-2 rounded bg-broker-surface-hover`}>
                 <div className={`h-2 rounded ${urgency === 'high' ? 'bg-red-500' : urgency === 'medium' ? 'bg-yellow-500' : 'bg-green-600'}`}
                   style={{ width: Math.min(100, t.count * 15) + '%' }} />
               </div>
-              <span className={m ? 'text-blue-300 w-6 text-right' : 'text-broker-text-muted w-6 text-right'}>{t.count}x</span>
-              <span className={m ? 'text-yellow-300 w-14' : 'text-broker-text w-14'}>{fmt(t.price)}</span>
-              {t.triggersPhase && <span className={m ? 'text-red-400' : 'text-red-400'}>phase!</span>}
+              <span className="text-broker-text-muted w-6 text-right">{t.count}x</span>
+              <span className="text-broker-text w-14">{fmt(t.price)}</span>
+              {t.triggersPhase && <span className="text-red-400">phase!</span>}
             </div>
           )
         })}
       </div>
       {vulnerable.length > 0 && (
         <div className="mt-2">
-          <span className={m ? 'text-red-400 text-xs' : 'text-red-400 text-xs font-medium'}>Vulnerable trains:</span>
+          <span className="text-red-400 text-xs font-medium">Vulnerable trains:</span>
           <div className="flex flex-wrap gap-1 mt-0.5">
             {vulnerable.map((v, i) => (
-              <span key={i} className={m ? 'text-xs' : 'text-xs'}>
+              <span key={i} className="text-xs">
                 <span style={{ color: v.color }} className="font-bold">{v.corp}</span>
                 {' '}{v.train} (r{v.rustsOn}: {v.remaining} left)
               </span>
@@ -418,27 +409,27 @@ function TrainRush({ game, fmt, m, phase }) {
 }
 
 // --- Phase Pressure ---
-function PhasePressure({ game, fmt, m, phase }) {
+function PhasePressure({ game, fmt, phase }) {
   const nextPhase = game.phaseManager.phases[game.phaseManager.currentIndex + 1]
-  if (!nextPhase) return <Panel m={m} title="Phase Pressure"><span className={m ? 'text-blue-400' : 'text-broker-text-muted'}>Final phase reached</span></Panel>
+  if (!nextPhase) return <Panel title="Phase Pressure"><span className="text-broker-text-muted">Final phase reached</span></Panel>
 
   const triggerTrain = nextPhase.on
   const remaining = triggerTrain ? remainingCount(game.depot, triggerTrain) : 0
   const trainDef = game.depot.upcoming.find(t => t.name === triggerTrain)
 
   return (
-    <Panel m={m} title="Phase Pressure">
-      <div className={m ? 'text-white' : 'text-white'}>
+    <Panel title="Phase Pressure">
+      <div className="text-white">
         Current: <span className="font-bold">{phase.name}</span> → Next: <span className="font-bold">{nextPhase.name}</span>
-        {triggerTrain && <span className={m ? ' text-yellow-300' : ' text-amber-400'}> (on {triggerTrain} purchase)</span>}
+        {triggerTrain && <span className=" text-amber-400"> (on {triggerTrain} purchase)</span>}
       </div>
       {triggerTrain && (
-        <div className={m ? 'text-blue-300 mt-1' : 'text-broker-text-muted text-xs mt-1'}>
+        <div className="text-broker-text-muted text-xs mt-1">
           {remaining} {triggerTrain}-train{remaining !== 1 ? 's' : ''} left in depot @ {trainDef ? fmt(trainDef.price) : '?'}
           {remaining <= 2 && <span className="text-red-400 font-bold ml-1">IMMINENT</span>}
         </div>
       )}
-      <div className={m ? 'text-blue-400 mt-1' : 'text-broker-text-muted text-xs mt-1'}>
+      <div className="text-broker-text-muted text-xs mt-1">
         Next phase: limit {typeof nextPhase.trainLimit === 'number' ? nextPhase.trainLimit : JSON.stringify(nextPhase.trainLimit)}, {nextPhase.operatingRounds} ORs
         {nextPhase.events?.length > 0 && <span className="text-amber-400 ml-1">[{nextPhase.events.join(', ')}]</span>}
       </div>
@@ -447,7 +438,7 @@ function PhasePressure({ game, fmt, m, phase }) {
 }
 
 // --- Game Clock ---
-function GameClock({ game, fmt, m }) {
+function GameClock({ game, fmt }) {
   const bankTotal = typeof game.title.bankCash === 'number'
     ? game.title.bankCash
     : (game.title.bankCash[game.playerCount] || 8000)
@@ -488,19 +479,19 @@ function GameClock({ game, fmt, m }) {
   const endingSoon = bankPct < 0.15 || lastTierLeft <= 1
 
   return (
-    <Panel m={m} title="Game Clock">
+    <Panel title="Game Clock">
       <div className="flex items-center gap-2">
-        <div className={`flex-1 h-3 rounded ${m ? 'bg-blue-900' : 'bg-broker-surface-hover'}`}>
+        <div className={`flex-1 h-3 rounded bg-broker-surface-hover`}>
           <div className={`h-3 rounded ${endingSoon ? 'bg-red-500' : progress > 60 ? 'bg-yellow-500' : 'bg-green-500'}`}
             style={{ width: Math.min(100, progress) + '%' }} />
         </div>
-        <span className={m ? 'text-white' : 'text-white font-medium'}>{progress}%</span>
+        <span className="text-white font-medium">{progress}%</span>
       </div>
-      <div className={m ? 'text-blue-400 mt-1' : 'text-broker-text-muted text-xs mt-1'}>
+      <div className="text-broker-text-muted text-xs mt-1">
         SR {srCount} · OR {orCount}{typeof estORsLeft === 'number' ? ` · ~${estORsLeft} ORs left` : ''}
         {endingSoon && <span className="text-red-400 font-bold ml-1">ENDGAME</span>}
       </div>
-      <div className={m ? 'text-blue-400' : 'text-broker-text-muted text-xs'}>
+      <div className="text-broker-text-muted text-xs">
         Ends by: {bankPct < 0.15 ? 'bank break' : lastTierLeft <= 2 ? 'last train purchased' : 'bank break (est.)'}
       </div>
     </Panel>
@@ -508,7 +499,7 @@ function GameClock({ game, fmt, m }) {
 }
 
 // --- OR Efficiency ---
-function OREfficiency({ game, fmt, m }) {
+function OREfficiency({ game, fmt }) {
   const corps = game.corporations.filter(c => c.floated)
   if (corps.length === 0) return null
 
@@ -542,17 +533,17 @@ function OREfficiency({ game, fmt, m }) {
   }).sort((a, b) => (b.avgRev || 0) - (a.avgRev || 0))
 
   return (
-    <Panel m={m} title="OR Efficiency">
+    <Panel title="OR Efficiency">
       <div className="space-y-0.5">
         {efficiencies.map(e => (
           <div key={e.sym} className="flex items-center gap-2">
             <span style={{ color: e.color }} className="font-bold w-10">{e.sym}</span>
-            <span className={m ? 'text-blue-300 w-16' : 'text-broker-text-muted w-16'}>avg {fmt(e.avgRev)}</span>
-            <span className={m ? 'text-blue-400 w-16' : 'text-broker-text-muted w-16'}>capex {fmt(e.totalCapex)}</span>
+            <span className="text-broker-text-muted w-16">avg {fmt(e.avgRev)}</span>
+            <span className="text-broker-text-muted w-16">capex {fmt(e.totalCapex)}</span>
             <span className={`w-12 text-right ${parseInt(e.roi) > 150 ? 'text-green-400' : parseInt(e.roi) > 80 ? 'text-yellow-400' : 'text-red-400'}`}>
               {e.roi}% ROI
             </span>
-            <span className={m ? 'text-blue-400 w-14 text-right' : 'text-broker-text-muted w-14 text-right'}>{fmt(e.revPerToken)}/tok</span>
+            <span className="text-broker-text-muted w-14 text-right">{fmt(e.revPerToken)}/tok</span>
           </div>
         ))}
       </div>
@@ -561,7 +552,7 @@ function OREfficiency({ game, fmt, m }) {
 }
 
 // --- Float Speed ---
-function FloatSpeed({ game, fmt, m, titleData }) {
+function FloatSpeed({ game, fmt, titleData }) {
   const corps = game.corporations.filter(c => c.ipoed)
   if (corps.length === 0) return null
 
@@ -590,17 +581,17 @@ function FloatSpeed({ game, fmt, m, titleData }) {
   })
 
   return (
-    <Panel m={m} title="Float Speed">
+    <Panel title="Float Speed">
       <div className="space-y-0.5">
         {floatInfo.map(f => (
           <div key={f.sym} className="flex items-center gap-2">
             <span style={{ color: f.color }} className="font-bold w-10">{f.sym}</span>
-            <span className={m ? 'text-blue-300' : 'text-broker-text-muted'}>IPO'd SR{f.ipoSR}</span>
+            <span className="text-broker-text-muted">IPO'd SR{f.ipoSR}</span>
             <span className={f.floated ? 'text-green-400' : 'text-amber-400'}>
               {f.floated ? 'floated' : 'pending'}
             </span>
             {f.actionsBetween != null && (
-              <span className={m ? 'text-blue-400' : 'text-broker-text-muted'}>({f.actionsBetween} actions to float)</span>
+              <span className="text-broker-text-muted">({f.actionsBetween} actions to float)</span>
             )}
           </div>
         ))}
@@ -614,7 +605,7 @@ function FloatSpeed({ game, fmt, m, titleData }) {
 // =========================================================================
 
 // --- Sold-Out Tracker ---
-function SoldOutTracker({ game, fmt, m }) {
+function SoldOutTracker({ game, fmt }) {
   const corps = game.corporations.filter(c => c.floated)
   if (corps.length === 0) return null
 
@@ -626,7 +617,7 @@ function SoldOutTracker({ game, fmt, m }) {
   }).sort((a, b) => a.totalAvailable - b.totalAvailable)
 
   return (
-    <Panel m={m} title="Sold-Out Tracker">
+    <Panel title="Sold-Out Tracker">
       <div className="space-y-0.5">
         {data.map(d => (
           <div key={d.sym} className="flex items-center gap-2">
@@ -634,16 +625,16 @@ function SoldOutTracker({ game, fmt, m }) {
             {d.soldOut
               ? <span className="text-green-400 font-bold">SOLD OUT</span>
               : <>
-                  <span className={m ? 'text-blue-300' : 'text-broker-text-muted'}>IPO {d.ipoLeft}%</span>
-                  <span className={m ? 'text-blue-300' : 'text-broker-text-muted'}>Pool {d.poolLeft}%</span>
+                  <span className="text-broker-text-muted">IPO {d.ipoLeft}%</span>
+                  <span className="text-broker-text-muted">Pool {d.poolLeft}%</span>
                 </>
             }
-            <span className={m ? 'text-white ml-auto' : 'text-white ml-auto'}>{fmt(d.price)}</span>
+            <span className="text-white ml-auto">{fmt(d.price)}</span>
             {d.totalAvailable === 10 && !d.soldOut && <span className="text-amber-400 text-xs">1 share away!</span>}
           </div>
         ))}
       </div>
-      <div className={m ? 'text-blue-400 mt-1 text-[10px]' : 'text-broker-text-muted text-xs mt-1'}>
+      <div className="text-broker-text-muted text-xs mt-1">
         Sold-out corps move up at end of OR set
       </div>
     </Panel>
@@ -651,7 +642,7 @@ function SoldOutTracker({ game, fmt, m }) {
 }
 
 // --- Dump Alert ---
-function DumpAlert({ game, fmt, m }) {
+function DumpAlert({ game, fmt }) {
   const corps = game.corporations.filter(c => c.floated)
   const alerts = []
 
@@ -682,15 +673,15 @@ function DumpAlert({ game, fmt, m }) {
     }
   }
 
-  if (alerts.length === 0) return <Panel m={m} title="Dump Alert"><span className={m ? 'text-green-400' : 'text-green-400'}>No dump risk</span></Panel>
+  if (alerts.length === 0) return <Panel title="Dump Alert"><span className="text-green-400">No dump risk</span></Panel>
 
   return (
-    <Panel m={m} title="Dump Alert">
+    <Panel title="Dump Alert">
       {alerts.map(a => (
         <div key={a.sym} className="mb-1">
           <span style={{ color: a.color }} className="font-bold">{a.sym}</span>
           <span className="text-amber-400 ml-1">{a.presName} ({a.presPct}%)</span>
-          <span className={m ? ' text-blue-300' : ' text-broker-text-muted'}> can dump to </span>
+          <span className=" text-broker-text-muted"> can dump to </span>
           <span className="text-amber-400">{a.challengerName} ({a.challengerPct}%)</span>
         </div>
       ))}
@@ -699,7 +690,7 @@ function DumpAlert({ game, fmt, m }) {
 }
 
 // --- Short Squeeze ---
-function ShortSqueeze({ game, fmt, m }) {
+function ShortSqueeze({ game, fmt }) {
   const corps = game.corporations.filter(c => c.floated)
   const data = corps.map(c => {
     const price = corpPrice(game.stockMarket, c.sym) || 0
@@ -714,14 +705,14 @@ function ShortSqueeze({ game, fmt, m }) {
   if (data.length === 0) return null
 
   return (
-    <Panel m={m} title="Share Scarcity">
+    <Panel title="Share Scarcity">
       <div className="space-y-0.5">
         {data.map(d => (
           <div key={d.sym} className="flex items-center gap-2">
             <span style={{ color: d.color }} className="font-bold w-10">{d.sym}</span>
-            <span className={m ? 'text-white w-14' : 'text-white w-14'}>{fmt(d.price)}</span>
-            <span className={m ? 'text-blue-300' : 'text-broker-text-muted'}>{d.availableShares}% available</span>
-            <span className={m ? 'text-blue-300' : 'text-broker-text-muted'}>{d.totalPlayerPct}% held by players</span>
+            <span className="text-white w-14">{fmt(d.price)}</span>
+            <span className="text-broker-text-muted">{d.availableShares}% available</span>
+            <span className="text-broker-text-muted">{d.totalPlayerPct}% held by players</span>
             {d.tight && <span className="text-amber-400 text-xs font-bold">TIGHT</span>}
           </div>
         ))}
@@ -735,7 +726,7 @@ function ShortSqueeze({ game, fmt, m }) {
 // =========================================================================
 
 // --- Income Inequality ---
-function IncomeInequality({ game, fmt, m }) {
+function IncomeInequality({ game, fmt }) {
   const worths = allNetWorths(game)
   if (worths.length < 2) return null
 
@@ -770,8 +761,8 @@ function IncomeInequality({ game, fmt, m }) {
   }
 
   return (
-    <Panel m={m} title="Income Inequality">
-      <div className={m ? 'text-white' : 'text-white'}>
+    <Panel title="Income Inequality">
+      <div className="text-white">
         Gap: {fmt(gap)} · Ratio: {ratio}x · Gini: {gini}
       </div>
       <div className="space-y-0.5 mt-1">
@@ -780,12 +771,12 @@ function IncomeInequality({ game, fmt, m }) {
           const income = recentIncome[w.playerId] || 0
           return (
             <div key={w.playerId} className="flex items-center gap-2">
-              <span className={`w-16 truncate ${i === 0 ? 'text-green-400 font-bold' : m ? 'text-yellow-300' : 'text-broker-text'}`}>{w.name}</span>
-              <div className={`flex-1 h-2 rounded ${m ? 'bg-blue-900' : 'bg-broker-surface-hover'}`}>
+              <span className={`w-16 truncate ${i === 0 ? 'text-green-400 font-bold' : 'text-broker-text'}`}>{w.name}</span>
+              <div className={`flex-1 h-2 rounded bg-broker-surface-hover`}>
                 <div className={`h-2 rounded ${i === 0 ? 'bg-green-500' : 'bg-blue-500'}`} style={{ width: barPct + '%' }} />
               </div>
-              <span className={m ? 'text-white w-14 text-right' : 'text-white w-14 text-right'}>{fmt(w.total)}</span>
-              <span className={m ? 'text-blue-400 w-14 text-right' : 'text-broker-text-muted w-14 text-right'}>+{fmt(income)}</span>
+              <span className="text-white w-14 text-right">{fmt(w.total)}</span>
+              <span className="text-broker-text-muted w-14 text-right">+{fmt(income)}</span>
             </div>
           )
         })}
@@ -795,7 +786,7 @@ function IncomeInequality({ game, fmt, m }) {
 }
 
 // --- Capital Velocity ---
-function CapitalVelocity({ game, fmt, m }) {
+function CapitalVelocity({ game, fmt }) {
   // Track money flow: bank→player, player→corp, corp→bank
   let bankToPlayer = 0
   let playerToCorp = 0
@@ -837,18 +828,18 @@ function CapitalVelocity({ game, fmt, m }) {
   const velocity = bankTotal > 0 ? (totalFlow / bankTotal).toFixed(1) : '0.0'
 
   return (
-    <Panel m={m} title="Capital Velocity">
+    <Panel title="Capital Velocity">
       <div className="space-y-1">
         <div className="flex gap-4">
-          <span className={m ? 'text-green-400' : 'text-green-400'}>Bank→Players: {fmt(bankToPlayer)}</span>
-          <span className={m ? 'text-cyan-400' : 'text-blue-400'}>Players→Corps: {fmt(playerToCorp)}</span>
-          <span className={m ? 'text-purple-400' : 'text-purple-400'}>Corps→Bank: {fmt(corpToBank)}</span>
+          <span className="text-green-400">Bank→Players: {fmt(bankToPlayer)}</span>
+          <span className="text-blue-400">Players→Corps: {fmt(playerToCorp)}</span>
+          <span className="text-purple-400">Corps→Bank: {fmt(corpToBank)}</span>
         </div>
-        <div className={m ? 'text-white' : 'text-white'}>
+        <div className="text-white">
           Total flow: {fmt(totalFlow)} · Velocity: {velocity}x bank
         </div>
         <div className="flex items-center gap-1">
-          <span className={m ? 'text-blue-400 text-[10px]' : 'text-broker-text-muted text-[10px]'}>
+          <span className="text-broker-text-muted text-[10px]">
             {parseFloat(velocity) < 1 ? 'Slow economy — money pooling' : parseFloat(velocity) < 2 ? 'Normal circulation' : 'Fast economy — money cycling quickly'}
           </span>
         </div>
@@ -858,7 +849,7 @@ function CapitalVelocity({ game, fmt, m }) {
 }
 
 // --- Withhold vs Pay Breakeven ---
-function WithholdBreakeven({ game, fmt, m }) {
+function WithholdBreakeven({ game, fmt }) {
   const corps = game.corporations.filter(c => c.floated && c.trains.length > 0)
   if (corps.length === 0) return null
 
@@ -905,7 +896,7 @@ function WithholdBreakeven({ game, fmt, m }) {
   if (analysis.length === 0) return null
 
   return (
-    <Panel m={m} title="Withhold vs Pay Breakeven">
+    <Panel title="Withhold vs Pay Breakeven">
       <div className="space-y-1">
         {analysis.map(a => {
           const shouldWithhold = a.withholdToAfford > 0 && a.withholdToAfford <= 2
@@ -913,15 +904,15 @@ function WithholdBreakeven({ game, fmt, m }) {
             <div key={a.sym}>
               <div className="flex items-center gap-2">
                 <span style={{ color: a.color }} className="font-bold w-10">{a.sym}</span>
-                <span className={m ? 'text-blue-300' : 'text-broker-text-muted'}>rev {fmt(a.lastRev)}</span>
-                <span className={m ? 'text-blue-300' : 'text-broker-text-muted'}>treas {fmt(a.corpCash)}</span>
+                <span className="text-broker-text-muted">rev {fmt(a.lastRev)}</span>
+                <span className="text-broker-text-muted">treas {fmt(a.corpCash)}</span>
                 {a.nextTrainCost > 0 && (
-                  <span className={m ? 'text-blue-300' : 'text-broker-text-muted'}>
+                  <span className="text-broker-text-muted">
                     need {fmt(a.nextTrainCost)} ({a.nextTrainName})
                   </span>
                 )}
               </div>
-              <div className={m ? 'text-blue-400 ml-12' : 'text-broker-text-muted text-xs ml-12'}>
+              <div className="text-broker-text-muted text-xs ml-12">
                 Pay: pres gets {fmt(a.divIncome)} · Withhold: corp +{fmt(a.lastRev)}
                 {a.withholdToAfford > 0 && (
                   <span className={shouldWithhold ? ' text-amber-400 font-bold' : ''}>
@@ -942,7 +933,7 @@ function WithholdBreakeven({ game, fmt, m }) {
 // =========================================================================
 
 // --- Emergency Buy Exposure ---
-function EmergencyExposure({ game, fmt, m }) {
+function EmergencyExposure({ game, fmt }) {
   const corps = game.corporations.filter(c => c.floated)
   const exposed = []
 
@@ -969,15 +960,15 @@ function EmergencyExposure({ game, fmt, m }) {
     })
   }
 
-  if (exposed.length === 0) return <Panel m={m} title="Emergency Buy Exposure"><span className={m ? 'text-green-400' : 'text-green-400'}>No corps at risk</span></Panel>
+  if (exposed.length === 0) return <Panel title="Emergency Buy Exposure"><span className="text-green-400">No corps at risk</span></Panel>
 
   return (
-    <Panel m={m} title="Emergency Buy Exposure">
+    <Panel title="Emergency Buy Exposure">
       {exposed.map(e => (
         <div key={e.sym} className="mb-1">
           <span style={{ color: e.color }} className="font-bold">{e.sym}</span>
           {e.trainless ? <span className="text-red-400 ml-1">TRAINLESS</span> : <span className="text-amber-400 ml-1">all trains rust on {e.rustTriggers.join('/')}</span>}
-          <span className={m ? ' text-blue-300' : ' text-broker-text-muted'}> — needs {fmt(e.trainCost)}</span>
+          <span className=" text-broker-text-muted"> — needs {fmt(e.trainCost)}</span>
           {e.corpCanAfford ? <span className="text-green-400 ml-1">can afford</span>
             : e.presCanCover ? <span className="text-amber-400 ml-1">pres {e.presName} covers {fmt(e.shortfall)}</span>
             : <span className="text-red-400 ml-1">can't afford! shortfall {fmt(e.shortfall)}</span>}
@@ -988,12 +979,12 @@ function EmergencyExposure({ game, fmt, m }) {
 }
 
 // --- Dividend Projection ---
-function DividendProjection({ game, fmt, m }) {
+function DividendProjection({ game, fmt }) {
   const corps = game.corporations.filter(c => c.floated && c.trains.length > 0)
   if (corps.length === 0) return null
 
   return (
-    <Panel m={m} title="Cash Flow Projection">
+    <Panel title="Cash Flow Projection">
       <div className="space-y-1">
         {corps.map(c => {
           let lastRev = 0
@@ -1014,7 +1005,7 @@ function DividendProjection({ game, fmt, m }) {
           return (
             <div key={c.sym}>
               <span style={{ color: c.color }} className="font-bold">{c.sym}</span>
-              <span className={m ? ' text-blue-300' : ' text-broker-text-muted'}>
+              <span className=" text-broker-text-muted">
                 {' '}rev {fmt(lastRev)} · treas {fmt(c.cash)} · need {fmt(nextTrain.price)} for {nextTrain.name}
               </span>
               <span className={orsToAfford <= 2 ? ' text-green-400' : ' text-amber-400'}>
@@ -1029,7 +1020,7 @@ function DividendProjection({ game, fmt, m }) {
 }
 
 // --- Corp Quality ---
-function CorpQuality({ game, fmt, m }) {
+function CorpQuality({ game, fmt }) {
   const corps = game.corporations.filter(c => c.floated)
   if (corps.length === 0) return null
 
@@ -1051,18 +1042,18 @@ function CorpQuality({ game, fmt, m }) {
   }).sort((a, b) => b.score - a.score)
 
   return (
-    <Panel m={m} title="Corp Quality Ranking">
+    <Panel title="Corp Quality Ranking">
       <div className="space-y-0.5">
         {scored.map((c, i) => (
           <div key={c.sym} className="flex items-center gap-2">
-            <span className={m ? 'text-blue-400 w-4' : 'text-broker-text-muted w-4'}>{i + 1}.</span>
+            <span className="text-broker-text-muted w-4">{i + 1}.</span>
             <span style={{ color: c.color }} className="font-bold w-10">{c.sym}</span>
-            <div className={`flex-1 h-2 rounded ${m ? 'bg-blue-900' : 'bg-broker-surface-hover'}`}>
+            <div className={`flex-1 h-2 rounded bg-broker-surface-hover`}>
               <div className={`h-2 rounded ${c.score > 5 ? 'bg-green-500' : c.score > 2 ? 'bg-yellow-500' : 'bg-red-500'}`}
                 style={{ width: Math.min(100, c.score * 12) + '%' }} />
             </div>
-            <span className={m ? 'text-white w-8 text-right' : 'text-white w-8 text-right'}>{c.score}</span>
-            <span className={m ? 'text-blue-300 w-14' : 'text-broker-text-muted w-14'}>{fmt(c.price)}</span>
+            <span className="text-white w-8 text-right">{c.score}</span>
+            <span className="text-broker-text-muted w-14">{fmt(c.price)}</span>
             <span className={c.permanentTrains > 0 ? 'text-green-400 w-6' : c.trains.length === 0 ? 'text-red-400 w-6' : 'text-amber-400 w-6'}>
               {c.trains.map(t => t.name).join('') || '!'}
             </span>
@@ -1074,7 +1065,7 @@ function CorpQuality({ game, fmt, m }) {
 }
 
 // --- Train Timing Matrix ---
-function TrainTimingMatrix({ game, fmt, m }) {
+function TrainTimingMatrix({ game, fmt }) {
   const depot = game.depot
   const availableTrainNames = [...new Set(depot.upcoming.map(t => t.name))]
   if (availableTrainNames.length === 0) return null
@@ -1101,18 +1092,18 @@ function TrainTimingMatrix({ game, fmt, m }) {
   }
 
   return (
-    <Panel m={m} title="Train Timing Matrix">
+    <Panel title="Train Timing Matrix">
       <div className="space-y-1">
         {scenarios.map(s => (
           <div key={s.name}>
             <div className="flex items-center gap-2">
-              <span className={m ? 'text-white font-bold w-8' : 'text-white font-medium w-8'}>{s.name}</span>
-              <span className={m ? 'text-yellow-300 w-14' : 'text-broker-text w-14'}>{fmt(s.price)}</span>
-              <span className={m ? 'text-blue-300 w-6' : 'text-broker-text-muted w-6'}>{s.remaining}x</span>
+              <span className="text-white font-medium w-8">{s.name}</span>
+              <span className="text-broker-text w-14">{fmt(s.price)}</span>
+              <span className="text-broker-text-muted w-6">{s.remaining}x</span>
               {s.phaseChange && <span className="text-amber-400 text-xs">triggers {s.phaseChange.name}</span>}
             </div>
             {s.rustsTrains.length > 0 && (
-              <div className={m ? 'text-red-400 ml-10 text-[10px]' : 'text-red-400 ml-10 text-[10px]'}>
+              <div className="text-red-400 ml-10 text-[10px]">
                 Rusts: {s.rustsTrains.map((r, i) => (
                   <span key={i}>
                     <span style={{ color: r.color }} className="font-bold">{r.corp}</span>
@@ -1129,7 +1120,7 @@ function TrainTimingMatrix({ game, fmt, m }) {
 }
 
 // --- Endgame Projection ---
-function EndgameProjection({ game, fmt, m }) {
+function EndgameProjection({ game, fmt }) {
   const worths = allNetWorths(game)
   if (worths.length < 2) return null
 
@@ -1162,18 +1153,18 @@ function EndgameProjection({ game, fmt, m }) {
   const leaderChange = currentLeader.playerId !== projectedLeader.playerId
 
   return (
-    <Panel m={m} title="Endgame Projection">
+    <Panel title="Endgame Projection">
       <div className="space-y-0.5">
         {projected.map((p, i) => (
           <div key={p.playerId} className="flex items-center gap-2">
-            <span className={`w-16 truncate ${i === 0 ? 'text-green-400 font-bold' : m ? 'text-yellow-300' : 'text-broker-text'}`}>{p.name}</span>
-            <span className={m ? 'text-white w-14 text-right' : 'text-white w-14 text-right'}>{fmt(p.total)}</span>
-            <span className={m ? 'text-blue-400' : 'text-broker-text-muted'}> →</span>
-            <span className={m ? 'text-blue-300 w-14 text-right' : 'text-broker-text w-14 text-right'}>{fmt(Math.round(p.projected3))}</span>
-            <span className={m ? 'text-blue-400 text-[10px]' : 'text-broker-text-muted text-[10px]'}>+3OR</span>
-            <span className={m ? 'text-blue-300 w-14 text-right' : 'text-broker-text w-14 text-right'}>{fmt(Math.round(p.projected5))}</span>
-            <span className={m ? 'text-blue-400 text-[10px]' : 'text-broker-text-muted text-[10px]'}>+5OR</span>
-            <span className={m ? 'text-blue-400 w-12 text-right' : 'text-broker-text-muted w-12 text-right'}>+{fmt(Math.round(p.incomePerOR))}/OR</span>
+            <span className={`w-16 truncate ${i === 0 ? 'text-green-400 font-bold' : 'text-broker-text'}`}>{p.name}</span>
+            <span className="text-white w-14 text-right">{fmt(p.total)}</span>
+            <span className="text-broker-text-muted"> →</span>
+            <span className="text-broker-text w-14 text-right">{fmt(Math.round(p.projected3))}</span>
+            <span className="text-broker-text-muted text-[10px]">+3OR</span>
+            <span className="text-broker-text w-14 text-right">{fmt(Math.round(p.projected5))}</span>
+            <span className="text-broker-text-muted text-[10px]">+5OR</span>
+            <span className="text-broker-text-muted w-12 text-right">+{fmt(Math.round(p.incomePerOR))}/OR</span>
           </div>
         ))}
       </div>
@@ -1191,37 +1182,37 @@ function EndgameProjection({ game, fmt, m }) {
 // =========================================================================
 
 // --- Par Value Guide (from 18AI data) ---
-function ParGuide({ data, fmt, m, title }) {
+function ParGuide({ data, fmt, title }) {
   const prices = Object.entries(data.par_prices).sort((a, b) => parseInt(a[0]) - parseInt(b[0]))
   if (prices.length === 0) return null
 
   const bestPrice = prices.reduce((best, [p, s]) => s.win_rate > (best?.win_rate || 0) ? { price: p, ...s } : best, null)
 
   return (
-    <Panel m={m} title={`Par Value Guide (${data.games_analyzed} games)`}>
+    <Panel title={`Par Value Guide (${data.games_analyzed} games)`}>
       <div className="space-y-0.5">
         {prices.map(([price, stats]) => {
           const isBest = price === bestPrice?.price
           return (
             <div key={price} className="flex items-center gap-2">
-              <span className={`w-10 text-right font-bold ${isBest ? 'text-green-400' : m ? 'text-white' : 'text-white'}`}>{fmt(parseInt(price))}</span>
-              <div className={`flex-1 h-2 rounded ${m ? 'bg-blue-900' : 'bg-broker-surface-hover'}`}>
+              <span className={`w-10 text-right font-bold ${isBest ? 'text-green-400' : 'text-white'}`}>{fmt(parseInt(price))}</span>
+              <div className={`flex-1 h-2 rounded bg-broker-surface-hover`}>
                 <div className={`h-2 rounded ${isBest ? 'bg-green-500' : 'bg-blue-500'}`}
                   style={{ width: Math.min(100, stats.win_rate * 2.5) + '%' }} />
               </div>
-              <span className={m ? 'text-blue-300 w-12 text-right' : 'text-broker-text-muted w-12 text-right'}>{stats.win_rate}%</span>
-              <span className={m ? 'text-blue-400 w-8 text-right' : 'text-broker-text-muted w-8 text-right'}>{stats.count}x</span>
+              <span className="text-broker-text-muted w-12 text-right">{stats.win_rate}%</span>
+              <span className="text-broker-text-muted w-8 text-right">{stats.count}x</span>
             </div>
           )
         })}
       </div>
       {bestPrice && (
-        <div className={m ? 'text-green-400 mt-1' : 'text-green-400 text-xs mt-1'}>
+        <div className="text-green-400 text-xs mt-1">
           Best: {fmt(parseInt(bestPrice.price))} ({bestPrice.win_rate}% win rate, avg score {fmt(bestPrice.avg_score)})
         </div>
       )}
       {data.first_corp && Object.keys(data.first_corp).length > 0 && (
-        <div className={m ? 'text-blue-400 mt-1' : 'text-broker-text-muted text-xs mt-1'}>
+        <div className="text-broker-text-muted text-xs mt-1">
           First corp: {Object.entries(data.first_corp).slice(0, 5).map(([c, n]) => `${c}(${n}x)`).join(', ')}
         </div>
       )}
@@ -1230,12 +1221,12 @@ function ParGuide({ data, fmt, m, title }) {
 }
 
 // --- Private Valuation ---
-function PrivateValuation({ data, game, fmt, m }) {
+function PrivateValuation({ data, game, fmt }) {
   const privates = Object.entries(data.privates)
   if (privates.length === 0) return null
 
   return (
-    <Panel m={m} title={`Private Valuation (${data.games_analyzed} games)`}>
+    <Panel title={`Private Valuation (${data.games_analyzed} games)`}>
       <div className="space-y-0.5">
         {privates.sort((a, b) => b[1].winner_rate - a[1].winner_rate).map(([sym, stats]) => {
           const co = (game.companies || []).find(c => c.sym === sym)
@@ -1244,14 +1235,14 @@ function PrivateValuation({ data, game, fmt, m }) {
             : null
           return (
             <div key={sym} className="flex items-center gap-2">
-              <span className={m ? 'text-purple-300 w-12 font-bold' : 'text-white w-12 font-medium'}>{sym}</span>
-              <div className={`flex-1 h-2 rounded ${m ? 'bg-blue-900' : 'bg-broker-surface-hover'}`}>
+              <span className="text-white w-12 font-medium">{sym}</span>
+              <div className={`flex-1 h-2 rounded bg-broker-surface-hover`}>
                 <div className={`h-2 rounded ${stats.winner_rate > 40 ? 'bg-green-500' : stats.winner_rate > 25 ? 'bg-yellow-500' : 'bg-red-500'}`}
                   style={{ width: Math.min(100, stats.winner_rate * 2) + '%' }} />
               </div>
-              <span className={m ? 'text-blue-300 w-12 text-right' : 'text-broker-text-muted w-12 text-right'}>{stats.winner_rate}%</span>
-              <span className={m ? 'text-blue-400 w-8 text-right' : 'text-broker-text-muted w-8 text-right'}>{stats.count}x</span>
-              {owner && <span className={m ? 'text-yellow-300 w-12 truncate' : 'text-broker-text w-12 truncate'}>{owner}</span>}
+              <span className="text-broker-text-muted w-12 text-right">{stats.winner_rate}%</span>
+              <span className="text-broker-text-muted w-8 text-right">{stats.count}x</span>
+              {owner && <span className="text-broker-text w-12 truncate">{owner}</span>}
             </div>
           )
         })}
@@ -1261,12 +1252,12 @@ function PrivateValuation({ data, game, fmt, m }) {
 }
 
 // --- Corp Win Correlation ---
-function CorpWinCorrelation({ data, game, fmt, m }) {
+function CorpWinCorrelation({ data, game, fmt }) {
   const corps = Object.entries(data.corp_win_rate).sort((a, b) => b[1].win_rate - a[1].win_rate)
   if (corps.length === 0) return null
 
   return (
-    <Panel m={m} title={`Corp Win Correlation (${data.games_analyzed} games)`}>
+    <Panel title={`Corp Win Correlation (${data.games_analyzed} games)`}>
       <div className="space-y-0.5">
         {corps.map(([sym, stats]) => {
           const corp = game.corporations.find(c => c.sym === sym)
@@ -1275,12 +1266,12 @@ function CorpWinCorrelation({ data, game, fmt, m }) {
           return (
             <div key={sym} className="flex items-center gap-2">
               <span style={{ color: color || undefined }} className="font-bold w-10">{sym}</span>
-              <div className={`flex-1 h-2 rounded ${m ? 'bg-blue-900' : 'bg-broker-surface-hover'}`}>
+              <div className={`flex-1 h-2 rounded bg-broker-surface-hover`}>
                 <div className={`h-2 rounded ${stats.win_rate > 35 ? 'bg-green-500' : stats.win_rate > 20 ? 'bg-yellow-500' : 'bg-blue-500'}`}
                   style={{ width: Math.min(100, stats.win_rate * 2.5) + '%' }} />
               </div>
-              <span className={m ? 'text-blue-300 w-12 text-right' : 'text-broker-text-muted w-12 text-right'}>{stats.win_rate}%</span>
-              <span className={m ? 'text-blue-400 w-8 text-right' : 'text-broker-text-muted w-8 text-right'}>{stats.count}x</span>
+              <span className="text-broker-text-muted w-12 text-right">{stats.win_rate}%</span>
+              <span className="text-broker-text-muted w-8 text-right">{stats.count}x</span>
               {floated && <span className="text-green-400 text-[10px]">in play</span>}
             </div>
           )
@@ -1291,23 +1282,23 @@ function CorpWinCorrelation({ data, game, fmt, m }) {
 }
 
 // --- Player Count Impact ---
-function PlayerCountImpact({ data, game, fmt, m }) {
+function PlayerCountImpact({ data, game, fmt }) {
   const counts = Object.entries(data.player_count).sort((a, b) => parseInt(a[0]) - parseInt(b[0]))
   if (counts.length === 0) return null
 
   const currentCount = game.playerCount || game.players.length
 
   return (
-    <Panel m={m} title={`Player Count Impact (${data.games_analyzed} games)`}>
+    <Panel title={`Player Count Impact (${data.games_analyzed} games)`}>
       <div className="space-y-0.5">
         {counts.map(([count, stats]) => {
           const isCurrent = parseInt(count) === currentCount
           return (
             <div key={count} className="flex items-center gap-2">
-              <span className={`w-6 text-right font-bold ${isCurrent ? 'text-green-400' : m ? 'text-white' : 'text-white'}`}>{count}p</span>
-              <span className={m ? 'text-blue-300 w-8' : 'text-broker-text-muted w-8'}>{stats.games}g</span>
-              <span className={m ? 'text-blue-300' : 'text-broker-text-muted'}>win avg {fmt(stats.avg_winner_score)}</span>
-              <span className={m ? 'text-blue-400' : 'text-broker-text-muted'}>lose avg {fmt(stats.avg_loser_score)}</span>
+              <span className={`w-6 text-right font-bold ${isCurrent ? 'text-green-400' : 'text-white'}`}>{count}p</span>
+              <span className="text-broker-text-muted w-8">{stats.games}g</span>
+              <span className="text-broker-text-muted">win avg {fmt(stats.avg_winner_score)}</span>
+              <span className="text-broker-text-muted">lose avg {fmt(stats.avg_loser_score)}</span>
               {isCurrent && <span className="text-green-400 text-[10px] font-bold">CURRENT</span>}
             </div>
           )
@@ -1320,7 +1311,7 @@ function PlayerCountImpact({ data, game, fmt, m }) {
 // =========================================================================
 // REVIEW — post-game analysis, decision grading, learning
 // =========================================================================
-function Review({ game, fmt, m, titleData }) {
+function Review({ game, fmt, titleData }) {
   const worths = allNetWorths(game)
   const corps = game.corporations.filter(c => c.floated)
   const winner = worths[0]
@@ -1370,36 +1361,36 @@ function Review({ game, fmt, m, titleData }) {
   return (
     <>
       {/* Final standings */}
-      <Panel m={m} title="Final Standings">
+      <Panel title="Final Standings">
         <div className="space-y-1">
           {worths.map((w, i) => {
             const barPct = winner ? Math.round((w.total / winner.total) * 100) : 0
             return (
               <div key={w.playerId} className="flex items-center gap-2">
-                <span className={`w-4 font-bold ${i === 0 ? 'text-green-400' : m ? 'text-blue-400' : 'text-broker-text-muted'}`}>{i + 1}</span>
-                <span className={`w-16 truncate ${i === 0 ? 'text-green-400 font-bold' : m ? 'text-yellow-300' : 'text-broker-text'}`}>{w.name}</span>
-                <div className={`flex-1 h-3 rounded ${m ? 'bg-blue-900' : 'bg-broker-surface-hover'}`}>
+                <span className={`w-4 font-bold ${i === 0 ? 'text-green-400' : 'text-broker-text-muted'}`}>{i + 1}</span>
+                <span className={`w-16 truncate ${i === 0 ? 'text-green-400 font-bold' : 'text-broker-text'}`}>{w.name}</span>
+                <div className={`flex-1 h-3 rounded bg-broker-surface-hover`}>
                   <div className="h-3 rounded flex" style={{ width: barPct + '%' }}>
                     <div className="bg-green-700 h-full" style={{ width: w.total > 0 ? Math.round((w.cash / w.total) * 100) + '%' : '0' }} />
                     <div className="bg-blue-700 h-full" style={{ width: w.total > 0 ? Math.round((w.shareValue / w.total) * 100) + '%' : '0' }} />
                     <div className="bg-purple-700 h-full" style={{ width: w.total > 0 ? Math.round((w.privateValue / w.total) * 100) + '%' : '0' }} />
                   </div>
                 </div>
-                <span className={m ? 'text-white w-16 text-right font-bold' : 'text-white w-16 text-right font-bold'}>{fmt(w.total)}</span>
+                <span className="text-white w-16 text-right font-bold">{fmt(w.total)}</span>
                 {i === 0 && <span className="text-green-400 text-xs font-bold">WINNER</span>}
               </div>
             )
           })}
         </div>
         <div className="flex gap-3 mt-1 text-[10px]">
-          <span className={m ? 'text-blue-400' : 'text-broker-text-muted'}><span className="inline-block w-2 h-2 bg-green-700 rounded-sm mr-0.5" />Cash</span>
-          <span className={m ? 'text-blue-400' : 'text-broker-text-muted'}><span className="inline-block w-2 h-2 bg-blue-700 rounded-sm mr-0.5" />Shares</span>
-          <span className={m ? 'text-blue-400' : 'text-broker-text-muted'}><span className="inline-block w-2 h-2 bg-purple-700 rounded-sm mr-0.5" />Privates</span>
+          <span className="text-broker-text-muted"><span className="inline-block w-2 h-2 bg-green-700 rounded-sm mr-0.5" />Cash</span>
+          <span className="text-broker-text-muted"><span className="inline-block w-2 h-2 bg-blue-700 rounded-sm mr-0.5" />Shares</span>
+          <span className="text-broker-text-muted"><span className="inline-block w-2 h-2 bg-purple-700 rounded-sm mr-0.5" />Privates</span>
         </div>
       </Panel>
 
       {/* Player strategy profile */}
-      <Panel m={m} title="Player Strategy">
+      <Panel title="Player Strategy">
         <div className="space-y-2">
           {worths.map((w, i) => {
             const dc = divChoices[w.playerId] || { pay: 0, withhold: 0, half: 0 }
@@ -1409,12 +1400,12 @@ function Review({ game, fmt, m, titleData }) {
             return (
               <div key={w.playerId}>
                 <div className="flex items-center gap-2">
-                  <span className={`w-16 truncate font-medium ${i === 0 ? 'text-green-400' : m ? 'text-yellow-300' : 'text-broker-text'}`}>{w.name}</span>
-                  <span className={m ? 'text-blue-300' : 'text-broker-text-muted'}>
+                  <span className={`w-16 truncate font-medium ${i === 0 ? 'text-green-400' : 'text-broker-text'}`}>{w.name}</span>
+                  <span className="text-broker-text-muted">
                     {presCorps.map(c => c.sym).join(', ') || 'no corps'}
                   </span>
                 </div>
-                <div className={m ? 'text-blue-400 text-[10px] ml-16' : 'text-broker-text-muted text-[10px] ml-16'}>
+                <div className="text-broker-text-muted text-[10px] ml-16">
                   {totalDivs > 0 && <span>Pay {payRate}% · W {dc.withhold}x · H {dc.half}x</span>}
                   {' · '}{actionCounts[w.playerId] || 0} actions
                 </div>
@@ -1425,7 +1416,7 @@ function Review({ game, fmt, m, titleData }) {
       </Panel>
 
       {/* Corp Performance */}
-      <Panel m={m} title="Corp Performance">
+      <Panel title="Corp Performance">
         <div className="space-y-1">
           {corps.map(c => {
             const history = corpRevHistory[c.sym] || []
@@ -1436,11 +1427,11 @@ function Review({ game, fmt, m, titleData }) {
             return (
               <div key={c.sym} className="flex items-center gap-2">
                 <span style={{ color: c.color }} className="font-bold w-10">{c.sym}</span>
-                <span className={m ? 'text-white w-14' : 'text-white w-14'}>{fmt(price)}</span>
-                <span className={m ? 'text-blue-300' : 'text-broker-text-muted'}>avg rev {fmt(avgRev)}</span>
-                <span className={m ? 'text-blue-300' : 'text-broker-text-muted'}>{history.length} ORs</span>
-                <span className={m ? 'text-blue-300' : 'text-broker-text-muted'}>treas {fmt(c.cash)}</span>
-                <span className={m ? 'text-yellow-300 ml-auto' : 'text-broker-text ml-auto'}>{pres?.name || '—'}</span>
+                <span className="text-white w-14">{fmt(price)}</span>
+                <span className="text-broker-text-muted">avg rev {fmt(avgRev)}</span>
+                <span className="text-broker-text-muted">{history.length} ORs</span>
+                <span className="text-broker-text-muted">treas {fmt(c.cash)}</span>
+                <span className="text-broker-text ml-auto">{pres?.name || '—'}</span>
               </div>
             )
           })}
@@ -1449,15 +1440,15 @@ function Review({ game, fmt, m, titleData }) {
 
       {/* Key Moments Timeline */}
       {keyMoments.length > 0 && (
-        <Panel m={m} title="Key Moments">
+        <Panel title="Key Moments">
           <div className="space-y-0.5">
             {keyMoments.slice(-20).map((km, i) => (
               <div key={i} className={`text-xs ${
                 km.severity === 'critical' ? 'text-red-400' :
                 km.severity === 'warning' ? 'text-amber-400' :
-                m ? 'text-blue-300' : 'text-broker-text-muted'
+                'text-broker-text-muted'
               }`}>
-                <span className={m ? 'text-blue-400' : 'text-broker-text-muted'}>#{km.idx}</span> {km.text}
+                <span className="text-broker-text-muted">#{km.idx}</span> {km.text}
               </div>
             ))}
           </div>
@@ -1465,8 +1456,8 @@ function Review({ game, fmt, m, titleData }) {
       )}
 
       {/* What-If Note */}
-      <Panel m={m} title="Post-Game Tool">
-        <div className={m ? 'text-blue-300' : 'text-broker-text-muted'}>
+      <Panel title="Post-Game Tool">
+        <div className="text-broker-text-muted">
           Use <span className="font-bold">What-If mode</span> to explore alternative decisions:
           enter what-if, change share positions and stock prices,
           then simulate a few more OR rounds to see how different
@@ -1481,13 +1472,10 @@ function Review({ game, fmt, m, titleData }) {
 // SHARED COMPONENTS
 // =========================================================================
 
-function Panel({ m, title, children }) {
+function Panel({ title, children }) {
   return (
-    <div className={m
-      ? 'bg-blue-900/30 border border-blue-800 rounded p-2'
-      : 'bg-broker-surface rounded-lg p-3 border border-broker-border'
-    }>
-      <div className={m ? 'text-green-400 font-bold mb-1' : 'text-white font-medium mb-2'}>{title}</div>
+    <div className='bg-broker-surface rounded-lg p-3 border border-broker-border'>
+      <div className="text-white font-medium mb-2">{title}</div>
       {children}
     </div>
   )

@@ -564,7 +564,7 @@ function CorpDetail({ game, corp, dispatch, fmt, onNext, plusPlus }) {
       {plusPlus && tips.length > 0 && (
         <div className="bg-broker-surface rounded-lg p-3">
           <div className="text-xs text-broker-text-muted mb-2 font-medium uppercase">Advisor</div>
-          <AdvisorSection tips={tips} skin="broker" onCorpClick={goToCorp} onPlayerClick={goToPlayer} />
+          <AdvisorSection tips={tips} onCorpClick={goToCorp} onPlayerClick={goToPlayer} />
         </div>
       )}
 
@@ -660,7 +660,7 @@ function CorpSharePanel({ game, corp, dispatch, fmt }) {
           <div className="space-y-1">
             {buyOptions.map(({ corp: c, price, hasIPO, hasMarket, isSelf, canStart }) => {
               const shareSize = title.shares?.[1] ?? 10
-              const cost = price ? (price * shareSize) / 10 : 0
+              const cost = price || 0
               const canAfford = price ? corp.cash >= cost : false
               return (
                 <div key={c.sym} className="flex items-center gap-2">

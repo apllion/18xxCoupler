@@ -40,7 +40,6 @@ const TAB_COMPONENTS = {
 export default function GameShell() {
   const game = useGameStore((s) => s.game)
   const activeTab = useUIStore((s) => s.activeTab)
-  const skin = useUIStore((s) => s.skin)
   const TabComponent = TAB_COMPONENTS[activeTab] || SummaryTab
   const sync = useSyncContext()
 

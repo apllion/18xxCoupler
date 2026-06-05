@@ -6,11 +6,11 @@ import { playerSharePercent } from '../../engine/player.js'
 // Action definitions with context rules
 const ACTIONS = [
   // Share actions — SR context
-  { id: 'priority', label: 'Priority', mLabel: 'Prio', round: 'sr', always: true },
-  { id: 'buy', label: 'Buy', mLabel: '[B]uy', key: 'b', round: 'sr', always: true },
-  { id: 'sell', label: 'Sell', mLabel: '[S]ell', key: 's', round: 'sr', always: true },
-  { id: 'par', label: 'Par', mLabel: '[N]ew', key: 'n', round: 'sr', gate: (g) => g.corporations.some(c => !c.ipoed && !c.floated) },
-  { id: 'president', label: 'President', mLabel: 'Pres', round: 'any', always: true,
+  { id: 'priority', label: 'Priority', round: 'sr', always: true },
+  { id: 'buy', label: 'Buy', key: 'b', round: 'sr', always: true },
+  { id: 'sell', label: 'Sell', key: 's', round: 'sr', always: true },
+  { id: 'par', label: 'Par', key: 'n', round: 'sr', gate: (g) => g.corporations.some(c => !c.ipoed && !c.floated) },
+  { id: 'president', label: 'President', round: 'any', always: true,
     gate: (g, rt, player, corp) => {
       if (!player || !corp || !corp.ipoed) return false
       const certs = player.shares.filter(s => s.corpSym === corp.sym && !s.isPresident)
@@ -23,17 +23,17 @@ const ACTIONS = [
       return certs.length >= certsNeeded
     }
   },
-  { id: 'short', label: 'Short', mLabel: 'Sh[o]rt', key: 'o', round: 'sr', gate: (g) => !!g.title.shorts },
-  { id: 'closeshort', label: 'Close Short', mLabel: 'Cl[j]', key: 'j', round: 'sr', gate: (g) => !!g.title.shorts },
+  { id: 'short', label: 'Short', key: 'o', round: 'sr', gate: (g) => !!g.title.shorts },
+  { id: 'closeshort', label: 'Close Short', key: 'j', round: 'sr', gate: (g) => !!g.title.shorts },
 
   // Private actions — context-dependent
-  { id: 'buyprivate', label: 'Priv Buy', mLabel: '[P]riv', key: 'p', round: 'any',
+  { id: 'buyprivate', label: 'Priv Buy', key: 'p', round: 'any',
     gate: (g) => {
-      // Show when unowned privates exist — we're a moderator, don't gate by round
+      // Show when unowned privates exist
       return (g.companies || []).some(c => !c.ownerId && !c.closed)
     }
   },
-  { id: 'sellprivate', label: 'Priv Sell', mLabel: 'Sel[v]', key: 'v', round: 'or',
+  { id: 'sellprivate', label: 'Priv Sell', key: 'v', round: 'or',
     gate: (g, rt, player) => {
       if (!player) return false
       return (g.companies || []).some(c => c.ownerType === 'player' && c.ownerId === player.id && !c.closed && c.canSellToCorp !== false)
@@ -41,36 +41,36 @@ const ACTIONS = [
   },
 
   // Corp OR actions
-  { id: 'revenue', label: 'Revenue', mLabel: '[R]ev', key: 'r', round: 'or', always: true },
-  { id: 'train', label: 'Train', mLabel: '[T]rain', key: 't', round: 'or', always: true },
-  { id: 'token', label: 'Token', mLabel: 'To[k]en', key: 'k', round: 'or', always: true,
+  { id: 'revenue', label: 'Revenue', key: 'r', round: 'or', always: true },
+  { id: 'train', label: 'Train', key: 't', round: 'or', always: true },
+  { id: 'token', label: 'Token', key: 'k', round: 'or', always: true,
     gate: (g, rt, player, corp) => corp?.floated && corp?.tokensPlaced < corp?.tokens?.length
   },
-  { id: 'issue', label: 'Issue', mLabel: '[I]ssue', key: 'i', round: 'or',
+  { id: 'issue', label: 'Issue', key: 'i', round: 'or',
     gate: (g, rt, player, corp) => g.title.capitalization === 'incremental' && corp?.ipoShares > 0
   },
-  { id: 'redeem', label: 'Redeem', mLabel: 'Re[d]eem', key: 'q', round: 'or',
+  { id: 'redeem', label: 'Redeem', key: 'q', round: 'or',
     gate: (g, rt, player, corp) => g.title.capitalization === 'incremental' && corp?.marketShares > 0
   },
-  { id: 'loan', label: 'Loan', mLabel: '[L]oan', key: 'l', round: 'or', gate: (g) => !!g.title.loans },
-  { id: 'interest', label: 'Interest', mLabel: 'Int', round: 'or', gate: (g) => !!g.title.loans },
-  { id: 'corpshare', label: 'Corp Trade', mLabel: '[G]corp', key: 'g', round: 'or', gate: (g) => !!g.title.corpCanBuyShares },
-  { id: 'execcar', label: 'Exec Car', mLabel: 'ExCar', round: 'or', gate: (g) => !!g.title.executiveCars },
-  { id: 'export', label: 'Export', mLabel: 'Export', round: 'or', gate: (g) => !!g.title.trainExport },
-  { id: 'discard', label: 'Discard', mLabel: 'Discard', round: 'or',
+  { id: 'loan', label: 'Loan', key: 'l', round: 'or', gate: (g) => !!g.title.loans },
+  { id: 'interest', label: 'Interest', round: 'or', gate: (g) => !!g.title.loans },
+  { id: 'corpshare', label: 'Corp Trade', key: 'g', round: 'or', gate: (g) => !!g.title.corpCanBuyShares },
+  { id: 'execcar', label: 'Exec Car', round: 'or', gate: (g) => !!g.title.executiveCars },
+  { id: 'export', label: 'Export', round: 'or', gate: (g) => !!g.title.trainExport },
+  { id: 'discard', label: 'Discard', round: 'or',
     gate: (g, rt, player, corp) => corp?.floated && corp?.trains?.length > 0
   },
-  { id: 'removetoken', label: 'Rm Token', mLabel: 'RmTok', round: 'or',
+  { id: 'removetoken', label: 'Rm Token', round: 'or',
     gate: (g, rt, player, corp) => corp?.floated && corp?.tokensPlaced > 0
   },
 
   // Pay to bank — auctions, fees, any cash-to-bank transfer
-  { id: 'paybank', label: 'Pay', mLabel: 'Pay', round: 'any', always: true },
+  { id: 'paybank', label: 'Pay', round: 'any', always: true },
   // Strategy cards — PTG
-  { id: 'takecard', label: 'Card', mLabel: 'Card', round: 'any', gate: (g) => !!g.title.strategyCards },
+  { id: 'takecard', label: 'Card', round: 'any', gate: (g) => !!g.title.strategyCards },
 
   // Concessions — 1822 family
-  { id: 'concession', label: 'Concession', mLabel: 'Conc', round: 'sr',
+  { id: 'concession', label: 'Concession', round: 'sr',
     gate: (g, rt, player) => {
       if (!player) return false
       return (g.companies || []).some(c => c.ownerType === 'player' && c.ownerId === player.id && !c.closed && c.sym.startsWith('C'))
@@ -78,12 +78,11 @@ const ACTIONS = [
   },
 
   // Merger actions — title and round specific
-  { id: 'merge', label: 'Merge', mLabel: 'Merge', round: 'any', gate: (g) => !!g.title.merger },
+  { id: 'merge', label: 'Merge', round: 'any', gate: (g) => !!g.title.merger },
 
   // Round management — always
-  { id: 'advance', label: 'Advance', mLabel: '[A]dv', key: 'a', round: 'any', always: true, category: 'round' },
-  { id: 'collect', label: 'Collect', mLabel: '[C]oll', key: 'c', round: 'any', always: true, category: 'round' },
-  { id: 'soldout', label: 'Sold-out', mLabel: 'S[o]ld', round: 'any', always: true, category: 'round' },
+  { id: 'collect', label: 'Collect', key: 'c', round: 'any', always: true, category: 'round' },
+  { id: 'soldout', label: 'Sold-out', round: 'any', always: true, category: 'round' },
   // Undo is in the title bar, not the action bar
   // Replay is in Settings, not the action bar
 ]

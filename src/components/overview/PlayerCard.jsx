@@ -1,12 +1,11 @@
-// PlayerCard — compact player detail for both skins.
+// PlayerCard — compact player detail card.
 // Shows everything about one player in a dense, readable card.
 
 import { corpPrice } from '../../engine/stockMarket.js'
 import { playerSharePercent, playerCertCount, isPresident } from '../../engine/player.js'
 import { formatCurrency } from '../../utils/currency.js'
 
-export function PlayerCard({ game, playerId, skin }) {
-  const m = skin === 'moderator'
+export function PlayerCard({ game, playerId }) {
   const player = game.players.find(p => p.id === playerId)
   if (!player) return null
 
@@ -37,50 +36,6 @@ export function PlayerCard({ game, playerId, skin }) {
 
   const netWorth = player.cash + shareValue + privateValue
 
-  if (m) return (
-    <div className="bg-blue-950 border border-blue-800 p-2 text-xs font-mono">
-      <div className="flex justify-between items-center mb-1">
-        <span className={`font-bold text-sm ${isPriority ? 'text-yellow-300' : 'text-white'}`}>
-          {player.name}{isPriority && ' \u00BB'}
-        </span>
-        {player.bankrupt && <span className="text-red-400">BANKRUPT</span>}
-      </div>
-      <div className="grid grid-cols-4 gap-x-3 gap-y-0.5 text-blue-300">
-        <div>Cash: <span className="text-green-300">{fmt(player.cash)}</span></div>
-        <div>Shares: <span className="text-cyan-300">{fmt(shareValue)}</span></div>
-        <div>Privates: <span className="text-purple-300">{fmt(privateValue)}</span></div>
-        <div>Net: <span className="text-white font-bold">{fmt(netWorth)}</span></div>
-        <div>Certs: <span className={certs > game.certLimit ? 'text-red-400 font-bold' : ''}>{certs}/{game.certLimit}</span></div>
-      </div>
-      {/* Holdings */}
-      <div className="mt-1">
-        <span className="text-green-600">Holdings: </span>
-        {holdings.length === 0 ? <span className="text-blue-400">none</span> : holdings.map(h => (
-          <span key={h.sym} className="mr-2">
-            <span className="font-bold" style={{ color: h.color }}>{h.sym}</span>
-            <span className="text-white ml-0.5">{h.pct}%</span>
-            {h.pres && <span className="text-yellow-300">P</span>}
-            <span className="text-blue-400 ml-0.5">({fmt(h.value)})</span>
-          </span>
-        ))}
-      </div>
-      {/* Privates */}
-      {privates.length > 0 && (
-        <div className="mt-0.5">
-          <span className="text-green-600">Privates: </span>
-          {privates.map(c => (
-            <span key={c.sym} className="mr-2">
-              <span className="text-purple-300">{c.sym}</span>
-              <span className="text-blue-400 ml-0.5">{fmt(c.value)}</span>
-              {c.revenue > 0 && <span className="text-green-400 ml-0.5">+{fmt(c.revenue)}/OR</span>}
-            </span>
-          ))}
-        </div>
-      )}
-    </div>
-  )
-
-  // Broker skin
   return (
     <div className="bg-broker-surface rounded-lg p-3 text-sm">
       <div className="flex justify-between items-center mb-2">

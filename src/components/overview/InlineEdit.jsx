@@ -3,7 +3,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 
-export function InlineEdit({ value, onSave, type = 'number', enabled, skin, children }) {
+export function InlineEdit({ value, onSave, type = 'number', enabled, children }) {
   const [editing, setEditing] = useState(false)
   const [input, setInput] = useState('')
   const ref = useRef(null)
@@ -24,7 +24,6 @@ export function InlineEdit({ value, onSave, type = 'number', enabled, skin, chil
     )
   }
 
-  const m = skin === 'moderator'
   const confirm = () => {
     const v = type === 'number' ? parseInt(input, 10) : input
     if (type === 'number' && isNaN(v)) { setEditing(false); return }
@@ -41,10 +40,7 @@ export function InlineEdit({ value, onSave, type = 'number', enabled, skin, chil
       onKeyDown={e => { if (e.key === 'Enter') confirm(); if (e.key === 'Escape') setEditing(false) }}
       onBlur={() => setEditing(false)}
       onClick={e => e.stopPropagation()}
-      className={m
-        ? 'w-14 bg-black border border-orange-600 rounded px-1 py-0 text-center text-xs font-mono text-orange-300'
-        : 'w-16 bg-broker-bg border border-orange-500 rounded px-1 py-0 text-center text-xs text-orange-300'
-      }
+      className="w-16 bg-broker-bg border border-orange-500 rounded px-1 py-0 text-center text-xs text-orange-300"
     />
   )
 }

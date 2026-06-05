@@ -6,9 +6,8 @@ import { corpPrice } from '../../engine/stockMarket.js'
 import { playerSharePercent } from '../../engine/player.js'
 import { formatCurrency } from '../../utils/currency.js'
 
-export function PositionMeter({ game, skin }) {
+export function PositionMeter({ game }) {
   if (!game) return null
-  const m = skin === 'moderator'
   const fmt = (n) => formatCurrency(n, game.title.currencyFormat)
 
   // Calculate net worth per player
@@ -36,39 +35,6 @@ export function PositionMeter({ game, skin }) {
   const maxTotal = sorted[0]?.total || 1
   const avgTotal = positions.reduce((s, p) => s + p.total, 0) / (positions.length || 1)
 
-  if (m) {
-    return (
-      <div className="px-2 py-1 text-xs font-mono flex-shrink-0">
-        <div className="text-green-600 mb-0.5">Position</div>
-        {sorted.map((p, i) => {
-          const barWidth = Math.round((p.total / maxTotal) * 100)
-          const ratio = avgTotal > 0 ? (p.total / avgTotal).toFixed(2) : '—'
-          return (
-            <div key={p.id} className="flex items-center gap-1 mb-px">
-              <span className="text-yellow-300 w-16 truncate">{p.name}</span>
-              <div className="flex-1 h-3 bg-blue-950 rounded-sm overflow-hidden relative">
-                <div className="h-full rounded-sm flex" style={{ width: barWidth + '%' }}>
-                  <div className="bg-green-700 h-full" style={{ width: p.cash > 0 ? Math.round((p.cash / p.total) * 100) + '%' : '0' }} />
-                  <div className="bg-cyan-700 h-full" style={{ width: p.shareValue > 0 ? Math.round((p.shareValue / p.total) * 100) + '%' : '0' }} />
-                  <div className="bg-purple-700 h-full" style={{ width: p.privateValue > 0 ? Math.round((p.privateValue / p.total) * 100) + '%' : '0' }} />
-                </div>
-              </div>
-              <span className="text-white w-16 text-right">{fmt(p.total)}</span>
-              <span className="text-blue-400 w-10 text-right">{ratio}x</span>
-            </div>
-          )
-        })}
-        <div className="flex gap-3 mt-0.5 text-[9px] text-blue-400">
-          <span><span className="inline-block w-2 h-2 bg-green-700 rounded-sm mr-0.5" />Cash</span>
-          <span><span className="inline-block w-2 h-2 bg-cyan-700 rounded-sm mr-0.5" />Shares</span>
-          <span><span className="inline-block w-2 h-2 bg-purple-700 rounded-sm mr-0.5" />Privates</span>
-          <span>Avg: {fmt(Math.round(avgTotal))}</span>
-        </div>
-      </div>
-    )
-  }
-
-  // Broker skin
   return (
     <div className="px-3 py-2 text-xs flex-shrink-0 bg-broker-surface border-t border-broker-border">
       <div className="text-broker-text-muted font-medium mb-1">Position</div>

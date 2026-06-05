@@ -2,14 +2,11 @@
 // Who holds each card, whether it's been used (unique action or train permit).
 
 import { useGameStore } from '../../store/gameStore.js'
-import { useUIStore } from '../../store/uiStore.js'
 import { useDispatch } from '../../hooks/useDispatch.js'
 
 export default function StrategyCardsTab() {
   const game = useGameStore((s) => s.game)
-  const skin = useUIStore((s) => s.skin)
   const dispatch = useDispatch()
-  const m = skin === 'moderator'
 
   if (!game || !game.title.strategyCards?.length) return null
 
@@ -28,11 +25,8 @@ export default function StrategyCardsTab() {
   const assignedIds = new Set(playerCards.map(c => c.id))
 
   return (
-    <div className={m
-      ? 'font-mono text-xs p-2 space-y-3 overflow-y-auto bg-blue-950 text-blue-300 h-full'
-      : 'text-sm p-3 space-y-4 overflow-y-auto bg-broker-bg h-full'
-    }>
-      <h2 className={m ? 'text-green-400 font-bold' : 'text-broker-text font-bold text-lg'}>
+    <div className='text-sm p-3 space-y-4 overflow-y-auto bg-broker-bg h-full'>
+      <h2 className="text-broker-text font-bold text-lg">
         Strategy Cards
       </h2>
 
@@ -44,15 +38,12 @@ export default function StrategyCardsTab() {
           const assignedTo = holder?.assignedTo
 
           return (
-            <div key={card.id} className={m
-              ? 'bg-blue-900/30 border border-blue-800 rounded p-3'
-              : 'bg-broker-surface rounded-lg p-3 border border-broker-border'
-            }>
+            <div key={card.id} className='bg-broker-surface rounded-lg p-3 border border-broker-border'>
               {/* Card header */}
               <div className="flex items-center gap-2 mb-1">
                 <span className="w-3 h-3 rounded-full inline-block flex-shrink-0"
                   style={{ backgroundColor: card.color === 'white' ? '#e5e5e5' : card.color }} />
-                <span className={`font-bold ${m ? 'text-white' : 'text-broker-text'}`}>
+                <span className={`font-bold text-broker-text`}>
                   {card.name}
                 </span>
                 {holder && (
@@ -65,14 +56,14 @@ export default function StrategyCardsTab() {
                   </span>
                 )}
                 {!holder && (
-                  <span className={`ml-auto text-xs ${m ? 'text-blue-500' : 'text-broker-text-muted'}`}>
+                  <span className={`ml-auto text-xs text-broker-text-muted`}>
                     Unassigned
                   </span>
                 )}
               </div>
 
               {/* Abilities */}
-              <div className={`text-xs space-y-0.5 ${m ? 'text-blue-300' : 'text-broker-text-muted'}`}>
+              <div className={`text-xs space-y-0.5 text-broker-text-muted`}>
                 <div><span className="font-medium">Permit:</span> {card.permit}</div>
                 <div><span className="font-medium">Unique:</span> {card.unique}</div>
               </div>
@@ -83,7 +74,7 @@ export default function StrategyCardsTab() {
                   {game.players.map(p => (
                     <button key={p.id}
                       onClick={() => dispatch({ type: 'GIVE_CARD', playerId: p.id, card })}
-                      className={`text-[10px] px-2 py-0.5 rounded ${m ? 'bg-blue-800 text-blue-300 hover:bg-blue-700' : 'bg-broker-surface-hover text-broker-text-muted hover:text-white'}`}>
+                      className={`text-[10px] px-2 py-0.5 rounded bg-broker-surface-hover text-broker-text-muted hover:text-white`}>
                       → {p.name}
                     </button>
                   ))}
@@ -92,15 +83,15 @@ export default function StrategyCardsTab() {
 
               {/* Holder info */}
               {holder && (
-                <div className={`mt-2 text-xs flex items-center gap-2 ${m ? 'text-blue-400' : 'text-broker-text-muted'}`}>
+                <div className={`mt-2 text-xs flex items-center gap-2 text-broker-text-muted`}>
                   <span>
-                    Held by <span className={m ? 'text-white' : 'text-broker-text'}>{holder.playerName}</span>
+                    Held by <span className="text-broker-text">{holder.playerName}</span>
                     {assignedTo && <span> — attached to {assignedTo.corpSym} train</span>}
                     {usedAs === 'unique_action' && <span> — unique action used</span>}
                   </span>
                   <button
                     onClick={() => dispatch({ type: 'RETURN_CARD', playerId: holder.playerId, cardId: card.id })}
-                    className={`ml-auto text-[10px] px-2 py-0.5 rounded ${m ? 'bg-blue-800 text-blue-300 hover:bg-blue-700' : 'bg-broker-surface-hover text-broker-text-muted hover:text-white'}`}
+                    className={`ml-auto text-[10px] px-2 py-0.5 rounded bg-broker-surface-hover text-broker-text-muted hover:text-white`}
                   >
                     Return
                   </button>

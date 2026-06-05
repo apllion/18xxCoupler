@@ -1,6 +1,5 @@
 // BrokerOverview — Modern slim overview. Broker theme colors, clean typography.
 
-import { useState, useRef, useEffect } from 'react'
 import { useOverviewData, playerSharePercent, playerCertCount, isPresident } from './useOverviewData.js'
 import { useUIStore } from '../../store/uiStore.js'
 import { ActionPanel } from './ActionPanel.jsx'
@@ -9,9 +8,6 @@ import { InlineEdit } from './InlineEdit.jsx'
 
 export default function BrokerOverview() {
   const d = useOverviewData()
-  const [confirmAdvance, setConfirmAdvance] = useState(false)
-  const confirmTimer = useRef(null)
-  useEffect(() => () => clearTimeout(confirmTimer.current), [])
   if (!d.game) return null
   const { game, fmt, phase, label, limit, corps, unfloated, depotGroups, lastRevenue, corpPrivates, playerPrivates, lastAction, selPlayer, myPlayerId, selCorp, curRow, setCurRow, curCol, setCurCol, panel, setPanel, revenueInput, setRevenueInput, revRef, rootRef, cursorRef, onKeyDown, closePanel, doAction, inReplay, fullLog, enterReplay, exitReplay, replayTo, enterWhatIf, isWhatIf, exitWhatIf, canUndo, undo, canRedo, redo, isSR, isOR, isPre, superUmpire } = d
   const su = superUmpire
@@ -29,40 +25,30 @@ export default function BrokerOverview() {
       }`}>
         <div className="flex items-center gap-3">
           <span className="font-bold text-lg text-white">{game.title.title}</span>
-          <button onClick={() => {
-            if (confirmAdvance) {
-              clearTimeout(confirmTimer.current)
-              setConfirmAdvance(false)
-              doAction({ type: 'ADVANCE_ROUND' })
-            } else {
-              setConfirmAdvance(true)
-              confirmTimer.current = setTimeout(() => setConfirmAdvance(false), 2000)
-            }
-          }}
-            className={`text-sm font-medium px-2 py-0.5 rounded cursor-pointer transition-all ${
-            confirmAdvance ? 'bg-red-700 text-white animate-pulse' :
-            isSR ? 'bg-green-800 text-green-200 hover:brightness-125' : isOR ? 'bg-amber-800 text-amber-200 hover:brightness-125' : 'bg-broker-surface-hover text-broker-text-muted'
-          }`}>{confirmAdvance ? 'Tap to confirm' : `${isSR ? label : isOR ? label : 'Setup'} →`}</button>
+          <div className="flex">
+            {(game.roundTracker?.roundTypes || ['SR', 'OR']).map((rType) => {
+              const active = rType === game.roundTracker?.roundType
+              const colors = active
+                ? rType === 'SR' ? 'bg-green-800 text-green-200'
+                  : rType === 'OR' ? 'bg-amber-800 text-amber-200'
+                  : rType === 'Pregame' ? 'bg-purple-800 text-purple-200'
+                  : 'bg-blue-800 text-blue-200'
+                : 'bg-broker-surface-hover text-broker-text-muted hover:text-white'
+              return (
+                <button key={rType}
+                  onClick={() => doAction({ type: 'SET_ROUND', roundType: rType })}
+                  className={`text-sm font-medium px-2 py-0.5 first:rounded-l last:rounded-r border-r border-broker-border last:border-r-0 transition-colors ${colors}`}
+                >{rType}</button>
+              )
+            })}
+          </div>
           <span className="text-xs text-broker-text-muted">Phase {phase.name} / Limit {limit}</span>
         </div>
         <div className="flex items-center gap-2">
           {inReplay && <span className="text-xs font-medium text-purple-300 bg-purple-900/40 px-2 py-0.5 rounded">{curIdx + 1}/{fullLog.length}</span>}
-          <span className={`text-sm font-medium ${game.bank.cash <= 0 ? 'text-red-400' : 'text-broker-text'}`}>Bank <InlineEdit value={game.bank.cash} enabled={su} skin="broker"
-            onSave={v => doAction({ type: 'SET_CASH', entityId: 'bank', entityType: 'bank', value: v })}>{fmt(game.bank.cash)}</InlineEdit></span>
-          <span className="flex items-center gap-0.5">
-            <button onClick={() => useUIStore.getState().setMyPlayer(null)}
-              className={`text-xs px-1.5 py-0.5 rounded ${!myPlayerId ? 'bg-broker-gold/20 text-broker-gold font-bold' : 'bg-broker-surface-hover text-broker-text-muted hover:text-white'}`}>
-              Umpire
-            </button>
-            {game.players.map(p => (
-              <button key={p.id} onClick={() => useUIStore.getState().setMyPlayer(p.id)}
-                className={`text-xs px-1.5 py-0.5 rounded ${myPlayerId === p.id ? 'bg-broker-gold/20 text-broker-gold font-bold' : 'bg-broker-surface-hover text-broker-text-muted hover:text-white'}`}>
-                {p.name.slice(0, 4)}
-              </button>
-            ))}
-          </span>
-          <button onClick={() => canUndo() && undo()} className="text-xs text-broker-text-muted hover:text-white px-1">Undo</button>
-          <button onClick={() => canRedo() && redo()} className="text-xs text-broker-text-muted hover:text-white px-1">Redo</button>
+          <span className={`text-sm font-medium ${game.bank.cash <= 0 ? 'text-red-400' : 'text-broker-text'}`}>Bank <InlineEdit value={game.bank.cash} enabled={su}            onSave={v => doAction({ type: 'SET_CASH', entityId: 'bank', entityType: 'bank', value: v })}>{fmt(game.bank.cash)}</InlineEdit></span>
+          <button onClick={() => canUndo() && undo()} className="text-xs text-broker-text-muted hover:text-white px-1" title="Undo">↩</button>
+          <button onClick={() => canRedo() && redo()} className="text-xs text-broker-text-muted hover:text-white px-1" title="Redo">↪</button>
           <button onClick={() => setPanel(panel === 'settings' ? null : 'settings')} className="text-xs text-broker-text-muted hover:text-white bg-broker-surface-hover px-2 py-0.5 rounded">Settings</button>
         </div>
       </div>
@@ -93,11 +79,11 @@ export default function BrokerOverview() {
           <thead className="sticky top-0 z-20">
             <tr className="bg-broker-surface text-broker-text-muted">
               <th className="text-left px-2 py-1 sticky left-0 bg-broker-surface z-30 min-w-[90px] font-medium">Player</th>
-              <th className="px-2 text-right min-w-[50px] font-medium">Cash</th>
+              <th className="px-2 text-right min-w-[50px] font-bold text-sky-300">Cash</th>
               <th className="px-2 text-center min-w-[36px] font-medium">Cert</th>
               {game.title.taxThresholds && <th className="px-1 text-center text-[10px] font-medium text-red-400">Tax</th>}
               {corps.map((c, ci) => (
-                <th key={c.sym} className={`px-2 text-center min-w-[48px] font-bold cursor-pointer bg-broker-surface ${ci === curCol ? '!bg-broker-surface-hover' : ''} ${!c.ipoed ? 'opacity-30' : ''}`}
+                <th key={c.sym} className={`px-2 text-center min-w-[48px] font-bold cursor-pointer bg-broker-surface ${ci === curCol ? '!bg-broker-surface-hover' : ''} ${!c.ipoed ? 'opacity-30' : ''} ${c.operated ? 'border-b-2 border-green-500' : ''}`}
                   style={{ color: c.color }}
                   onClick={() => setCurCol(ci)}>{c.sym}</th>
               ))}
@@ -124,9 +110,8 @@ export default function BrokerOverview() {
                       ))}</div>
                     )}
                   </td>
-                  <td className="px-2 text-right text-broker-text font-medium">
-                    <InlineEdit value={p.cash} enabled={su} skin="broker"
-                      onSave={v => doAction({ type: 'SET_CASH', entityId: p.id, entityType: 'player', value: v })}>
+                  <td className="px-2 text-right font-bold text-sky-300">
+                    <InlineEdit value={p.cash} enabled={su}                      onSave={v => doAction({ type: 'SET_CASH', entityId: p.id, entityType: 'player', value: v })}>
                       {fmt(p.cash)}
                     </InlineEdit>
                   </td>
@@ -164,32 +149,27 @@ export default function BrokerOverview() {
             })}
 
             {/* Separator */}
-            <tr><td colSpan={3 + corps.length} className="h-px bg-broker-border"></td></tr>
+            <tr><td colSpan={3 + (game.title.taxThresholds ? 1 : 0) + corps.length} className="h-px bg-broker-border"></td></tr>
 
             {/* Corp rows */}
             <BRow extraCols={game.title.taxThresholds ? 1 : 0} l="Price" corps={corps} cc={curCol} r={c => !c.ipoed ? '' :
-              <InlineEdit value={`${c.pos?.row ?? 0},${c.pos?.col ?? 0}`} type="text" enabled={su} skin="broker"
-                onSave={v => { const [r, cl] = v.split(',').map(Number); if (!isNaN(r) && !isNaN(cl)) doAction({ type: 'SET_MARKET_POSITION', corpSym: c.sym, row: r, col: cl }) }}>
+              <InlineEdit value={`${c.pos?.row ?? 0},${c.pos?.col ?? 0}`} type="text" enabled={su}                onSave={v => { const [r, cl] = v.split(',').map(Number); if (!isNaN(r) && !isNaN(cl)) doAction({ type: 'SET_MARKET_POSITION', corpSym: c.sym, row: r, col: cl }) }}>
                 <span className="text-white font-medium">{fmt(c.price)}</span>
               </InlineEdit>} />
             <BRow extraCols={game.title.taxThresholds ? 1 : 0} l="Par" corps={corps} cc={curCol} r={c => !c.ipoed ? '' :
-              <InlineEdit value={c.parPrice} enabled={su} skin="broker"
-                onSave={v => doAction({ type: 'SET_CORP_FIELD', corpSym: c.sym, field: 'parPrice', value: v })}>
+              <InlineEdit value={c.parPrice} enabled={su}                onSave={v => doAction({ type: 'SET_CORP_FIELD', corpSym: c.sym, field: 'parPrice', value: v })}>
                 <span className="text-broker-text-muted">{fmt(c.parPrice)}</span>
               </InlineEdit>} />
-            <BRow extraCols={game.title.taxThresholds ? 1 : 0} l="Treasury" corps={corps} cc={curCol} r={c => !c.ipoed ? '' :
-              <InlineEdit value={c.cash} enabled={su} skin="broker"
-                onSave={v => doAction({ type: 'SET_CASH', entityId: c.sym, entityType: 'corporation', value: v })}>
-                <span className={c.cash < 0 ? 'text-red-400' : 'text-broker-text'}>{fmt(c.cash)}</span>
+            <BRow extraCols={game.title.taxThresholds ? 1 : 0} l="Treasury" highlight corps={corps} cc={curCol} r={c => !c.ipoed ? '' :
+              <InlineEdit value={c.cash} enabled={su}                onSave={v => doAction({ type: 'SET_CASH', entityId: c.sym, entityType: 'corporation', value: v })}>
+                <span className={c.cash < 0 ? 'text-red-400' : 'text-sky-300 font-bold'}>{fmt(c.cash)}</span>
               </InlineEdit>} />
             <BRow extraCols={game.title.taxThresholds ? 1 : 0} l="IPO" corps={corps} cc={curCol} r={c => c.ipoShares < 100 ?
-              <InlineEdit value={c.ipoShares} enabled={su} skin="broker"
-                onSave={v => doAction({ type: 'SET_CORP_FIELD', corpSym: c.sym, field: 'ipoShares', value: v })}>
+              <InlineEdit value={c.ipoShares} enabled={su}                onSave={v => doAction({ type: 'SET_CORP_FIELD', corpSym: c.sym, field: 'ipoShares', value: v })}>
                 {c.ipoShares}%
               </InlineEdit> : ''} />
             <BRow extraCols={game.title.taxThresholds ? 1 : 0} l="Pool" corps={corps} cc={curCol} r={c => c.marketShares > 0 ?
-              <InlineEdit value={c.marketShares} enabled={su} skin="broker"
-                onSave={v => doAction({ type: 'SET_CORP_FIELD', corpSym: c.sym, field: 'marketShares', value: v })}>
+              <InlineEdit value={c.marketShares} enabled={su}                onSave={v => doAction({ type: 'SET_CORP_FIELD', corpSym: c.sym, field: 'marketShares', value: v })}>
                 <span className="text-amber-400">{c.marketShares}%</span>
               </InlineEdit> : ''} />
             <BRow extraCols={game.title.taxThresholds ? 1 : 0} l="Trains" corps={corps} cc={curCol} onClick={(sym, ci) => { setCurCol(ci); setPanel('train') }} r={c => {
@@ -207,8 +187,7 @@ export default function BrokerOverview() {
             <BRow extraCols={game.title.taxThresholds ? 1 : 0} l="Tokens" corps={corps} cc={curCol}
               onClick={(sym, ci) => { setCurCol(ci); setPanel(panel === 'token' ? null : 'token') }}
               r={c => !c.floated ? '' :
-              <InlineEdit value={c.tokensPlaced} enabled={su} skin="broker"
-                onSave={v => doAction({ type: 'SET_CORP_FIELD', corpSym: c.sym, field: 'tokensPlaced', value: v })}>
+              <InlineEdit value={c.tokensPlaced} enabled={su}                onSave={v => doAction({ type: 'SET_CORP_FIELD', corpSym: c.sym, field: 'tokensPlaced', value: v })}>
                 {c.tokensPlaced}/{c.tokens.length}
               </InlineEdit>} />
             {game.title.loans && <BRow extraCols={game.title.taxThresholds ? 1 : 0} l="Loans" corps={corps} cc={curCol} r={c => !c.floated ? '' : c.loans ? <span className="text-red-400 font-bold">{c.loans}</span> : '0'} />}
@@ -233,6 +212,20 @@ export default function BrokerOverview() {
                   : ''
               }} />
             )}
+            {/* Corp-to-corp holdings: one row per target corp, percentages in buyer columns */}
+            {(() => {
+              const targets = corps.filter(c => game.corporations.some(h => (h.sharesHeld || []).some(s => s.corpSym === c.sym)))
+              if (targets.length === 0) return null
+              return targets.map(target => (
+                <BRow key={`ch_${target.sym}`} extraCols={game.title.taxThresholds ? 1 : 0}
+                  l={<span style={{ color: target.color }}>{target.sym}</span>}
+                  corps={corps} cc={curCol}
+                  r={c => {
+                    const pct = (c.sharesHeld || []).filter(s => s.corpSym === target.sym).reduce((sum, s) => sum + s.percent, 0)
+                    return pct > 0 ? <span className="text-cyan-400">{pct}%</span> : ''
+                  }} />
+              ))
+            })()}
           </tbody>
         </table>
       </div>
@@ -254,7 +247,7 @@ export default function BrokerOverview() {
       {panel ? (
         <ActionPanel panel={panel} game={game} player={selPlayer} corp={selCorp} unfloated={unfloated}
           fmt={fmt} revenueInput={revenueInput} setRevenueInput={setRevenueInput}
-          revRef={revRef} onClose={closePanel} doAction={doAction} skin="broker" />
+          revRef={revRef} onClose={closePanel} doAction={doAction} />
       ) : inReplay ? (
         <div className="bg-broker-surface border-t border-broker-border px-3 py-2 flex-shrink-0 flex items-center gap-2 flex-wrap">
           <Bb t="Prev" o={() => replayTo(Math.max(-1, curIdx - 1))} />
@@ -268,16 +261,16 @@ export default function BrokerOverview() {
       ) : (
         <ContextBar game={game} selPlayer={selPlayer} selCorp={selCorp} myPlayerId={myPlayerId}
           setPanel={setPanel} doAction={doAction} revRef={revRef} canUndo={canUndo} undo={undo}
-          enterReplay={enterReplay} lastAction={lastAction} skin="broker" />
+          enterReplay={enterReplay} lastAction={lastAction} />
       )}
     </div>
   )
 }
 
-function BRow({ l, corps, cc, r, onClick, extraCols = 0 }) {
+function BRow({ l, corps, cc, r, onClick, extraCols = 0, highlight }) {
   return (
-    <tr className="border-t border-broker-border/20">
-      <td colSpan={3 + extraCols} className="px-2 py-0.5 text-broker-text-muted sticky left-0 bg-broker-bg z-10 text-xs">{l}</td>
+    <tr className={`border-t border-broker-border/20 ${highlight ? 'bg-broker-surface-hover/10' : ''}`}>
+      <td colSpan={3 + extraCols} className={`px-2 py-0.5 sticky left-0 z-10 text-xs ${highlight ? 'bg-broker-surface-hover/30 text-sky-300 font-medium' : 'bg-broker-bg text-broker-text-muted'}`}>{l}</td>
       {corps.map((c, ci) => (
         <td key={c.sym}
           className={`px-2 text-center py-0.5 text-xs ${ci === cc ? 'bg-broker-surface-hover/20' : ''} ${onClick ? 'cursor-pointer hover:bg-broker-surface-hover/30' : ''}`}

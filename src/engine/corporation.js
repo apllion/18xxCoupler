@@ -38,6 +38,9 @@ export function createCorporation(def, title) {
     // Loans (1817, 1867)
     loans: 0,
 
+    // Per-round state
+    operated: false,
+
     // Liquidation state
     liquidated: false,
   }

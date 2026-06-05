@@ -337,7 +337,7 @@ export default function PlayersTab() {
           <SectionHeader title="Analysis" />
           <div className="bg-broker-surface rounded-lg p-3">
             <div className="text-xs text-broker-text-muted mb-2 font-medium uppercase">Advisor</div>
-            <AdvisorSection tips={tips} skin="broker" onCorpClick={goToCorp} />
+            <AdvisorSection tips={tips} onCorpClick={goToCorp} />
           </div>
         </>
       )}

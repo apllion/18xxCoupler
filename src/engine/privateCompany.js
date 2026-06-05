@@ -69,6 +69,23 @@ export function collectAllRevenue(state) {
       }
     }
   }
+
+  // CEO salary: pay each player holding a president share
+  const ceoIncome = state.title.ceoIncome
+  if (ceoIncome) {
+    for (const player of state.players) {
+      const ceoShares = player.shares.filter((s) => s.isPresident)
+      if (ceoShares.length > 0) {
+        const total = ceoIncome * ceoShares.length
+        player.cash += total
+        state.bank.cash -= total
+        for (const s of ceoShares) {
+          results.push({ sym: `${s.corpSym} CEO`, amount: ceoIncome, ownerId: player.id })
+        }
+      }
+    }
+  }
+
   return results
 }
 

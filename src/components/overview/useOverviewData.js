@@ -33,6 +33,7 @@ export function useOverviewData() {
 
   const [curRow, setCurRow] = useState(0)
   const [curCol, setCurCol] = useState(0)
+  const selectedCorpSym = useRef(null)
   const [panel, setPanel] = useState(null)
   const [revenueInput, setRevenueInput] = useState('')
   const [trainPrice, setTrainPrice] = useState('')
@@ -115,7 +116,16 @@ export function useOverviewData() {
   // For share actions: use myPlayerId if set, otherwise cursor row
   const actingPlayer = myPlayerId ? game?.players?.find(p => p.id === myPlayerId) : cursorPlayer
   const selPlayer = actingPlayer || cursorPlayer
+  // Stabilize corp selection when sort order changes
+  useEffect(() => {
+    if (selectedCorpSym.current && corps.length > 0) {
+      const newIdx = corps.findIndex(c => c.sym === selectedCorpSym.current)
+      if (newIdx >= 0 && newIdx !== curCol) setCurCol(newIdx)
+    }
+  }, [corps])
+
   const selCorp = corps[curCol] || corps[0]
+  useEffect(() => { selectedCorpSym.current = selCorp?.sym || null }, [selCorp?.sym])
 
   const rt = game?.roundTracker
   const isSR = rt?.roundType === 'SR'
@@ -136,7 +146,7 @@ export function useOverviewData() {
     // Number keys: navigate menu when open, player select otherwise
     if (key >= '0' && key <= '9' && panel === 'navigate') {
       e.preventDefault()
-      const navMap = { '1': 'overview', '2': 'moderator', '3': 'market', '4': 'corps', '5': 'players', '6': 'privates', '7': 'beer', '0': 'summary' }
+      const navMap = { '1': 'overview', '3': 'market', '4': 'corps', '5': 'players', '6': 'privates', '7': 'beer', '0': 'summary' }
       if (navMap[key]) { useUIStore.getState().setActiveTab(navMap[key]); closePanel() }
       return
     }
@@ -155,7 +165,7 @@ export function useOverviewData() {
     if (inReplay) return
     if (!selPlayer || !selCorp) return
     // Actions
-    if (key === 'b' && !panel) { if (!selCorp.ipoed && !selCorp.floated) { setPanel('par'); return } if (selCorp.ipoShares > 0) doAction({ type: 'BUY_SHARE', playerId: selPlayer.id, corpSym: selCorp.sym, source: 'ipo', percent: 10 }); else if (selCorp.marketShares > 0) doAction({ type: 'BUY_SHARE', playerId: selPlayer.id, corpSym: selCorp.sym, source: 'market', percent: 10 }) }
+    if (key === 'b' && !panel) { if (!selCorp.ipoed && !selCorp.floated) { setPanel('par'); return } if (selCorp.ipoShares > 0 && selCorp.marketShares > 0) { setPanel('buy'); return } if (selCorp.ipoShares > 0) doAction({ type: 'BUY_SHARE', playerId: selPlayer.id, corpSym: selCorp.sym, source: 'ipo', percent: 10 }); else if (selCorp.marketShares > 0) doAction({ type: 'BUY_SHARE', playerId: selPlayer.id, corpSym: selCorp.sym, source: 'market', percent: 10 }) }
     if (key === 'm' && !panel && selCorp.marketShares > 0) doAction({ type: 'BUY_SHARE', playerId: selPlayer.id, corpSym: selCorp.sym, source: 'market', percent: 10 })
     if (key === 's' && !panel && playerSharePercent(selPlayer, selCorp.sym) > 0) doAction({ type: 'SELL_SHARES', playerId: selPlayer.id, corpSym: selCorp.sym, percent: 10 })
     if (key === 'r' && !panel) { setPanel('revenue'); setTimeout(() => revRef.current?.focus(), 50) }
@@ -165,23 +175,12 @@ export function useOverviewData() {
     if (key === 'p' && !panel) setPanel('buyprivate')
     if (key === 'l' && !panel && game?.title?.loans && selCorp?.floated) setPanel('loan')
     if (key === 'g' && !panel && game?.title?.corpCanBuyShares && selCorp?.floated) setPanel('corpshare')
-    if (key === 'a' && !panel) doAction({ type: 'ADVANCE_ROUND' })
     if (key === 'c' && !panel) doAction({ type: 'COLLECT_ALL_REVENUE' })
     if (key === 'o' && !panel) doAction({ type: 'SOLD_OUT_ADJUST' })
     if (key === 'i' && !panel && game?.title?.loans && selCorp?.floated) doAction({ type: 'PAY_INTEREST', corpSym: selCorp.sym })
     if (key === 'd' && !panel && selCorp) { setPanel('corpdetail') }
     if (key === 'f' && !panel) { setPanel('playerdetail') }
-    // Tab opens navigate popup only in Moderator skin
-    if (key === 'Tab' && useUIStore.getState().skin === 'moderator') { e.preventDefault(); setPanel('navigate') }
     if (key === 'x' && !panel) { setPanel('settings') }
-    // F-keys for inline panels (Moderator only)
-    if (useUIStore.getState().skin === 'moderator') {
-      if (key === 'F1') { e.preventDefault(); closePanel() }
-      if (key === 'F3') { e.preventDefault(); setPanel('corpdetail') }
-      if (key === 'F4') { e.preventDefault(); setPanel('playerdetail') }
-      if (key === 'F5') { e.preventDefault(); setPanel('buyprivate') }
-      if (key === 'F6') { e.preventDefault(); setPanel('settings') }
-    }
   }, [game, corps, selPlayer, selCorp, panel, canUndo, undo, canRedo, redo, unfloated, inReplay, fullLog])
 
   useEffect(() => { rootRef.current?.focus() }, [])

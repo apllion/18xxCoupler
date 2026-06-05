@@ -9,22 +9,17 @@ import { formatCurrency } from '../../utils/currency.js'
 
 export default function RouteCalcTab() {
   const game = useGameStore((s) => s.game)
-  const skin = useUIStore((s) => s.skin)
-  const m = skin === 'moderator'
   const fmt = (n) => formatCurrency(n, game?.title?.currencyFormat || '$')
 
   return (
-    <div className={m
-      ? 'font-mono text-xs p-2 space-y-3 overflow-y-auto bg-blue-950 text-blue-300 h-full'
-      : 'text-sm p-3 space-y-4 overflow-y-auto bg-broker-bg h-full'
-    }>
-      <h2 className={m ? 'text-green-400 font-bold' : 'text-broker-text font-bold text-lg'}>Route Calculator</h2>
-      <RouteCalc game={game} fmt={fmt} m={m} />
+    <div className="text-sm p-3 space-y-4 overflow-y-auto bg-broker-bg h-full">
+      <h2 className="text-broker-text font-bold text-lg">Route Calculator</h2>
+      <RouteCalc game={game} fmt={fmt} />
     </div>
   )
 }
 
-function RouteCalc({ game, fmt, m }) {
+function RouteCalc({ game, fmt }) {
   const activeSym = useUIStore.getState().activeCorpSym
   const savedRoutes = useUIStore((s) => s.savedRoutes)
   const saveRoutes = useUIStore((s) => s.saveRoutes)
@@ -119,26 +114,19 @@ function RouteCalc({ game, fmt, m }) {
   const total = trains.reduce((s, t) => s + trainRev(t), 0)
 
   // --- Styles ---
-  const labelCls = m ? 'text-blue-400 text-[10px]' : 'text-broker-text-muted text-[10px]'
-  const nameInput = m
-    ? 'w-10 bg-black/30 border border-blue-800 rounded px-1 py-0.5 text-xs text-blue-300 focus:outline-none'
-    : 'w-10 bg-broker-bg border border-broker-border rounded px-1 py-0.5 text-xs text-white focus:outline-none'
+  const labelCls = 'text-broker-text-muted text-[10px]'
+  const nameInput = 'w-10 bg-broker-bg border border-broker-border rounded px-1 py-0.5 text-xs text-white focus:outline-none'
   return (
     <>
       {/* Load from game */}
       {game && corp.sym && game.corporations.some(c => c.sym === corp.sym && c.floated) && (
-        <button onClick={loadFromGame} className={m
-          ? 'text-xs bg-blue-800 text-blue-300 hover:bg-blue-700 px-3 py-1.5 rounded self-start'
-          : 'text-xs bg-broker-surface-hover text-broker-text hover:text-white px-3 py-1.5 rounded self-start'
-        }>Load {corp.sym} trains from game</button>
+        <button onClick={loadFromGame} className="text-xs bg-broker-surface-hover text-broker-text hover:text-white px-3 py-1.5 rounded self-start"
+        >Load {corp.sym} trains from game</button>
       )}
 
       {/* Total */}
-      <div className={m
-        ? 'bg-green-900/30 border border-green-800 rounded p-2 flex items-center gap-3 flex-wrap'
-        : 'bg-broker-surface border border-broker-border rounded-lg p-3 flex items-center gap-3 flex-wrap'
-      }>
-        <span className={`text-2xl font-bold ${m ? 'text-white' : 'text-broker-text'}`}>{fmt(total)}</span>
+      <div className="bg-broker-surface border border-broker-border rounded-lg p-3 flex items-center gap-3 flex-wrap">
+        <span className={`text-2xl font-bold text-broker-text`}>{fmt(total)}</span>
         <span className={labelCls}>{fmt(Math.floor(total / 10))}/share</span>
         {trains.filter(t => t.stops.length > 0).map(t => (
           <span key={t.id} className="text-xs">{t.name || '?'}: {fmt(trainRev(t))}</span>
@@ -148,10 +136,8 @@ function RouteCalc({ game, fmt, m }) {
             useUIStore.getState().setRouteRevenue(corp.sym, total)
             useUIStore.getState().setActiveCorp(corp.sym)
             useUIStore.getState().setActiveTab('corps')
-          }} className={m
-            ? 'ml-auto text-xs bg-green-800 text-green-200 hover:bg-green-700 px-3 py-1.5 rounded font-bold'
-            : 'ml-auto text-xs bg-green-700 text-white hover:bg-green-600 px-3 py-1.5 rounded font-bold'
-          }>→ {corp.sym} Pay/Withhold</button>
+          }} className="ml-auto text-xs bg-green-700 text-white hover:bg-green-600 px-3 py-1.5 rounded font-bold"
+          >→ {corp.sym} Pay/Withhold</button>
         )}
       </div>
 
@@ -189,7 +175,7 @@ function RouteCalc({ game, fmt, m }) {
             }} className={`text-[9px] px-1 py-1 rounded-r transition-colors ${
               pendingDelete === `del-corp-${sym}`
                 ? 'bg-red-600 text-white animate-pulse'
-                : (m ? 'bg-blue-900/50 text-blue-400' : 'bg-broker-bg text-broker-text-muted/40 hover:text-red-400')
+                : 'bg-broker-bg text-broker-text-muted/40 hover:text-red-400'
             }`}>{pendingDelete === `del-corp-${sym}` ? '×?' : '×'}</button>
           </span>
         ))}
@@ -216,10 +202,8 @@ function RouteCalc({ game, fmt, m }) {
             setTrains([{ id: String(Date.now()), name: '2', stops: [], mult: 1 }])
             setActiveTrain(null)
             setNewCorpName('')
-          }} className={m
-            ? 'text-sm bg-green-900/50 text-green-300 hover:bg-green-800 disabled:opacity-30 px-3 py-1.5 rounded'
-            : 'text-sm bg-broker-surface-hover text-broker-text hover:text-white disabled:opacity-30 px-3 py-1.5 rounded'
-          }>+ Corp</button>
+          }} className="text-sm bg-broker-surface-hover text-broker-text hover:text-white disabled:opacity-30 px-3 py-1.5 rounded"
+          >+ Corp</button>
       </div>
 
       {/* Train cards */}
@@ -227,10 +211,7 @@ function RouteCalc({ game, fmt, m }) {
         const rev = trainRev(t)
         const isActive = activeTrain === t.id
         return (
-          <div key={t.id} className={m
-            ? `bg-blue-900/30 border ${isActive ? 'border-green-600' : 'border-blue-800'} rounded p-2`
-            : `bg-broker-surface border ${isActive ? 'border-blue-500' : 'border-broker-border'} rounded-lg p-3`
-          }>
+          <div key={t.id} className={`bg-broker-surface border ${isActive ? 'border-blue-500' : 'border-broker-border'} rounded-lg p-3`}>
             {/* Header */}
             <div className="flex items-center gap-2 mb-1">
               <input type="text" value={t.name}
@@ -238,8 +219,8 @@ function RouteCalc({ game, fmt, m }) {
                 placeholder="train" className={`${nameInput} font-bold`} />
               <button onClick={() => setActiveTrain(isActive ? null : t.id)}
                 className={`text-sm px-3 py-1.5 rounded font-medium ${isActive
-                  ? (m ? 'bg-green-700 text-white' : 'bg-blue-600 text-white')
-                  : (m ? 'bg-blue-800 text-blue-300' : 'bg-broker-surface-hover text-broker-text')
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-broker-surface-hover text-broker-text'
                 }`}>{isActive ? 'done' : 'edit'}</button>
               {t.stops.length > 0 && (
                 <button onClick={() => {
@@ -250,7 +231,7 @@ function RouteCalc({ game, fmt, m }) {
                   {pendingDelete === `clear-${t.id}` ? 'clear?' : 'clear'}
                 </button>
               )}
-              <span className={`ml-auto text-lg font-bold ${m ? 'text-white' : 'text-broker-text'}`}>
+              <span className={`ml-auto text-lg font-bold text-broker-text`}>
                 {rev > 0 ? fmt(rev) : '—'}
               </span>
               <button onClick={() => {
@@ -268,10 +249,7 @@ function RouteCalc({ game, fmt, m }) {
                 <div className="flex flex-wrap gap-1 mb-1">
                   {allQuickValues.map(v => (
                     <button key={v} onClick={() => addStopToTrain(t.id, v)}
-                      className={m
-                        ? `text-sm ${extraValues.includes(v) ? 'bg-green-900/50 text-green-300' : 'bg-blue-900/50 text-blue-300'} hover:bg-blue-800 px-3 py-2 rounded min-w-[2.5rem]`
-                        : `text-sm ${extraValues.includes(v) ? 'bg-blue-800 text-blue-200' : 'bg-broker-surface-hover text-broker-text'} hover:text-white px-3 py-2 rounded min-w-[2.5rem]`
-                      }>{v}</button>
+                      className={`text-sm ${extraValues.includes(v) ? 'bg-blue-800 text-blue-200' : 'bg-broker-surface-hover text-broker-text'} hover:text-white px-3 py-2 rounded min-w-[2.5rem]`}>{v}</button>
                   ))}
                   <input type="number" value={customStop}
                     onChange={e => setCustomStop(e.target.value)}
@@ -283,10 +261,8 @@ function RouteCalc({ game, fmt, m }) {
                   <button onClick={() => {
                     const v = parseInt(customStop) || 0
                     if (v > 0) { addCustomValue(v); addStopToTrain(t.id, v); setCustomStop('') }
-                  }} className={m
-                    ? 'text-sm bg-green-900/50 text-green-300 hover:bg-green-800 px-3 py-1.5 rounded'
-                    : 'text-sm bg-broker-surface-hover text-broker-text hover:text-white px-3 py-1.5 rounded'
-                  }>add</button>
+                  }} className="text-sm bg-broker-surface-hover text-broker-text hover:text-white px-3 py-1.5 rounded"
+                  >add</button>
                 </div>
                 {/* Multiplier */}
                 <div className="flex flex-wrap gap-1 mb-1">
@@ -295,8 +271,8 @@ function RouteCalc({ game, fmt, m }) {
                       onClick={() => setTrains(prev => prev.map(tr => tr.id === t.id ? { ...tr, mult: x } : tr))}
                       className={`text-sm px-3 py-1.5 rounded font-medium ${
                         (t.mult || 1) === x
-                          ? (m ? 'bg-green-700 text-white' : 'bg-blue-600 text-white')
-                          : (m ? 'bg-blue-900/30 text-blue-400' : 'bg-broker-bg text-broker-text-muted')
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-broker-bg text-broker-text-muted'
                       }`}>×{x}</button>
                   ))}
                 </div>
@@ -310,7 +286,7 @@ function RouteCalc({ game, fmt, m }) {
                           className={`text-xs px-3 py-1.5 rounded font-bold transition-colors ${
                             isAlarm
                               ? 'bg-red-600 text-white animate-pulse'
-                              : m ? 'bg-green-800 text-green-200' : 'bg-blue-600 text-white'
+                              : 'bg-blue-600 text-white'
                           }`}>
                           {v}{isAlarm ? ' ×' : ''}
                         </button>
@@ -322,7 +298,7 @@ function RouteCalc({ game, fmt, m }) {
             ) : (
               /* Inactive: just show stops */
               t.stops.length > 0 && (
-                <div className={`text-[10px] ${m ? 'text-blue-400' : 'text-broker-text-muted'}`}>
+                <div className={`text-[10px] text-broker-text-muted`}>
                   {t.stops.join(' + ')}{(t.mult || 1) > 1 ? ` ×${t.mult}` : ''} = {fmt(rev)}
                 </div>
               )
@@ -333,10 +309,8 @@ function RouteCalc({ game, fmt, m }) {
 
       <div className="flex gap-2">
         <button onClick={addTrain}
-          className={m
-            ? 'text-sm bg-green-900/50 text-green-300 hover:bg-green-800 px-3 py-1.5 rounded'
-            : 'text-sm bg-broker-surface-hover text-broker-text hover:text-white px-3 py-1.5 rounded'
-          }>+ Train</button>
+          className="text-sm bg-broker-surface-hover text-broker-text hover:text-white px-3 py-1.5 rounded"
+          >+ Train</button>
         {game && game.corporations.filter(c => c.floated && c.sym !== corp.sym).length > 0 && (
           <span className={labelCls + ' self-center'}>or switch corp above</span>
         )}

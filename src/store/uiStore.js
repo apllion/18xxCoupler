@@ -27,15 +27,9 @@ export const useUIStore = create((set) => ({
     autoConfig: { ...s.autoConfig, [key]: value },
   })),
 
-  skin: 'broker',            // 'broker' | 'moderator' — which chrome to use for detail tabs
-  modTheme: 'dos',           // 'dos' | 'green' | 'amber' | 'white' — moderator terminal theme
-  setActiveTab: (tab) => set((s) => ({
-    activeTab: tab,
-    skin: tab === 'overview' ? 'broker' : tab === 'moderator' ? 'moderator' : s.skin,
-  })),
+  setActiveTab: (tab) => set({ activeTab: tab }),
   setActivePlayer: (id) => set({ activePlayerId: id }),
   setMyPlayer: (id) => set({ myPlayerId: id }),
-  setModTheme: (id) => set({ modTheme: id }),
   setActiveCorp: (sym) => set({ activeCorpSym: sym }),
   routeRevenue: null, // { corpSym, revenue } — set by route calc, consumed by corp view
   setRouteRevenue: (corpSym, revenue) => set({ routeRevenue: { corpSym, revenue } }),

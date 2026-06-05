@@ -4,7 +4,6 @@
 
 import { useState, useMemo } from 'react'
 import { useGameStore } from '../../store/gameStore.js'
-import { useUIStore } from '../../store/uiStore.js'
 import { formatCurrency } from '../../utils/currency.js'
 import { corpPrice, projectPrices } from '../../engine/stockMarket.js'
 import { playerSharePercent } from '../../engine/player.js'
@@ -13,8 +12,6 @@ const COMMON_PRICES = [40, 50, 60, 67, 70, 76, 80, 82, 90, 100, 110, 112, 120, 1
 
 export default function EndgameCalcTab() {
   const game = useGameStore((s) => s.game)
-  const skin = useUIStore((s) => s.skin)
-  const m = skin === 'moderator'
   const fmt = (n) => formatCurrency(n, game?.title?.currencyFormat || '$')
 
   const stateFromGame = (projectRounds = 3) => {
@@ -178,48 +175,36 @@ export default function EndgameCalcTab() {
   const result = calcResults()
 
   // --- Styles ---
-  const inputCls = m
-    ? 'w-14 bg-black/30 border border-blue-800 rounded px-1 py-0.5 text-xs text-blue-300 text-right focus:outline-none focus:border-green-600'
-    : 'w-14 bg-broker-bg border border-broker-border rounded px-1 py-0.5 text-xs text-white text-right focus:outline-none focus:border-blue-500'
-  const nameInputCls = m
-    ? 'w-16 bg-black/30 border border-blue-800 rounded px-1 py-0.5 text-xs text-yellow-300 focus:outline-none focus:border-green-600'
-    : 'w-16 bg-broker-bg border border-broker-border rounded px-1 py-0.5 text-xs text-white focus:outline-none focus:border-blue-500'
-  const labelCls = m ? 'text-blue-400 text-[10px]' : 'text-broker-text-muted text-[10px]'
-  const btnCls = m ? 'text-[10px] text-blue-400 hover:text-blue-300 px-1' : 'text-[10px] text-broker-text-muted hover:text-white px-1'
-  const btnSmall = m
-    ? 'text-[10px] bg-green-900/50 text-green-300 hover:bg-green-800 px-2 py-0.5 rounded'
-    : 'text-[10px] bg-broker-surface-hover text-broker-text hover:text-white px-2 py-0.5 rounded'
+  const inputCls = 'w-14 bg-broker-bg border border-broker-border rounded px-1 py-0.5 text-xs text-white text-right focus:outline-none focus:border-blue-500'
+  const nameInputCls = 'w-16 bg-broker-bg border border-broker-border rounded px-1 py-0.5 text-xs text-white focus:outline-none focus:border-blue-500'
+  const labelCls = 'text-broker-text-muted text-[10px]'
+  const btnCls = 'text-[10px] text-broker-text-muted hover:text-white px-1'
+  const btnSmall = 'text-[10px] bg-broker-surface-hover text-broker-text hover:text-white px-2 py-0.5 rounded'
 
   // Style for tappable price cells
   const cellCls = (isActive, isFinal) => `text-xs text-right px-1.5 py-2 rounded cursor-pointer min-w-[3rem] transition-colors ${isFinal ? 'font-bold' : ''} ${
     isActive
-      ? (m ? 'bg-green-800 text-green-200 ring-1 ring-green-500' : 'bg-blue-600 text-white ring-1 ring-blue-400')
-      : (m ? 'bg-black/30 text-blue-300 border border-blue-800' : 'bg-broker-bg text-white border border-broker-border')
+      ? ('bg-blue-600 text-white ring-1 ring-blue-400')
+      : ('bg-broker-bg text-white border border-broker-border')
   }`
 
   return (
-    <div className={m
-      ? 'font-mono text-xs p-2 space-y-3 overflow-y-auto bg-blue-950 text-blue-300 h-full'
-      : 'text-sm p-3 space-y-4 overflow-y-auto bg-broker-bg h-full'
-    }>
+    <div className='text-sm p-3 space-y-4 overflow-y-auto bg-broker-bg h-full'>
       <div className="flex items-center gap-3">
-        <h2 className={m ? 'text-green-400 font-bold' : 'text-broker-text font-bold text-lg'}>Endgame Calculator</h2>
+        <h2 className="text-broker-text font-bold text-lg">Endgame Calculator</h2>
         {game && game.corporations.some(c => c.floated) && (
-          <button onClick={loadFromGame} className={m
-            ? 'text-xs bg-blue-800 text-blue-300 hover:bg-blue-700 px-3 py-1.5 rounded'
-            : 'text-xs bg-broker-surface-hover text-broker-text hover:text-white px-3 py-1.5 rounded'
-          }>Load from game</button>
+          <button onClick={loadFromGame} className='text-xs bg-broker-surface-hover text-broker-text hover:text-white px-3 py-1.5 rounded'>Load from game</button>
         )}
       </div>
 
       {/* Standings */}
-      <Panel m={m} title="">
+      <Panel title="">
         <div className="space-y-1">
           {result.standings.map((p, i) => (
             <div key={i} className="flex items-center gap-2">
-              <span className={`w-4 font-bold ${i === 0 ? 'text-green-400' : m ? 'text-blue-400' : 'text-broker-text-muted'}`}>{i + 1}</span>
-              <span className={`flex-1 truncate ${i === 0 ? 'text-green-400 font-bold' : m ? 'text-yellow-300' : 'text-broker-text'}`}>{p.name}</span>
-              <span className={m ? 'text-white text-lg font-bold' : 'text-broker-text text-lg font-bold'}>{fmt(p.total)}</span>
+              <span className={`w-4 font-bold ${i === 0 ? 'text-green-400' : 'text-broker-text-muted'}`}>{i + 1}</span>
+              <span className={`flex-1 truncate ${i === 0 ? 'text-green-400 font-bold' : 'text-broker-text'}`}>{p.name}</span>
+              <span className="text-broker-text text-lg font-bold">{fmt(p.total)}</span>
               {i === 0 && <span className="text-green-400 text-xs font-bold">WINNER</span>}
             </div>
           ))}
@@ -228,7 +213,7 @@ export default function EndgameCalcTab() {
 
       {/* Round control */}
       <div className="flex items-center gap-2">
-        <span className={m ? 'text-green-400 font-bold' : 'text-broker-text font-medium'}>Corporations</span>
+        <span className="text-broker-text font-medium">Corporations</span>
         <span className={labelCls}>{rounds} round{rounds !== 1 ? 's' : ''}</span>
         <button onClick={removeRound} disabled={rounds <= 1} className={`${btnSmall} px-3 py-1.5 disabled:opacity-30`}>−</button>
         <button onClick={addRound} className={`${btnSmall} px-3 py-1.5`}>+</button>
@@ -241,7 +226,7 @@ export default function EndgameCalcTab() {
       {corps.map(c => {
         const isPickingHere = activeCell?.sym === c.sym
         return (
-          <Panel key={c.sym} m={m} title="">
+          <Panel key={c.sym} title="">
             {/* Header: sym + rev + loans + delete */}
             <div className="flex items-center gap-2 mb-1 flex-wrap">
               <span style={{ color: c.color }} className="font-bold text-sm">{c.sym}</span>
@@ -253,10 +238,10 @@ export default function EndgameCalcTab() {
                 <>
                   <span className={labelCls}>loans</span>
                   <button onClick={() => adjLoans(c.sym, -1)} disabled={(c.loans || 0) <= 0}
-                    className={`text-lg px-3 py-1 rounded disabled:opacity-20 ${m ? 'bg-blue-900/50 text-blue-300' : 'bg-broker-surface-hover text-broker-text'}`}>−</button>
-                  <span className={`text-xs w-4 text-center font-bold ${(c.loans || 0) > 0 ? 'text-red-400' : m ? 'text-blue-400' : 'text-broker-text-muted'}`}>{c.loans || 0}</span>
+                    className={`text-lg px-3 py-1 rounded disabled:opacity-20 bg-broker-surface-hover text-broker-text`}>−</button>
+                  <span className={`text-xs w-4 text-center font-bold ${(c.loans || 0) > 0 ? 'text-red-400' : 'text-broker-text-muted'}`}>{c.loans || 0}</span>
                   <button onClick={() => adjLoans(c.sym, 1)}
-                    className={`text-lg px-3 py-1 rounded ${m ? 'bg-blue-900/50 text-blue-300' : 'bg-broker-surface-hover text-broker-text'}`}>+</button>
+                    className={`text-lg px-3 py-1 rounded bg-broker-surface-hover text-broker-text`}>+</button>
                 </>
               )}
               <button onClick={() => removeCorp(c.sym)} className={`${btnCls} text-red-400 ml-auto text-sm px-2 py-1`}>×</button>
@@ -287,8 +272,8 @@ export default function EndgameCalcTab() {
                     <button key={v} onClick={() => setPrice(c.sym, activeCell.roundIdx, v)}
                       className={`text-sm px-2 py-1.5 rounded min-w-[2.5rem] transition-colors ${
                         v === currentVal
-                          ? (m ? 'bg-green-700 text-white font-bold' : 'bg-blue-600 text-white font-bold')
-                          : (m ? 'bg-blue-900/50 text-blue-300 hover:bg-blue-800' : 'bg-broker-surface-hover text-broker-text hover:text-white')
+                          ? ('bg-blue-600 text-white font-bold')
+                          : ('bg-broker-surface-hover text-broker-text hover:text-white')
                       }`}>{v}</button>
                   )
                 })}
@@ -314,18 +299,18 @@ export default function EndgameCalcTab() {
         const total = result.standings.find(s => s.name === p.name)?.total || 0
         const isOpen = showCalc === pi
         return (
-          <Panel key={pi} m={m} title="">
+          <Panel key={pi} title="">
             <div className="flex items-center gap-2 mb-1">
               <input type="text" value={p.name} onChange={e => setPlayerField(pi, 'name', e.target.value)}
                 className={`${nameInputCls} w-24 font-bold`} />
               <span className={labelCls}>cash</span>
               <input type="number" value={p.cash || ''} onChange={e => setPlayerField(pi, 'cash', e.target.value)}
                 className={inputCls} />
-              <span className={`ml-auto font-bold ${m ? 'text-white' : 'text-broker-text'}`}>{fmt(total)}</span>
+              <span className={`ml-auto font-bold text-broker-text`}>{fmt(total)}</span>
               <button onClick={() => setShowCalc(isOpen ? null : pi)}
                 className={`text-sm px-2 py-1 rounded ${isOpen
-                  ? (m ? 'bg-green-800 text-green-200' : 'bg-blue-600 text-white')
-                  : (m ? 'bg-blue-900/50 text-blue-300' : 'bg-broker-surface-hover text-broker-text-muted')
+                  ? ('bg-blue-600 text-white')
+                  : ('bg-broker-surface-hover text-broker-text-muted')
                 }`}
                 title="Show calculation">=</button>
               <button onClick={() => removePlayer(pi)} className={`${btnCls} text-red-400 text-sm px-2 py-1`}>×</button>
@@ -338,12 +323,12 @@ export default function EndgameCalcTab() {
                   <div key={c.sym} className="flex items-center gap-0.5">
                     <span style={{ color: c.color }} className="font-bold text-[10px] w-8">{c.sym}</span>
                     <button onClick={() => adjShares(pi, c.sym, -1)}
-                      className={`text-lg px-3 py-1 rounded ${m ? 'bg-blue-900/50 text-blue-300' : 'bg-broker-surface-hover text-broker-text'}`}>−</button>
-                    <span className={`text-xs w-4 text-center font-bold ${isShort ? 'text-red-400' : m ? 'text-white' : 'text-broker-text'}`}>
+                      className={`text-lg px-3 py-1 rounded bg-broker-surface-hover text-broker-text`}>−</button>
+                    <span className={`text-xs w-4 text-center font-bold ${isShort ? 'text-red-400' : 'text-broker-text'}`}>
                       {val}
                     </span>
                     <button onClick={() => adjShares(pi, c.sym, 1)}
-                      className={`text-lg px-3 py-1 rounded ${m ? 'bg-blue-900/50 text-blue-300' : 'bg-broker-surface-hover text-broker-text'}`}>+</button>
+                      className={`text-lg px-3 py-1 rounded bg-broker-surface-hover text-broker-text`}>+</button>
                     {isShort && <span className="text-[9px] text-red-400">S</span>}
                   </div>
                 )
@@ -351,7 +336,7 @@ export default function EndgameCalcTab() {
             </div>
             {/* Calculation breakdown */}
             {isOpen && (
-              <div className={m ? 'mt-2 text-[10px] text-blue-400 space-y-0.5' : 'mt-2 text-[10px] text-broker-text-muted space-y-0.5'}>
+              <div className="mt-2 text-[10px] text-broker-text-muted space-y-0.5">
                 <div>Cash: {fmt(p.cash)}</div>
                 {corps.map(c => {
                   const shares = p.shares[c.sym] || 0
@@ -397,13 +382,10 @@ export default function EndgameCalcTab() {
   )
 }
 
-function Panel({ m, title, children }) {
+function Panel({ title, children }) {
   return (
-    <div className={m
-      ? 'bg-blue-900/30 border border-blue-800 rounded p-2'
-      : 'bg-broker-surface rounded-lg p-3 border border-broker-border'
-    }>
-      {title && <div className={m ? 'text-green-400 font-bold mb-1' : 'text-white font-medium mb-2'}>{title}</div>}
+    <div className='bg-broker-surface rounded-lg p-3 border border-broker-border'>
+      {title && <div className="text-white font-medium mb-2">{title}</div>}
       {children}
     </div>
   )

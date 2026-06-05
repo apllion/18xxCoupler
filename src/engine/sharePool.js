@@ -14,7 +14,11 @@ export function buyShareFromIPO(state, playerId, corpSym, percent = 10) {
   // Market price = per-share price. Shares per cert = percent / baseShareSize.
   const baseShare = regularSharePercent(state, corpSym)
   const cost = price * (percent / baseShare)
-  const isPresident = percent === 20 || (percent === (state.title.shares?.[0] ?? 20))
+  // President cert: only if this is the president-sized share AND nobody already holds the president
+  const presPercent = state.title.shares?.[0] ?? 20
+  const presExists = state.players.some(p => p.shares.some(s => s.corpSym === corpSym && s.isPresident))
+    || state.corporations.some(c => (c.sharesHeld || []).some(s => s.corpSym === corpSym && s.isPresident))
+  const isPresident = !presExists && (percent === presPercent)
 
   player.cash -= cost
   corp.ipoShares -= percent

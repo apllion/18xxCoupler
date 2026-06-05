@@ -165,6 +165,16 @@ export function applyAction(state, action) {
       const mcCorp = state.corporations.find(c => c.sym === action.corpSym)
       if (!mcCorp) break
 
+      // If moving a president cert, strip isPresident from any other holder first
+      if (action.isPresident) {
+        for (const p of state.players) {
+          for (const s of p.shares) { if (s.corpSym === action.corpSym && s.isPresident) s.isPresident = false }
+        }
+        for (const c of state.corporations) {
+          for (const s of (c.sharesHeld || [])) { if (s.corpSym === action.corpSym && s.isPresident) s.isPresident = false }
+        }
+      }
+
       if (action.fromSource === 'ipo') {
         // From IPO to player
         if (mcTo && mcCorp.ipoShares >= action.percent) {
@@ -212,7 +222,10 @@ export function applyAction(state, action) {
       if (newPct > 0) {
         const shareSize = state.title.shares?.[1] ?? 10
         const presSize = state.title.shares?.[0] ?? 20
-        if (wasPres || newPct >= presSize) {
+        // Only grant president cert if this player had it, or nobody else does
+        const otherHasPres = state.players.some(p => p.id !== sp.id && p.shares.some(s => s.corpSym === action.corpSym && s.isPresident))
+          || state.corporations.some(c => (c.sharesHeld || []).some(s => s.corpSym === action.corpSym && s.isPresident))
+        if ((wasPres || newPct >= presSize) && !otherHasPres) {
           sp.shares.push({ corpSym: action.corpSym, percent: presSize, isPresident: true })
           let remaining = newPct - presSize
           while (remaining >= shareSize) { sp.shares.push({ corpSym: action.corpSym, percent: shareSize, isPresident: false }); remaining -= shareSize }
@@ -275,6 +288,10 @@ export function applyAction(state, action) {
     case 'SET_ROUND':
       if (state.roundTracker) {
         setRoundType(state.roundTracker, action.roundType)
+        // Reset operated flags when entering OR
+        if (action.roundType === 'OR') {
+          for (const c of state.corporations) c.operated = false
+        }
       }
       break
     // Beer market actions (HSB)
@@ -480,8 +497,8 @@ export function applyAction(state, action) {
         ic.ipoShares -= shareSize
         ic.marketShares += shareSize
         ic.cash += revenue
-        // Price moves left on issue
-        moveLeft(state.stockMarket, action.corpSym, 1)
+        // Price drops one step on issue
+        moveDown(state.stockMarket, action.corpSym, 1)
       }
       break
     }
@@ -683,6 +700,22 @@ export function applyAction(state, action) {
     }
     default:
       break
+  }
+
+  // Mark corp as operated when it takes an OR action
+  const OR_ACTIONS = new Set(['PAY_DIVIDEND', 'WITHHOLD_DIVIDEND', 'HALF_DIVIDEND', 'BUY_TRAIN', 'ISSUE_SHARES', 'REDEEM_SHARES', 'TAKE_LOAN', 'REPAY_LOAN', 'PAY_INTEREST', 'CORP_BUY_SHARE', 'CORP_PAR', 'CORP_SELL_SHARES'])
+  if (OR_ACTIONS.has(action.type) && action.corpSym) {
+    const oc = state.corporations.find((c) => c.sym === action.corpSym)
+    if (oc) oc.operated = true
+  }
+  // Also handle buyer/seller corp actions
+  if (action.buyerCorpSym) {
+    const oc = state.corporations.find((c) => c.sym === action.buyerCorpSym)
+    if (oc) oc.operated = true
+  }
+  if (action.sellerCorpSym) {
+    const oc = state.corporations.find((c) => c.sym === action.sellerCorpSym)
+    if (oc) oc.operated = true
   }
 
   if (entry) state.actionLog.push(entry)
