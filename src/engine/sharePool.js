@@ -97,7 +97,12 @@ export function corpBuyShareFromIPO(state, buyerCorpSym, targetCorpSym, percent 
 
   const baseShare = regularSharePercent(state, targetCorpSym); const cost = price * (percent / baseShare)
   buyer.cash -= cost
-  state.bank.cash += cost
+
+  if (state.title.capitalization === 'incremental') {
+    target.cash += cost
+  } else {
+    state.bank.cash += cost
+  }
 
   target.ipoShares -= percent
   buyer.sharesHeld.push({ corpSym: targetCorpSym, percent, isPresident: false })
@@ -106,9 +111,11 @@ export function corpBuyShareFromIPO(state, buyerCorpSym, targetCorpSym, percent 
   const soldPercent = 100 - target.ipoShares
   if (!target.floated && soldPercent >= target.floatPercent) {
     target.floated = true
-    const capitalization = target.parPrice * 10
-    target.cash += capitalization
-    state.bank.cash -= capitalization
+    if (state.title.capitalization !== 'incremental') {
+      const capitalization = target.parPrice * 10
+      target.cash += capitalization
+      state.bank.cash -= capitalization
+    }
   }
 }
 
