@@ -487,10 +487,9 @@ export function importGame(gameJson) {
     }
   }
 
-  // Imported games are past pregame — clear auction state
-  if (state.roundTracker) {
-    state.roundTracker.inPregame = false
-    state.roundTracker.pregameIndex = -1
+  // Imported games are past pregame
+  if (state.roundTracker?.roundType === 'Pregame') {
+    state.roundTracker.roundType = 'SR'
   }
 
   // Attach import metadata
@@ -595,9 +594,8 @@ export function replayWithCallbacks(gameJson, callback) {
   // Final callback
   callback(state, orNumber, actions.length, 'end')
 
-  if (state.roundTracker) {
-    state.roundTracker.inPregame = false
-    state.roundTracker.pregameIndex = -1
+  if (state.roundTracker?.roundType === 'Pregame') {
+    state.roundTracker.roundType = 'SR'
   }
   state.importSource = {
     platform: '18xx.games',

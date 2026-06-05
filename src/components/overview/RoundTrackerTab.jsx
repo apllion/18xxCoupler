@@ -24,8 +24,8 @@ export default function RoundTrackerTab() {
   const phase = currentPhase(game.phaseManager)
   const fmt = (n) => formatCurrency(n, game.title.currencyFormat)
   const label = rt ? roundLabel(rt) : '—'
-  const isSR = rt?.type === 'stock'
-  const isOR = rt?.type === 'operating'
+  const isSR = rt?.roundType === 'SR'
+  const isOR = rt?.roundType === 'OR'
 
   // Build round history from action log
   const roundHistory = []
@@ -61,17 +61,25 @@ export default function RoundTrackerTab() {
             <div className="text-lg font-bold text-white">{phase.name}</div>
           </div>
         </div>
-        <div className="flex gap-2 mt-2">
-          <button
-            onClick={() => dispatch({ type: 'ADVANCE_ROUND' })}
-            className={`flex-1 py-2 rounded font-medium text-sm ${
-              isSR
-                ? 'bg-broker-green text-broker-gold hover:bg-broker-green-light'
-                : 'bg-amber-900 text-amber-200 hover:bg-amber-800'
-            }`}
-          >
-            Advance → {isSR ? 'OR' : 'next'}
-          </button>
+        <div className="flex gap-1 mt-2">
+          {(rt?.roundTypes || ['SR', 'OR']).map((rType) => {
+            const active = rType === rt?.roundType
+            const colors = active
+              ? rType === 'SR' ? 'bg-broker-green text-broker-gold'
+                : rType === 'OR' ? 'bg-amber-900 text-amber-200'
+                : rType === 'Pregame' ? 'bg-purple-800 text-purple-200'
+                : 'bg-blue-800 text-blue-200'
+              : 'bg-broker-surface-hover text-broker-text-muted hover:text-white'
+            return (
+              <button
+                key={rType}
+                onClick={() => dispatch({ type: 'SET_ROUND', roundType: rType })}
+                className={`flex-1 py-2 rounded font-medium text-sm transition-colors ${colors}`}
+              >
+                {rType}
+              </button>
+            )
+          })}
         </div>
       </div>
 
@@ -86,14 +94,6 @@ export default function RoundTrackerTab() {
           <div>
             <span className="text-broker-text-muted">ORs per set: </span>
             <span className="text-white">{phase.operatingRounds || 2}</span>
-          </div>
-          <div>
-            <span className="text-broker-text-muted">Total ORs played: </span>
-            <span className="text-white">{rt?.orTotal || 0}</span>
-          </div>
-          <div>
-            <span className="text-broker-text-muted">SR count: </span>
-            <span className="text-white">{rt?.srNumber || 1}</span>
           </div>
           <div>
             <span className="text-broker-text-muted">Bank: </span>
@@ -255,40 +255,6 @@ export default function RoundTrackerTab() {
         </div>
       )}
 
-      {/* Manual Round Override */}
-      <div className="bg-broker-surface rounded-lg p-3 border border-broker-border">
-        <div className="text-broker-text font-medium mb-2">Manual Override</div>
-        <div className="flex gap-2 flex-wrap">
-          <button
-            onClick={() => dispatch({ type: 'SET_ROUND', roundType: 'stock' })}
-            className={`text-xs px-3 py-1.5 rounded ${isSR ? 'bg-broker-green text-broker-gold' : 'bg-broker-surface-hover text-broker-text-muted hover:text-white'}`}
-          >
-            Set SR
-          </button>
-          <button
-            onClick={() => dispatch({ type: 'SET_ROUND', roundType: 'operating' })}
-            className={`text-xs px-3 py-1.5 rounded ${isOR ? 'bg-amber-900 text-amber-200' : 'bg-broker-surface-hover text-broker-text-muted hover:text-white'}`}
-          >
-            Set OR
-          </button>
-          {rt?.fixedSequence && (
-            <>
-              <button
-                onClick={() => {
-                  if (rt.fixedIndex > 0) dispatch({ type: 'SET_ROUND', fixedIndex: rt.fixedIndex - 1 })
-                }}
-                disabled={rt.fixedIndex <= 0}
-                className="text-xs px-3 py-1.5 rounded bg-broker-surface-hover text-broker-text-muted hover:text-white disabled:opacity-30"
-              >
-                ← Prev Round
-              </button>
-              <span className="text-xs text-broker-text-muted self-center">
-                {rt.fixedIndex + 1}/{rt.fixedSequence.length}
-              </span>
-            </>
-          )}
-        </div>
-      </div>
 
       {/* Sync / Room */}
       <SyncSection sync={sync} />

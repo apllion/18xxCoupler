@@ -92,9 +92,10 @@ export function getContextActions(game, selPlayer, selCorp, superUmpire) {
   if (!game) return []
 
   const rt = game.roundTracker
-  const isSR = rt?.type === 'stock' && !rt?.inPregame
-  const isOR = rt?.type === 'operating' && !rt?.inPregame
-  const currentRound = isSR ? 'sr' : isOR ? 'or' : 'any'
+  const roundType = rt?.roundType || 'SR'
+  const ROUND_GATE = { SR: 'sr', OR: 'or', CR: 'or' }
+  const currentRound = ROUND_GATE[roundType] || 'any'
+  const isOR = currentRound === 'or'
 
   return ACTIONS.filter(action => {
     // Super-umpire: show everything

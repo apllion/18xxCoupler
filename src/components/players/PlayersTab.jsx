@@ -37,8 +37,8 @@ export default function PlayersTab() {
   const isGuided = turnTracking === 'on' && !isWhatIf
   const turnQueue = game?.turnQueue || []
   const turnIndex = game?.turnIndex || 0
-  const isSR = game?.roundTracker?.type === 'stock' && !game?.roundTracker?.inPregame
-  const isOR = game?.roundTracker?.type === 'operating' && !game?.roundTracker?.inPregame
+  const isSR = game?.roundTracker?.roundType === 'SR'
+  const isOR = game?.roundTracker?.roundType === 'OR'
   const currentEntity = turnQueue[turnIndex]
   const guidedPlayerId = isSR ? currentEntity
     : isOR ? game?.players?.find((p) =>
@@ -770,6 +770,33 @@ function CorpOps({ game, corp, dispatch, fmt, isSub }) {
               )
             })}
           </div>
+          {/* Start new corp */}
+          {game.title.corpCanStartCorps && (() => {
+            const unfloated = game.corporations.filter(c => !c.ipoed && c.sym !== corp.sym)
+            if (unfloated.length === 0) return null
+            const pars = parPrices(game.stockMarket)
+            const ceoPercent = game.title.shares?.[0] ?? 20
+            const baseShare = game.title.shares?.[1] ?? game.title.shares?.[0] ?? 10
+            return (
+              <div className="mt-1">
+                <div className="text-xs text-broker-text-muted mb-1">Start Corp:</div>
+                <div className="flex gap-1 flex-wrap">
+                  {unfloated.map(c => pars.map(pp => {
+                    const cost = pp.price * (ceoPercent / baseShare)
+                    const ok = corp.cash >= cost
+                    return (
+                      <button key={`${c.sym}_${pp.price}`}
+                        onClick={() => ok && dispatch({ type: 'CORP_PAR', buyerCorpSym: corp.sym, targetCorpSym: c.sym, parPrice: pp.price, row: pp.row, col: pp.col })}
+                        disabled={!ok}
+                        className={`text-sm rounded px-3 py-2 ${ok ? 'bg-green-800 hover:bg-green-700 text-white' : 'bg-broker-surface-hover text-broker-text-muted opacity-30'}`}>
+                        <span style={{ color: c.color }} className="font-bold">{c.sym}</span> @{fmt(pp.price)}
+                      </button>
+                    )
+                  }))}
+                </div>
+              </div>
+            )
+          })()}
         </div>
       )}
 

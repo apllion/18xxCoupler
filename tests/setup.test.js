@@ -33,17 +33,16 @@ describe('createGame', () => {
     const title = getTitle('g1830')
     const game = createGame(title, ['A', 'B'])
 
-    expect(game.roundTracker.inPregame).toBe(true)
-    expect(game.roundTracker.pregameSteps).toHaveLength(1)
-    expect(game.roundTracker.pregameSteps[0].type).toBe('waterfall')
+    expect(game.roundTracker.roundType).toBe('Pregame')
+    expect(game.roundTracker.roundTypes).toContain('Pregame')
   })
 
   it('creates game with no pregame for titles without auction', () => {
     const title = getTitle('g18usa')
     const game = createGame(title, ['A', 'B'])
 
-    expect(game.roundTracker.inPregame).toBe(false)
-    expect(game.roundTracker.pregameSteps).toHaveLength(0)
+    expect(game.roundTracker.roundType).toBe('SR')
+    expect(game.roundTracker.roundTypes).not.toContain('Pregame')
   })
 
   it('resolves nested cert limits (1846)', () => {

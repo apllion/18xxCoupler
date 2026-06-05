@@ -65,7 +65,7 @@ describe('sync: full game simulation', () => {
     expect(gameB.players.map((p) => p.name)).toEqual(gameA.players.map((p) => p.name))
     expect(gameB.bank.cash).toBe(gameA.bank.cash)
     expect(gameB.priorityDeal).toBe(gameA.priorityDeal)
-    expect(gameB.roundTracker.type).toBe(gameA.roundTracker.type)
+    expect(gameB.roundTracker.roundType).toBe(gameA.roundTracker.roundType)
 
     // Corp state
     const prrA = gameA.corporations.find((c) => c.sym === 'PRR')

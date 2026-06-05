@@ -118,9 +118,9 @@ export function useOverviewData() {
   const selCorp = corps[curCol] || corps[0]
 
   const rt = game?.roundTracker
-  const isSR = rt?.type === 'stock' && !rt?.inPregame
-  const isOR = rt?.type === 'operating' && !rt?.inPregame
-  const isPre = rt?.inPregame
+  const isSR = rt?.roundType === 'SR'
+  const isOR = rt?.roundType === 'OR'
+  const isPre = rt?.roundType === 'Pregame'
 
   function closePanel() { setPanel(null); setRevenueInput(''); setTrainPrice(''); rootRef.current?.focus() }
   function doAction(action) { dispatch(action); closePanel() }

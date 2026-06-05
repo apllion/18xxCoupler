@@ -34,9 +34,7 @@ function compareState(a, b) {
     .toEqual(b.corporations.map((c) => ({ sym: c.sym, cash: c.cash, parPrice: c.parPrice, ipoed: c.ipoed, floated: c.floated, ipoShares: c.ipoShares, trains: c.trains.map((t) => t.name) })))
   expect(a.companies.map((c) => ({ sym: c.sym, ownerId: c.ownerId, closed: c.closed })))
     .toEqual(b.companies.map((c) => ({ sym: c.sym, ownerId: c.ownerId, closed: c.closed })))
-  expect(a.roundTracker.type).toBe(b.roundTracker.type)
-  expect(a.roundTracker.srNumber).toBe(b.roundTracker.srNumber)
-  expect(a.roundTracker.inPregame).toBe(b.roundTracker.inPregame)
+  expect(a.roundTracker.roundType).toBe(b.roundTracker.roundType)
   expect(a.priorityDeal).toBe(b.priorityDeal)
   expect(a.actionLog.length).toBe(b.actionLog.length)
 }
@@ -209,6 +207,6 @@ describe('partial replay for replay UI', () => {
     expect(partial.companies.find((c) => c.sym === 'SV').ownerId).toBe('p0')
     expect(partial.companies.find((c) => c.sym === 'CS').ownerId).toBe('p1')
     expect(partial.companies.find((c) => c.sym === 'DH').ownerId).toBeNull()
-    expect(partial.roundTracker.inPregame).toBe(true)
+    expect(partial.roundTracker.roundType).toBe('Pregame')
   })
 })

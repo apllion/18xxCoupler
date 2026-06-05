@@ -39,9 +39,8 @@ export const useGameStore = create(
       }
 
       // If game has actions, it's past pregame setup
-      if (actions.length > 0 && freshGame.roundTracker?.inPregame) {
-        freshGame.roundTracker.inPregame = false
-        freshGame.roundTracker.pregameIndex = -1
+      if (actions.length > 0 && freshGame.roundTracker?.roundType === 'Pregame') {
+        freshGame.roundTracker.roundType = 'SR'
       }
 
       const saveKey = `${titleId}_${savedGame.createdAt}`
@@ -54,10 +53,9 @@ export const useGameStore = create(
       if (!resp.ok) throw new Error(`Game ${gameId} not found (${resp.status})`)
       const gameJson = await resp.json()
       const game = importFrom18xxGamesEngine(gameJson)
-      // Imported games are past pregame — clear pregame state
-      if (game.roundTracker) {
-        game.roundTracker.inPregame = false
-        game.roundTracker.pregameIndex = -1
+      // Imported games are past pregame
+      if (game.roundTracker?.roundType === 'Pregame') {
+        game.roundTracker.roundType = 'SR'
       }
       const saveKey = `import_${gameId}`
       set({ game, saveKey })

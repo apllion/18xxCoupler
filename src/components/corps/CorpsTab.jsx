@@ -3,7 +3,7 @@ import { useGameStore } from '../../store/gameStore.js'
 import { useUIStore } from '../../store/uiStore.js'
 import { useDispatch } from '../../hooks/useDispatch.js'
 import { formatCurrency } from '../../utils/currency.js'
-import { corpPrice, priceAt } from '../../engine/stockMarket.js'
+import { corpPrice, priceAt, parPrices } from '../../engine/stockMarket.js'
 import { playerSharePercent } from '../../engine/player.js'
 import { currentPhase, trainLimit, operatingRounds } from '../../engine/phase.js'
 import { nextAvailableTrains, remainingCount } from '../../engine/depot.js'
@@ -44,7 +44,7 @@ export default function CorpsTab() {
   }, [game.corporations, game.stockMarket])
 
   // Auto-sync with turn tracking in OR (disabled in what-if mode)
-  const isOR = game.roundTracker?.type === 'operating' && !game.roundTracker?.inPregame
+  const isOR = game.roundTracker?.roundType === 'OR'
   const currentTurnCorp = isOR && turnTracking === 'on' && !isWhatIf && turnQueue.length > 0
     ? turnQueue[turnIndex]
     : null
@@ -671,7 +671,7 @@ function CorpSharePanel({ game, corp, dispatch, fmt }) {
                   <span className="text-sm font-medium w-12">
                     {c.sym}{isSelf ? '*' : ''}
                   </span>
-                  {hasIPO && (
+                  {hasIPO && price && (
                     <button
                       onClick={() => canAfford && handleCorpBuy(c.sym, 'ipo')}
                       disabled={!canAfford}
@@ -681,10 +681,10 @@ function CorpSharePanel({ game, corp, dispatch, fmt }) {
                           : 'bg-broker-surface-hover text-broker-text-muted cursor-not-allowed'
                       }`}
                     >
-                      IPO {fmt(c.parPrice ?? price)}
+                      IPO {fmt(price)}
                     </button>
                   )}
-                  {hasMarket && (
+                  {hasMarket && price && (
                     <button
                       onClick={() => canAfford && handleCorpBuy(c.sym, 'market')}
                       disabled={!canAfford}
@@ -697,18 +697,24 @@ function CorpSharePanel({ game, corp, dispatch, fmt }) {
                       Mkt {fmt(price)}
                     </button>
                   )}
-                  {canStart && (
-                    <button
-                      onClick={() => {
-                        // Corp buys CEO share — triggers PAR for the target corp
-                        // The corp pays from its treasury, needs a par price selection
-                        dispatch({ type: 'CORP_BUY_SHARE', buyerCorpSym: corp.sym, targetCorpSym: c.sym, source: 'ipo', percent: title.shares?.[0] ?? 20 })
-                      }}
-                      className="text-sm px-3 py-2 rounded bg-green-800 hover:bg-green-700 text-white"
-                    >
-                      Start {c.sym}
-                    </button>
-                  )}
+                  {canStart && (() => {
+                    const pars = parPrices(game.stockMarket)
+                    const ceoPercent = title.shares?.[0] ?? 20
+                    const baseShare = title.shares?.[1] ?? title.shares?.[0] ?? 10
+                    return pars.map(pp => {
+                      const ppCost = pp.price * (ceoPercent / baseShare)
+                      const ok = corp.cash >= ppCost
+                      return (
+                        <button key={pp.price}
+                          onClick={() => ok && dispatch({ type: 'CORP_PAR', buyerCorpSym: corp.sym, targetCorpSym: c.sym, parPrice: pp.price, row: pp.row, col: pp.col })}
+                          disabled={!ok}
+                          className={`text-sm px-3 py-2 rounded ${ok ? 'bg-green-800 hover:bg-green-700 text-white' : 'bg-broker-surface-hover text-broker-text-muted cursor-not-allowed'}`}
+                        >
+                          @{fmt(pp.price)}
+                        </button>
+                      )
+                    })
+                  })()}
                 </div>
               )
             })}

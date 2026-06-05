@@ -35,6 +35,9 @@ export const defaults = {
   marketShareLimit: 50,
 
   // Corp-to-corp share purchasing (disabled by default)
+  // Round types available for this title (user picks from these)
+  roundTypes: ['SR', 'OR'],
+
   corpCanBuyShares: false,
   corpCanSellShares: false,
 }

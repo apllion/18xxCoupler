@@ -15,8 +15,8 @@ export default function PlayerSelector() {
   const srPassed = game?.srPassed || []
 
   const isGuided = turnTracking === 'on' && !isWhatIf
-  const isSR = game?.roundTracker?.type === 'stock' && !game?.roundTracker?.inPregame
-  const isOR = game?.roundTracker?.type === 'operating' && !game?.roundTracker?.inPregame
+  const isSR = game?.roundTracker?.roundType === 'SR'
+  const isOR = game?.roundTracker?.roundType === 'OR'
 
   // In guided mode, derive active player from turn queue
   const currentTurnEntity = isGuided && turnQueue.length > 0 ? turnQueue[turnIndex] : null

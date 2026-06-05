@@ -18,7 +18,7 @@ export default function TurnStatus() {
 
   if (!game || turnTracking !== 'on') return null
   const rt = game.roundTracker
-  if (!rt || rt.inPregame) return null
+  if (!rt) return null
 
   const turnQueue = game.turnQueue || []
   const turnIndex = game.turnIndex || 0
@@ -28,8 +28,8 @@ export default function TurnStatus() {
   if (turnQueue.length === 0) return null
 
   const current = turnQueue[turnIndex]
-  const isSR = rt.type === 'stock'
-  const isOR = rt.type === 'operating'
+  const isSR = rt.roundType === 'SR'
+  const isOR = rt.roundType === 'OR'
 
   if (isSR) {
     const player = game.players.find((p) => p.id === current)

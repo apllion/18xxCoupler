@@ -9,7 +9,7 @@ import { advanceToPhase, phaseForTrain } from './phase.js'
 import { collectRevenue, collectAllRevenue, closeAllCompanies, assignPrivate, closePrivate } from './privateCompany.js'
 import { transferFromBank, transferToBank } from './bank.js'
 import { deliverToSegment, deliverToExport, advanceBeerMarket, removeNoDemand, placeNoDemand } from './beerMarket.js'
-import { advanceRound, setRound, setFixedIndex, roundLabel } from './roundTracker.js'
+import { advanceRound, setRoundType, roundLabel } from './roundTracker.js'
 import { ptgMerge, merge1862, acquireMinor1822, convertMinor1867, mergeMinors1867, rlaMerge } from './merger.js'
 import { takeLoan, repayLoan, payInterest, interestDue } from './loans.js'
 import { convertTo5Share, convertTo10Share } from './corpConversion.js'
@@ -42,6 +42,9 @@ export function applyAction(state, action) {
       break
     case 'CORP_BUY_SHARE':
       handleCorpBuyShare(state, action)
+      break
+    case 'CORP_PAR':
+      handleCorpPar(state, action)
       break
     case 'CORP_SELL_SHARES':
       handleCorpSellShares(state, action)
@@ -266,16 +269,12 @@ export function applyAction(state, action) {
     }
     case 'ADVANCE_ROUND':
       if (state.roundTracker) {
-        advanceRound(state.roundTracker, state.phaseManager)
+        advanceRound(state.roundTracker)
       }
       break
     case 'SET_ROUND':
       if (state.roundTracker) {
-        if (action.fixedIndex != null) {
-          setFixedIndex(state.roundTracker, action.fixedIndex)
-        } else {
-          setRound(state.roundTracker, action.roundType, action.srNumber, action.orSet, action.orInSet)
-        }
+        setRoundType(state.roundTracker, action.roundType)
       }
       break
     // Beer market actions (HSB)
@@ -729,6 +728,40 @@ function handlePar(state, { playerId, corpSym, parPrice, row, col }) {
   }
 }
 
+function handleCorpPar(state, { buyerCorpSym, targetCorpSym, parPrice, row, col }) {
+  const buyer = state.corporations.find((c) => c.sym === buyerCorpSym)
+  const target = state.corporations.find((c) => c.sym === targetCorpSym)
+  if (!buyer || !target || target.ipoed) return
+
+  target.parPrice = parPrice
+  target.ipoed = true
+  placeCorpOnMarket(state.stockMarket, targetCorpSym, row, col)
+
+  const corpShares = getCorpShares(state, targetCorpSym)
+  const presPercent = corpShares[0] ?? 20
+  const baseShare = corpShares[1] ?? corpShares[0] ?? 10
+  const cost = parPrice * (presPercent / baseShare)
+
+  buyer.cash -= cost
+  target.ipoShares -= presPercent
+  buyer.sharesHeld.push({ corpSym: targetCorpSym, percent: presPercent, isPresident: true })
+
+  if (state.title.capitalization === 'incremental') {
+    target.cash += cost
+  } else {
+    state.bank.cash += cost
+  }
+
+  const soldPercent = 100 - target.ipoShares
+  if (soldPercent >= target.floatPercent) {
+    target.floated = true
+    if (state.title.capitalization !== 'incremental') {
+      target.cash += parPrice * 10
+      state.bank.cash -= parPrice * 10
+    }
+  }
+}
+
 function handleBuyShare(state, { playerId, corpSym, source, percent = 10 }) {
   if (source === 'ipo') {
     buyShareFromIPO(state, playerId, corpSym, percent)
@@ -1126,6 +1159,8 @@ function describeAction(state, action) {
       return `${playerName(action.playerId)} sells ${action.percent ?? 10}% ${action.corpSym}`
     case 'CORP_BUY_SHARE':
       return `${action.buyerCorpSym} buys ${action.percent ?? 10}% ${action.targetCorpSym} from ${action.source}`
+    case 'CORP_PAR':
+      return `${action.buyerCorpSym} starts ${action.targetCorpSym} @ ${fmt(action.parPrice)}`
     case 'CORP_SELL_SHARES':
       return `${action.sellerCorpSym} sells ${action.percent ?? 10}% ${action.targetCorpSym}`
     case 'PAY_DIVIDEND': {
@@ -1242,7 +1277,7 @@ function describeAction(state, action) {
     case 'ADVANCE_ROUND':
       return `→ ${state.roundTracker ? roundLabel(state.roundTracker) : 'next round'}`
     case 'SET_ROUND':
-      return `Round set manually`
+      return `→ ${action.roundType}`
     case 'SET_PLAYER_ORDER': {
       const names = (action.order || []).map((id) => playerName(id))
       return `Player order set: ${names.join(', ')}`

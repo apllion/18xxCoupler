@@ -1,7 +1,7 @@
 import { useState, useCallback, useMemo } from 'react'
 import { useGameStore } from '../../store/gameStore.js'
 import { useDispatch } from '../../hooks/useDispatch.js'
-import { currentPregameStep } from '../../engine/roundTracker.js'
+import { getPregameSteps } from '../../engine/pregame.js'
 import { formatCurrency } from '../../utils/currency.js'
 import { getRules } from './auctionRules.js'
 import SetupHints from './SetupHints.jsx'
@@ -22,7 +22,8 @@ export default function AuctionGuide() {
   if (!game) return null
 
   const fmt = useCallback((n) => formatCurrency(n, game.title.currencyFormat), [game.title.currencyFormat])
-  const step = currentPregameStep(game.roundTracker)
+  const pregameSteps = getPregameSteps(game.title)
+  const step = pregameSteps[0] || null
   const auctionType = step?.type || 'waterfall'
   const rulesKey = auctionType === 'draft' && game.title.draftStyle === 'secret' ? 'secret_draft' : auctionType
   const rules = getRules(rulesKey)

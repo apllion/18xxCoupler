@@ -181,25 +181,21 @@ describe('REMOVE_CORPORATION', () => {
 })
 
 describe('ADVANCE_ROUND', () => {
-  it('advances from pregame to SR1', () => {
+  it('advances from pregame to SR', () => {
     const game = make1830()
-    expect(game.roundTracker.inPregame).toBe(true)
+    expect(game.roundTracker.roundType).toBe('Pregame')
 
     applyAction(game, { type: 'ADVANCE_ROUND' })
 
-    expect(game.roundTracker.inPregame).toBe(false)
-    expect(game.roundTracker.type).toBe('stock')
-    expect(game.roundTracker.srNumber).toBe(1)
+    expect(game.roundTracker.roundType).toBe('SR')
   })
 
   it('advances from SR to OR', () => {
     const game = make1830()
-    applyAction(game, { type: 'ADVANCE_ROUND' }) // pregame → SR1
-    applyAction(game, { type: 'ADVANCE_ROUND' }) // SR1 → OR1.1
+    applyAction(game, { type: 'ADVANCE_ROUND' }) // Pregame → SR
+    applyAction(game, { type: 'ADVANCE_ROUND' }) // SR → OR
 
-    expect(game.roundTracker.type).toBe('operating')
-    expect(game.roundTracker.orSet).toBe(1)
-    expect(game.roundTracker.orInSet).toBe(1)
+    expect(game.roundTracker.roundType).toBe('OR')
   })
 })
 
