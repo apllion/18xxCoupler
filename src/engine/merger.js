@@ -502,6 +502,24 @@ export function convertMinor1867(state, minorSym, majorSym) {
     moveCorpToPosition(state.stockMarket, majorSym, parPos.row, parPos.col)
   }
 
+  // Determine president: majority holder
+  let maxPct = 0
+  let presId = null
+  for (const player of state.players) {
+    const pct = player.shares
+      .filter((s) => s.corpSym === majorSym)
+      .reduce((sum, s) => sum + s.percent, 0)
+    if (pct > maxPct) {
+      maxPct = pct
+      presId = player.id
+    }
+  }
+  if (presId) {
+    const pres = state.players.find((p) => p.id === presId)
+    const cert = pres.shares.find((s) => s.corpSym === majorSym)
+    if (cert) cert.isPresident = true
+  }
+
   // Remove minor
   removeCorpFromGame(state, minorSym)
 

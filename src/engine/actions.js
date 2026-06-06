@@ -292,6 +292,22 @@ export function applyAction(state, action) {
         if (action.roundType === 'OR') {
           for (const c of state.corporations) c.operated = false
         }
+        // Build turn queue for the new round
+        if (action.roundType === 'SR') {
+          const ids = state.players.map((p) => p.id)
+          const prioIdx = ids.indexOf(state.priorityDeal)
+          state.turnQueue = prioIdx > 0 ? [...ids.slice(prioIdx), ...ids.slice(0, prioIdx)] : [...ids]
+          state.turnIndex = 0
+          state.srPassed = []
+        } else if (action.roundType === 'OR') {
+          state.turnQueue = state.corporations
+            .filter((c) => c.floated)
+            .map((c) => ({ sym: c.sym, price: corpPrice(state.stockMarket, c.sym) || 0 }))
+            .sort((a, b) => b.price - a.price)
+            .map((c) => c.sym)
+          state.turnIndex = 0
+          state.orStep = 0
+        }
       }
       break
     // Beer market actions (HSB)

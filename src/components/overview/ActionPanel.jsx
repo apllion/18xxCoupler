@@ -934,6 +934,7 @@ function PriceInput({ label, value, onChange, onConfirm, onCancel }) {
 function SettingsPanel({ game, doAction }) {
   const ac = useUIStore((s) => s.autoConfig)
   const myPlayerId = useUIStore((s) => s.myPlayerId)
+  const turnTracking = useUIStore((s) => s.turnTracking)
   const setAutoConfig = useUIStore((s) => s.setAutoConfig)
   const brokerThemeId = useThemeStore((s) => s.themeId)
   const setBrokerTheme = useThemeStore((s) => s.setTheme)
@@ -970,6 +971,12 @@ function SettingsPanel({ game, doAction }) {
               </Btn>
             ))}
           </div>
+        </div>
+        <div>
+          <div className={labelColor}>Turn Tracking</div>
+          <Btn v={turnTracking === 'on' ? 'green' : 'blue'} o={() => useUIStore.getState().toggleTurnTracking()}>
+            {turnTracking === 'on' ? 'On' : 'Off'}
+          </Btn>
         </div>
         <div>
           <div className={labelColor}>Theme</div>

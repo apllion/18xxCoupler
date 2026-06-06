@@ -61,6 +61,7 @@ export default function GameShell() {
     return (
       <div className="flex flex-col h-screen pb-12">
         {sync?.roomId && roomBar}
+        <TurnStatus />
         <OverviewTab />
         <ActionToast />
         <BottomNav />
