@@ -73,14 +73,6 @@ export default function Header() {
               Bank: {fmt(game.bank.cash)}
             </span>
 
-            {/* Home — back to overview */}
-            <button
-              onClick={() => useUIStore.getState().setActiveTab('overview')}
-              className="text-xs px-2.5 py-0.5 rounded bg-broker-surface-hover text-broker-text-muted hover:text-white transition-colors"
-            >
-              {'\u2302'} Overview
-            </button>
-
             {/* What-if toggle */}
             {(
               <button

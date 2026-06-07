@@ -90,6 +90,10 @@ function PanelContent({ panel, game, player, corp, unfloated, fmt, revenueInput,
               if (e.key === 'h') { e.preventDefault(); doAction({ type: 'HALF_DIVIDEND', corpSym: corp.sym, totalRevenue: rev }) }
             }}
           />
+          <Btn v="blue" o={() => {
+            useUIStore.getState().setActiveCorp(corp.sym)
+            useUIStore.getState().setActiveTab('routes')
+          }}>Route Calc</Btn>
           {rev > 0 && (
             <>
               <Btn v="green" o={() => doAction({ type: 'PAY_DIVIDEND', corpSym: corp.sym, totalRevenue: rev })}>

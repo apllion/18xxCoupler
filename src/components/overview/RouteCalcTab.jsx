@@ -134,8 +134,7 @@ function RouteCalc({ game, fmt }) {
         {total > 0 && game && corp.sym && (
           <button onClick={() => {
             useUIStore.getState().setRouteRevenue(corp.sym, total)
-            useUIStore.getState().setActiveCorp(corp.sym)
-            useUIStore.getState().setActiveTab('corps')
+            useUIStore.getState().setActiveTab('overview')
           }} className="ml-auto text-xs bg-green-700 text-white hover:bg-green-600 px-3 py-1.5 rounded font-bold"
           >→ {corp.sym} Pay/Withhold</button>
         )}

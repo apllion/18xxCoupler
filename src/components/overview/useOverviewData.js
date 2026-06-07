@@ -127,6 +127,18 @@ export function useOverviewData() {
   const selCorp = corps[curCol] || corps[0]
   useEffect(() => { selectedCorpSym.current = selCorp?.sym || null }, [selCorp?.sym])
 
+  // Pick up route calculator revenue
+  const routeRevenue = useUIStore((s) => s.routeRevenue)
+  useEffect(() => {
+    if (routeRevenue && corps.length > 0) {
+      const idx = corps.findIndex(c => c.sym === routeRevenue.corpSym)
+      if (idx >= 0) setCurCol(idx)
+      setRevenueInput(String(routeRevenue.revenue))
+      setPanel('revenue')
+      useUIStore.setState({ routeRevenue: null })
+    }
+  }, [routeRevenue])
+
   const rt = game?.roundTracker
   const isSR = rt?.roundType === 'SR'
   const isOR = rt?.roundType === 'OR'
