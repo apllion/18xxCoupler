@@ -177,9 +177,10 @@ export function useOverviewData() {
     if (inReplay) return
     if (!selPlayer || !selCorp) return
     // Actions
-    if (key === 'b' && !panel) { if (!selCorp.ipoed && !selCorp.floated) { setPanel('par'); return } if (selCorp.ipoShares > 0 && selCorp.marketShares > 0) { setPanel('buy'); return } if (selCorp.ipoShares > 0) doAction({ type: 'BUY_SHARE', playerId: selPlayer.id, corpSym: selCorp.sym, source: 'ipo', percent: 10 }); else if (selCorp.marketShares > 0) doAction({ type: 'BUY_SHARE', playerId: selPlayer.id, corpSym: selCorp.sym, source: 'market', percent: 10 }) }
-    if (key === 'm' && !panel && selCorp.marketShares > 0) doAction({ type: 'BUY_SHARE', playerId: selPlayer.id, corpSym: selCorp.sym, source: 'market', percent: 10 })
-    if (key === 's' && !panel && playerSharePercent(selPlayer, selCorp.sym) > 0) doAction({ type: 'SELL_SHARES', playerId: selPlayer.id, corpSym: selCorp.sym, percent: 10 })
+    const ss = game.title.shares?.[1] ?? 10
+    if (key === 'b' && !panel) { if (!selCorp.ipoed && !selCorp.floated) { setPanel('par'); return } if (selCorp.ipoShares > 0 && selCorp.marketShares > 0) { setPanel('buy'); return } if (selCorp.ipoShares > 0) doAction({ type: 'BUY_SHARE', playerId: selPlayer.id, corpSym: selCorp.sym, source: 'ipo', percent: ss }); else if (selCorp.marketShares > 0) doAction({ type: 'BUY_SHARE', playerId: selPlayer.id, corpSym: selCorp.sym, source: 'market', percent: ss }) }
+    if (key === 'm' && !panel && selCorp.marketShares > 0) doAction({ type: 'BUY_SHARE', playerId: selPlayer.id, corpSym: selCorp.sym, source: 'market', percent: ss })
+    if (key === 's' && !panel && playerSharePercent(selPlayer, selCorp.sym) > 0) doAction({ type: 'SELL_SHARES', playerId: selPlayer.id, corpSym: selCorp.sym, percent: ss })
     if (key === 'r' && !panel) { setPanel('revenue'); setTimeout(() => revRef.current?.focus(), 50) }
     if (key === 't' && !panel) setPanel('train')
     if (key === 'n' && !panel && unfloated.length > 0) setPanel('par')

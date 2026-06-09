@@ -1411,6 +1411,7 @@ function DividendAdvisorPanel({ advisor, fmt }) {
 }
 
 function IssueRedeemPanel({ game, corp, dispatch, fmt }) {
+  const shareSize = game.title.shares?.[1] ?? 10
   const pos = game.stockMarket.corpPositions[corp.sym]
   if (!pos) return null
 
@@ -1436,7 +1437,7 @@ function IssueRedeemPanel({ game, corp, dispatch, fmt }) {
       <div className="flex gap-2">
         {canIssue && (
           <button
-            onClick={() => dispatch({ type: 'ISSUE_SHARES', corpSym: corp.sym, percent: 10 })}
+            onClick={() => dispatch({ type: 'ISSUE_SHARES', corpSym: corp.sym, percent: shareSize })}
             className="text-sm bg-blue-800 hover:bg-blue-700 text-white px-3 py-2 rounded"
           >
             Issue Share (+{fmt(issuePrice)} to corp)
@@ -1444,7 +1445,7 @@ function IssueRedeemPanel({ game, corp, dispatch, fmt }) {
         )}
         {canRedeem && (
           <button
-            onClick={() => dispatch({ type: 'REDEEM_SHARES', corpSym: corp.sym, percent: 10 })}
+            onClick={() => dispatch({ type: 'REDEEM_SHARES', corpSym: corp.sym, percent: shareSize })}
             className="text-sm bg-green-800 hover:bg-green-700 text-white px-3 py-2 rounded"
           >
             Redeem Share (-{fmt(redeemPrice)} from corp)

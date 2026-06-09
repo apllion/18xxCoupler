@@ -229,13 +229,14 @@ export function moveDividend(market, corpSym, perShare, dividendMovement, totalR
 
 // --- Sell movement (title-aware) ---
 // sellMovement config: 'down_share' | 'down_per_10' | 'down_per_sale' | 'left_block_pres' | 'down_block' | 'none'
-export function moveSell(market, corpSym, percentSold, sellMovement = 'down_share') {
+// baseSharePercent: size of one regular cert (10 for standard, 20 for PTG 5-share corps)
+export function moveSell(market, corpSym, percentSold, sellMovement = 'down_share', baseSharePercent = 10) {
   const pos = market.corpPositions[corpSym]
   if (!pos) return
 
   if (sellMovement === 'none') return
 
-  const shares = Math.floor(percentSold / 10)
+  const shares = Math.floor(percentSold / baseSharePercent)
 
   switch (sellMovement) {
     case 'down_share':

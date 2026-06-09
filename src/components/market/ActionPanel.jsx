@@ -3,6 +3,7 @@ import { useGameStore } from '../../store/gameStore.js'
 import { useUIStore } from '../../store/uiStore.js'
 import { useDispatch } from '../../hooks/useDispatch.js'
 import { parPrices, corpPrice } from '../../engine/stockMarket.js'
+import { getCorpShares } from '../../engine/corporation.js'
 import { formatCurrency } from '../../utils/currency.js'
 
 export default function ActionPanel() {
@@ -103,12 +104,13 @@ function BuySection({ game, player, dispatch, fmt }) {
   if (buyableCorps.length === 0) return null
 
   function handleBuy(corpSym, source) {
+    const shareSize = getCorpShares(game, corpSym)[1] ?? 10
     dispatch({
       type: 'BUY_SHARE',
       playerId: player.id,
       corpSym,
       source,
-      percent: 10,
+      percent: shareSize,
     })
   }
 
@@ -178,7 +180,7 @@ function SellSection({ game, player, dispatch, fmt }) {
 
   if (holdingsToSell.length === 0) return null
 
-  function handleSell(corpSym, percent = 10) {
+  function handleSell(corpSym, percent) {
     dispatch({
       type: 'SELL_SHARES',
       playerId: player.id,
@@ -191,22 +193,25 @@ function SellSection({ game, player, dispatch, fmt }) {
     <div className="bg-broker-surface rounded-lg p-3">
       <div className="text-xs text-broker-text-muted mb-2 font-medium uppercase">Sell</div>
       <div className="space-y-1">
-        {holdingsToSell.map(({ corp, pct, price }) => (
-          <div key={corp.sym} className="flex items-center gap-2">
-            <span
-              className="w-3 h-3 rounded-full flex-shrink-0"
-              style={{ backgroundColor: corp.color }}
-            />
-            <span className="text-sm font-medium w-12">{corp.sym}</span>
-            <span className="text-xs text-broker-text-muted">{pct}%</span>
-            <button
-              onClick={() => handleSell(corp.sym, 10)}
-              className="text-xs px-2 py-1 rounded bg-red-900 hover:bg-red-800 text-red-200"
-            >
-              Sell 10% → +{fmt(price)}
-            </button>
-          </div>
-        ))}
+        {holdingsToSell.map(({ corp, pct, price }) => {
+          const shareSize = getCorpShares(game, corp.sym)[1] ?? 10
+          return (
+            <div key={corp.sym} className="flex items-center gap-2">
+              <span
+                className="w-3 h-3 rounded-full flex-shrink-0"
+                style={{ backgroundColor: corp.color }}
+              />
+              <span className="text-sm font-medium w-12">{corp.sym}</span>
+              <span className="text-xs text-broker-text-muted">{pct}%</span>
+              <button
+                onClick={() => handleSell(corp.sym, shareSize)}
+                className="text-xs px-2 py-1 rounded bg-red-900 hover:bg-red-800 text-red-200"
+              >
+                Sell {shareSize}% → +{fmt(price)}
+              </button>
+            </div>
+          )
+        })}
       </div>
     </div>
   )

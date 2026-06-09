@@ -10,6 +10,8 @@ export default function ShareHoldings() {
 
   // Get all corps that are IPO'd
   const activeCorp = game.corporations.filter((c) => c.ipoed)
+  // Corps that hold shares in other corps
+  const holdingCorps = game.corporations.filter(c => (c.sharesHeld || []).length > 0)
 
   if (activeCorp.length === 0) {
     return (
@@ -31,6 +33,9 @@ export default function ShareHoldings() {
             ))}
             <th className="text-center py-1 px-1">IPO</th>
             <th className="text-center py-1 px-1">Mkt</th>
+            {holdingCorps.map(hc => (
+              <th key={hc.sym} className="text-center py-1 px-1" style={{ color: hc.color }}>{hc.sym}</th>
+            ))}
           </tr>
         </thead>
         <tbody>
@@ -69,6 +74,16 @@ export default function ShareHoldings() {
                 <td className="text-center py-1 px-1 text-broker-text-muted">
                   {corp.marketShares > 0 ? `${corp.marketShares}%` : ''}
                 </td>
+                {holdingCorps.map(hc => {
+                  const held = (hc.sharesHeld || [])
+                    .filter(s => s.corpSym === corp.sym)
+                    .reduce((sum, s) => sum + s.percent, 0)
+                  return (
+                    <td key={hc.sym} className="text-center py-1 px-1">
+                      {held > 0 ? <span className="text-cyan-400">{held}%</span> : ''}
+                    </td>
+                  )
+                })}
               </tr>
             )
           })}

@@ -140,7 +140,7 @@ export default function BrokerOverview() {
                           if (su) setPanel('movecert')
                         }}>
                         {pct === 0 ? <span className="text-broker-text-muted/20">·</span>
-                          : <span className={pres ? 'text-white font-bold' : 'text-broker-text'}>{pct}{pres && '%P'}</span>}
+                          : <span className={pres ? 'text-white font-bold' : 'text-broker-text'}>{pct}%{pres && 'P'}</span>}
                       </td>
                     )
                   })}

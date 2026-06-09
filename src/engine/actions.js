@@ -830,14 +830,16 @@ function handleCorpBuyShare(state, { buyerCorpSym, targetCorpSym, source, percen
 function handleCorpSellShares(state, { sellerCorpSym, targetCorpSym, percent = 10 }) {
   corpSellShares(state, sellerCorpSym, targetCorpSym, percent)
   const sellMovement = state.title.sellMovement || 'down_share'
-  moveSell(state.stockMarket, targetCorpSym, percent, sellMovement)
+  const baseShare = regularSharePercent(state, targetCorpSym)
+  moveSell(state.stockMarket, targetCorpSym, percent, sellMovement, baseShare)
 }
 
 function handleSellShares(state, { playerId, corpSym, percent = 10 }) {
   sellShares(state, playerId, corpSym, percent)
   // Title-aware sell movement
   const sellMovement = state.title.sellMovement || 'down_share'
-  moveSell(state.stockMarket, corpSym, percent, sellMovement)
+  const baseShare = regularSharePercent(state, corpSym)
+  moveSell(state.stockMarket, corpSym, percent, sellMovement, baseShare)
 }
 
 function handlePayDividend(state, { corpSym, totalRevenue }) {
