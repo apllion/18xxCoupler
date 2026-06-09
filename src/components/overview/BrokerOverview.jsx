@@ -85,7 +85,14 @@ export default function BrokerOverview() {
               {corps.map((c, ci) => (
                 <th key={c.sym} className={`px-2 text-center min-w-[48px] font-bold cursor-pointer bg-broker-surface ${ci === curCol ? '!bg-broker-surface-hover' : ''} ${!c.ipoed ? 'opacity-30' : ''} ${c.operated ? 'border-b-2 border-green-500' : ''}`}
                   style={{ color: c.color }}
-                  onClick={() => setCurCol(ci)}>{c.sym}</th>
+                  onClick={() => setCurCol(ci)}>{c.sym}{(() => {
+                    if (!c.ipoed) return null
+                    const shareSize = game.title.shares?.[1] ?? 10
+                    const avail = c.ipoShares + c.marketShares
+                    if (avail === 0) return <span className="text-[8px] text-green-400 ml-0.5" title="Sold out">&#x2605;</span>
+                    if (avail <= shareSize) return <span className="text-[8px] text-yellow-400 ml-0.5" title="One share from sold out">&#x2605;</span>
+                    return null
+                  })()}</th>
               ))}
             </tr>
           </thead>

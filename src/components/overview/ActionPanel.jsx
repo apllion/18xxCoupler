@@ -939,6 +939,7 @@ function SettingsPanel({ game, doAction }) {
   const ac = useUIStore((s) => s.autoConfig)
   const myPlayerId = useUIStore((s) => s.myPlayerId)
   const turnTracking = useUIStore((s) => s.turnTracking)
+  const showToasts = useUIStore((s) => s.showToasts)
   const setAutoConfig = useUIStore((s) => s.setAutoConfig)
   const brokerThemeId = useThemeStore((s) => s.themeId)
   const setBrokerTheme = useThemeStore((s) => s.setTheme)
@@ -995,8 +996,8 @@ function SettingsPanel({ game, doAction }) {
         <div>
           <div className={labelColor}>Tools</div>
           <div className="flex gap-1 flex-wrap">
-            <Btn v={useUIStore.getState().showToasts ? 'green' : 'blue'} o={() => useUIStore.setState(s => ({ showToasts: !s.showToasts }))}>
-              {useUIStore.getState().showToasts ? 'Toasts ✓' : 'Toasts'}
+            <Btn v={showToasts ? 'green' : 'blue'} o={() => useUIStore.setState(s => ({ showToasts: !s.showToasts }))}>
+              {showToasts ? 'Toasts ✓' : 'Toasts'}
             </Btn>
             {game?.actionLog?.length > 0 && !inReplay && <Btn v="blue" o={() => enterReplay()}>Replay</Btn>}
             {inReplay && <Btn v="red" o={() => exitReplay()}>Exit Replay</Btn>}
