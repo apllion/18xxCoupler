@@ -17,9 +17,12 @@ export default function BrokerOverview() {
   const [soldOutWarn, setSoldOutWarn] = useState(null) // { corps, targetRound }
 
   function handleRoundChange(rType) {
-    // Warn when leaving SR if sold-out corps exist
+    // Warn when leaving SR if sold-out corps exist (skip if already adjusted this SR)
     if (isSR && rType !== 'SR' && !soldOutWarn) {
-      const soldOut = corps.filter(c => c.ipoed && c.ipoShares === 0 && c.marketShares === 0)
+      const log = game.actionLog || []
+      const lastSR = log.findLastIndex(e => e.action.type === 'SET_ROUND' && (e.action.roundType === 'SR' || e.action.roundType === 'stock'))
+      const alreadyAdjusted = log.slice(lastSR + 1).some(e => e.action.type === 'SOLD_OUT_ADJUST')
+      const soldOut = alreadyAdjusted ? [] : corps.filter(c => c.ipoed && c.ipoShares === 0 && c.marketShares === 0)
       if (soldOut.length > 0) {
         setSoldOutWarn({ corps: soldOut.map(c => c.sym).join(', '), targetRound: rType })
         return
