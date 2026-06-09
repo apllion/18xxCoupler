@@ -1,5 +1,6 @@
 // BrokerOverview — Modern slim overview. Broker theme colors, clean typography.
 
+import { useState } from 'react'
 import { useOverviewData, playerSharePercent, playerCertCount, isPresident } from './useOverviewData.js'
 import { useUIStore } from '../../store/uiStore.js'
 import { ActionPanel } from './ActionPanel.jsx'
@@ -13,6 +14,23 @@ export default function BrokerOverview() {
   const su = superUmpire
 
   const curIdx = game.actionLog.length - 1
+  const [soldOutWarn, setSoldOutWarn] = useState(null)
+
+  function handleRoundChange(rType) {
+    // Warn when leaving SR if sold-out corps exist
+    if (isSR && rType !== 'SR') {
+      const soldOut = corps.filter(c => c.ipoed && c.ipoShares === 0 && c.marketShares === 0)
+      if (soldOut.length > 0) {
+        if (!soldOutWarn) {
+          setSoldOutWarn(soldOut.map(c => c.sym).join(', '))
+          setTimeout(() => setSoldOutWarn(null), 4000)
+          return
+        }
+      }
+    }
+    setSoldOutWarn(null)
+    doAction({ type: 'SET_ROUND', roundType: rType })
+  }
 
   return (
     <div ref={rootRef} tabIndex={0} onKeyDown={onKeyDown}
@@ -36,7 +54,7 @@ export default function BrokerOverview() {
                 : 'bg-broker-surface-hover text-broker-text-muted hover:text-white'
               return (
                 <button key={rType}
-                  onClick={() => doAction({ type: 'SET_ROUND', roundType: rType })}
+                  onClick={() => handleRoundChange(rType)}
                   className={`text-sm font-medium px-2 py-0.5 first:rounded-l last:rounded-r border-r border-broker-border last:border-r-0 transition-colors ${colors}`}
                 >{rType}</button>
               )
@@ -52,6 +70,17 @@ export default function BrokerOverview() {
           <button onClick={() => setPanel(panel === 'settings' ? null : 'settings')} className="text-xs text-broker-text-muted hover:text-white bg-broker-surface-hover px-2 py-0.5 rounded">Settings</button>
         </div>
       </div>
+
+      {/* Sold-out warning */}
+      {soldOutWarn && (
+        <div className="bg-yellow-900/80 border-b border-yellow-600 px-3 py-1.5 flex items-center justify-between flex-shrink-0">
+          <span className="text-yellow-200 text-sm">Sold out: <span className="font-bold">{soldOutWarn}</span></span>
+          <div className="flex gap-2">
+            <button onClick={() => { doAction({ type: 'SOLD_OUT_ADJUST' }); setSoldOutWarn(null) }} className="text-xs bg-yellow-700 hover:bg-yellow-600 text-white px-2 py-0.5 rounded font-medium">Adjust</button>
+            <button onClick={() => setSoldOutWarn(null)} className="text-xs text-yellow-400 hover:text-white px-1">&times;</button>
+          </div>
+        </div>
+      )}
 
       {/* Mode indicator banners */}
       {isWhatIf && (
@@ -83,14 +112,14 @@ export default function BrokerOverview() {
               <th className="px-2 text-center min-w-[36px] font-medium">Cert</th>
               {game.title.taxThresholds && <th className="px-1 text-center text-[10px] font-medium text-red-400">Tax</th>}
               {corps.map((c, ci) => (
-                <th key={c.sym} className={`px-2 text-center min-w-[48px] font-bold cursor-pointer bg-broker-surface ${ci === curCol ? '!bg-broker-surface-hover' : ''} ${!c.ipoed ? 'opacity-30' : ''} ${c.operated ? 'border-b-2 border-green-500' : ''}`}
-                  style={{ color: c.color }}
+                <th key={c.sym} className={`px-2 py-1 text-center min-w-[48px] font-bold cursor-pointer ${ci === curCol ? 'ring-1 ring-white/30' : ''} ${!c.ipoed ? 'opacity-30' : ''} ${c.operated ? 'border-b-2 border-green-500' : ''}`}
+                  style={{ backgroundColor: c.color, color: c.textColor }}
                   onClick={() => setCurCol(ci)}>{c.sym}{(() => {
                     if (!c.ipoed) return null
                     const shareSize = game.title.shares?.[1] ?? 10
                     const avail = c.ipoShares + c.marketShares
-                    if (avail === 0) return <span className="text-[8px] text-green-400 ml-0.5" title="Sold out">&#x2605;</span>
-                    if (avail <= shareSize) return <span className="text-[8px] text-yellow-400 ml-0.5" title="One share from sold out">&#x2605;</span>
+                    if (avail === 0) return <span className="text-[8px] ml-0.5" style={{ color: c.color }} title="Sold out">&#x25B2;</span>
+                    if (avail <= shareSize) return <span className="text-[8px] ml-0.5 opacity-40" style={{ color: c.color }} title="One share from sold out">&#x25AA;</span>
                     return null
                   })()}</th>
               ))}
@@ -225,7 +254,8 @@ export default function BrokerOverview() {
               if (targets.length === 0) return null
               return targets.map(target => (
                 <BRow key={`ch_${target.sym}`} extraCols={game.title.taxThresholds ? 1 : 0}
-                  l={<span style={{ color: target.color }}>{target.sym}</span>}
+                  l={target.sym}
+                  labelStyle={{ backgroundColor: target.color, color: target.textColor }}
                   corps={corps} cc={curCol}
                   r={c => {
                     const pct = (c.sharesHeld || []).filter(s => s.corpSym === target.sym).reduce((sum, s) => sum + s.percent, 0)
@@ -274,10 +304,10 @@ export default function BrokerOverview() {
   )
 }
 
-function BRow({ l, corps, cc, r, onClick, extraCols = 0, highlight }) {
+function BRow({ l, corps, cc, r, onClick, extraCols = 0, highlight, labelStyle }) {
   return (
     <tr className={`border-t border-broker-border/20 ${highlight ? 'bg-broker-surface-hover/10' : ''}`}>
-      <td colSpan={3 + extraCols} className={`px-2 py-0.5 sticky left-0 z-10 text-xs ${highlight ? 'bg-broker-surface-hover/30 text-sky-300 font-medium' : 'bg-broker-bg text-broker-text-muted'}`}>{l}</td>
+      <td colSpan={3 + extraCols} style={labelStyle} className={`px-2 py-0.5 sticky left-0 z-10 text-xs font-bold ${!labelStyle ? (highlight ? 'bg-broker-surface-hover/30 text-sky-300 font-medium' : 'bg-broker-bg text-broker-text-muted') : ''}`}>{l}</td>
       {corps.map((c, ci) => (
         <td key={c.sym}
           className={`px-2 text-center py-0.5 text-xs ${ci === cc ? 'bg-broker-surface-hover/20' : ''} ${onClick ? 'cursor-pointer hover:bg-broker-surface-hover/30' : ''}`}
