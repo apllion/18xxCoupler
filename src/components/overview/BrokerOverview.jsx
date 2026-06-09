@@ -14,22 +14,25 @@ export default function BrokerOverview() {
   const su = superUmpire
 
   const curIdx = game.actionLog.length - 1
-  const [soldOutWarn, setSoldOutWarn] = useState(null)
+  const [soldOutWarn, setSoldOutWarn] = useState(null) // { corps, targetRound }
 
   function handleRoundChange(rType) {
     // Warn when leaving SR if sold-out corps exist
-    if (isSR && rType !== 'SR') {
+    if (isSR && rType !== 'SR' && !soldOutWarn) {
       const soldOut = corps.filter(c => c.ipoed && c.ipoShares === 0 && c.marketShares === 0)
       if (soldOut.length > 0) {
-        if (!soldOutWarn) {
-          setSoldOutWarn(soldOut.map(c => c.sym).join(', '))
-          setTimeout(() => setSoldOutWarn(null), 4000)
-          return
-        }
+        setSoldOutWarn({ corps: soldOut.map(c => c.sym).join(', '), targetRound: rType })
+        return
       }
     }
     setSoldOutWarn(null)
     doAction({ type: 'SET_ROUND', roundType: rType })
+  }
+
+  function dismissSoldOutWarn() {
+    const target = soldOutWarn?.targetRound
+    setSoldOutWarn(null)
+    if (target) doAction({ type: 'SET_ROUND', roundType: target })
   }
 
   return (
@@ -74,10 +77,10 @@ export default function BrokerOverview() {
       {/* Sold-out warning */}
       {soldOutWarn && (
         <div className="bg-yellow-900/80 border-b border-yellow-600 px-3 py-1.5 flex items-center justify-between flex-shrink-0">
-          <span className="text-yellow-200 text-sm">Sold out: <span className="font-bold">{soldOutWarn}</span></span>
+          <span className="text-yellow-200 text-sm">Sold out: <span className="font-bold">{soldOutWarn.corps}</span></span>
           <div className="flex gap-2">
-            <button onClick={() => { doAction({ type: 'SOLD_OUT_ADJUST' }); setSoldOutWarn(null) }} className="text-xs bg-yellow-700 hover:bg-yellow-600 text-white px-2 py-0.5 rounded font-medium">Adjust</button>
-            <button onClick={() => setSoldOutWarn(null)} className="text-xs text-yellow-400 hover:text-white px-1">&times;</button>
+            <button onClick={() => { doAction({ type: 'SOLD_OUT_ADJUST' }); dismissSoldOutWarn() }} className="text-xs bg-yellow-700 hover:bg-yellow-600 text-white px-2 py-0.5 rounded font-medium">Adjust</button>
+            <button onClick={dismissSoldOutWarn} className="text-xs text-yellow-400 hover:text-white px-1">&times;</button>
           </div>
         </div>
       )}
@@ -112,16 +115,17 @@ export default function BrokerOverview() {
               <th className="px-2 text-center min-w-[36px] font-medium">Cert</th>
               {game.title.taxThresholds && <th className="px-1 text-center text-[10px] font-medium text-red-400">Tax</th>}
               {corps.map((c, ci) => (
-                <th key={c.sym} className={`px-2 py-1 text-center min-w-[48px] font-bold cursor-pointer ${ci === curCol ? 'ring-1 ring-white/30' : ''} ${!c.ipoed ? 'opacity-30' : ''} ${c.operated ? 'border-b-2 border-green-500' : ''}`}
-                  style={{ backgroundColor: c.color, color: c.textColor }}
-                  onClick={() => setCurCol(ci)}>{c.sym}{(() => {
+                <th key={c.sym} className={`px-1 py-1 text-center min-w-[48px] cursor-pointer bg-broker-surface ${ci === curCol ? '!bg-broker-surface-hover' : ''} ${!c.ipoed ? 'opacity-30' : ''} ${c.operated ? 'border-b-2 border-green-500' : ''}`}
+                  onClick={() => setCurCol(ci)}>
+                  <span className="px-1 rounded font-bold" style={{ backgroundColor: c.color, color: c.textColor }}>{c.sym}{(() => {
                     if (!c.ipoed) return null
                     const shareSize = game.title.shares?.[1] ?? 10
                     const avail = c.ipoShares + c.marketShares
-                    if (avail === 0) return <span className="text-[8px] ml-0.5" style={{ color: c.color }} title="Sold out">&#x25B2;</span>
-                    if (avail <= shareSize) return <span className="text-[8px] ml-0.5 opacity-40" style={{ color: c.color }} title="One share from sold out">&#x25AA;</span>
+                    if (avail === 0) return <span className="text-[8px] ml-0.5" title="Sold out">&#x25B2;</span>
+                    if (avail <= shareSize) return <span className="text-[8px] ml-0.5 opacity-70" title="One share from sold out">&#x25AA;</span>
                     return null
-                  })()}</th>
+                  })()}</span>
+                </th>
               ))}
             </tr>
           </thead>
@@ -254,7 +258,14 @@ export default function BrokerOverview() {
               if (targets.length === 0) return null
               return targets.map(target => (
                 <BRow key={`ch_${target.sym}`} extraCols={game.title.taxThresholds ? 1 : 0}
-                  l={target.sym}
+                  l={<>{target.sym}{(() => {
+                    if (!target.ipoed) return null
+                    const shareSize = game.title.shares?.[1] ?? 10
+                    const avail = target.ipoShares + target.marketShares
+                    if (avail === 0) return <span className="text-[8px] ml-0.5" title="Sold out">&#x25B2;</span>
+                    if (avail <= shareSize) return <span className="text-[8px] ml-0.5 opacity-70" title="One share from sold out">&#x25AA;</span>
+                    return null
+                  })()}</>}
                   labelStyle={{ backgroundColor: target.color, color: target.textColor }}
                   corps={corps} cc={curCol}
                   r={c => {
@@ -307,7 +318,9 @@ export default function BrokerOverview() {
 function BRow({ l, corps, cc, r, onClick, extraCols = 0, highlight, labelStyle }) {
   return (
     <tr className={`border-t border-broker-border/20 ${highlight ? 'bg-broker-surface-hover/10' : ''}`}>
-      <td colSpan={3 + extraCols} style={labelStyle} className={`px-2 py-0.5 sticky left-0 z-10 text-xs font-bold ${!labelStyle ? (highlight ? 'bg-broker-surface-hover/30 text-sky-300 font-medium' : 'bg-broker-bg text-broker-text-muted') : ''}`}>{l}</td>
+      <td colSpan={3 + extraCols} className={`px-2 py-0.5 sticky left-0 z-10 text-xs bg-broker-bg ${highlight ? 'text-sky-300 font-medium' : 'text-broker-text-muted'}`}>
+        {labelStyle ? <span className="px-1 rounded font-bold" style={labelStyle}>{l}</span> : l}
+      </td>
       {corps.map((c, ci) => (
         <td key={c.sym}
           className={`px-2 text-center py-0.5 text-xs ${ci === cc ? 'bg-broker-surface-hover/20' : ''} ${onClick ? 'cursor-pointer hover:bg-broker-surface-hover/30' : ''}`}
