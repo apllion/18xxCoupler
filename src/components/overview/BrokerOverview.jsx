@@ -49,8 +49,19 @@ export default function BrokerOverview() {
       }`}>
         <div className="flex items-center gap-3">
           <span className="font-bold text-lg text-white">{game.title.title}</span>
+          {(() => {
+            // Count rounds per type from action log
+            const counts = {}
+            for (const e of (game.actionLog || [])) {
+              if (e.action.type === 'SET_ROUND') {
+                const rt = e.action.roundType
+                counts[rt] = (counts[rt] || 0) + 1
+              }
+            }
+            return (
           <div className="flex">
             {(game.roundTracker?.roundTypes || ['SR', 'OR']).map((rType) => {
+              const count = counts[rType] || 0
               const active = rType === game.roundTracker?.roundType
               const colors = active
                 ? rType === 'SR' ? 'bg-green-800 text-green-200'
@@ -62,10 +73,11 @@ export default function BrokerOverview() {
                 <button key={rType}
                   onClick={() => handleRoundChange(rType)}
                   className={`text-sm font-medium px-2 py-0.5 first:rounded-l last:rounded-r border-r border-broker-border last:border-r-0 transition-colors ${colors}`}
-                >{rType}</button>
+                >{rType}{count > 0 && <span className="text-[9px] opacity-60 ml-0.5">{count}</span>}</button>
               )
             })}
           </div>
+            )})()}
           <span className="text-xs text-broker-text-muted">Phase {phase.name} / Limit {limit}</span>
         </div>
         <div className="flex items-center gap-2">
@@ -120,7 +132,12 @@ export default function BrokerOverview() {
               {corps.map((c, ci) => (
                 <th key={c.sym} className={`px-1 py-1 text-center min-w-[48px] cursor-pointer bg-broker-surface ${ci === curCol ? '!bg-broker-surface-hover' : ''} ${!c.ipoed ? 'opacity-30' : ''} ${c.operated ? 'border-b-2 border-green-500' : ''}`}
                   onClick={() => setCurCol(ci)}>
-                  <span className="px-1 rounded font-bold" style={{ backgroundColor: c.color, color: c.textColor }}>{c.sym}{(() => {
+                  <span className="px-1 rounded font-bold inline-flex items-center" style={c.stripeColor
+                    ? { background: `linear-gradient(135deg, ${c.color} 50%, ${c.stripeColor} 50%)` }
+                    : { backgroundColor: c.color, color: c.textColor }
+                  }>{c.stripeColor
+                    ? c.sym.split('-').map((part, i) => <span key={i} style={{ color: i === 0 ? c.textColor : (c.stripeTextColor || '#fff') }}>{i > 0 ? '-' : ''}{part}</span>)
+                    : c.sym}{(() => {
                     if (!c.ipoed) return null
                     const shareSize = game.title.shares?.[1] ?? 10
                     const avail = c.ipoShares + c.marketShares
@@ -261,7 +278,9 @@ export default function BrokerOverview() {
               if (targets.length === 0) return null
               return targets.map(target => (
                 <BRow key={`ch_${target.sym}`} extraCols={game.title.taxThresholds ? 1 : 0}
-                  l={<>{target.sym}{(() => {
+                  l={<>{target.stripeColor
+                    ? target.sym.split('-').map((part, i) => <span key={i} style={{ color: i === 0 ? target.textColor : (target.stripeTextColor || '#fff') }}>{i > 0 ? '-' : ''}{part}</span>)
+                    : target.sym}{(() => {
                     if (!target.ipoed) return null
                     const shareSize = game.title.shares?.[1] ?? 10
                     const avail = target.ipoShares + target.marketShares
@@ -269,7 +288,9 @@ export default function BrokerOverview() {
                     if (avail <= shareSize) return <span className="text-[8px] ml-0.5 opacity-70" title="One share from sold out">&#x25AA;</span>
                     return null
                   })()}</>}
-                  labelStyle={{ backgroundColor: target.color, color: target.textColor }}
+                  labelStyle={target.stripeColor
+                    ? { background: `linear-gradient(135deg, ${target.color} 50%, ${target.stripeColor} 50%)` }
+                    : { backgroundColor: target.color, color: target.textColor }}
                   corps={corps} cc={curCol}
                   r={c => {
                     const pct = (c.sharesHeld || []).filter(s => s.corpSym === target.sym).reduce((sum, s) => sum + s.percent, 0)

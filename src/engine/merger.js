@@ -164,19 +164,14 @@ export function ptgMerge(state, topCorpSym, bottomCorpSym) {
   top.tokens = [...top.tokens, ...bottom.tokens]
   top.tokensPlaced = (top.tokensPlaced || 0) + (bottom.tokensPlaced || 0)
 
-  // Convert shares: 5x20% → 10x10%
-  // At this point, player shares referencing oldSym have been renamed to newSym.
-  // Shares referencing bottomCorpSym have been removed by removeCorpFromGame (called later).
-  // But bottom shares still exist in players. Convert all shares (newSym + bottomCorpSym) → 10% newSym.
+  // Convert shares: each 20% share of either corp → one 10% share of merged corp.
+  // (1/5 of old corp = 1/10 of merged corp)
   for (const player of state.players) {
     const newShares = []
     for (const share of player.shares) {
       if (share.corpSym === newSym || share.corpSym === bottomCorpSym) {
-        // Each 20% share becomes 2x 10%
-        const count = share.percent / 10
-        for (let i = 0; i < count; i++) {
-          newShares.push({ corpSym: newSym, percent: 10, isPresident: false })
-        }
+        // Each 20% cert → one 10% cert (halved, not doubled)
+        newShares.push({ corpSym: newSym, percent: 10, isPresident: false })
       } else {
         newShares.push(share)
       }
@@ -184,16 +179,17 @@ export function ptgMerge(state, topCorpSym, bottomCorpSym) {
     player.shares = newShares
   }
 
-  // Convert corp-held shares similarly
+  // Corp-held shares: convert to 10% of merged corp.
+  // Exception: if a merging corp holds shares of its merge partner, return those to IPO.
   for (const corp of state.corporations) {
     if (!corp.sharesHeld) continue
     const newHeld = []
     for (const share of corp.sharesHeld) {
       if (share.corpSym === newSym || share.corpSym === bottomCorpSym) {
-        const count = share.percent / 10
-        for (let i = 0; i < count; i++) {
-          newHeld.push({ corpSym: newSym, percent: 10, isPresident: false })
-        }
+        // Merging corp holding its partner's shares → return to IPO
+        if (corp.sym === newSym || corp.sym === bottomCorpSym) continue
+        // Other corps: convert to 10% of merged corp
+        newHeld.push({ corpSym: newSym, percent: 10, isPresident: false })
       } else {
         newHeld.push(share)
       }
@@ -213,17 +209,25 @@ export function ptgMerge(state, topCorpSym, bottomCorpSym) {
       presidentId = player.id
     }
   }
-  // Mark president
   if (presidentId) {
     const player = state.players.find((p) => p.id === presidentId)
     const presCert = player.shares.find((s) => s.corpSym === newSym)
     if (presCert) presCert.isPresident = true
   }
 
-  // Update share tracking on corp
-  top.ipoShares = top.ipoShares + bottom.ipoShares
+  // Recalculate share pools: merged corp is now 10-share (100% total)
+  // Count all held shares (players + corps)
+  let heldPct = 0
+  for (const player of state.players) {
+    heldPct += player.shares.filter(s => s.corpSym === newSym).reduce((sum, s) => sum + s.percent, 0)
+  }
+  for (const corp of state.corporations) {
+    heldPct += (corp.sharesHeld || []).filter(s => s.corpSym === newSym).reduce((sum, s) => sum + s.percent, 0)
+  }
   top.marketShares = top.marketShares + bottom.marketShares
-  top.treasuryShares = top.treasuryShares + bottom.treasuryShares
+  top.ipoShares = 100 - heldPct - top.marketShares
+  top.treasuryShares = 0
+  top.totalShares = 10
 
   // Bottom CEO share no longer generates income (PTG-specific)
   top.bottomCeoNoIncome = true

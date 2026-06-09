@@ -42,7 +42,7 @@ function PanelContent({ panel, game, player, corp, unfloated, fmt, revenueInput,
     const shareSize = game.title.shares?.[1] ?? 10
     return (
       <div>
-        <Title>Buy {shareSize}% <span style={{ color: corp.color }}>{corp.sym}</span> for {player.name}</Title>
+        <Title>Buy {shareSize}% <CB c={corp} /> for {player.name}</Title>
         <div className="flex gap-2 mt-1">
           <Btn v="green" o={() => doAction({ type: 'BUY_SHARE', playerId: player.id, corpSym: corp.sym, source: 'ipo', percent: shareSize })}>IPO {fmt(price)}</Btn>
           <Btn v="blue" o={() => doAction({ type: 'BUY_SHARE', playerId: player.id, corpSym: corp.sym, source: 'market', percent: shareSize })}>Market {fmt(price)}</Btn>
@@ -58,7 +58,7 @@ function PanelContent({ panel, game, player, corp, unfloated, fmt, revenueInput,
     const pres = player.shares.some(s => s.corpSym === corp.sym && s.isPresident)
     return (
       <div>
-        <Title>{player.name} + <span style={{ color: corp.color }}>{corp.sym}</span></Title>
+        <Title>{player.name} + <CB c={corp} /></Title>
         <div className="flex gap-2 mt-1">
           {corp.ipoShares > 0 && <Btn v="green" o={() => doAction({ type: 'BUY_SHARE', playerId: player.id, corpSym: corp.sym, source: 'ipo', percent: shareSize })}>Buy IPO {fmt(price)}</Btn>}
           {corp.marketShares > 0 && <Btn v="blue" o={() => doAction({ type: 'BUY_SHARE', playerId: player.id, corpSym: corp.sym, source: 'market', percent: shareSize })}>Buy Market {fmt(price)}</Btn>}
@@ -78,7 +78,7 @@ function PanelContent({ panel, game, player, corp, unfloated, fmt, revenueInput,
     const dblJump = price > 0 && perShare >= price
     return (
       <div>
-        <Title><span style={{ color: corp.color }}>{corp.sym}</span> Revenue</Title>
+        <Title><CB c={corp} /> Revenue</Title>
         <div className="flex items-center gap-2 mt-1">
           <input ref={revRef} type="number" value={revenueInput} onChange={e => setRevenueInput(e.target.value)}
             placeholder="Enter revenue" autoFocus
@@ -117,10 +117,10 @@ function PanelContent({ panel, game, player, corp, unfloated, fmt, revenueInput,
     const total = corp.tokens.length
     const remaining = total - placed
     const defaultCost = placed < total ? (corp.tokens[placed] || 0) : 0
-    if (remaining <= 0) return <div><Title><span style={{ color: corp.color }}>{corp.sym}</span> Tokens</Title><span className="text-broker-text-muted">All tokens placed</span></div>
+    if (remaining <= 0) return <div><Title><CB c={corp} /> Tokens</Title><span className="text-broker-text-muted">All tokens placed</span></div>
     return (
       <div>
-        <Title><span style={{ color: corp.color }}>{corp.sym}</span> Place Token ({placed}/{total})</Title>
+        <Title><CB c={corp} /> Place Token ({placed}/{total})</Title>
         <div className="flex items-center gap-2 mt-1">
           <input type="number" value={priceValue} onChange={e => setPriceValue(e.target.value)}
             placeholder={String(defaultCost)}
@@ -144,7 +144,7 @@ function PanelContent({ panel, game, player, corp, unfloated, fmt, revenueInput,
     const otherCorps = game.corporations.filter(c => c.sym !== corp.sym && c.trains.length > 0)
     return (
       <div>
-        <Title><span style={{ color: corp.color }}>{corp.sym}</span> Buy Train — Treasury {fmt(corp.cash)}</Title>
+        <Title><CB c={corp} /> Buy Train — Treasury {fmt(corp.cash)}</Title>
         <div className="mt-1 space-y-1">
           {available.length > 0 && (
             <div className="flex gap-1 flex-wrap">
@@ -189,7 +189,7 @@ function PanelContent({ panel, game, player, corp, unfloated, fmt, revenueInput,
     const max = config.maxLoansPerCorp || 99
     return (
       <div>
-        <Title><span style={{ color: corp.color }}>{corp.sym}</span> Loans — {loans}/{max}</Title>
+        <Title><CB c={corp} /> Loans — {loans}/{max}</Title>
         <div className="flex gap-2 mt-1">
           {loans < max && <Btn v="green" o={() => doAction({ type: 'TAKE_LOAN', corpSym: corp.sym })}>Take Loan +{fmt(loanValue)}</Btn>}
           {loans > 0 && corp.cash >= loanValue && <Btn v="red" o={() => doAction({ type: 'REPAY_LOAN', corpSym: corp.sym })}>Repay -{fmt(loanValue)}</Btn>}
@@ -204,7 +204,7 @@ function PanelContent({ panel, game, player, corp, unfloated, fmt, revenueInput,
     const privs = (game.companies || []).filter(c => c.ownerType === 'player' && c.ownerId === player.id && !c.closed && c.canSellToCorp !== false)
     return (
       <div>
-        <Title>{player.name} sell private to <span style={{ color: corp.color }}>{corp.sym}</span></Title>
+        <Title>{player.name} sell private to <CB c={corp} /></Title>
         {privs.length === 0
           ? <span className="text-broker-text-muted text-sm">No privates to sell</span>
           : <div className="flex gap-2 mt-1 flex-wrap">
@@ -318,7 +318,7 @@ function PanelContent({ panel, game, player, corp, unfloated, fmt, revenueInput,
           {corps.map(c => (
             <Btn key={c.sym} v="red"
               o={() => doAction({ type: 'SHORT_SELL', playerId: player.id, corpSym: c.sym })}>
-              <span style={{ color: c.color }}>{c.sym}</span> @ {fmt(corpPrice(game.stockMarket, c.sym) || 0)}
+              <CB c={c} /> @ {fmt(corpPrice(game.stockMarket, c.sym) || 0)}
             </Btn>
           ))}
         </div>
@@ -352,7 +352,7 @@ function PanelContent({ panel, game, player, corp, unfloated, fmt, revenueInput,
     const ecPrice = game.title.executiveCars?.price ?? 0
     return (
       <div>
-        <Title><span style={{ color: corp.color }}>{corp.sym}</span> — Buy Executive Car ({fmt(ecPrice)})</Title>
+        <Title><CB c={corp} /> — Buy Executive Car ({fmt(ecPrice)})</Title>
         <div className="flex gap-1 mt-1 flex-wrap">
           {trainsWithoutCar.map(t => (
             <Btn key={t.id} v={corp.cash >= ecPrice ? 'green' : 'disabled'}
@@ -505,7 +505,7 @@ function PanelContent({ panel, game, player, corp, unfloated, fmt, revenueInput,
     if (corp.trains.length === 0) return <Title>{corp.sym} has no trains to discard</Title>
     return (
       <div>
-        <Title><span style={{ color: corp.color }}>{corp.sym}</span> — Discard Train</Title>
+        <Title><CB c={corp} /> — Discard Train</Title>
         <div className="flex gap-1 mt-1 flex-wrap">
           {corp.trains.map((t, i) => (
             <Btn key={t.id || i} v="red"
@@ -526,7 +526,7 @@ function PanelContent({ panel, game, player, corp, unfloated, fmt, revenueInput,
     const ownShares = corp.sharesHeld || []
     return (
       <div>
-        <Title><span style={{ color: corp.color }}>{corp.sym}</span> Share Trading — Treasury {fmt(corp.cash)}</Title>
+        <Title><CB c={corp} /> Share Trading — Treasury {fmt(corp.cash)}</Title>
         {/* Buy from other corps */}
         <div className="mt-1 space-y-1">
           <span className="text-broker-text-muted text-xs">Buy {shareSize}% from:</span>
@@ -541,11 +541,11 @@ function PanelContent({ panel, game, player, corp, unfloated, fmt, revenueInput,
                 <span key={target.sym} className="inline-flex gap-0.5">
                   {hasIPO && <Btn v={ok ? 'green' : 'disabled'}
                     o={() => ok && doAction({ type: 'CORP_BUY_SHARE', buyerCorpSym: corp.sym, targetCorpSym: target.sym, source: 'ipo', percent: shareSize })}>
-                    <span style={{ color: target.color }}>{target.sym}</span> IPO {fmt(cost)}
+                    <CB c={target} /> IPO {fmt(cost)}
                   </Btn>}
                   {hasMkt && <Btn v={ok ? 'blue' : 'disabled'}
                     o={() => ok && doAction({ type: 'CORP_BUY_SHARE', buyerCorpSym: corp.sym, targetCorpSym: target.sym, source: 'market', percent: shareSize })}>
-                    <span style={{ color: target.color }}>{target.sym}</span> Mkt {fmt(cost)}
+                    <CB c={target} /> Mkt {fmt(cost)}
                   </Btn>}
                 </span>
               )
@@ -566,7 +566,7 @@ function PanelContent({ panel, game, player, corp, unfloated, fmt, revenueInput,
                       return (
                         <Btn key={pp.price} v={ok ? 'green' : 'disabled'}
                           o={() => ok && doAction({ type: 'CORP_PAR', buyerCorpSym: corp.sym, targetCorpSym: target.sym, parPrice: pp.price, row: pp.row, col: pp.col })}>
-                          <span style={{ color: target.color }}>{target.sym}</span> @{fmt(pp.price)}
+                          <CB c={target} /> @{fmt(pp.price)}
                         </Btn>
                       )
                     })}
@@ -586,7 +586,7 @@ function PanelContent({ panel, game, player, corp, unfloated, fmt, revenueInput,
                   return (
                     <Btn key={sym} v="red"
                       o={() => doAction({ type: 'CORP_SELL_SHARES', sellerCorpSym: corp.sym, targetCorpSym: sym, percent: shareSize })}>
-                      <span style={{ color: target?.color }}>{sym}</span> {pct}%
+                      <CB c={target} /> {pct}%
                     </Btn>
                   )
                 })}
@@ -619,8 +619,8 @@ function ParPanel({ player, unfloated, game, fmt, doAction }) {
                 ? 'border-broker-gold bg-broker-gold/10'
                 : 'border-broker-border bg-broker-surface-hover hover:border-broker-text-muted'
             }`}
-            style={{ color: c.color }}>
-            {c.sym}
+            >
+            <CB c={c} />
           </button>
         ))}
       </div>
@@ -672,7 +672,7 @@ function MoveCertPanel({ certs, player, corp, game, otherPlayers, doAction, fmt 
   if (!selectedCert) {
     return (
       <div>
-        <Title>{player.name} — <span style={{ color: corp.color }}>{corp.sym}</span> Certificates</Title>
+        <Title>{player.name} — <CB c={corp} /> Certificates</Title>
         <div className="mt-1 space-y-0.5">
           {corpCerts.length === 0 && <span className="text-broker-text-muted text-xs">No certs held</span>}
           {corpCerts.map((c, i) => (
@@ -721,7 +721,7 @@ function MoveCertPanel({ certs, player, corp, game, otherPlayers, doAction, fmt 
   // Step 2: pick destination
   return (
     <div>
-      <Title>Move {selectedCert.percent}%{selectedCert.isPresident ? ' President' : ''} <span style={{ color: corp.color }}>{corp.sym}</span> to:</Title>
+      <Title>Move {selectedCert.percent}%{selectedCert.isPresident ? ' President' : ''} <CB c={corp} /> to:</Title>
       <div className="flex gap-1 mt-1 flex-wrap">
         {selectedCert.source === 'player' ? (
           <>
@@ -778,6 +778,11 @@ function MergePanel({ game, corp, fmt, doAction }) {
     }
   }
 
+  // Block merged corps from merging again if title disallows
+  if (corp.isMerged && !merger.canReMerge) {
+    return <Title><CB c={corp} /> — already merged</Title>
+  }
+
   // Find eligible targets based on merger type
   let targets = []
   let label = 'Merge'
@@ -813,7 +818,7 @@ function MergePanel({ game, corp, fmt, doAction }) {
   if (!target) {
     return (
       <div>
-        <Title><span style={{ color: corp.color }}>{corp.sym}</span> — {label}</Title>
+        <Title><CB c={corp} /> — {label}</Title>
         <div className="flex gap-1 mt-1 flex-wrap">
           {targets.map(t => (
             <Btn key={t.sym} v="blue" o={() => {
@@ -842,7 +847,7 @@ function MergePanel({ game, corp, fmt, doAction }) {
   if (mergerType === '1822_acquire') {
     return (
       <div>
-        <Title><span style={{ color: corp.color }}>{corp.sym}</span> acquires {target}</Title>
+        <Title><CB c={corp} /> acquires {target}</Title>
         <div className="mt-1 space-y-1">
           <div className="flex gap-1 items-center">
             <span className="text-broker-text-muted text-xs">Shares:</span>
@@ -1048,4 +1053,15 @@ function SettingsPanel({ game, doAction }) {
 function Btn({ v, o, children }) {
   const styles = { green: 'bg-green-700 text-white hover:bg-green-600', red: 'bg-red-700 text-white hover:bg-red-600', blue: 'bg-blue-700 text-white hover:bg-blue-600', yellow: 'bg-amber-700 text-white hover:bg-amber-600', disabled: 'bg-broker-surface-hover text-broker-text-muted cursor-not-allowed' }
   return <button onClick={o} className={`px-2 py-1 rounded text-xs font-medium ${styles[v] || styles.green}`}>{children}</button>
+}
+
+function CB({ c }) {
+  if (!c) return null
+  const style = c.stripeColor
+    ? { background: `linear-gradient(135deg, ${c.color} 50%, ${c.stripeColor} 50%)` }
+    : { backgroundColor: c.color, color: c.textColor }
+  const sym = c.stripeColor
+    ? c.sym.split('-').map((part, i) => <span key={i} style={{ color: i === 0 ? c.textColor : (c.stripeTextColor || '#fff') }}>{i > 0 ? '-' : ''}{part}</span>)
+    : c.sym
+  return <span className="px-1 rounded font-bold text-xs" style={style}>{sym}</span>
 }

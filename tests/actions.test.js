@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { createGame } from '../src/engine/setup.js'
 import { applyAction } from '../src/engine/actions.js'
 import { getTitle } from '../src/titles/index.js'
+import { ptgMerge } from '../src/engine/merger.js'
 
 function make1830(playerCount = 3) {
   const title = getTitle('g1830')
@@ -381,5 +382,111 @@ describe('MOVE_CERT: president uniqueness', () => {
     expect(game.players[0].shares.some(s => s.corpSym === 'PRR' && s.isPresident)).toBe(false)
     // p1 should be president
     expect(game.players[1].shares.some(s => s.corpSym === 'PRR' && s.isPresident)).toBe(true)
+  })
+})
+
+describe('PTG merger', () => {
+  it('total shares equal 100% after merge', () => {
+    const game = makePTG()
+    parPTGCorp(game, 'p0', 'RED', 80)
+    parPTGCorp(game, 'p1', 'GRN', 80)
+    // p0 buys another RED share
+    applyAction(game, { type: 'BUY_SHARE', playerId: 'p0', corpSym: 'RED', source: 'ipo', percent: 20 })
+    // p1 buys another GRN share
+    applyAction(game, { type: 'BUY_SHARE', playerId: 'p1', corpSym: 'GRN', source: 'ipo', percent: 20 })
+
+    // RED: p0 has 40% (20%P + 20%), IPO has 60%
+    // GRN: p1 has 40% (20%P + 20%), IPO has 60%
+    ptgMerge(game, 'RED', 'GRN')
+
+    const merged = game.corporations.find(c => c.sym === 'RED-GRN')
+    expect(merged).toBeTruthy()
+
+    // p0 had 2 RED certs → 2×10% = 20%. p1 had 2 GRN certs → 2×10% = 20%.
+    const p0pct = game.players[0].shares.filter(s => s.corpSym === 'RED-GRN').reduce((sum, s) => sum + s.percent, 0)
+    const p1pct = game.players[1].shares.filter(s => s.corpSym === 'RED-GRN').reduce((sum, s) => sum + s.percent, 0)
+    expect(p0pct).toBe(20)
+    expect(p1pct).toBe(20)
+
+    // Total should be 100%
+    const total = p0pct + p1pct + merged.ipoShares + merged.marketShares
+    expect(total).toBe(100)
+    expect(merged.ipoShares).toBe(60)
+    expect(merged.totalShares).toBe(10)
+  })
+
+  it('all shares are 10% after merge', () => {
+    const game = makePTG()
+    parPTGCorp(game, 'p0', 'RED', 80)
+    parPTGCorp(game, 'p1', 'GRN', 80)
+
+    ptgMerge(game, 'RED', 'GRN')
+
+    for (const p of game.players) {
+      for (const s of p.shares) {
+        if (s.corpSym === 'RED-GRN') {
+          expect(s.percent).toBe(10)
+        }
+      }
+    }
+  })
+
+  it('has exactly one president after merge (10% cert)', () => {
+    const game = makePTG()
+    parPTGCorp(game, 'p0', 'RED', 80)
+    parPTGCorp(game, 'p1', 'GRN', 80)
+
+    ptgMerge(game, 'RED', 'GRN')
+
+    const allPres = game.players.flatMap(p => p.shares.filter(s => s.corpSym === 'RED-GRN' && s.isPresident))
+    expect(allPres).toHaveLength(1)
+    expect(allPres[0].percent).toBe(10)
+  })
+
+  it('president is majority holder after merge', () => {
+    const game = makePTG()
+    parPTGCorp(game, 'p0', 'RED', 80)
+    parPTGCorp(game, 'p1', 'GRN', 80)
+    // p0 buys more RED → majority
+    applyAction(game, { type: 'BUY_SHARE', playerId: 'p0', corpSym: 'RED', source: 'ipo', percent: 20 })
+
+    ptgMerge(game, 'RED', 'GRN')
+
+    // p0 had 2 RED certs → 2×10% = 20%, p1 had 1 GRN cert → 1×10% = 10%. p0 is majority.
+    expect(game.players[0].shares.some(s => s.corpSym === 'RED-GRN' && s.isPresident)).toBe(true)
+    expect(game.players[1].shares.some(s => s.corpSym === 'RED-GRN' && s.isPresident)).toBe(false)
+  })
+
+  it('merged corp has stripe colors', () => {
+    const game = makePTG()
+    parPTGCorp(game, 'p0', 'RED', 80)
+    parPTGCorp(game, 'p1', 'GRN', 80)
+
+    const grnColor = game.corporations.find(c => c.sym === 'GRN').color
+
+    ptgMerge(game, 'RED', 'GRN')
+
+    const merged = game.corporations.find(c => c.sym === 'RED-GRN')
+    expect(merged.isMerged).toBe(true)
+    expect(merged.stripeColor).toBe(grnColor)
+  })
+
+  it('market shares stay correct after merge', () => {
+    const game = makePTG()
+    parPTGCorp(game, 'p0', 'RED', 80)
+    parPTGCorp(game, 'p1', 'GRN', 80)
+    // Issue a RED share to market
+    applyAction(game, { type: 'ISSUE_SHARES', corpSym: 'RED' })
+
+    const redMarket = game.corporations.find(c => c.sym === 'RED').marketShares
+
+    ptgMerge(game, 'RED', 'GRN')
+
+    const merged = game.corporations.find(c => c.sym === 'RED-GRN')
+    // Market shares from RED should be preserved
+    expect(merged.marketShares).toBe(redMarket)
+    // Total should still be 100%
+    const held = game.players.reduce((sum, p) => sum + p.shares.filter(s => s.corpSym === 'RED-GRN').reduce((s2, sh) => s2 + sh.percent, 0), 0)
+    expect(held + merged.ipoShares + merged.marketShares).toBe(100)
   })
 })
