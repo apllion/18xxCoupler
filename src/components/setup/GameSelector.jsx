@@ -297,6 +297,11 @@ function WrenchLegend({ title, onClose }) {
           <span className="flex gap-px">
             {Array.from({ length: 5 }, (_, i) => <WrenchIcon key={i} filled={i < (title.maturity || 0)} />)}
           </span>
+          {(title.testQuality || 0) > 0 && (
+            <span className="text-[10px] text-broker-text-muted font-mono" title="Test coverage">
+              {'#'.repeat(title.testQuality)}
+            </span>
+          )}
         </div>
         <div className="text-xs text-broker-text space-y-0.5">
           {title.implemented.split('•').filter(s => s.trim()).map((line, i) => (
@@ -332,9 +337,16 @@ function TitleButton({ t, onClick, onShowLegend, onShowInfo }) {
       <div className="text-sm text-broker-text-muted mt-1">{t.subtitle}</div>
       <div className="flex items-center justify-between mt-2">
         <span className="text-xs text-broker-text-muted">{t.minPlayers}–{t.maxPlayers} players</span>
-        <span onClick={e => { e.stopPropagation(); onShowLegend?.(t) }}
-          className="flex gap-px items-center cursor-pointer" title={t.implemented || WRENCH_LABELS[m]}>
-          {Array.from({ length: 5 }, (_, i) => <WrenchIcon key={i} filled={i < m} />)}
+        <span className="flex gap-2 items-center">
+          <span onClick={e => { e.stopPropagation(); onShowLegend?.(t) }}
+            className="flex gap-px items-center cursor-pointer" title={t.implemented || WRENCH_LABELS[m]}>
+            {Array.from({ length: 5 }, (_, i) => <WrenchIcon key={i} filled={i < m} />)}
+          </span>
+          {(t.testQuality || 0) > 0 && (
+            <span className="text-[10px] text-broker-text-muted font-mono tracking-tight" title="Test coverage">
+              {'#'.repeat(t.testQuality)}
+            </span>
+          )}
         </span>
       </div>
     </button>

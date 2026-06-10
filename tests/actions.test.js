@@ -223,7 +223,7 @@ function parPTGCorp(game, playerId, corpSym, parPrice = 80) {
   const grid = game.stockMarket.grid
   let row = 0
   for (let r = 0; r < grid.length; r++) {
-    if (grid[r][0]?.price === parPrice && grid[r][0]?.par) { row = r; break }
+    if (grid[r][0]?.price === parPrice && grid[r][0]?.canPar) { row = r; break }
   }
   applyAction(game, { type: 'PAR_SHARE', playerId, corpSym, parPrice, row, col: 0 })
 }
