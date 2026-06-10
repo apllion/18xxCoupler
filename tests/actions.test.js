@@ -411,6 +411,8 @@ describe('PTG merger', () => {
     // Total should be 100%
     const total = p0pct + p1pct + merged.ipoShares + merged.marketShares
     expect(total).toBe(100)
+    // IPO: RED had 3 IPO certs (60%), GRN had 3 IPO certs (60%) → 6 certs × 10% = 60%
+    // But held = 20+20=40%, market=0, so IPO = 100-40-0 = 60%
     expect(merged.ipoShares).toBe(60)
     expect(merged.totalShares).toBe(10)
   })
@@ -471,6 +473,28 @@ describe('PTG merger', () => {
     expect(merged.stripeColor).toBe(grnColor)
   })
 
+  it('non-merging corp shares in sharesHeld are preserved', () => {
+    const game = makePTG()
+    parPTGCorp(game, 'p0', 'RED', 80)
+    parPTGCorp(game, 'p1', 'GRN', 80)
+    parPTGCorp(game, 'p0', 'YEL', 80)
+
+    // RED buys a share of YEL (corp-to-corp)
+    const red = game.corporations.find(c => c.sym === 'RED')
+    red.cash = 500
+    applyAction(game, { type: 'CORP_BUY_SHARE', buyerCorpSym: 'RED', targetCorpSym: 'YEL', source: 'ipo', percent: 20 })
+
+    const redYelBefore = red.sharesHeld.filter(s => s.corpSym === 'YEL').reduce((sum, s) => sum + s.percent, 0)
+    expect(redYelBefore).toBe(20)
+
+    ptgMerge(game, 'RED', 'GRN')
+
+    // RED-GRN should still hold 20% of YEL (not converted)
+    const merged = game.corporations.find(c => c.sym === 'RED-GRN')
+    const yelHeld = merged.sharesHeld.filter(s => s.corpSym === 'YEL').reduce((sum, s) => sum + s.percent, 0)
+    expect(yelHeld).toBe(20)
+  })
+
   it('market shares stay correct after merge', () => {
     const game = makePTG()
     parPTGCorp(game, 'p0', 'RED', 80)
@@ -483,8 +507,8 @@ describe('PTG merger', () => {
     ptgMerge(game, 'RED', 'GRN')
 
     const merged = game.corporations.find(c => c.sym === 'RED-GRN')
-    // Market shares from RED should be preserved
-    expect(merged.marketShares).toBe(redMarket)
+    // Market shares halved: each old 20% cert → 10% in merged corp
+    expect(merged.marketShares).toBe(redMarket / 2)
     // Total should still be 100%
     const held = game.players.reduce((sum, p) => sum + p.shares.filter(s => s.corpSym === 'RED-GRN').reduce((s2, sh) => s2 + sh.percent, 0), 0)
     expect(held + merged.ipoShares + merged.marketShares).toBe(100)

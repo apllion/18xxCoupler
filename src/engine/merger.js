@@ -155,6 +155,13 @@ export function ptgMerge(state, topCorpSym, bottomCorpSym) {
     }
   }
 
+  // Update corp-held share references to new sym
+  for (const corp of state.corporations) {
+    for (const s of (corp.sharesHeld || [])) {
+      if (s.corpSym === oldSym) s.corpSym = newSym
+    }
+  }
+
   // Update turn queue
   if (state.turnQueue) {
     state.turnQueue = state.turnQueue.map((s) => s === oldSym ? newSym : s)
@@ -216,7 +223,9 @@ export function ptgMerge(state, topCorpSym, bottomCorpSym) {
   }
 
   // Recalculate share pools: merged corp is now 10-share (100% total)
-  // Count all held shares (players + corps)
+  // Market/IPO: each old 20% cert → one 10% cert, so halve the raw percentages
+  top.marketShares = (top.marketShares + bottom.marketShares) / 2
+  // Count all held shares (already converted to 10%)
   let heldPct = 0
   for (const player of state.players) {
     heldPct += player.shares.filter(s => s.corpSym === newSym).reduce((sum, s) => sum + s.percent, 0)
@@ -224,7 +233,6 @@ export function ptgMerge(state, topCorpSym, bottomCorpSym) {
   for (const corp of state.corporations) {
     heldPct += (corp.sharesHeld || []).filter(s => s.corpSym === newSym).reduce((sum, s) => sum + s.percent, 0)
   }
-  top.marketShares = top.marketShares + bottom.marketShares
   top.ipoShares = 100 - heldPct - top.marketShares
   top.treasuryShares = 0
   top.totalShares = 10
