@@ -268,6 +268,21 @@ const WRENCH_LABELS = [
   'Human-verified at the table',
 ]
 
+function TrackIcon({ filled, size = 'w-3 h-3' }) {
+  return (
+    <svg className={`${size} ${filled ? 'text-broker-gold' : 'text-broker-text-muted/20'}`}
+      viewBox="0 0 24 24" fill="currentColor" stroke="none">
+      {/* Two horizontal rails */}
+      <rect x="0" y="4" width="24" height="2.5" rx="1" />
+      <rect x="0" y="17.5" width="24" height="2.5" rx="1" />
+      {/* Vertical ties (sleepers) */}
+      <rect x="3" y="1" width="2.5" height="22" rx="0.5" />
+      <rect x="10.75" y="1" width="2.5" height="22" rx="0.5" />
+      <rect x="18.5" y="1" width="2.5" height="22" rx="0.5" />
+    </svg>
+  )
+}
+
 function WrenchIcon({ filled, size = 'w-3 h-3' }) {
   return (
     <svg className={`${size} ${filled ? 'text-broker-gold' : 'text-broker-text-muted/20'}`}
@@ -297,11 +312,9 @@ function WrenchLegend({ title, onClose }) {
           <span className="flex gap-px">
             {Array.from({ length: 5 }, (_, i) => <WrenchIcon key={i} filled={i < (title.maturity || 0)} />)}
           </span>
-          {(title.testQuality || 0) > 0 && (
-            <span className="text-[10px] text-broker-text-muted font-mono" title="Test coverage">
-              {'#'.repeat(title.testQuality)}
-            </span>
-          )}
+          <span className="flex gap-px items-center" title="Test coverage">
+            {Array.from({ length: 5 }, (_, i) => <TrackIcon key={i} filled={i < (title.testQuality || 0)} />)}
+          </span>
         </div>
         <div className="text-xs text-broker-text space-y-0.5">
           {title.implemented.split('•').filter(s => s.trim()).map((line, i) => (
@@ -342,11 +355,9 @@ function TitleButton({ t, onClick, onShowLegend, onShowInfo }) {
             className="flex gap-px items-center cursor-pointer" title={t.implemented || WRENCH_LABELS[m]}>
             {Array.from({ length: 5 }, (_, i) => <WrenchIcon key={i} filled={i < m} />)}
           </span>
-          {(t.testQuality || 0) > 0 && (
-            <span className="text-[10px] text-broker-text-muted font-mono tracking-tight" title="Test coverage">
-              {'#'.repeat(t.testQuality)}
-            </span>
-          )}
+          <span className="flex gap-px items-center" title="Test coverage">
+            {Array.from({ length: 5 }, (_, i) => <TrackIcon key={i} filled={i < (t.testQuality || 0)} />)}
+          </span>
         </span>
       </div>
     </button>
