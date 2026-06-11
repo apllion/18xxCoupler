@@ -234,18 +234,17 @@ describe('18Chesapeake dividends', () => {
     expect(colAfterWithhold).toBeLessThan(colAfterPay)
   })
 
-  it('IPO shares pay dividends to corp treasury (full cap)', () => {
+  it('IPO shares do NOT pay dividends (standard full cap)', () => {
     const game = makeChes()
     parCorp(game, 'p0', 'PRR', 80)
     floatCorp(game, 'PRR')
     const corp = game.corporations.find(c => c.sym === 'PRR')
     const cashBefore = corp.cash
-    const ipoPct = corp.ipoShares // 40% remaining in IPO
 
     applyAction(game, { type: 'PAY_DIVIDEND', corpSym: 'PRR', totalRevenue: 100 })
 
-    // IPO shares: $10/share × 4 shares = $40 to corp
-    expect(corp.cash).toBe(cashBefore + 10 * (ipoPct / 10))
+    // IPO shares pay nothing — corp cash unchanged from dividends
+    expect(corp.cash).toBe(cashBefore)
   })
 })
 

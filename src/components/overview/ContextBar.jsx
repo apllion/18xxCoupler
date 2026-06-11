@@ -37,6 +37,7 @@ export function ContextBar({ game, selPlayer, selCorp, myPlayerId, setPanel, doA
     },
     discard: () => setPanel('discard'),
     removetoken: () => selCorp && doAction({ type: 'REMOVE_TOKEN', corpSym: selCorp.sym }),
+    terrain: () => setPanel('terrain'),
     paybank: () => setPanel('paybank'),
     takecard: () => setPanel('takecard'),
     collect: () => doAction({ type: 'COLLECT_ALL_REVENUE' }),

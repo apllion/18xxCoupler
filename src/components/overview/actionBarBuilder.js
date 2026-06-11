@@ -64,6 +64,11 @@ const ACTIONS = [
     gate: (g, rt, player, corp) => corp?.floated && corp?.tokensPlaced > 0
   },
 
+  // Terrain costs — tile lay costs deducted from corp treasury
+  { id: 'terrain', label: 'Terrain', round: 'or',
+    gate: (g) => (g.title.terrainCosts || []).length > 0
+  },
+
   // Pay to bank — auctions, fees, any cash-to-bank transfer
   { id: 'paybank', label: 'Pay', round: 'any', always: true },
   // Strategy cards — PTG

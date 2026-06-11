@@ -127,8 +127,7 @@ function PanelContent({ panel, game, player, corp, unfloated, fmt, revenueInput,
     const total = corp.tokens.length
     const remaining = total - placed
     const tokenCost = placed < total ? (corp.tokens[placed] || 0) : 0
-    const terrainCosts = game.title.terrainCosts || []
-    const variableTokenCost = game.title.variableTokenCost // true for titles like PTG where token cost is free-entry
+    const variableTokenCost = game.title.variableTokenCost
     if (remaining <= 0) return <div><Title><CB c={corp} /> Tokens</Title><span className="text-broker-text-muted">All tokens placed</span></div>
 
     const placeToken = (cost) => {
@@ -137,42 +136,37 @@ function PanelContent({ panel, game, player, corp, unfloated, fmt, revenueInput,
 
     return (
       <div>
-        <Title><CB c={corp} /> Place Token ({placed}/{total})</Title>
-        <div className="mt-1 space-y-1">
-          {/* Token cost buttons */}
-          <div className="flex items-center gap-1 flex-wrap">
-            <span className="text-broker-text-muted text-xs w-14">Token:</span>
-            {variableTokenCost ? (
-              <>
-                <input type="number" value={priceValue} onChange={e => setPriceValue(e.target.value)}
-                  placeholder="0"
-                  className="w-20 bg-broker-bg border border-broker-border rounded px-2 py-1 text-white text-center text-xs" />
-                <Btn v="green" o={() => { placeToken(parseInt(priceValue, 10) || 0); setPriceValue('') }}>
-                  Place {fmt(parseInt(priceValue, 10) || 0)}
-                </Btn>
-              </>
-            ) : (
-              <>
-                <Btn v="green" o={() => placeToken(tokenCost)}>{fmt(tokenCost)}</Btn>
-                {terrainCosts.map(tc => (
-                  <Btn key={tc} v="yellow" o={() => placeToken(tokenCost + tc)}>
-                    {fmt(tokenCost)}+{fmt(tc)}={fmt(tokenCost + tc)}
-                  </Btn>
-                ))}
-              </>
-            )}
-          </div>
-          {/* Terrain-only buttons (for additional tile lay costs etc.) */}
-          {terrainCosts.length > 0 && (
-            <div className="flex items-center gap-1 flex-wrap">
-              <span className="text-broker-text-muted text-xs w-14">Terrain:</span>
-              {terrainCosts.map(tc => (
-                <Btn key={tc} v="yellow" o={() => doAction({ type: 'ADJUST_CASH', entityId: corp.sym, entityType: 'corporation', amount: -tc })}>
-                  {fmt(tc)}
-                </Btn>
-              ))}
-            </div>
+        <Title><CB c={corp} /> Place Token ({placed}/{total}) — next: {fmt(tokenCost)}</Title>
+        <div className="flex items-center gap-1 flex-wrap mt-1">
+          {variableTokenCost ? (
+            <>
+              <input type="number" value={priceValue} onChange={e => setPriceValue(e.target.value)}
+                placeholder="0"
+                className="w-20 bg-broker-bg border border-broker-border rounded px-2 py-1 text-white text-center text-xs" />
+              <Btn v="green" o={() => { placeToken(parseInt(priceValue, 10) || 0); setPriceValue('') }}>
+                Place {fmt(parseInt(priceValue, 10) || 0)}
+              </Btn>
+            </>
+          ) : (
+            <Btn v="green" o={() => placeToken(tokenCost)}>Place {fmt(tokenCost)}</Btn>
           )}
+        </div>
+      </div>
+    )
+  }
+
+  // Terrain costs
+  if (panel === 'terrain' && corp) {
+    const terrainCosts = game.title.terrainCosts || []
+    return (
+      <div>
+        <Title><CB c={corp} /> Terrain Cost</Title>
+        <div className="flex items-center gap-1 flex-wrap mt-1">
+          {terrainCosts.map(tc => (
+            <Btn key={tc} v="yellow" o={() => doAction({ type: 'ADJUST_CASH', entityId: corp.sym, entityType: 'corporation', amount: -tc })}>
+              {fmt(tc)}
+            </Btn>
+          ))}
         </div>
       </div>
     )
