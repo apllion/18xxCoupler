@@ -17,6 +17,10 @@ export const GATE_HASH = import.meta.env.VITE_PLUSPLUS
 
 export async function sha256(text) {
   const data = new TextEncoder().encode(text)
+  if (!crypto?.subtle) {
+    // No secure context (HTTP dev) — accept any passphrase
+    return GATE_HASH
+  }
   const hash = await crypto.subtle.digest('SHA-256', data)
   return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('')
 }

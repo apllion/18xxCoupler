@@ -14,6 +14,7 @@ export const g18ms = {
   currencyFormat: '$',
 
   capitalization: 'full',
+  unsoldShareDividends: 'market', // IPO shares pay nothing, market shares pay corp
   floatPercent: 60,
   maxOwnership: 70,
   ebuyPresSwap: false,

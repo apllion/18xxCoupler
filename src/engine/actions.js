@@ -868,14 +868,18 @@ function handlePayDividend(state, { corpSym, totalRevenue }) {
     }
   }
 
-  // IPO shares: dividends on unsold shares go to corp treasury
-  if (corp.ipoShares > 0) {
+  // Unsold share dividends: title-configurable
+  const unsoldRule = state.title.unsoldShareDividends || 'ipo'
+  if ((unsoldRule === 'ipo' || unsoldRule === 'both') && corp.ipoShares > 0) {
     const ipoPayout = perShare * (corp.ipoShares / regShare)
     corp.cash += ipoPayout
     state.bank.cash -= ipoPayout
   }
-
-  // Market shares: dividends go to bank (already there, no transfer needed)
+  if ((unsoldRule === 'market' || unsoldRule === 'both') && corp.marketShares > 0) {
+    const mktPayout = perShare * (corp.marketShares / regShare)
+    corp.cash += mktPayout
+    state.bank.cash -= mktPayout
+  }
 
   // Price movement: title-aware
   // perShare is per actual share, totalRevenue passed for PTG-style comparison
