@@ -49,6 +49,8 @@ export const g18chesapeake = {
     { name: 'D', distance: 999, price: 900, num: 20, availableOn: '6', discount: { '4': 200, '5': 200, '6': 200 } },
   ],
 
+  terrainCosts: [20, 40],
+
   corporations: [
     { sym: 'PRR', name: 'Pennsylvania Railroad', tokens: [0,40,60,80], color: '#237333', coordinates: 'F2' },
     { sym: 'PLE', name: 'Pittsburgh and Lake Erie Railroad', tokens: [0,40,60], color: '#000000', coordinates: 'A3' },

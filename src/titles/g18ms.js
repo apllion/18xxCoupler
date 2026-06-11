@@ -52,6 +52,8 @@ export const g18ms = {
     { sym: 'WRA', name: 'Western Railway of Alabama', tokens: [0,40,100], color: '#c7c4e2', textColor: '#000', coordinates: 'E11' },
   ],
 
+  terrainCosts: [20, 40],
+
   pregame: [{ id: 'draft', label: 'Draft', type: 'draft' }],
 
   companies: [

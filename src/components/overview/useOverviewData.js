@@ -51,7 +51,15 @@ export function useOverviewData() {
     const active = game.corporations
       .filter(c => c.ipoed || c.floated)
       .map(c => ({ ...c, price: corpPrice(game.stockMarket, c.sym) || 0, pos: game.stockMarket.corpPositions[c.sym] }))
-      .sort((a, b) => b.price - a.price)
+      .sort((a, b) => {
+        // Sort by market position: row ascending (top = best), column descending (right = best),
+        // then by arrival order (lower = arrived first = on top of stack)
+        const ar = a.pos?.row ?? 99, br = b.pos?.row ?? 99
+        const ac = a.pos?.col ?? -1, bc = b.pos?.col ?? -1
+        if (ar !== br) return ar - br
+        if (ac !== bc) return bc - ac
+        return (a.pos?.order ?? 0) - (b.pos?.order ?? 0)
+      })
     const inactive = game.corporations
       .filter(c => !c.ipoed && !c.floated)
       .map(c => ({ ...c, price: 0, pos: null }))

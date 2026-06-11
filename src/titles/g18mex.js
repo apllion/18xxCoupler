@@ -45,6 +45,8 @@ export const g18mex = {
     { name: '4D', distance: 4, price: 700, num: 7 },
   ],
 
+  terrainCosts: [20, 60],
+
   corporations: [
     { sym: 'CHI', name: 'Chihuahua Pacific Railway', tokens: [0,40,60,80], color: '#FF4136', coordinates: 'E6' },
     { sym: 'NdM', name: 'National Railways of Mexico', tokens: [0,40,60,80], color: '#00AC00', coordinates: 'O10',

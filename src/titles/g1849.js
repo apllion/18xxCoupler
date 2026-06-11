@@ -62,6 +62,8 @@ export const g1849 = {
     { name: 'R6H', distance: 6, price: 350, num: 2, availableOn: '16H' },
   ],
 
+  terrainCosts: [40, 60],
+
   corporations: [
     { sym: 'AFG', name: 'Azienda Ferroviaria Garibaldi', tokens: [0,0,0], color: '#ff0000', coordinates: null, floatPercent: 20,
       desc: 'Choose home token location when floated.' },

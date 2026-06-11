@@ -111,6 +111,8 @@ export const gptg = {
       unique: 'Reserve one tile for the duration of a round (only you can place it).' },
   ],
 
+  variableTokenCost: true, // Token cost is free-entry (multiples of 10)
+
   // Corp share trading: step 3.1 sell, step 3.7 buy one share per turn
   corpCanBuyShares: true,
   corpCanSellShares: true,

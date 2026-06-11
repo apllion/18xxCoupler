@@ -61,6 +61,8 @@ export const g1846 = {
     { name: '6', distance: 6, price: 800, num: 9, variants: [{ name: '7/8', price: 900 }], events: ['remove_bonuses','remove_reservations'] },
   ],
 
+  terrainCosts: [40, 60],
+
   corporations: [
     { sym: 'PRR', name: 'Pennsylvania Railroad', tokens: [0,80,80,80,80], color: '#FF0000', coordinates: 'F20', floatPercent: 20 },
     { sym: 'NYC', name: 'New York Central Railroad', tokens: [0,80,80,80], color: '#110a0c', coordinates: 'D20', floatPercent: 20 },

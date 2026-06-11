@@ -55,6 +55,8 @@ export const g1889 = {
     { name: 'D', distance: 999, price: 1100, num: 99, availableOn: '6', discount: { '4': 300, '5': 300, '6': 300 } },
   ],
 
+  terrainCosts: [80],
+
   corporations: [
     { sym: 'AR', name: 'Awa Railroad', tokens: [0,40], color: '#37383a', coordinates: 'K8', floatPercent: 50 },
     { sym: 'IR', name: 'Iyo Railway', tokens: [0,40], color: '#f48221', coordinates: 'E2', floatPercent: 50 },

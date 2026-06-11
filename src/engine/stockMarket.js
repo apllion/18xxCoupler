@@ -65,15 +65,25 @@ export function corpPrice(market, corpSym) {
 }
 
 export function placeCorpOnMarket(market, corpSym, row, col) {
-  market.corpPositions[corpSym] = { row, col }
+  // order: higher = arrived later = placed under existing tokens
+  const maxOrder = Object.values(market.corpPositions).reduce((m, p) => Math.max(m, p.order || 0), 0)
+  market.corpPositions[corpSym] = { row, col, order: maxOrder + 1 }
 }
 
 // --- Single-step primitives ---
+
+let _orderSeq = 1000
+
+function bumpOrder(market, pos) {
+  _orderSeq++
+  pos.order = _orderSeq
+}
 
 function stepRight(market, pos) {
   const row = market.grid[pos.row]
   if (pos.col < row.length - 1 && row[pos.col + 1]) {
     pos.col++
+    bumpOrder(market, pos)
     return true
   }
   return false
@@ -82,6 +92,7 @@ function stepRight(market, pos) {
 function stepLeft(market, pos) {
   if (pos.col > 0 && market.grid[pos.row][pos.col - 1]) {
     pos.col--
+    bumpOrder(market, pos)
     return true
   }
   return false
@@ -95,6 +106,7 @@ function stepDown(market, pos) {
   if (col >= 0) {
     pos.row++
     pos.col = col
+    bumpOrder(market, pos)
     return true
   }
   return false
@@ -108,6 +120,7 @@ function stepUp(market, pos) {
   if (col >= 0) {
     pos.row--
     pos.col = col
+    bumpOrder(market, pos)
     return true
   }
   return false

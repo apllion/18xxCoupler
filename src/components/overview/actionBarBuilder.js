@@ -28,9 +28,11 @@ const ACTIONS = [
 
   // Private actions — context-dependent
   { id: 'buyprivate', label: 'Priv Buy', key: 'p', round: 'any',
-    gate: (g) => {
-      // Show when unowned privates exist
-      return (g.companies || []).some(c => !c.ownerId && !c.closed)
+    gate: (g, rt) => {
+      if (!(g.companies || []).some(c => !c.ownerId && !c.closed)) return false
+      // If title uses draft pregame, only show during Pregame
+      if (g.title.pregame?.some(s => s.type === 'draft') && rt?.roundType !== 'Pregame') return false
+      return true
     }
   },
   { id: 'sellprivate', label: 'Priv Sell', key: 'v', round: 'or',

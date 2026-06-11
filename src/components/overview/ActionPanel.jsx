@@ -94,6 +94,7 @@ function PanelContent({ panel, game, player, corp, unfloated, fmt, revenueInput,
             useUIStore.getState().setActiveCorp(corp.sym)
             useUIStore.getState().setActiveTab('routes')
           }}>Route Calc</Btn>
+          <Btn v="red" o={() => doAction({ type: 'WITHHOLD_DIVIDEND', corpSym: corp.sym, totalRevenue: 0 })}>$0</Btn>
           {rev > 0 && (
             <>
               <Btn v="green" o={() => doAction({ type: 'PAY_DIVIDEND', corpSym: corp.sym, totalRevenue: rev })}>
@@ -116,23 +117,53 @@ function PanelContent({ panel, game, player, corp, unfloated, fmt, revenueInput,
     const placed = corp.tokensPlaced || 0
     const total = corp.tokens.length
     const remaining = total - placed
-    const defaultCost = placed < total ? (corp.tokens[placed] || 0) : 0
+    const tokenCost = placed < total ? (corp.tokens[placed] || 0) : 0
+    const terrainCosts = game.title.terrainCosts || []
+    const variableTokenCost = game.title.variableTokenCost // true for titles like PTG where token cost is free-entry
     if (remaining <= 0) return <div><Title><CB c={corp} /> Tokens</Title><span className="text-broker-text-muted">All tokens placed</span></div>
+
+    const placeToken = (cost) => {
+      doAction({ type: 'PLACE_TOKEN', corpSym: corp.sym, price: cost })
+    }
+
     return (
       <div>
         <Title><CB c={corp} /> Place Token ({placed}/{total})</Title>
-        <div className="flex items-center gap-2 mt-1">
-          <input type="number" value={priceValue} onChange={e => setPriceValue(e.target.value)}
-            placeholder={String(defaultCost)}
-            className="w-24 bg-broker-bg border border-broker-border rounded px-2 py-1.5 text-white text-center" />
-          <Btn v="green" o={() => {
-            const cost = priceValue !== '' ? (parseInt(priceValue, 10) || 0) : defaultCost
-            doAction({ type: 'PLACE_TOKEN', corpSym: corp.sym, price: cost })
-            setPriceValue('')
-          }}>Place ({fmt(priceValue !== '' ? (parseInt(priceValue, 10) || 0) : defaultCost)})</Btn>
-          <span className="text-broker-text-muted text-xs">
-            default: {fmt(defaultCost)}
-          </span>
+        <div className="mt-1 space-y-1">
+          {/* Token cost buttons */}
+          <div className="flex items-center gap-1 flex-wrap">
+            <span className="text-broker-text-muted text-xs w-14">Token:</span>
+            {variableTokenCost ? (
+              <>
+                <input type="number" value={priceValue} onChange={e => setPriceValue(e.target.value)}
+                  placeholder="0"
+                  className="w-20 bg-broker-bg border border-broker-border rounded px-2 py-1 text-white text-center text-xs" />
+                <Btn v="green" o={() => { placeToken(parseInt(priceValue, 10) || 0); setPriceValue('') }}>
+                  Place {fmt(parseInt(priceValue, 10) || 0)}
+                </Btn>
+              </>
+            ) : (
+              <>
+                <Btn v="green" o={() => placeToken(tokenCost)}>{fmt(tokenCost)}</Btn>
+                {terrainCosts.map(tc => (
+                  <Btn key={tc} v="yellow" o={() => placeToken(tokenCost + tc)}>
+                    {fmt(tokenCost)}+{fmt(tc)}={fmt(tokenCost + tc)}
+                  </Btn>
+                ))}
+              </>
+            )}
+          </div>
+          {/* Terrain-only buttons (for additional tile lay costs etc.) */}
+          {terrainCosts.length > 0 && (
+            <div className="flex items-center gap-1 flex-wrap">
+              <span className="text-broker-text-muted text-xs w-14">Terrain:</span>
+              {terrainCosts.map(tc => (
+                <Btn key={tc} v="yellow" o={() => doAction({ type: 'ADJUST_CASH', entityId: corp.sym, entityType: 'corporation', amount: -tc })}>
+                  {fmt(tc)}
+                </Btn>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     )
@@ -403,21 +434,16 @@ function PanelContent({ panel, game, player, corp, unfloated, fmt, revenueInput,
 
     const doPay = (amount) => {
       const v = amount || payAmount
-      if (v <= 0 || !payFrom) return
-      doAction({ type: 'ADJUST_CASH', entityId: payFrom.id || payFrom.type, entityType: payFrom.type, amount: -v })
-      if (payTo.type === 'corporation') {
-        doAction({ type: 'ADJUST_CASH', entityId: payTo.id, entityType: 'corporation', amount: v })
-      }
+      if (v <= 0 || !payFrom || !payTo) return
+      doAction({ type: 'ADJUST_CASH', entityId: payFrom.id, entityType: payFrom.type, amount: -v })
+      doAction({ type: 'ADJUST_CASH', entityId: payTo.id, entityType: payTo.type, amount: v })
       onClose()
     }
 
-    const fromOptions = [
-      ...(player ? [{ type: 'player', id: player.id, label: player.name, cash: player.cash }] : []),
+    const allOptions = [
+      { type: 'bank', id: 'bank', label: 'Bank', cash: game.bank.cash },
+      ...game.players.map(p => ({ type: 'player', id: p.id, label: p.name, cash: p.cash })),
       ...floatedCorps.map(c => ({ type: 'corporation', id: c.sym, label: c.sym, color: c.color, cash: c.cash })),
-    ]
-    const toOptions = [
-      { type: 'bank', label: 'Bank' },
-      ...floatedCorps.map(c => ({ type: 'corporation', id: c.sym, label: c.sym, color: c.color })),
     ]
 
     return (
@@ -426,10 +452,10 @@ function PanelContent({ panel, game, player, corp, unfloated, fmt, revenueInput,
         {/* From */}
         <div className="text-broker-text-muted text-xs mb-0.5">From:</div>
         <div className="flex gap-1 flex-wrap mb-1">
-          {fromOptions.map(o => (
-            <Btn key={o.id} v={payFrom?.id === o.id ? 'green' : 'blue'}
+          {allOptions.map(o => (
+            <Btn key={o.id} v={payFrom?.id === o.id && payFrom?.type === o.type ? 'green' : 'blue'}
               o={() => setPayFrom(o)}>
-              {o.color ? <span style={{ color: o.color }} className="font-bold">{o.label}</span> : o.label}
+              {o.color ? <CB c={{ sym: o.label, color: o.color, textColor: '#fff' }} /> : o.label}
               {o.cash != null && <span className="ml-1 opacity-60">{fmt(o.cash)}</span>}
             </Btn>
           ))}
@@ -437,10 +463,10 @@ function PanelContent({ panel, game, player, corp, unfloated, fmt, revenueInput,
         {/* To */}
         <div className="text-broker-text-muted text-xs mb-0.5">To:</div>
         <div className="flex gap-1 flex-wrap mb-1">
-          {toOptions.filter(o => !(o.type === payFrom?.type && o.id === payFrom?.id)).map(o => (
-            <Btn key={o.id || 'bank'} v={payTo?.id === o.id && payTo?.type === o.type ? 'green' : 'blue'}
+          {allOptions.filter(o => !(o.type === payFrom?.type && o.id === payFrom?.id)).map(o => (
+            <Btn key={o.id} v={payTo?.id === o.id && payTo?.type === o.type ? 'green' : 'blue'}
               o={() => setPayTo(o)}>
-              {o.color ? <span style={{ color: o.color }} className="font-bold">{o.label}</span> : o.label}
+              {o.color ? <CB c={{ sym: o.label, color: o.color, textColor: '#fff' }} /> : o.label}
             </Btn>
           ))}
         </div>

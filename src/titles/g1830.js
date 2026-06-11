@@ -52,6 +52,8 @@ export const g1830 = {
     { name: 'D', distance: 999, price: 1100, num: 20, availableOn: '6', discount: { '4': 300, '5': 300, '6': 300 } },
   ],
 
+  terrainCosts: [40, 60],
+
   corporations: [
     { sym: 'PRR', name: 'Pennsylvania Railroad', tokens: [0,40,100,100], color: '#32763f', coordinates: 'H12' },
     { sym: 'NYC', name: 'New York Central Railroad', tokens: [0,40,100,100], color: '#474548', coordinates: 'E19' },
