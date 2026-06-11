@@ -3,7 +3,7 @@ import { defaults } from './defaults.js'
 export const g1867 = {
   ...defaults,
 
-  maturity: 2, titleId: 'g1867', roundTypes: ['SR', 'OR', 'MR'],
+  maturity: 2, testQuality: 1, titleId: 'g1867', roundTypes: ['SR', 'OR', 'MR'],
   gameInfo: '• 16 minors (100% single-share) merge into 8 majors, then nationalize into CN • Incremental capitalization, 20% float for majors, half pay dividends allowed • Dedicated Merger Rounds between ORs from phase 3 through 7 • Default 1D column market (28 spaces), optional 2D grid variant • Bid box auction for 5 privates with city-bonus revenue abilities • 7 phases (2-8), nationalization events at phases 4/6/8 with train discounts • Phase 8 trains get large discounts ($275-$500 off), 2+2 and 5+5E multiplier trains • $15,000 bank, 2-6 players, sibling to 1861, sweet spot 4-5p',
   implemented: 'Shares • Half pay • Mergers (minor→major) • Nationalization • Train discounts',
   title: '1867',

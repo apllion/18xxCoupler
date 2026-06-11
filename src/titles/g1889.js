@@ -3,7 +3,7 @@ import { defaults } from './defaults.js'
 export const g1889 = {
   ...defaults,
 
-  maturity: 4, titleId: 'g1889',
+  maturity: 4, testQuality: 1, titleId: 'g1889',
   gameInfo: '• Classic intro 18xx set on Shikoku island, Japan • Full capitalization, 50% float (5 of 10 shares) • Must sell in blocks, no emergency buy from other corps • 7 corps (1-3 tokens each), 7 privates (¥20-¥150) • 2D grid market (11x15), sell/buy stock rounds • 6 phases (2/3/4/5/6/D), unlimited D-trains with ¥300 trade-in • ¥7,000 bank, privates close at phase 5 • Beginner variant with simplified private distribution • Best at 3-4 players, typically 2-3 hours',
   implemented: 'Shares • Dividends • Auto stock movement • Privates • D-train trade-in',
   title: '1889',

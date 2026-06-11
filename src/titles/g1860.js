@@ -3,7 +3,7 @@ import { defaults } from './defaults.js'
 export const g1860 = {
   ...defaults,
 
-  maturity: 3, titleId: 'g1860',
+  maturity: 3, testQuality: 1, titleId: 'g1860',
   gameInfo: '• Full capitalization, 50% float, no pool share limit (100% can be in market) • Sell shares at any time, even before corp operates • English auction for 5 privates, each exchangeable for a corp share • 8 corps (1-4 tokens each), Southern Railway national forms at phase 9 • 1D single-row market (54 spaces) with many par price options • 8 phases with +N trains (2+1 through 9+5), very long train roster • £10,000 bank, must sell in blocks, no emergency buy from others • 2-4 players, Isle of Wight setting, long strategic game',
   implemented: 'Shares • Dividends • Auto stock movement (1D) • No pool limit',
   title: '1860',

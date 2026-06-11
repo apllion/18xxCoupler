@@ -2,7 +2,7 @@ import { defaults } from './defaults.js'
 
 export const g1822 = {
   ...defaults,
-  maturity: 1, titleId: 'g1822',
+  maturity: 1, testQuality: 1, titleId: 'g1822',
   gameInfo: '• 30 minors + 10 majors, majors acquire minors during ORs • Bid box auction for concessions, privates, and minor companies • L/2 train variants (minor gets L-train, major upgrades to 2-train) • Tax haven private holds shares off-books, outside cert limit • Incremental cap switches to full at phase 6, 20% float for majors • 2D grid market (15x21), half pay allowed, most-cash SR order • 7 phases (1-7), 7/E train variant, 21 privates with unique abilities • £12,000 bank, 2-7 players, complex heavy-weight game (5-8 hours)',
   implemented: 'Shares • Dividends • Concessions • Minor acquisition mergers • Half pay',
   title: '1822', subtitle: 'The Railways of Great Britain', designer: 'Simon Cutforth',

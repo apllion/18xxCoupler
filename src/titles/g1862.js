@@ -2,7 +2,7 @@ import { defaults } from './defaults.js'
 
 export const g1862 = {
   ...defaults,
-  maturity: 1, titleId: 'g1862',
+  maturity: 1, testQuality: 1, titleId: 'g1862',
   gameInfo: '• 20 corps with 30% president share (30/10/10/10/10/10/10/10) • Peer mergers: two equal corps combine, survivor gets averaged price • All trains run unlimited distance, value determined by letter (A-H) • Charter auction to distribute initial corps, no private companies • 1D single-row market (66 spaces), full cap, 50% float • 8 phases (A-H), H-train purchase triggers LNER formation event • £15,000 bank, sell/buy stock rounds, can only sell after full round • 2-8 players, Railway Mania in Eastern Counties England setting',
   implemented: 'Shares • Dividends • Peer mergers • 30% president • 20 corps',
   title: '1862', subtitle: 'Railway Mania in the Eastern Counties', designer: 'Mike Hutton',

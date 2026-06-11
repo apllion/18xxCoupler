@@ -3,7 +3,7 @@ import { defaults } from './defaults.js'
 export const g1846 = {
   ...defaults,
 
-  maturity: 3, titleId: 'g1846',
+  maturity: 3, testQuality: 1, titleId: 'g1846',
   gameInfo: '• Incremental capitalization, 20% float (president share only) • Secret draft replaces auction: privates, minors, and pass cards • 7 majors + 2 minors (MS, BIG4), half pay dividends allowed • 1D single-row market, sell moves left (blocked by president) • Corp can issue shares to raise emergency train funds • 4 phases (I/II/III/IV) with train variants (3/5, 4/6, 7/8) • Cert limit varies by player AND corp count • Bank varies by player count ($7,000-$9,000), ends on bank break or bankruptcy • Best at 3-5 players, sweet spot 4p',
   implemented: 'Shares • Half pay • Auto stock movement (1D) • Issue/redeem shares • Cert limits • Privates',
   title: '1846',

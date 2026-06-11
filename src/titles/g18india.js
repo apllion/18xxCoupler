@@ -2,7 +2,7 @@ import { defaults } from './defaults.js'
 
 export const g18india = {
   ...defaults,
-  maturity: 1, titleId: 'g18india',
+  maturity: 1, testQuality: 1, titleId: 'g18india',
   gameInfo: '• Corps can buy one share of another corp per OR, creating cross-ownership • 30% float (3 of 10 shares), incremental capitalization • Multiplier trains (3x2, 3x3, 4x2, 4x3) run route multiple times for huge revenue • Selling shares causes NO stock price movement, first-to-pass SR order • All tile colors available from phase 1 (no color restrictions) • 18 corps (1-5 tokens), English auction for 6 East India Company privates • 1D single-row market (29 spaces), 5 phases (I-IV), ₹9,000 bank • 2-5 players, British Raj India setting, GIPR has all-10% shares',
   implemented: 'Shares • Dividends • Corp share trading • GIPR 10x10% • No sell movement',
   title: '18India', subtitle: 'The Railways of the British Raj', designer: 'Michael Carter, Anthony Fryer, John Harres, Nick Neylon',

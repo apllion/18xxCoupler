@@ -2,7 +2,7 @@ import { defaults } from './defaults.js'
 
 export const g21moon = {
   ...defaults,
-  maturity: 2, titleId: 'g21moon', roundTypes: ['SR', 'CR', 'OR'],
+  maturity: 2, testQuality: 1, titleId: 'g21moon', roundTypes: ['SR', 'CR', 'OR'],
   gameInfo: '• Corps buy and sell shares of other corps during Corporate Round • Incremental capitalization, 50% float, unlimited bank • 7 corps with 3-5 tokens each, mineral resource hexes boost revenue • 2D grid market (7x18), no cert limit for corp-held shares • 6 privates with resource/terrain abilities, no pregame auction • 6 phases (2/3/4/5/6/10), 10-train is unlimited • Lunar-themed sci-fi setting on the Moon • 2-5 players, medium-weight strategic game',
   implemented: 'Shares • Dividends • Corp share trading • Mineral resources (config)',
   title: '21 Moon', subtitle: 'Lunar Railways', designer: 'Jonas Jones and Scott Petersen',

@@ -3,7 +3,7 @@ import { defaults } from './defaults.js'
 export const g18depot = {
   ...defaults,
 
-  maturity: 3, titleId: 'g18depot',
+  maturity: 3, testQuality: 1, titleId: 'g18depot',
   gameInfo: '• Generic 18xx template — works for any game • All actions always available, no phase gates • Manual stock movement via action buttons • Toggle features on/off: half pay, loans, corp trading • No title-specific rules enforced • Pure recording tool',
   implemented: 'All basic actions • Pay/Receive • Par • Buy/Sell shares • Revenue/Dividends • Manual stock movement • Place token • Buy train • Loans (optional) • Half pay (optional) • Corp trading (optional)',
   title: '18Depot',
