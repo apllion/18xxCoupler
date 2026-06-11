@@ -38,7 +38,7 @@ export function PositionMeter({ game }) {
   return (
     <div className="px-3 py-2 text-xs flex-shrink-0 bg-broker-surface border-t border-broker-border">
       <div className="text-broker-text-muted font-medium mb-1">Position</div>
-      {sorted.map((p, i) => {
+      {sorted.map((p) => {
         const barWidth = Math.round((p.total / maxTotal) * 100)
         const ratio = avgTotal > 0 ? (p.total / avgTotal).toFixed(2) : '—'
         const leading = p.total === maxTotal

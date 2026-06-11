@@ -41,13 +41,13 @@ function getSharedState(game) {
 const ROOM_KEY = '18xxCoupler_room'
 
 function saveRoomInfo(code, isCreator) {
-  try { localStorage.setItem(ROOM_KEY, JSON.stringify({ code, isCreator })) } catch {}
+  try { localStorage.setItem(ROOM_KEY, JSON.stringify({ code, isCreator })) } catch { /* no-op */ }
 }
 function loadRoomInfo() {
   try { return JSON.parse(localStorage.getItem(ROOM_KEY)) } catch { return null }
 }
 function clearRoomInfo() {
-  try { localStorage.removeItem(ROOM_KEY) } catch {}
+  try { localStorage.removeItem(ROOM_KEY) } catch { /* no-op */ }
 }
 
 export function useSync(gameStore) {

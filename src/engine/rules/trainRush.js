@@ -1,6 +1,6 @@
 // Train Rush Indicator — phase pressure, obsolescence, emergency buy exposure.
 
-import { currentPhase, phaseForTrain } from '../phase.js'
+import { currentPhase } from '../phase.js'
 import { remainingCount } from '../depot.js'
 import { corpPrice } from '../stockMarket.js'
 
@@ -8,13 +8,9 @@ import { corpPrice } from '../stockMarket.js'
 export function trainRushAnalysis(state) {
   const pm = state.phaseManager
   const phase = currentPhase(pm)
-  const depot = state.depot
 
   // Find the next phase-triggering train
   const nextPhaseInfo = findNextPhase(pm)
-  const nextTrain = nextPhaseInfo
-    ? depot.upcoming.find(t => t.name === nextPhaseInfo.on)
-    : null
 
   // Trains remaining in current and next tier
   const tiers = buildTierInfo(state)
@@ -70,7 +66,7 @@ function buildTierInfo(state) {
   return tiers
 }
 
-function analyzeCorpTrains(state, corp, tiers, nextPhase) {
+function analyzeCorpTrains(state, corp, tiers, _nextPhase) {
   const price = corpPrice(state.stockMarket, corp.sym) || 0
 
   // Which trains does this corp own?

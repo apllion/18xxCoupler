@@ -7,7 +7,6 @@ import { corpPrice, priceAt, parPrices } from '../../engine/stockMarket.js'
 import { playerSharePercent } from '../../engine/player.js'
 import { currentPhase, trainLimit, operatingRounds } from '../../engine/phase.js'
 import { nextAvailableTrains, remainingCount } from '../../engine/depot.js'
-import { calculateDividend } from '../../engine/rules/dividend.js'
 import { dividendComparison } from '../../engine/rules/dividendAdvisor.js'
 import { trainRushAnalysis } from '../../engine/rules/trainRush.js'
 import { currentInterestRate, interestDue, maxLoansForCorp } from '../../engine/loans.js'
@@ -29,22 +28,17 @@ export default function CorpsTab() {
   // Navigate from PlayersTab cross-link
   const activeCorpSym = useUIStore((s) => s.activeCorpSym)
 
-  if (!game) return null
-
-  const fmt = (n) => formatCurrency(n, game.title.currencyFormat)
-  const phase = currentPhase(game.phaseManager)
-  const orCount = operatingRounds(game.phaseManager)
-
   // Operating order: floated corps sorted by share price descending
   const operatingOrder = useMemo(() => {
+    if (!game) return []
     return game.corporations
       .filter((c) => c.floated)
       .map((c) => ({ ...c, price: corpPrice(game.stockMarket, c.sym) || 0 }))
       .sort((a, b) => b.price - a.price)
-  }, [game.corporations, game.stockMarket])
+  }, [game?.corporations, game?.stockMarket])
 
   // Auto-sync with turn tracking in OR (disabled in what-if mode)
-  const isOR = game.roundTracker?.roundType === 'OR'
+  const isOR = game?.roundTracker?.roundType === 'OR'
   const currentTurnCorp = isOR && turnTracking === 'on' && !isWhatIf && turnQueue.length > 0
     ? turnQueue[turnIndex]
     : null
@@ -63,6 +57,12 @@ export default function CorpsTab() {
       useUIStore.getState().setActiveCorp(null)
     }
   }, [activeCorpSym, operatingOrder])
+
+  if (!game) return null
+
+  const fmt = (n) => formatCurrency(n, game.title.currencyFormat)
+  const phase = currentPhase(game.phaseManager)
+  const orCount = operatingRounds(game.phaseManager)
 
   // Unfloated corps
   const unfloatedCorps = game.corporations.filter(c => !c.floated)
@@ -206,7 +206,6 @@ function CorpDetail({ game, corp, dispatch, fmt, onNext, plusPlus }) {
 
   const revNum = parseInt(revenue, 10) || 0
   const perShare = revNum > 0 ? Math.floor(revNum / 10) : 0
-  const dividendPreview = revNum > 0 ? calculateDividend(game, corp.sym, revNum) : null
   const advisor = revNum > 0 ? dividendComparison(game, corp.sym, revNum) : null
   const isDoubleJump = price && perShare >= price
 
@@ -659,7 +658,6 @@ function CorpSharePanel({ game, corp, dispatch, fmt }) {
           <div className="text-xs text-broker-text-muted mb-1">Buy Share:</div>
           <div className="space-y-1">
             {buyOptions.map(({ corp: c, price, hasIPO, hasMarket, isSelf, canStart }) => {
-              const shareSize = title.shares?.[1] ?? 10
               const cost = price || 0
               const canAfford = price ? corp.cash >= cost : false
               return (
@@ -727,7 +725,7 @@ function CorpSharePanel({ game, corp, dispatch, fmt }) {
         <div>
           <div className="text-xs text-broker-text-muted mb-1">Sell Share:</div>
           <div className="space-y-1">
-            {sellOptions.map(({ sym, pct, price, color, textColor }) => (
+            {sellOptions.map(({ sym, pct, price, color, textColor: _textColor }) => (
               <div key={sym} className="flex items-center gap-2">
                 <span
                   className="w-3 h-3 rounded-full flex-shrink-0"
@@ -1223,7 +1221,7 @@ function ConversionPanel({ game, corp, dispatch }) {
   )
 }
 
-function BuyFromCorpPanel({ otherCorpTrains, buyerCash, onBuy, fmt }) {
+function BuyFromCorpPanel({ otherCorpTrains, buyerCash: _buyerCash, onBuy, fmt: _fmt }) {
   const [buyingFrom, setBuyingFrom] = useState(null) // { corpSym, trainName }
   const [negotiatedPrice, setNegotiatedPrice] = useState('')
 
@@ -1456,7 +1454,7 @@ function IssueRedeemPanel({ game, corp, dispatch, fmt }) {
   )
 }
 
-function PlaceTokenPanel({ game, corp, dispatch, fmt }) {
+function PlaceTokenPanel({ game: _game, corp, dispatch, fmt }) {
   const [customCost, setCustomCost] = useState('')
   const placed = corp.tokensPlaced || 0
   const total = corp.tokens.length
@@ -1465,8 +1463,6 @@ function PlaceTokenPanel({ game, corp, dispatch, fmt }) {
 
   // Cost of the next token (tokens array has cost per slot)
   const nextTokenCost = corp.tokens[placed] || 0
-  const canAfford = corp.cash >= nextTokenCost
-
   return (
     <div className="bg-broker-surface rounded-lg p-3">
       <div className="text-xs text-broker-text-muted mb-2 font-medium uppercase">Tokens</div>

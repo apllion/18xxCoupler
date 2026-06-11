@@ -3,7 +3,6 @@
 
 import { useState } from 'react'
 import { useGameStore } from '../../store/gameStore.js'
-import { useUIStore } from '../../store/uiStore.js'
 import { useDispatch } from '../../hooks/useDispatch.js'
 import { useSyncContext } from '../../hooks/SyncContext.jsx'
 import { roundLabel } from '../../engine/roundTracker.js'

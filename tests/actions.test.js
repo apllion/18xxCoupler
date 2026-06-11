@@ -268,8 +268,6 @@ describe('PTG: incremental capitalization for corp IPO purchases', () => {
 
     const redCashBefore = red.cash
     const grnCashBefore = grn.cash
-    const bankBefore = game.bank.cash
-
     // RED buys GRN share from IPO at market price (80)
     applyAction(game, { type: 'CORP_BUY_SHARE', buyerCorpSym: 'RED', targetCorpSym: 'GRN', source: 'ipo', percent: 20 })
 
@@ -286,7 +284,6 @@ describe('PTG: sell movement uses baseSharePercent', () => {
     parPTGCorp(game, 'p0', 'RED', 90)
     applyAction(game, { type: 'BUY_SHARE', playerId: 'p0', corpSym: 'RED', source: 'ipo', percent: 20 })
 
-    const priceBefore = game.stockMarket.grid[game.stockMarket.corpPositions['RED'].row][game.stockMarket.corpPositions['RED'].col].price
     const rowBefore = game.stockMarket.corpPositions['RED'].row
 
     applyAction(game, { type: 'SELL_SHARES', playerId: 'p0', corpSym: 'RED', percent: 20 })

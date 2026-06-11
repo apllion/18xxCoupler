@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-disable no-undef */
 // advisor-calibrate.js — replay 18xx.games files, run advisor at each OR,
 // compare tips vs what actually happened to calibrate advisor accuracy.
 //
@@ -139,7 +140,7 @@ function processGame(gameJson, filePath, tipStats) {
 }
 
 // --- Print report ---
-function printReport(title, stats, gameCount) {
+function printReport(title, stats, _gameCount) {
   const sorted = Object.entries(stats).sort((a, b) => b[1].total - a[1].total)
   if (sorted.length === 0) { console.log('  (no tips generated)\n'); return }
 
@@ -186,7 +187,7 @@ function resolveFiles(args) {
               if (files.length > 0) {
                 titleFiles[sub] = (titleFiles[sub] || []).concat(files)
               }
-            } catch {}
+            } catch { /* no-op */ }
           }
         } else {
           // Single title dir
@@ -202,7 +203,7 @@ function resolveFiles(args) {
         // Individual file
         titleFiles['mixed'] = (titleFiles['mixed'] || []).concat([arg])
       }
-    } catch {}
+    } catch { /* no-op */ }
   }
 
   return titleFiles

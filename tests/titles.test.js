@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { createGame } from '../src/engine/setup.js'
 import { applyAction } from '../src/engine/actions.js'
 import { getTitle, titles } from '../src/titles/index.js'
-import { corpPrice, parPrices } from '../src/engine/stockMarket.js'
+import { parPrices } from '../src/engine/stockMarket.js'
 
 // ---------------------------------------------------------------------------
 // Helpers

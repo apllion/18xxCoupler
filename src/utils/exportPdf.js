@@ -2,7 +2,7 @@
 
 import { jsPDF } from 'jspdf'
 import { corpPrice } from '../engine/stockMarket.js'
-import { playerSharePercent, playerCertCount, isPresident } from '../engine/player.js'
+import { playerCertCount, isPresident } from '../engine/player.js'
 import { currentPhase, trainLimit } from '../engine/phase.js'
 import { roundLabel } from '../engine/roundTracker.js'
 import { formatCurrency } from './currency.js'

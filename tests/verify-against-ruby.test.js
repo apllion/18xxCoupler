@@ -8,7 +8,7 @@ import { describe, it, expect } from 'vitest'
 import { importGame } from '../src/engine/import18xxGames.js'
 import { corpPrice } from '../src/engine/stockMarket.js'
 import { playerSharePercent } from '../src/engine/player.js'
-import { readFileSync, existsSync } from 'fs'
+import { readFileSync, writeFileSync, existsSync } from 'fs'
 import { gunzipSync } from 'zlib'
 import { execSync } from 'child_process'
 
@@ -18,7 +18,7 @@ function loadGame(filePath) {
 
 function getRubyState(filePath) {
   const json = gunzipSync(readFileSync(filePath)).toString()
-  require('fs').writeFileSync('/tmp/verify_game.json', json)
+  writeFileSync('/tmp/verify_game.json', json)
 
   try {
     const raw = execSync(`

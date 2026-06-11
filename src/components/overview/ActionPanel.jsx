@@ -32,6 +32,15 @@ function PanelContent({ panel, game, player, corp, unfloated, fmt, revenueInput,
   const [priceTarget, setPriceTarget] = useState(null) // { type, data } for inline price entry
   const [priceValue, setPriceValue] = useState('')
 
+  // Pay panel state (must be at top level, not inside conditional)
+  const [payAmount, setPayAmount] = useState(0)
+  const [payFrom, setPayFrom] = useState(
+    corp?.floated ? { type: 'corporation', id: corp.sym, label: corp.sym, color: corp.color, cash: corp.cash }
+    : player ? { type: 'player', id: player.id, label: player.name, cash: player.cash }
+    : null
+  )
+  const [payTo, setPayTo] = useState({ type: 'bank', label: 'Bank' })
+
   // Par: two-step — pick corp, then pick price
   if (panel === 'par' && player) {
     return <ParPanel player={player} unfloated={unfloated} game={game} fmt={fmt} doAction={doAction} />
@@ -424,13 +433,6 @@ function PanelContent({ panel, game, player, corp, unfloated, fmt, revenueInput,
   // Pay — from player or corp, to bank or corp
   if (panel === 'paybank') {
     const floatedCorps = game.corporations.filter(c => c.floated)
-    const [payAmount, setPayAmount] = useState(0)
-    const [payFrom, setPayFrom] = useState(
-      corp?.floated ? { type: 'corporation', id: corp.sym, label: corp.sym, color: corp.color, cash: corp.cash }
-      : player ? { type: 'player', id: player.id, label: player.name, cash: player.cash }
-      : null
-    )
-    const [payTo, setPayTo] = useState({ type: 'bank', label: 'Bank' })
 
     const doPay = (amount) => {
       const v = amount || payAmount
@@ -683,7 +685,7 @@ function Title({ children }) {
   return <div className="text-sm font-medium text-white">{children}</div>
 }
 
-function MoveCertPanel({ certs, player, corp, game, otherPlayers, doAction, fmt }) {
+function MoveCertPanel({ certs, player, corp, game, otherPlayers, doAction, fmt: _fmt }) {
   const [selectedCert, setSelectedCert] = useState(null) // { percent, isPresident, index }
 
   // Certs this player holds
@@ -783,7 +785,7 @@ function MoveCertPanel({ certs, player, corp, game, otherPlayers, doAction, fmt 
   )
 }
 
-function MergePanel({ game, corp, fmt, doAction }) {
+function MergePanel({ game, corp, fmt: _fmt, doAction }) {
   const [target, setTarget] = useState(null)
   const [paymentShares, setPaymentShares] = useState(0)
   const [cashDiff, setCashDiff] = useState('')
@@ -966,7 +968,7 @@ function PriceInput({ label, value, onChange, onConfirm, onCancel }) {
   )
 }
 
-function SettingsPanel({ game, doAction }) {
+function SettingsPanel({ game, doAction: _doAction }) {
   const ac = useUIStore((s) => s.autoConfig)
   const myPlayerId = useUIStore((s) => s.myPlayerId)
   const turnTracking = useUIStore((s) => s.turnTracking)

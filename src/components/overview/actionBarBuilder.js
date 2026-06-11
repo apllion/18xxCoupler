@@ -1,8 +1,6 @@
 // actionBarBuilder — determines which actions to show based on context.
 // Returns a list of action descriptors for the bottom bar.
 
-import { playerSharePercent } from '../../engine/player.js'
-
 // Action definitions with context rules
 const ACTIONS = [
   // Share actions — SR context

@@ -28,7 +28,7 @@ export function AdvisorSection({ tips, onCorpClick, onPlayerClick }) {
   )
 }
 
-function TipText({ tip, onCorpClick, onPlayerClick }) {
+function TipText({ tip, onCorpClick, onPlayerClick: _onPlayerClick }) {
   // If tip has a corpSym, make it clickable
   if (tip.corpSym && onCorpClick) {
     const parts = tip.text.split(tip.corpSym)

@@ -19,7 +19,7 @@ export default function PassphraseGate({ children }) {
     try {
       const saved = localStorage.getItem(STORAGE_KEY)
       if (saved === GATE_HASH) setGranted(true)
-    } catch {}
+    } catch { /* no-op */ }
     setChecking(false)
   }, [])
 

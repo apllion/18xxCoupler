@@ -19,9 +19,19 @@ export default function AuctionGuide() {
   const [rulesExpanded, setRulesExpanded] = useState(false)
   const [manualMode, setManualMode] = useState(false)
 
+  const fmt = useCallback((n) => formatCurrency(n, game?.title?.currencyFormat), [game?.title?.currencyFormat])
+
+  // Players ordered starting from priority deal holder
+  const orderedPlayers = useMemo(() => {
+    if (!game) return []
+    const all = game.players
+    const prioIdx = all.findIndex((p) => p.id === game.priorityDeal)
+    if (prioIdx > 0) return [...all.slice(prioIdx), ...all.slice(0, prioIdx)]
+    return all
+  }, [game])
+
   if (!game) return null
 
-  const fmt = useCallback((n) => formatCurrency(n, game.title.currencyFormat), [game.title.currencyFormat])
   const pregameSteps = getPregameSteps(game.title)
   const step = pregameSteps[0] || null
   const auctionType = step?.type || 'waterfall'
@@ -32,14 +42,6 @@ export default function AuctionGuide() {
   const unsoldCompanies = companies.filter((c) => !c.ownerId)
   const allSold = unsoldCompanies.length === 0
   const hasCompanies = companies.length > 0
-
-  // Players ordered starting from priority deal holder
-  const orderedPlayers = useMemo(() => {
-    const all = game.players
-    const prioIdx = all.findIndex((p) => p.id === game.priorityDeal)
-    if (prioIdx > 0) return [...all.slice(prioIdx), ...all.slice(0, prioIdx)]
-    return all
-  }, [game.players, game.priorityDeal])
 
   function handleAdvance() {
     dispatch({ type: 'ADVANCE_ROUND' })

@@ -2,15 +2,13 @@
 // Separate tab with all analysis panels in one scrollable view.
 // 24 panels total: position, timing, market, money flow, strategic, meta.
 
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { useGameStore } from '../../store/gameStore.js'
 import { formatCurrency } from '../../utils/currency.js'
 import { corpPrice, isSoldOut } from '../../engine/stockMarket.js'
 import { playerSharePercent } from '../../engine/player.js'
-import { playerCertCount } from '../../engine/player.js'
-import { currentPhase, trainLimit } from '../../engine/phase.js'
+import { currentPhase } from '../../engine/phase.js'
 import { remainingCount } from '../../engine/depot.js'
-import { roundLabel } from '../../engine/roundTracker.js'
 import { allNetWorths } from '../../engine/rules/netWorth.js'
 import { PositionMeter } from './PositionMeter.jsx'
 
@@ -20,6 +18,7 @@ const analysisData = analysisDataRaw || {}
 
 export default function AnalysisTab() {
   const game = useGameStore((s) => s.game)
+  const [view, setView] = useState('financial')
 
   if (!game) return null
 
@@ -28,7 +27,6 @@ export default function AnalysisTab() {
   const titleData = analysisData[game.title.title] || null
 
   const hasStats = !!titleData
-  const [view, setView] = useState('financial')
   // Map analysis placeholder — future: game.title.hasMap or game.map presence
   const hasMap = false
 
@@ -152,7 +150,7 @@ function Section({ title }) {
 // =========================================================================
 // WINNER PROFILE — synthesizes all metrics into per-player scorecard
 // =========================================================================
-function WinnerProfile({ game, fmt, titleData }) {
+function WinnerProfile({ game, fmt, titleData: _titleData }) {
   if (game.players.length < 2) return null
   const worths = allNetWorths(game)
   const corps = game.corporations.filter(c => c.floated)
@@ -349,7 +347,7 @@ function BankBreak({ game, fmt }) {
 }
 
 // --- Train Rush Clock ---
-function TrainRush({ game, fmt, phase }) {
+function TrainRush({ game, fmt, phase: _phase }) {
   const depot = game.depot
   const tiers = []
   const seen = new Set()
@@ -438,7 +436,7 @@ function PhasePressure({ game, fmt, phase }) {
 }
 
 // --- Game Clock ---
-function GameClock({ game, fmt }) {
+function GameClock({ game, fmt: _fmt }) {
   const bankTotal = typeof game.title.bankCash === 'number'
     ? game.title.bankCash
     : (game.title.bankCash[game.playerCount] || 8000)
@@ -552,7 +550,7 @@ function OREfficiency({ game, fmt }) {
 }
 
 // --- Float Speed ---
-function FloatSpeed({ game, fmt, titleData }) {
+function FloatSpeed({ game, fmt: _fmt, titleData: _titleData }) {
   const corps = game.corporations.filter(c => c.ipoed)
   if (corps.length === 0) return null
 
@@ -642,7 +640,7 @@ function SoldOutTracker({ game, fmt }) {
 }
 
 // --- Dump Alert ---
-function DumpAlert({ game, fmt }) {
+function DumpAlert({ game, fmt: _fmt }) {
   const corps = game.corporations.filter(c => c.floated)
   const alerts = []
 
@@ -661,7 +659,6 @@ function DumpAlert({ game, fmt }) {
 
     const topChallenger = others[0]
     // President can dump if they sell enough to make someone else pres
-    const canDump = presPct > 20 || (presPct === 20 && topChallenger.pct >= 20)
     const dumpable = presPct - 10 <= topChallenger.pct && c.marketShares + 10 <= 50
 
     if (dumpable) {
@@ -696,7 +693,6 @@ function ShortSqueeze({ game, fmt }) {
     const price = corpPrice(game.stockMarket, c.sym) || 0
     const totalPlayerPct = game.players.reduce((s, p) => s + playerSharePercent(p, c.sym), 0)
     const availableShares = c.ipoShares + c.marketShares
-    const demand = 100 - totalPlayerPct - availableShares // shares "missing" or in corp treasury etc
     const tight = availableShares <= 10 && !isSoldOut(c)
     return { sym: c.sym, color: c.color, price, availableShares, totalPlayerPct, tight }
   }).filter(d => d.tight || d.availableShares <= 20)
@@ -791,7 +787,6 @@ function CapitalVelocity({ game, fmt }) {
   let bankToPlayer = 0
   let playerToCorp = 0
   let corpToBank = 0
-  let playerToBank = 0
 
   for (const entry of game.actionLog) {
     const a = entry.action
@@ -881,7 +876,6 @@ function WithholdBreakeven({ game, fmt }) {
     // Rough: withholding once = price drops ~1 slot (~$10-20), paying = price rises ~1 slot
     // Net worth impact: withhold gives corp cash but pres loses share value
     // Pay gives pres dividend but corp stays poor
-    const presShareValue = Math.round(price * presPct / 10)
     const priceSwing = Math.round(price * 0.1) // rough estimate per slot
 
     return {
@@ -1182,7 +1176,7 @@ function EndgameProjection({ game, fmt }) {
 // =========================================================================
 
 // --- Par Value Guide (from 18AI data) ---
-function ParGuide({ data, fmt, title }) {
+function ParGuide({ data, fmt, title: _title }) {
   const prices = Object.entries(data.par_prices).sort((a, b) => parseInt(a[0]) - parseInt(b[0]))
   if (prices.length === 0) return null
 
@@ -1221,7 +1215,7 @@ function ParGuide({ data, fmt, title }) {
 }
 
 // --- Private Valuation ---
-function PrivateValuation({ data, game, fmt }) {
+function PrivateValuation({ data, game, fmt: _fmt }) {
   const privates = Object.entries(data.privates)
   if (privates.length === 0) return null
 
@@ -1252,7 +1246,7 @@ function PrivateValuation({ data, game, fmt }) {
 }
 
 // --- Corp Win Correlation ---
-function CorpWinCorrelation({ data, game, fmt }) {
+function CorpWinCorrelation({ data, game, fmt: _fmt }) {
   const corps = Object.entries(data.corp_win_rate).sort((a, b) => b[1].win_rate - a[1].win_rate)
   if (corps.length === 0) return null
 
@@ -1311,7 +1305,7 @@ function PlayerCountImpact({ data, game, fmt }) {
 // =========================================================================
 // REVIEW — post-game analysis, decision grading, learning
 // =========================================================================
-function Review({ game, fmt, titleData }) {
+function Review({ game, fmt, titleData: _titleData }) {
   const worths = allNetWorths(game)
   const corps = game.corporations.filter(c => c.floated)
   const winner = worths[0]

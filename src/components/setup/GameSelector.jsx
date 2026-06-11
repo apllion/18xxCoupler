@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { allTitles } from '../../titles/index.js'
 import { useGameStore } from '../../store/gameStore.js'
@@ -16,7 +16,6 @@ export default function GameSelector() {
   const [importId, setImportId] = useState('')
   const [importError, setImportError] = useState(null)
   const [importing, setImporting] = useState(false)
-  const [showMore, setShowMore] = useState(false)
   const [sortBy, setSortBy] = useState('rating')
   const [showLegend, setShowLegend] = useState(null) // title object or true for generic
   const [showInfo, setShowInfo] = useState(null) // title object

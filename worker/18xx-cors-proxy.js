@@ -38,7 +38,7 @@ export default {
   },
 }
 
-function corsHeaders(request) {
+function corsHeaders(_request) {
   return {
     'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
     'Access-Control-Allow-Methods': 'GET, OPTIONS',

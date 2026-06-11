@@ -1,7 +1,6 @@
 import { useGameStore } from '../../store/gameStore.js'
 import { useUIStore } from '../../store/uiStore.js'
 import { useDispatch } from '../../hooks/useDispatch.js'
-import { corpPrice } from '../../engine/stockMarket.js'
 
 const OR_STEPS = [
   { id: 'track', label: 'Track' },

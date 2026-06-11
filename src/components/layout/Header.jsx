@@ -1,5 +1,4 @@
 import { useGameStore } from '../../store/gameStore.js'
-import { useUIStore } from '../../store/uiStore.js'
 import { useDispatch } from '../../hooks/useDispatch.js'
 import { currentPhase } from '../../engine/phase.js'
 import { getEventInfo } from '../../engine/events.js'

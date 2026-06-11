@@ -3,8 +3,6 @@
 // The user picks the current type; it filters actions and views.
 // Always advisory — never blocks actions.
 
-import { getPregameSteps } from './pregame.js'
-
 export function createRoundTracker(title, pregameSteps = []) {
   const base = title.roundTypes || ['SR', 'OR']
   const roundTypes = pregameSteps.length > 0 && !base.includes('Pregame')

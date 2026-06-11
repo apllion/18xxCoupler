@@ -2,8 +2,6 @@ import { describe, it, expect } from 'vitest'
 import { createGame } from '../src/engine/setup.js'
 import { applyAction } from '../src/engine/actions.js'
 import { getTitle } from '../src/titles/index.js'
-import { corpPrice } from '../src/engine/stockMarket.js'
-
 function makeChes(playerCount = 3) {
   const title = getTitle('g18chesapeake')
   return createGame(title, Array.from({ length: playerCount }, (_, i) => `Player${i + 1}`))

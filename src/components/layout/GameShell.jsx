@@ -1,4 +1,3 @@
-import { useGameStore } from '../../store/gameStore.js'
 import { useUIStore } from '../../store/uiStore.js'
 import { useSyncContext } from '../../hooks/SyncContext.jsx'
 import Header from './Header.jsx'
@@ -38,9 +37,8 @@ const TAB_COMPONENTS = {
 }
 
 export default function GameShell() {
-  const game = useGameStore((s) => s.game)
   const activeTab = useUIStore((s) => s.activeTab)
-  const TabComponent = TAB_COMPONENTS[activeTab] || SummaryTab
+  const TabComponent = TAB_COMPONENTS[activeTab] || OverviewTab
   const sync = useSyncContext()
 
   const roomBar = (

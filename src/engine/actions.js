@@ -6,8 +6,7 @@ import { placeCorpOnMarket, moveDividend, moveSell, moveRight, moveLeft, moveDow
 import { buyAvailableTrain, rustTrains } from './depot.js'
 import { addTrain, getCorpShares, regularSharePercent } from './corporation.js'
 import { advanceToPhase, phaseForTrain } from './phase.js'
-import { collectRevenue, collectAllRevenue, closeAllCompanies, assignPrivate, closePrivate } from './privateCompany.js'
-import { transferFromBank, transferToBank } from './bank.js'
+import { collectRevenue, collectAllRevenue, closeAllCompanies, assignPrivate } from './privateCompany.js'
 import { deliverToSegment, deliverToExport, advanceBeerMarket, removeNoDemand, placeNoDemand } from './beerMarket.js'
 import { advanceRound, setRoundType, roundLabel } from './roundTracker.js'
 import { ptgMerge, merge1862, acquireMinor1822, convertMinor1867, mergeMinors1867, rlaMerge } from './merger.js'
@@ -214,7 +213,6 @@ export function applyAction(state, action) {
       const sc = state.corporations.find(co => co.sym === action.corpSym)
       if (!sp || !sc) break
       const newPct = action.percent
-      const oldPct = sp.shares.filter(s => s.corpSym === action.corpSym).reduce((sum, s) => sum + s.percent, 0)
       const wasPres = sp.shares.some(s => s.corpSym === action.corpSym && s.isPresident)
       // Remove all existing shares of this corp
       sp.shares = sp.shares.filter(s => s.corpSym !== action.corpSym)
@@ -338,11 +336,6 @@ export function applyAction(state, action) {
           state.players = ordered
           state.playerOrder = action.order
         }
-      }
-      break
-    case 'SET_PRIORITY':
-      if (action.playerId) {
-        state.priorityDeal = action.playerId
       }
       break
     case 'DISMISS_EVENT':
@@ -1037,14 +1030,14 @@ function handleSoldOutAdjust(state) {
 
 // --- Beer market handlers (HSB) ---
 
-function handleDeliverBeer(state, { brewerySym, segmentId, count = 1 }) {
+function handleDeliverBeer(state, { brewerySym: _brewerySym, segmentId, count = 1 }) {
   if (!state.beerMarket) return
   const delivered = deliverToSegment(state.beerMarket, segmentId, count)
   // Income is tracked when BREWERY_INCOME action is dispatched
   return delivered
 }
 
-function handleDeliverExport(state, { brewerySym, count = 1 }) {
+function handleDeliverExport(state, { brewerySym: _brewerySym, count = 1 }) {
   if (!state.beerMarket) return
   deliverToExport(state.beerMarket, count)
 }
@@ -1333,8 +1326,6 @@ function describeAction(state, action) {
       const names = (action.order || []).map((id) => playerName(id))
       return `Player order set: ${names.join(', ')}`
     }
-    case 'SET_PRIORITY':
-      return `Priority deal → ${playerName(action.playerId)}`
     case 'DISMISS_EVENT':
       return `Event acknowledged: ${action.event}`
     case 'REMOVE_CORPORATION':

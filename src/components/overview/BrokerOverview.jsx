@@ -2,19 +2,19 @@
 
 import { useState } from 'react'
 import { useOverviewData, playerSharePercent, playerCertCount, isPresident } from './useOverviewData.js'
-import { useUIStore } from '../../store/uiStore.js'
 import { ActionPanel } from './ActionPanel.jsx'
 import { ContextBar } from './ContextBar.jsx'
 import { InlineEdit } from './InlineEdit.jsx'
 
 export default function BrokerOverview() {
   const d = useOverviewData()
+  const [soldOutWarn, setSoldOutWarn] = useState(null) // { corps, targetRound }
+
   if (!d.game) return null
-  const { game, fmt, phase, label, limit, corps, unfloated, depotGroups, lastRevenue, corpPrivates, playerPrivates, lastAction, selPlayer, myPlayerId, selCorp, curRow, setCurRow, curCol, setCurCol, panel, setPanel, revenueInput, setRevenueInput, revRef, rootRef, cursorRef, onKeyDown, closePanel, doAction, inReplay, fullLog, enterReplay, exitReplay, replayTo, enterWhatIf, isWhatIf, exitWhatIf, canUndo, undo, canRedo, redo, isSR, isOR, isPre, superUmpire } = d
+  const { game, fmt, phase, label: _label, limit, corps, unfloated, depotGroups, lastRevenue, corpPrivates, playerPrivates, lastAction, selPlayer, myPlayerId, selCorp, curRow, setCurRow, curCol, setCurCol, panel, setPanel, revenueInput, setRevenueInput, revRef, rootRef, cursorRef, onKeyDown, closePanel, doAction, inReplay, fullLog, enterReplay, exitReplay, replayTo, enterWhatIf, isWhatIf, exitWhatIf, canUndo, undo, canRedo, redo, isSR, isOR, isPre: _isPre, superUmpire } = d
   const su = superUmpire
 
   const curIdx = game.actionLog.length - 1
-  const [soldOutWarn, setSoldOutWarn] = useState(null) // { corps, targetRound }
 
   function handleRoundChange(rType) {
     // Warn when leaving SR if sold-out corps exist (skip if already adjusted this SR)

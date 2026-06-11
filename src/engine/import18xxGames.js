@@ -76,7 +76,7 @@ function buildPlayerMap(gamePlayers) {
 }
 
 // Determine if a share buy is from IPO or market based on current state
-function inferShareSource(state, corpSym, shareIndex) {
+function inferShareSource(state, corpSym, _shareIndex) {
   const corp = state.corporations.find(c => c.sym === corpSym)
   if (!corp) return 'ipo'
   // Index 0 is president cert — always IPO if available
@@ -94,7 +94,6 @@ function findImplicitWithholds(actions) {
   const result = []
   let currentCorp = null
   let hadDividend = false
-  let turnStartIndex = -1
 
   function endTurn(beforeIndex) {
     if (currentCorp && !hadDividend) {
@@ -114,7 +113,6 @@ function findImplicitWithholds(actions) {
         endTurn(i)
         currentCorp = sym
         hadDividend = false
-        turnStartIndex = i
       }
       if (a.type === 'dividend') hadDividend = true
     } else {
@@ -457,7 +455,7 @@ export function importGame(gameJson) {
           try {
             applyAction(state, { type: 'WITHHOLD_DIVIDEND', corpSym, totalRevenue: 0 })
             stats.applied++
-          } catch {}
+          } catch { /* no-op */ }
         }
       }
     }
@@ -556,7 +554,7 @@ export function replayWithCallbacks(gameJson, callback) {
       for (const corpSym of withholds) {
         const corp = state.corporations.find(c => c.sym === corpSym)
         if (corp?.floated) {
-          try { applyAction(state, { type: 'WITHHOLD_DIVIDEND', corpSym, totalRevenue: 0 }) } catch {}
+          try { applyAction(state, { type: 'WITHHOLD_DIVIDEND', corpSym, totalRevenue: 0 }) } catch { /* no-op */ }
         }
       }
     }
@@ -587,7 +585,7 @@ export function replayWithCallbacks(gameJson, callback) {
     if (!converted) continue
     const toApply = Array.isArray(converted) ? converted : [converted]
     for (const a of toApply) {
-      try { applyAction(state, a) } catch {}
+      try { applyAction(state, a) } catch { /* no-op */ }
     }
   }
 

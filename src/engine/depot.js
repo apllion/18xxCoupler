@@ -32,7 +32,7 @@ export function createDepot(trainDefs, playerCount) {
   }
 }
 
-export function availableTrains(depot, currentPhase) {
+export function availableTrains(depot, _currentPhase) {
   // Trains are available if they don't have an availableOn requirement,
   // or if the phase that makes them available has been reached
   return depot.upcoming.filter((t) => {

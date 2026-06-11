@@ -3,11 +3,11 @@
 // severity: 'critical' | 'warning' | 'opportunity' | 'info'
 
 import { corpPrice, isSoldOut } from '../stockMarket.js'
-import { playerSharePercent, playerCertCount } from '../player.js'
-import { currentPhase, trainLimit } from '../phase.js'
-import { remainingCount, nextAvailableTrains } from '../depot.js'
-import { playerNetWorth, allNetWorths } from './netWorth.js'
-import { getCertLimit, certLimitWarnings } from './certLimit.js'
+import { playerSharePercent } from '../player.js'
+import { trainLimit } from '../phase.js'
+import { nextAvailableTrains } from '../depot.js'
+import { allNetWorths } from './netWorth.js'
+import { certLimitWarnings } from './certLimit.js'
 import { trainRushAnalysis } from './trainRush.js'
 
 // ---- Player Tips ----

@@ -56,7 +56,7 @@ export default function EndgameCalcTab() {
     hasLoans: false, hasShorts: false, loanValue: 100,
   }
 
-  const initState = useMemo(() => stateFromGame(3) || emptyState, [])
+  const [initState] = useState(() => stateFromGame(3) || emptyState)
 
   const [players, setPlayers] = useState(initState.players)
   const [corps, setCorps] = useState(initState.corps)

@@ -9,7 +9,7 @@ import { useState, useEffect } from 'react'
 //   → no bids: cheapest price drops by 5
 // - Bid fight: only the bidders compete, ascending bids, pass = out. Last one wins.
 
-export default function WaterfallAuction({ game, players, dispatch, fmt, auctionType }) {
+export default function WaterfallAuction({ game, players, dispatch, fmt, auctionType: _auctionType }) {
   const companies = game.companies
 
   // bids[sym] = { high: { playerId, amount }, bidders: [playerId, ...] }
@@ -30,6 +30,15 @@ export default function WaterfallAuction({ game, players, dispatch, fmt, auction
   const cheapest = unsold.length > 0 ? unsold[0] : null
   const cheapestPrice = cheapest ? Math.max(0, cheapest.value - (priceDrops[cheapest.sym] || 0)) : 0
 
+  function clearBid(sym) {
+    const newBids = { ...bids }
+    delete newBids[sym]
+    setBids(newBids)
+    const newDrops = { ...priceDrops }
+    delete newDrops[sym]
+    setPriceDrops(newDrops)
+  }
+
   // Check if cheapest has bids and auto-resolve or start bid fight
   useEffect(() => {
     if (!cheapest || bidFight) return
@@ -37,22 +46,31 @@ export default function WaterfallAuction({ game, players, dispatch, fmt, auction
     if (!entry) return
 
     if (entry.bidders.length === 1) {
-      // Auto-sell to single bidder
-      addLog(`${pName(entry.high.playerId)} wins ${cheapest.sym} for ${fmt(entry.high.amount)} (sole bidder)`)
-      dispatch({
-        type: 'BUY_PRIVATE',
-        playerId: entry.high.playerId,
-        companySym: cheapest.sym,
-        price: entry.high.amount,
-      })
-      clearBid(cheapest.sym)
+      // Auto-sell to single bidder — defer to avoid synchronous setState cascade
+      const winnerId = entry.high.playerId
+      const winAmount = entry.high.amount
+      const winSym = cheapest.sym
+      setTimeout(() => {
+        setLog((prev) => [`${players.find((p) => p.id === winnerId)?.name ?? winnerId} wins ${winSym} for ${fmt(winAmount)} (sole bidder)`, ...prev].slice(0, 30))
+        dispatch({
+          type: 'BUY_PRIVATE',
+          playerId: winnerId,
+          companySym: winSym,
+          price: winAmount,
+        })
+        clearBid(winSym)
+      }, 0)
     } else if (entry.bidders.length > 1) {
       // Start bid fight among the bidders
-      addLog(`${cheapest.sym} has ${entry.bidders.length} bidders — bid fight!`)
-      const orderedBidders = players
-        .filter((p) => entry.bidders.includes(p.id))
-        .map((p) => p.id)
-      setBidFight({ sym: cheapest.sym, activeBidders: orderedBidders, fightIdx: 0 })
+      const fightSym = cheapest.sym
+      const bidderCount = entry.bidders.length
+      setTimeout(() => {
+        setLog((prev) => [`${fightSym} has ${bidderCount} bidders — bid fight!`, ...prev].slice(0, 30))
+        const orderedBidders = players
+          .filter((p) => entry.bidders.includes(p.id))
+          .map((p) => p.id)
+        setBidFight({ sym: fightSym, activeBidders: orderedBidders, fightIdx: 0 })
+      }, 0)
     }
   }, [cheapest?.sym, bids, bidFight])
 
@@ -80,15 +98,6 @@ export default function WaterfallAuction({ game, players, dispatch, fmt, auction
 
   function nextPlayerIdx(fromIdx) {
     return (fromIdx + 1) % players.length
-  }
-
-  function clearBid(sym) {
-    const newBids = { ...bids }
-    delete newBids[sym]
-    setBids(newBids)
-    const newDrops = { ...priceDrops }
-    delete newDrops[sym]
-    setPriceDrops(newDrops)
   }
 
   function startNewRound() {

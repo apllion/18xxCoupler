@@ -53,6 +53,12 @@ export default function PlayersTab() {
     }
   }, [guidedPlayerId, isGuided])
 
+  // Advisor tips
+  const tips = useMemo(() => {
+    if (!game) return []
+    return plusPlus ? playerAdvisorTips(game, game.players[selectedIdx]?.id) : []
+  }, [game, selectedIdx, plusPlus])
+
   if (!game) return null
 
   const fmt = (n) => formatCurrency(n, game.title.currencyFormat)
@@ -119,9 +125,6 @@ export default function PlayersTab() {
       })
     }
   }
-
-  // Advisor tips
-  const tips = useMemo(() => plusPlus ? playerAdvisorTips(game, selected.id) : [], [game, selected.id, plusPlus])
 
   return (
     <div className="p-3 space-y-3">
@@ -595,7 +598,6 @@ function CorpOps({ game, corp, dispatch, fmt, isSub }) {
   const [tokenCost, setTokenCost] = useState('')
 
   const price = corpPrice(game.stockMarket, corp.sym) || 0
-  const phase = currentPhase(game.phaseManager)
   const tLimit = trainLimit(game.phaseManager)
   const revNum = parseInt(revenue, 10) || 0
   const regShare = regularSharePercent(game, corp.sym)
@@ -861,7 +863,6 @@ function CorpOps({ game, corp, dispatch, fmt, isSub }) {
 
       {/* Merger (all types) */}
       {game.title.merger && corp.floated && (() => {
-        const mergerType = game.title.merger.type
         const targets = game.corporations.filter(c => c.sym !== corp.sym && c.floated)
         if (targets.length === 0) return null
         return (
@@ -943,7 +944,7 @@ function CorpOps({ game, corp, dispatch, fmt, isSub }) {
   )
 }
 
-function GiveCardPanel({ game, playerId, playerCards, dispatch }) {
+function GiveCardPanel({ game, playerId, playerCards: _playerCards, dispatch }) {
   const allGiven = game.players.flatMap((p) => (p.cards || []).map((c) => c.id))
   const available = (game.title.strategyCards || []).filter((c) => !allGiven.includes(c.id))
   if (available.length === 0) return null

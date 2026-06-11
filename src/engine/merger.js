@@ -364,10 +364,6 @@ export function merge1862(state, survivorSym, nonsurvivorSym) {
   // Share handling: return half of each holder's shares to market
   for (const player of state.players) {
     const nonSurvivorShares = player.shares.filter((s) => s.corpSym === nonsurvivorSym)
-    const survivorShares = player.shares.filter((s) => s.corpSym === survivorSym)
-    const totalPct = nonSurvivorShares.reduce((s, sh) => s + sh.percent, 0) +
-                     survivorShares.reduce((s, sh) => s + sh.percent, 0)
-
     // Remove nonsurvivor shares from player
     player.shares = player.shares.filter((s) => s.corpSym !== nonsurvivorSym)
 

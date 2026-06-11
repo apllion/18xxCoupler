@@ -191,7 +191,7 @@ function CorpOrderHint({ hint, game, dispatch }) {
   )
 }
 
-function RandomPresidentHint({ hint, game, dispatch }) {
+function RandomPresidentHint({ hint, game, dispatch: _dispatch }) {
   const [result, setResult] = useState(null)
   const corps = game.corporations.filter((c) => c.type !== 'national' && c.type !== 'minor')
 

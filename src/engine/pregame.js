@@ -6,6 +6,8 @@
 //   removeCorps: { [playerCount]: count } — random corps to remove
 //   parPriceGates: [{ price, unlocksOn }] — phase-gated par prices
 
+import { parPrices } from './stockMarket.js'
+
 // Filter corporations for the given player count
 export function filterCorporations(title, playerCount) {
   let corps = title.corporations.filter((c) => {
@@ -52,12 +54,10 @@ export function getPregameSteps(title) {
 export function getAvailableParPrices(title, phaseManager, stockMarket) {
   if (!title.parPriceGates) {
     // Standard: all par prices from market
-    const { parPrices } = require('./stockMarket.js')
     return parPrices(stockMarket)
   }
 
   // Phase-gated: only prices whose gate has been reached
-  const currentPhase = phaseManager.phases[phaseManager.currentIndex]
   const phaseIndex = phaseManager.currentIndex
 
   // Collect all par prices that are unlocked

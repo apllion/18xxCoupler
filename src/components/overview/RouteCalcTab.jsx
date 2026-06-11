@@ -40,7 +40,7 @@ function RouteCalc({ game, fmt }) {
     return { corp: { sym: '', color: '#888' }, trains: [{ id: '1', name: '2', stops: [], mult: 1 }] }
   }
 
-  const init = useMemo(initState, [activeSym])
+  const init = useMemo(() => initState(), [activeSym])
   const [corp, setCorp] = useState(init.corp)
   const [trains, setTrains] = useState(init.trains)
   const [activeTrain, setActiveTrain] = useState(null)

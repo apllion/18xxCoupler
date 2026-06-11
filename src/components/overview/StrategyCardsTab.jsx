@@ -21,9 +21,6 @@ export default function StrategyCardsTab() {
     cardHolders[pc.id] = pc
   }
 
-  // Unassigned cards (still in the deck)
-  const assignedIds = new Set(playerCards.map(c => c.id))
-
   return (
     <div className='text-sm p-3 space-y-4 overflow-y-auto bg-broker-bg h-full'>
       <h2 className="text-broker-text font-bold text-lg">

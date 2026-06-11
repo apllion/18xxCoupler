@@ -32,8 +32,6 @@ export function PlayerCard({ game, playerId }) {
   // Privates
   const privates = (game.companies || []).filter(c => c.ownerType === 'player' && c.ownerId === playerId && !c.closed)
   const privateValue = privates.reduce((s, c) => s + (c.value || 0), 0)
-  const privateRevenue = privates.reduce((s, c) => s + (c.revenue || 0), 0)
-
   const netWorth = player.cash + shareValue + privateValue
 
   return (

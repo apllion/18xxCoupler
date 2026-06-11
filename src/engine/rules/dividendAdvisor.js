@@ -1,6 +1,6 @@
 // Dividend Advisor — compare payout/withhold/half-pay outcomes.
 
-import { corpPrice, priceAt } from '../stockMarket.js'
+import { priceAt } from '../stockMarket.js'
 
 // Given a revenue number, compute all three outcomes side by side
 export function dividendComparison(state, corpSym, totalRevenue) {
@@ -90,7 +90,7 @@ export function dividendComparison(state, corpSym, totalRevenue) {
 }
 
 // Simulate payout price: right 1 (or 2 if double jump)
-function simulatePayPrice(market, pos, perShare, currentPrice, title) {
+function simulatePayPrice(market, pos, perShare, currentPrice, _title) {
   const row = market.grid[pos.row]
   const jumps = perShare >= currentPrice ? 2 : 1
   let col = pos.col

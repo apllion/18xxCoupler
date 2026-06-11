@@ -4,7 +4,7 @@
 
 import { test, expect } from '@playwright/test'
 import { execSync } from 'child_process'
-import { readFileSync } from 'fs'
+import { readFileSync, writeFileSync } from 'fs'
 import { gunzipSync } from 'zlib'
 
 const BROKER_URL = 'http://localhost:5173/18xxBroker/'
@@ -17,8 +17,7 @@ function getRubyState() {
   const json = gunzipSync(compressed).toString()
 
   // Write to temp file for Docker
-  const fs = require('fs')
-  fs.writeFileSync('/tmp/test_game.json', json)
+  writeFileSync('/tmp/test_game.json', json)
 
   const result = execSync(`
     cat /tmp/test_game.json | docker exec -i 18xx-rack-1 ruby -I /18xx/lib -e '
@@ -87,8 +86,7 @@ test.describe('18Chesapeake #213140 Verification', () => {
     await expect(page.locator('text=18Chesapeake')).toBeVisible({ timeout: 10000 })
 
     // 5. Extract state from the page via JS
-    const brokerState = await page.evaluate(() => {
-      const store = window.__ZUSTAND_STORE__ // Need to expose this
+    await page.evaluate(() => {
       // Fallback: read from DOM
       return null
     })
