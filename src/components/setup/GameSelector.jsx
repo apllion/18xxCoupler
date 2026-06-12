@@ -90,6 +90,11 @@ export default function GameSelector() {
         v{typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '?'} · {typeof __BUILD_ID__ !== 'undefined' ? __BUILD_ID__ : '?'}
       </p>
 
+      {/* ===== JOIN COMPARTMENT ===== */}
+      <div className="w-full max-w-md mb-6">
+        <RoomJoin sync={sync} />
+      </div>
+
       {/* ===== TOOLS ===== */}
       <div className="w-full max-w-md space-y-2 mb-6">
         <SectionLabel>Tools</SectionLabel>
@@ -214,10 +219,6 @@ export default function GameSelector() {
         <input ref={fileRef} type="file" accept=".json" onChange={handleImport} className="hidden" />
       </div>
 
-      {/* ===== JOIN ROOM ===== */}
-      <div className="w-full max-w-md mt-6">
-        <RoomJoin sync={sync} />
-      </div>
 
       {/* About / Legal */}
       <div className="w-full max-w-md mt-8 mb-4 text-center">
@@ -402,35 +403,51 @@ function RoomJoin({ sync }) {
 
   if (sync.roomId) {
     return (
-      <div className="bg-broker-surface rounded-lg px-4 py-2 flex items-center justify-between text-xs">
-        <div className="flex items-center gap-2">
-          <span className={`w-2 h-2 rounded-full ${sync.status === 'connected' ? 'bg-green-400' : 'bg-amber-400 animate-pulse'}`} />
-          <span className="text-broker-text-muted">Room</span>
-          <span className="font-mono font-bold text-white tracking-wider">{sync.roomId}</span>
-          <span className="text-broker-text-muted">{sync.peerCount > 0 ? `${sync.peerCount + 1} devices` : 'waiting...'}</span>
+      <div className="bg-broker-surface border border-broker-border rounded-lg px-4 py-3 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <span className={`w-3 h-3 rounded-full ${sync.status === 'connected' ? 'bg-green-400' : 'bg-amber-400 animate-pulse'}`} />
+          <div>
+            <div className="text-xs text-broker-text-muted">Compartment</div>
+            <div className="font-mono font-bold text-white text-lg tracking-wider">{sync.roomId}</div>
+          </div>
+          <span className="text-sm text-broker-text-muted">
+            {sync.peerCount > 0 ? `${sync.peerCount + 1} devices connected` : 'waiting for others...'}
+          </span>
         </div>
-        <button onClick={sync.leaveRoom} className="text-broker-text-muted hover:text-red-300">Leave</button>
+        <button onClick={sync.leaveRoom} className="text-xs text-broker-text-muted hover:text-red-300 px-2 py-1">Leave</button>
       </div>
     )
   }
 
   return (
-    <div className="flex gap-2 justify-center text-xs">
+    <div className="bg-broker-surface border border-broker-border rounded-lg p-4">
+      <div className="text-center mb-3">
+        <div className="text-xs text-broker-text-muted uppercase tracking-wider">Coupler</div>
+        <div className="text-lg font-bold text-white">Join Compartment</div>
+        <div className="text-xs text-broker-gold italic">Your seat awaits</div>
+      </div>
       {showJoin ? (
-        <>
+        <div className="flex gap-2 justify-center items-center">
           <input type="text" value={code} onChange={(e) => setCode(e.target.value.toUpperCase())}
-            placeholder="Room code" maxLength={6} autoFocus
-            className="w-24 bg-broker-surface border border-broker-border rounded px-2 py-1 text-white font-mono tracking-wider placeholder-broker-text-muted text-center" />
+            placeholder="CODE" maxLength={6} autoFocus
+            onKeyDown={e => e.key === 'Enter' && code.trim().length >= 4 && (sync.joinRoom(code), setShowJoin(false))}
+            className="w-28 bg-broker-bg border border-broker-border rounded-lg px-3 py-2 text-white font-mono text-lg tracking-widest placeholder-broker-text-muted text-center" />
           <button onClick={() => { if (code.trim().length >= 4) { sync.joinRoom(code); setShowJoin(false) } }}
             disabled={code.trim().length < 4}
-            className="bg-blue-800 hover:bg-blue-700 text-white px-3 py-1 rounded disabled:opacity-40">Join</button>
-          <button onClick={() => setShowJoin(false)} className="text-broker-text-muted hover:text-white px-2">Cancel</button>
-        </>
+            className="bg-blue-700 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium disabled:opacity-40">Board</button>
+          <button onClick={() => setShowJoin(false)} className="text-broker-text-muted hover:text-white px-2">&times;</button>
+        </div>
       ) : (
-        <button onClick={() => setShowJoin(true)}
-          className="text-broker-text-muted hover:text-white">
-          Join Room
-        </button>
+        <div className="flex gap-3 justify-center">
+          <button onClick={() => setShowJoin(true)}
+            className="bg-blue-700 hover:bg-blue-600 text-white px-5 py-2 rounded-lg font-medium text-sm">
+            Join
+          </button>
+          <button onClick={sync.createRoom}
+            className="bg-broker-green hover:bg-broker-green-light text-broker-gold px-5 py-2 rounded-lg font-medium text-sm">
+            Create
+          </button>
+        </div>
       )}
     </div>
   )
