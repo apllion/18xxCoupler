@@ -235,7 +235,13 @@ export default function GameSelector() {
             <div className="text-sm text-white font-bold mb-1">{showInfo.title}</div>
             <div className="text-xs text-broker-text-muted mb-3">{showInfo.subtitle}</div>
             <div className="text-xs text-broker-text space-y-1">
-              {(showInfo.gameInfo || '').split('•').filter(s => s.trim()).map((line, i) => (
+              {(showInfo.gameInfo || '').split('•').filter(s => {
+                const l = s.trim().toLowerCase()
+                if (!l) return false
+                // Skip lines that duplicate the rules grid
+                const skip = ['capitalization', 'float', 'sell/buy', 'sell buy', 'cert limit', 'bank pool', 'no cert limit', 'unlimited cert']
+                return !skip.some(k => l.includes(k))
+              }).map((line, i) => (
                 <div key={i} className="flex gap-1">
                   <span className="text-broker-text-muted">•</span>
                   <span>{line.trim()}</span>
@@ -246,25 +252,34 @@ export default function GameSelector() {
               {showInfo.minPlayers}–{showInfo.maxPlayers} players • {showInfo.designer}
             </div>
             {/* Rules summary */}
-            <div className="mt-3 border-t border-broker-border pt-2 grid grid-cols-2 gap-x-3 gap-y-0.5 text-[10px]">
-              {[
-                ['Cap', (showInfo.capitalization || 'full') === 'incremental' ? 'Incremental' : 'Full'],
-                ['Float', (showInfo.floatPercent || 60) + '%'],
-                ['Shares', (() => { const s = showInfo.shares || [20,10]; return s[0] + '/' + (s[1]||s[0]) + ' ×' + s.length })()],
-                ['Sell move', (showInfo.sellMovement || 'down_share').replace(/_/g, ' ')],
-                ['Unsold div', showInfo.unsoldShareDividends || 'market'],
-                ['Pool limit', (showInfo.marketShareLimit != null ? showInfo.marketShareLimit : 50) + '%'],
-                ['Sell order', (showInfo.sellBuyOrder || 'sell_buy').replace(/_/g, ' ')],
-              ].map(([k, v]) => (
-                <div key={k}><span className="text-broker-text-muted">{k}:</span> <span className="text-white">{v}</span></div>
-              ))}
-              {showInfo.halfPay && <div><span className="text-broker-text-muted">Half pay:</span> <span className="text-green-400">✓</span></div>}
-              {showInfo.loans && <div><span className="text-broker-text-muted">Loans:</span> <span className="text-green-400">✓</span></div>}
-              {showInfo.shorts && <div><span className="text-broker-text-muted">Shorts:</span> <span className="text-green-400">✓</span></div>}
-              {showInfo.corpCanBuyShares && <div><span className="text-broker-text-muted">Corp trade:</span> <span className="text-green-400">✓</span></div>}
-              {showInfo.merger && <div><span className="text-broker-text-muted">Merger:</span> <span className="text-white">{showInfo.merger.type.replace(/_/g, ' ')}</span></div>}
-              {showInfo.terrainCosts?.length > 0 && <div><span className="text-broker-text-muted">Terrain:</span> <span className="text-white">{showInfo.terrainCosts.join(', ')}</span></div>}
-            </div>
+            {(() => {
+              const t = showInfo
+              const rows = [
+                ['Cap', (t.capitalization || 'full') === 'incremental' ? 'Incremental' : 'Full'],
+                ['Float', (t.floatPercent || 60) + '%'],
+                ['Shares', (() => { const s = t.shares || [20,10]; return s[0] + '/' + (s[1]||s[0]) + ' ×' + s.length })()],
+                ['Sell move', (t.sellMovement || 'down_share').replace(/_/g, ' ')],
+                ['Sell after', (t.sellAfter || 'first SR').replace(/_/g, ' ')],
+                ['Unsold div', (t.unsoldShareDividends || 'market') + ' → corp'],
+                ['Pool limit', (t.marketShareLimit != null ? t.marketShareLimit : 50) + '%'],
+                ['Sell order', (t.sellBuyOrder || 'sell_buy').replace(/_/g, ' ')],
+              ]
+              if (t.maxOwnership) rows.push(['Max own', (typeof t.maxOwnership === 'number' ? t.maxOwnership + '%' : 'varies')])
+              if (t.dividendMovement && t.dividendMovement !== 'standard') rows.push(['Div move', t.dividendMovement.replace(/_/g, ' ')])
+              if (t.halfPay) rows.push(['Half pay', '✓'])
+              if (t.loans) rows.push(['Loans', '✓'])
+              if (t.shorts) rows.push(['Shorts', '✓'])
+              if (t.corpCanBuyShares) rows.push(['Corp trade', '✓'])
+              if (t.merger) rows.push(['Merger', t.merger.type.replace(/_/g, ' ')])
+              if (t.terrainCosts?.length > 0) rows.push(['Terrain', t.terrainCosts.join(', ')])
+              return (
+                <div className="mt-3 border-t border-broker-border pt-2 grid grid-cols-2 gap-x-3 gap-y-0.5 text-[10px]">
+                  {rows.map(([k, v]) => (
+                    <div key={k}><span className="text-broker-text-muted">{k}:</span> <span className="text-white">{v}</span></div>
+                  ))}
+                </div>
+              )
+            })()}
             <button onClick={() => setShowInfo(null)}
               className="mt-3 w-full text-xs text-broker-text-muted hover:text-white py-2 px-3">Close</button>
           </div>
