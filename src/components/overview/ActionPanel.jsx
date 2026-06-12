@@ -6,6 +6,7 @@ import { playerSharePercent, corpPrice, parPrices, nextAvailableTrains } from '.
 import { getCorpShares } from '../../engine/corporation.js'
 import { useUIStore } from '../../store/uiStore.js'
 import { useGameStore } from '../../store/gameStore.js'
+import { useSyncContext } from '../../hooks/SyncContext.jsx'
 import { useThemeStore, themes as brokerThemes } from '../../store/themeStore.js'
 import { exportGamePdf } from '../../utils/exportPdf.js'
 import { exportGame } from '../../utils/persistence.js'
@@ -967,6 +968,7 @@ function SettingsPanel({ game, doAction: _doAction }) {
   const myPlayerId = useUIStore((s) => s.myPlayerId)
   const turnTracking = useUIStore((s) => s.turnTracking)
   const showToasts = useUIStore((s) => s.showToasts)
+  const sync = useSyncContext()
   const setAutoConfig = useUIStore((s) => s.setAutoConfig)
   const brokerThemeId = useThemeStore((s) => s.themeId)
   const setBrokerTheme = useThemeStore((s) => s.setTheme)
@@ -1009,6 +1011,20 @@ function SettingsPanel({ game, doAction: _doAction }) {
           <Btn v={turnTracking === 'on' ? 'green' : 'blue'} o={() => useUIStore.getState().toggleTurnTracking()}>
             {turnTracking === 'on' ? 'On' : 'Off'}
           </Btn>
+        </div>
+        <div>
+          <div className={labelColor}>Compartment</div>
+          {sync?.roomId ? (
+            <div className="flex items-center gap-2">
+              <span className="font-mono font-bold text-white text-xs">{sync.roomId}</span>
+              <span className="text-[10px] text-broker-text-muted">{sync.peerCount > 0 ? `${sync.peerCount + 1} devices` : 'waiting'}</span>
+              <Btn v="red" o={sync.leaveRoom}>Leave</Btn>
+            </div>
+          ) : (
+            <button onClick={sync?.createRoom} className="hover:brightness-110 transition-all">
+              <img src={import.meta.env.BASE_URL + 'btn-create.png'} alt="Create Compartment" className="w-24 rounded-lg" />
+            </button>
+          )}
         </div>
         <div>
           <div className={labelColor}>Theme</div>

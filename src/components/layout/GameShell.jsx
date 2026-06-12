@@ -58,7 +58,7 @@ export default function GameShell() {
   if (activeTab === 'overview') {
     return (
       <div className="flex flex-col h-screen pb-12">
-        {sync && roomBar}
+        {sync?.roomId && roomBar}
         <TurnStatus />
         <OverviewTab />
         <ActionToast />
