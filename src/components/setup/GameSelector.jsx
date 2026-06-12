@@ -438,14 +438,37 @@ function RoomJoin({ sync }) {
           <button onClick={() => setShowJoin(false)} className="text-broker-text-muted hover:text-white px-2">&times;</button>
         </div>
       ) : (
-        <div className="flex gap-3 justify-center">
+        <div className="grid grid-cols-2 gap-3">
+          {/* Join card */}
           <button onClick={() => setShowJoin(true)}
-            className="bg-blue-700 hover:bg-blue-600 text-white px-5 py-2 rounded-lg font-medium text-sm">
-            Join
+            className="bg-gradient-to-b from-slate-700 to-slate-800 hover:from-slate-600 hover:to-slate-700 border border-slate-600 rounded-xl p-3 text-center transition-all">
+            <svg className="w-12 h-12 mx-auto mb-2 text-amber-200" viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <rect x="6" y="10" width="36" height="24" rx="3" fill="currentColor" fillOpacity="0.1" />
+              <rect x="10" y="14" width="28" height="16" rx="2" fill="currentColor" fillOpacity="0.15" />
+              <path d="M18 30v4M30 30v4" strokeWidth="2" />
+              <circle cx="24" cy="20" r="2" fill="currentColor" fillOpacity="0.4" />
+              <path d="M16 22c2 3 6 5 8 5s6-2 8-5" strokeWidth="1" opacity="0.5" />
+              <path d="M20 18l4-4 4 4" strokeWidth="1.5" opacity="0.6" />
+            </svg>
+            <div className="text-xs text-slate-400">Join</div>
+            <div className="text-sm font-bold text-white">Compartment</div>
+            <div className="text-[10px] text-amber-300/70 italic mt-0.5">Your seat awaits</div>
           </button>
+          {/* Create card */}
           <button onClick={sync.createRoom}
-            className="bg-broker-green hover:bg-broker-green-light text-broker-gold px-5 py-2 rounded-lg font-medium text-sm">
-            Create
+            className="bg-gradient-to-b from-slate-700 to-slate-800 hover:from-slate-600 hover:to-slate-700 border border-slate-600 rounded-xl p-3 text-center transition-all">
+            <svg className="w-12 h-12 mx-auto mb-2 text-green-300" viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <rect x="8" y="8" width="32" height="32" rx="3" fill="currentColor" fillOpacity="0.05" strokeDasharray="3 2" />
+              <line x1="8" y1="20" x2="40" y2="20" opacity="0.15" />
+              <line x1="8" y1="28" x2="40" y2="28" opacity="0.15" />
+              <line x1="20" y1="8" x2="20" y2="40" opacity="0.15" />
+              <line x1="28" y1="8" x2="28" y2="40" opacity="0.15" />
+              <line x1="24" y1="16" x2="24" y2="32" strokeWidth="2.5" strokeLinecap="round" />
+              <line x1="16" y1="24" x2="32" y2="24" strokeWidth="2.5" strokeLinecap="round" />
+            </svg>
+            <div className="text-xs text-slate-400">Create</div>
+            <div className="text-sm font-bold text-white">Compartment</div>
+            <div className="text-[10px] text-green-300/70 italic mt-0.5">Design your space</div>
           </button>
         </div>
       )}
