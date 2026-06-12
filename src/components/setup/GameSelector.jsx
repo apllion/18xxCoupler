@@ -245,6 +245,26 @@ export default function GameSelector() {
             <div className="text-[10px] text-broker-text-muted mt-3">
               {showInfo.minPlayers}–{showInfo.maxPlayers} players • {showInfo.designer}
             </div>
+            {/* Rules summary */}
+            <div className="mt-3 border-t border-broker-border pt-2 grid grid-cols-2 gap-x-3 gap-y-0.5 text-[10px]">
+              {[
+                ['Cap', (showInfo.capitalization || 'full') === 'incremental' ? 'Incremental' : 'Full'],
+                ['Float', (showInfo.floatPercent || 60) + '%'],
+                ['Shares', (() => { const s = showInfo.shares || [20,10]; return s[0] + '/' + (s[1]||s[0]) + ' ×' + s.length })()],
+                ['Sell move', (showInfo.sellMovement || 'down_share').replace(/_/g, ' ')],
+                ['Unsold div', showInfo.unsoldShareDividends || 'market'],
+                ['Pool limit', (showInfo.marketShareLimit != null ? showInfo.marketShareLimit : 50) + '%'],
+                ['Sell order', (showInfo.sellBuyOrder || 'sell_buy').replace(/_/g, ' ')],
+              ].map(([k, v]) => (
+                <div key={k}><span className="text-broker-text-muted">{k}:</span> <span className="text-white">{v}</span></div>
+              ))}
+              {showInfo.halfPay && <div><span className="text-broker-text-muted">Half pay:</span> <span className="text-green-400">✓</span></div>}
+              {showInfo.loans && <div><span className="text-broker-text-muted">Loans:</span> <span className="text-green-400">✓</span></div>}
+              {showInfo.shorts && <div><span className="text-broker-text-muted">Shorts:</span> <span className="text-green-400">✓</span></div>}
+              {showInfo.corpCanBuyShares && <div><span className="text-broker-text-muted">Corp trade:</span> <span className="text-green-400">✓</span></div>}
+              {showInfo.merger && <div><span className="text-broker-text-muted">Merger:</span> <span className="text-white">{showInfo.merger.type.replace(/_/g, ' ')}</span></div>}
+              {showInfo.terrainCosts?.length > 0 && <div><span className="text-broker-text-muted">Terrain:</span> <span className="text-white">{showInfo.terrainCosts.join(', ')}</span></div>}
+            </div>
             <button onClick={() => setShowInfo(null)}
               className="mt-3 w-full text-xs text-broker-text-muted hover:text-white py-2 px-3">Close</button>
           </div>
