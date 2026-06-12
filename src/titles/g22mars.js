@@ -4,6 +4,7 @@ export const g22mars = {
   ...defaults,
   maturity: 1, testQuality: 1, titleId: 'g22mars',
   gameInfo: '• Fixed round sequence: 5 SRs and 11 ORs in predetermined order • All shares are 20% (5 per corp), tax of 10c per share above 2 in same corp at each SR • 7* and 8* trains double first/last stop values for massive revenue spikes • Revolt event strikes randomly between OR7-OR10, disrupting operations • 8 corps with 4 tokens each, incremental cap, 20% float, 80% pool limit • 2D grid market (9x14), priority auction for 9 permit cards • 6 phases (2/3/4/5/7/8) plus unique black tile phase • Unlimited bank, game ends after OR11 or stock ceiling, 3-5 players, Mars sci-fi setting',
+  specialties: 'Fixed round sequence • Revolt mechanic • Mars colonization',
   implemented: 'Shares • Dividends • Fixed rounds (config) • Tax • 20% shares',
   title: '22Mars', subtitle: 'Convict Camps, Mining, and Space Tourism', designer: 'Jonas Jones',
   location: 'Mars', minPlayers: 3, maxPlayers: 5,

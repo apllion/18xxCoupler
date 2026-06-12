@@ -10,8 +10,8 @@ const titles = allTitles().sort((a, b) => a.title.localeCompare(b.title))
 let out = '# Title Rules Reference\n\n'
 out += 'Auto-generated from title configs — run `node --input-type=module tools/gen-title-rules.js` to update.\n\n'
 
-out += '| Title | Cap | Float | Shares | Max Own | Sell Move | Sell After | Unsold Div | Div Move | Pool Limit | Sell Order | Half | Loans | Shorts | Corp Trade | Merger | Terrain |\n'
-out += '|-------|-----|-------|--------|---------|----------|------------|------------|----------|------------|------------|------|-------|--------|------------|--------|---------|\n'
+out += '| Title | Cap | Float | Shares | Max Own | Sell Move | Sell After | Unsold Div | Div Move | Pool Limit | Sell Order | Half | Loans | Shorts | Corp Trade | Merger | Terrain | Specialties |\n'
+out += '|-------|-----|-------|--------|---------|----------|------------|------------|----------|------------|------------|------|-------|--------|------------|--------|---------|-----------|\n'
 
 for (const t of titles) {
   const cap = (t.capitalization || 'full').slice(0, 4)
@@ -31,9 +31,10 @@ for (const t of titles) {
   const corpTrade = t.corpCanBuyShares ? '✓' : ''
   const merger = t.merger ? t.merger.type.replace(/_/g, ' ') : ''
   const terrain = (t.terrainCosts || []).join(',') || ''
+  const specialties = (t.specialties || '').replace(/\|/g, '/')
 
   out += '| ' + [
-    t.title, cap, floatPct, shareStr, maxOwn, sellMove, sellAfter, unsoldDiv, divMove, mktLimit, sellOrder, halfPay, loans, shorts, corpTrade, merger, terrain
+    t.title, cap, floatPct, shareStr, maxOwn, sellMove, sellAfter, unsoldDiv, divMove, mktLimit, sellOrder, halfPay, loans, shorts, corpTrade, merger, terrain, specialties
   ].join(' | ') + ' |\n'
 }
 

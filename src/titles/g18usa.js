@@ -4,6 +4,7 @@ export const g18usa = {
   ...defaults,
   maturity: 2, testQuality: 1, titleId: 'g18usa',
   gameInfo: '• Incremental capitalization, 20% float, unlimited bank, half pay allowed • Resource markers (coal, ore, oil) add route bonuses, 30 subsidy privates • 20 corps with 1 token each (choose home city at float), 1D single-row market • 10 phases (2 through 8), plus P-trains available from phase 5 • Train counts scale by player count, 8-train signals game end • Sell/buy stock rounds, no auction (privates chosen at float) • Massive scale: continental USA map, 2-7 player range • Sweet spot 4-5p, longest 18xx title at 5-8 hours',
+  specialties: '20 corps • Resource markers (coal/ore) • Massive scale',
   implemented: 'Shares • Half pay • Dividends • Pullman trains (config)',
   title: '18USA', subtitle: 'The Railroads Come of Age', designer: 'Edward Reece, Mark Hendrickson, Shawn Fox',
   location: 'United States', minPlayers: 2, maxPlayers: 7,

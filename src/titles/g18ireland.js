@@ -5,6 +5,7 @@ export const g18ireland = {
   maturity: 3, testQuality: 1, titleId: 'g18ireland',
   unsoldShareDividends: 'ipo', // Charter shares pay corp, bank pool pays nothing
   gameInfo: '• 14 minors (40/20/20/20 shares) merge into 7 majors after 4H phase • Majors can IPO only after 6H train purchased • Incremental capitalization, 20% float for majors, 40% for minors • 2D grid market (8x15), £4,000 bank (optional £5,000 variant) • 6 phases (2/4/6/8/10/D), minors cannot start after 8H • Waterfall auction for 11 privates, DKR private starts a minor • Narrow gauge tile abilities on several privates • 3-6 players, merger timing is the strategic crux',
+  specialties: 'Narrow gauge tiles • Minors → majors • DKR private starts minor',
   implemented: 'Shares • Dividends • Auto stock movement • Minor→Major mergers',
   title: '18Ireland', subtitle: 'Railways of Ireland', designer: 'Ian Scrivins',
   location: 'Ireland', minPlayers: 3, maxPlayers: 6,

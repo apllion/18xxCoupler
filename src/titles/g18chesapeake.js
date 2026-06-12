@@ -5,6 +5,7 @@ export const g18chesapeake = {
 
   maturity: 4, testQuality: 1, titleId: 'g18chesapeake',
   gameInfo: '• Streamlined 1830 variant, great intro to full-cap 18xx • Full capitalization, 60% float, sell/buy only (no sell-buy-sell) • 8 corps, 6 privates including Cornelius Vanderbilt (random presidency) • 2D grid market (8x17), smaller $8,000 bank for faster games • Cheaper D-train at $900 with $200 trade-in, gray tiles in D phase • 6 phases (2/3/4/5/6/D), privates close at phase 5 • 2p variant uses 30% president share and 7-share corps • Best at 3-5 players, typically 2-3 hours',
+  specialties: 'Intro 18xx • Cornelius Vanderbilt random president • D-train trade-in $200',
   implemented: 'Shares • Dividends • Auto stock movement • Privates • D-trains • Gray tiles',
   title: '18Chesapeake',
   subtitle: 'The Birth of American Railroads',

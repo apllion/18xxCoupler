@@ -234,22 +234,18 @@ export default function GameSelector() {
             onClick={e => e.stopPropagation()}>
             <div className="text-sm text-white font-bold mb-1">{showInfo.title}</div>
             <div className="text-xs text-broker-text-muted mb-3">{showInfo.subtitle}</div>
-            <div className="text-xs text-broker-text space-y-1">
-              {(showInfo.gameInfo || '').split('•').filter(s => {
-                const l = s.trim().toLowerCase()
-                if (!l) return false
-                // Skip lines that duplicate the rules grid
-                const skip = ['capitalization', 'float', 'sell/buy', 'sell buy', 'cert limit', 'bank pool', 'no cert limit', 'unlimited cert']
-                return !skip.some(k => l.includes(k))
-              }).map((line, i) => (
-                <div key={i} className="flex gap-1">
-                  <span className="text-broker-text-muted">•</span>
-                  <span>{line.trim()}</span>
-                </div>
-              ))}
-            </div>
-            <div className="text-[10px] text-broker-text-muted mt-3">
-              {showInfo.minPlayers}–{showInfo.maxPlayers} players • {showInfo.designer}
+            {showInfo.specialties && (
+              <div className="text-xs text-broker-text space-y-0.5">
+                {showInfo.specialties.split('•').filter(s => s.trim()).map((line, i) => (
+                  <div key={i} className="flex gap-1">
+                    <span className="text-broker-gold">•</span>
+                    <span>{line.trim()}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+            <div className="text-[10px] text-broker-text-muted mt-2">
+              {showInfo.minPlayers}–{showInfo.maxPlayers} players • {showInfo.designer} • {showInfo.location}
             </div>
             {/* Rules summary */}
             {(() => {

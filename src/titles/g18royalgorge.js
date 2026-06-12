@@ -4,6 +4,7 @@ export const g18royalgorge = {
   ...defaults,
   maturity: 1, testQuality: 1, titleId: 'g18royalgorge',
   gameInfo: '• Metal companies (CF&I, VGC) as non-rail investable corps alongside 11 railroad corps • Gold and coal resources shipped for revenue, debt tokens constrain operations • Treaty of Boston event reshapes the competitive landscape mid-game • Incremental capitalization, 20% float, sell/buy stock rounds • 1D single-row market (28 spaces), unlimited bank • English auction for 18 privates across Yellow/Green/Brown tiers • 4 phases (Yellow/Green/Brown/Silver), 6x2 multiplier train is unlimited • 2-4 players, Fremont County Colorado setting, highly thematic',
+  specialties: 'Mining tokens • Coal/ore revenue bonuses',
   implemented: 'Shares • Dividends • Metal companies (config) • Debt tokens (config)',
   title: '18 Royal Gorge', subtitle: 'The Royal Gorge Wars', designer: 'Kayla Ross & Denman Scofield',
   location: 'Fremont County, Colorado', minPlayers: 2, maxPlayers: 4,

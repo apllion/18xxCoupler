@@ -4,6 +4,7 @@ export const g18ms = {
   ...defaults,
   maturity: 4, testQuality: 1, titleId: 'g18ms',
   gameInfo: '• Full capitalization, 60% float, 70% max player ownership • Draft-based private selection (5 privates) instead of auction • Trains have salvage value when replaced (2+=$20, 3+=$30, 4+=$60) • Double-header D trains (2D/4D/5D) multiply route revenue • 5 corps with 2-4 tokens, sell/buy stock rounds • 2D grid market (5x14), 4 phases with fixed OR count • Game ends after fixed round count, $10,000 bank • Best at 2-4 players, fast-playing at about 2 hours',
+  specialties: 'Draft privates • Salvage train values • Multiplier D-trains 2D/4D/5D • 70% max ownership',
   implemented: 'Shares • Dividends • Auto stock movement • Salvage trains • Multiplier D-trains',
   title: '18MS', subtitle: 'The Railroads Come to Mississippi', designer: 'Mark Derrick',
   location: 'Mississippi, USA', minPlayers: 2, maxPlayers: 4,

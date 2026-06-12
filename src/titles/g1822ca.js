@@ -4,6 +4,7 @@ export const g1822ca = {
   ...defaults,
   maturity: 1, testQuality: 1, titleId: 'g1822ca',
   gameInfo: '• 1822 system adapted for Canada: 30 minors + 10 majors with acquisition • Bid box auction for concessions, privates, and minors • Grain trains deliver grain from prairie elevators to port cities for bonus revenue • Incremental cap (full at phase 6), 20% float, half pay, most-cash SR order • 1D single-row market (35 spaces), must sell in blocks • 7 phases (1-7), separate L and 2-trains plus E-train endgame • Eastern and Western Regional Scenario variants for shorter games • $12,000 bank, 2-7 players, heavy-weight game',
+  specialties: 'Concessions • Minors → majors • Bidbox auction',
   implemented: 'Shares • Dividends • Concessions • Minor acquisition mergers',
   title: '1822CA', subtitle: 'The Railways of Canada', designer: 'Robert Lecuyer & Simon Cutforth',
   location: 'Canada', minPlayers: 2, maxPlayers: 7,
