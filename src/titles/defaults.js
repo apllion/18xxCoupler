@@ -35,7 +35,7 @@ export const defaults = {
   marketShareLimit: 50,
 
   // Corp-to-corp share purchasing (disabled by default)
-  // Dividend on unsold shares: 'market' = market pays corp (standard), 'ipo' = IPO pays corp, 'both' = both pay corp
+  // Dividend on unsold shares: 'market' = market pays corp (standard), 'ipo' = IPO/treasury pays corp, 'both' = both, 'none' = neither
   unsoldShareDividends: 'market',
 
   // Round types available for this title (user picks from these)
