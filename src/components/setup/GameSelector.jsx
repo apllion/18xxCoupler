@@ -13,12 +13,9 @@ export default function GameSelector() {
   const sync = useSyncContext()
   const titles = allTitles()
   const [savedGames, setSavedGames] = useState(() => loadAllGames())
-  const [importId, setImportId] = useState('')
-  const [importError, setImportError] = useState(null)
-  const [importing, setImporting] = useState(false)
-  const [sortBy, setSortBy] = useState('rating')
-  const [showLegend, setShowLegend] = useState(null) // title object or true for generic
-  const [showInfo, setShowInfo] = useState(null) // title object
+  const [view, setView] = useState('hub') // 'hub' | 'titles' | 'settings' | 'join' | 'create' | 'depot' | 'modern'
+  const [showLegend, setShowLegend] = useState(null)
+  const [showInfo, setShowInfo] = useState(null)
 
   const savedList = Object.entries(savedGames)
     .map(([key, game]) => ({ key, game }))
@@ -34,122 +31,188 @@ export default function GameSelector() {
     setSavedGames(loadAllGames())
   }
 
-  const fileRef = useRef(null)
-  function handleImport(e) {
-    const file = e.target.files?.[0]
-    if (!file) return
-    const reader = new FileReader()
-    reader.onload = () => {
-      try {
-        const data = importGame(reader.result)
-        loadGame(data)
-        navigate('/')
-      } catch (err) {
-        console.error('Failed to import game:', err)
-      }
-    }
-    reader.readAsText(file)
-    e.target.value = ''
+  // ===== HUB VIEW =====
+  if (view === 'hub') {
+    return (
+      <div className="min-h-screen flex flex-col items-center p-6">
+        <h1 className="text-3xl font-bold text-white mt-2 tracking-wide">18xxCoupler</h1>
+        <img src={import.meta.env.BASE_URL + 'logo.png'} alt="18xxCoupler"
+          className="w-full max-w-md mt-1 rounded-xl" />
+        <p className="text-sm text-broker-text-muted italic mb-1">Steam meets Screens</p>
+        <p className="text-[10px] text-broker-text-muted mb-6">
+          v{typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '?'} · {typeof __BUILD_ID__ !== 'undefined' ? __BUILD_ID__ : '?'}
+        </p>
+
+        {/* Connected room banner */}
+        {sync?.roomId && (
+          <div className="w-full max-w-md mb-4 bg-broker-surface border border-broker-border rounded-lg px-4 py-3 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <span className={`w-3 h-3 rounded-full ${sync.status === 'connected' ? 'bg-green-400' : 'bg-amber-400 animate-pulse'}`} />
+              <div>
+                <div className="text-xs text-broker-text-muted">Compartment</div>
+                <div className="font-mono font-bold text-white text-lg tracking-wider">{sync.roomId}</div>
+              </div>
+              <span className="text-sm text-broker-text-muted">
+                {sync.peerCount > 0 ? `${sync.peerCount + 1} devices` : 'waiting...'}
+              </span>
+            </div>
+            <button onClick={sync.leaveRoom} className="text-xs text-broker-text-muted hover:text-red-300 px-2 py-1">Leave</button>
+          </div>
+        )}
+
+        {/* 3×2 Button Grid */}
+        <div className="grid grid-cols-3 gap-3 w-full max-w-md mb-6">
+          {[
+            { view: 'join', img: 'btn-join.png', label: 'Join', sub: 'Your seat awaits' },
+            { view: 'create', img: 'btn-create.png', label: 'Create', sub: 'Start a room' },
+            { view: 'titles', img: 'btn-build.png', label: 'Build Track', sub: 'Select a title' },
+            { view: 'settings', img: 'btn-engine.png', label: 'Settings', sub: 'Theme & config' },
+            { view: 'depot', img: 'btn-depot.png', label: 'Depot', sub: 'Load & import' },
+            { view: 'mobile', img: 'btn-modern.png', label: 'Mobile', sub: 'Phone view' },
+          ].map(b => (
+            <button key={b.view} onClick={() => {
+              if (b.view === 'create') { sync?.createRoom(); setView('create') }
+              else setView(b.view)
+            }}
+              className="rounded-xl overflow-hidden hover:brightness-110 transition-all text-center">
+              <img src={import.meta.env.BASE_URL + b.img} alt={b.label} className="w-full rounded-t-xl" />
+              <div className="bg-broker-surface px-2 py-1.5 rounded-b-xl">
+                <div className="text-sm font-bold text-white">{b.label}</div>
+                <div className="text-[10px] text-broker-text-muted">{b.sub}</div>
+              </div>
+            </button>
+          ))}
+        </div>
+
+        {/* Quick continue — show last saved game if any */}
+        {savedList.length > 0 && (
+          <div className="w-full max-w-md mb-4">
+            <button onClick={() => handleLoad(savedList[0].key, savedList[0].game)}
+              className="w-full bg-broker-surface hover:bg-broker-surface-hover border border-broker-border rounded-lg p-3 text-left transition-colors">
+              <div className="text-[10px] text-broker-text-muted uppercase tracking-wider mb-0.5">Continue</div>
+              <div className="font-medium text-white">{savedList[0].game.title?.title || savedList[0].key}</div>
+              <div className="text-xs text-broker-text-muted">{savedList[0].game.players?.map(p => p.name).join(', ')} · {savedList[0].game.actionLog?.length || 0} actions</div>
+            </button>
+          </div>
+        )}
+
+        {/* About */}
+        <button onClick={() => navigate('/about')}
+          className="text-xs text-broker-text-muted hover:text-broker-gold mt-4">
+          About / Legal / Impressum
+        </button>
+      </div>
+    )
   }
 
-  const themeId = useThemeStore((s) => s.themeId)
-  const setTheme = useThemeStore((s) => s.setTheme)
+  // ===== JOIN VIEW =====
+  if (view === 'join') {
+    return <JoinView sync={sync} onBack={() => setView('hub')} />
+  }
 
+  // ===== CREATE VIEW =====
+  if (view === 'create') {
+    return <CreateView sync={sync} titles={titles} navigate={navigate}
+      onBack={() => setView('hub')} showLegend={showLegend} setShowLegend={setShowLegend}
+      showInfo={showInfo} setShowInfo={setShowInfo} />
+  }
+
+  // ===== TITLES VIEW =====
+  if (view === 'titles') {
+    return <TitlesView titles={titles} navigate={navigate}
+      onBack={() => setView('hub')} showLegend={showLegend} setShowLegend={setShowLegend}
+      showInfo={showInfo} setShowInfo={setShowInfo} />
+  }
+
+  // ===== DEPOT VIEW (load, save, import, export) =====
+  if (view === 'depot') {
+    return <DepotView navigate={navigate} onBack={() => setView('hub')}
+      loadGame={loadGame} importFrom18xxGames={importFrom18xxGames}
+      savedGames={savedGames} setSavedGames={setSavedGames} />
+  }
+
+  // ===== MOBILE VIEW (placeholder) =====
+  if (view === 'mobile') {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center p-6">
+        <img src={import.meta.env.BASE_URL + 'btn-modern.png'} alt="" className="w-24 rounded-xl mb-4" />
+        <h2 className="text-xl font-bold text-white mb-2">Mobile View</h2>
+        <p className="text-xs text-broker-text-muted mb-4">Coming soon — optimized phone layout</p>
+        <button onClick={() => setView('hub')} className="text-xs text-broker-text-muted hover:text-white">← Back</button>
+      </div>
+    )
+  }
+
+  // ===== SETTINGS VIEW =====
+  if (view === 'settings') {
+    return <SettingsView navigate={navigate} onBack={() => setView('hub')} />
+  }
+
+  return null
+}
+
+// ===== JOIN VIEW =====
+function JoinView({ sync, onBack }) {
+  const [code, setCode] = useState('')
+
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center p-6">
+      <img src={import.meta.env.BASE_URL + 'btn-join.png'} alt="Join" className="w-32 rounded-xl mb-4" />
+      <h2 className="text-xl font-bold text-white mb-1">Join Compartment</h2>
+      <p className="text-xs text-broker-text-muted mb-4">Enter the room code from your host</p>
+      <div className="flex gap-2 items-center">
+        <input type="text" value={code} onChange={(e) => setCode(e.target.value.toUpperCase())}
+          placeholder="CODE" maxLength={6} autoFocus
+          onKeyDown={e => e.key === 'Enter' && code.trim().length >= 4 && sync?.joinRoom(code)}
+          className="w-32 bg-broker-surface border border-broker-border rounded-lg px-3 py-3 text-white font-mono text-xl tracking-widest placeholder-broker-text-muted text-center" />
+        <button onClick={() => { if (code.trim().length >= 4) sync?.joinRoom(code) }}
+          disabled={code.trim().length < 4}
+          className="bg-blue-700 hover:bg-blue-600 text-white px-5 py-3 rounded-lg font-bold disabled:opacity-40">
+          Board
+        </button>
+      </div>
+      <button onClick={onBack} className="mt-6 text-xs text-broker-text-muted hover:text-white">← Back</button>
+    </div>
+  )
+}
+
+// ===== CREATE VIEW =====
+function CreateView({ sync, titles, navigate, onBack, showLegend, setShowLegend, showInfo, setShowInfo }) {
+  return (
+    <div className="min-h-screen flex flex-col items-center p-6">
+      <img src={import.meta.env.BASE_URL + 'btn-create.png'} alt="Create" className="w-24 rounded-xl mb-3" />
+      <h2 className="text-xl font-bold text-white mb-1">Create Compartment</h2>
+      {sync?.roomId ? (
+        <div className="flex items-center gap-3 mb-4">
+          <span className={`w-3 h-3 rounded-full ${sync.status === 'connected' ? 'bg-green-400' : 'bg-amber-400 animate-pulse'}`} />
+          <span className="font-mono font-bold text-white text-2xl tracking-wider">{sync.roomId}</span>
+          <span className="text-sm text-broker-text-muted">
+            {sync.peerCount > 0 ? `${sync.peerCount + 1} devices` : 'waiting...'}
+          </span>
+        </div>
+      ) : (
+        <p className="text-xs text-broker-text-muted mb-4">Creating room...</p>
+      )}
+      <p className="text-xs text-broker-text-muted mb-4">Share the code, then select a title to start</p>
+      <TitlesGrid titles={titles} navigate={navigate} showLegend={showLegend} setShowLegend={setShowLegend} showInfo={showInfo} setShowInfo={setShowInfo} />
+      <button onClick={onBack} className="mt-6 text-xs text-broker-text-muted hover:text-white">← Back</button>
+    </div>
+  )
+}
+
+// ===== TITLES GRID (shared) =====
+function TitlesGrid({ titles, navigate, showLegend, setShowLegend, showInfo, setShowInfo }) {
+  const [sortBy, setSortBy] = useState('rating')
   const [minRating, setMinRating] = useState(0)
 
-  // Sort titles
   const sortFn = sortBy === 'name' ? (a, b) => a.title.localeCompare(b.title)
     : (a, b) => (b.maturity || 0) - (a.maturity || 0) || a.title.localeCompare(b.title)
   const sorted = [...titles].sort(sortFn).filter(t => (t.maturity || 0) >= minRating)
 
   return (
-    <div className="min-h-screen flex flex-col items-center p-6">
-      {/* Theme switcher */}
-      <div className="self-end flex gap-1 mb-2">
-        {Object.values(themes).map((t) => (
-          <button
-            key={t.id}
-            onClick={() => setTheme(t.id)}
-            className={`text-sm px-3 py-1.5 rounded transition-colors ${
-              themeId === t.id
-                ? 'bg-broker-gold text-broker-bg font-medium'
-                : 'bg-broker-surface text-broker-text-muted hover:bg-broker-surface-hover'
-            }`}
-            title={t.desc}
-          >
-            {t.label}
-          </button>
-        ))}
-      </div>
-
-      <h1 className="text-3xl font-bold text-white mt-2 tracking-wide">18xxCoupler</h1>
-      <img src={import.meta.env.BASE_URL + 'logo.png'} alt="18xxCoupler"
-        className="w-full max-w-md mt-1 rounded-xl" />
-      <p className="text-sm text-broker-text-muted italic mb-1">Steam meets Screens</p>
-      <p className="text-[10px] text-broker-text-muted mb-6">
-        v{typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '?'} · {typeof __BUILD_ID__ !== 'undefined' ? __BUILD_ID__ : '?'}
-      </p>
-
-      {/* ===== JOIN COMPARTMENT ===== */}
-      <div className="w-full max-w-md mb-6">
-        <RoomJoin sync={sync} />
-      </div>
-
-      {/* ===== TOOLS ===== */}
-      <div className="w-full max-w-md space-y-2 mb-6">
-        <SectionLabel>Tools</SectionLabel>
-        <button onClick={() => navigate('/routes')}
-          className="w-full bg-broker-surface hover:bg-broker-surface-hover text-broker-text hover:text-white rounded-lg px-4 py-3 text-sm font-medium transition-colors text-left">
-          <span className="flex items-center gap-2">Route Calculator <WrenchIcon filled size="w-3 h-3" /></span>
-          <span className="block text-xs text-broker-text-muted mt-0.5">Build routes, calculate revenue per corp</span>
-        </button>
-        <button onClick={() => navigate('/endgame')}
-          className="w-full bg-broker-surface hover:bg-broker-surface-hover text-broker-text hover:text-white rounded-lg px-4 py-3 text-sm font-medium transition-colors text-left">
-          <span className="flex items-center gap-2">Endgame Calculator <WrenchIcon filled size="w-3 h-3" /></span>
-          <span className="block text-xs text-broker-text-muted mt-0.5">Enter shares and prices — crank ORs to bank break</span>
-        </button>
-      </div>
-
-      {/* ===== SAVED GAMES ===== */}
-      {savedList.length > 0 && (
-        <div className="w-full max-w-md mb-6">
-          <SectionLabel>Continue</SectionLabel>
-          <div className="space-y-2">
-            {savedList.map(({ key, game }) => {
-              const date = game.createdAt ? new Date(game.createdAt).toLocaleDateString() : '—'
-              const players = game.players?.map((p) => p.name).join(', ') || '—'
-              const actions = game.actionLog?.length || 0
-              return (
-                <div key={key} className="bg-broker-surface border border-broker-border rounded-lg p-3 flex items-center justify-between">
-                  <button onClick={() => handleLoad(key, game)} className="flex-1 text-left hover:text-broker-gold transition-colors">
-                    <div className="font-medium">
-                      {game.title?.title || key}
-                      <span className="text-broker-text-muted text-sm ml-2">{date}</span>
-                    </div>
-                    <div className="text-xs text-broker-text-muted">{players} · {actions} actions</div>
-                  </button>
-                  <button onClick={(e) => {
-                    e.stopPropagation()
-                    const json = exportGame(game)
-                    const blob = new Blob([json], { type: 'application/json' })
-                    const url = URL.createObjectURL(blob)
-                    const a = document.createElement('a')
-                    a.href = url
-                    a.download = `${game.title?.titleId || 'game'}_${new Date(game.createdAt).toISOString().slice(0,10)}.json`
-                    a.click()
-                    URL.revokeObjectURL(url)
-                  }} className="text-broker-text-muted hover:text-broker-gold ml-2 px-2 py-1 text-xs">↓</button>
-                  <button onClick={() => handleDelete(key)} className="text-broker-text-muted hover:text-red-400 px-2 py-1 text-sm">×</button>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* ===== NEW GAME ===== */}
+    <>
       <div className="w-full max-w-md mb-2 flex items-center justify-between">
-        <SectionLabel>New Game ({sorted.length})</SectionLabel>
+        <SectionLabel>Select Title ({sorted.length})</SectionLabel>
         <div className="flex gap-1 items-center">
           {[['rating', 'Rating'], ['name', 'A-Z']].map(([id, label]) => (
             <button key={id} onClick={() => setSortBy(id)}
@@ -179,11 +242,106 @@ export default function GameSelector() {
           No titles at this rating. <button onClick={() => setMinRating(0)} className="underline">Show all</button>
         </div>
       )}
+      {showLegend && <WrenchLegend title={showLegend === true ? null : showLegend} onClose={() => setShowLegend(null)} />}
+      {showInfo && <TitleInfoPopup title={showInfo} onClose={() => setShowInfo(null)} />}
+    </>
+  )
+}
 
-      {/* ===== IMPORT ===== */}
-      <div className="w-full max-w-md mt-6">
+// ===== TITLES VIEW =====
+function TitlesView({ titles, navigate, onBack, showLegend, setShowLegend, showInfo, setShowInfo }) {
+  return (
+    <div className="min-h-screen flex flex-col items-center p-6">
+      <div className="w-full max-w-md mb-2 flex items-center gap-2">
+        <button onClick={onBack} className="text-broker-text-muted hover:text-white text-sm">←</button>
+        <img src={import.meta.env.BASE_URL + 'btn-build.png'} alt="" className="w-8 rounded" />
+        <h2 className="text-lg font-bold text-white">Build Track</h2>
+      </div>
+      <TitlesGrid titles={titles} navigate={navigate} showLegend={showLegend} setShowLegend={setShowLegend} showInfo={showInfo} setShowInfo={setShowInfo} />
+      <button onClick={onBack} className="mt-6 text-xs text-broker-text-muted hover:text-white">← Back</button>
+    </div>
+  )
+}
+
+// ===== DEPOT VIEW (saved games, load/save/import/export) =====
+function DepotView({ navigate, onBack, loadGame, importFrom18xxGames, savedGames, setSavedGames }) {
+  const fileRef = useRef(null)
+  const [importId, setImportId] = useState('')
+  const [importError, setImportError] = useState(null)
+  const [importing, setImporting] = useState(false)
+  const savedList = Object.entries(savedGames)
+    .map(([key, game]) => ({ key, game }))
+    .sort((a, b) => (b.game.createdAt || 0) - (a.game.createdAt || 0))
+
+  function handleImport(e) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = () => {
+      try {
+        const data = importGame(reader.result)
+        loadGame(data)
+        navigate('/')
+      } catch (err) { console.error('Failed to import game:', err) }
+    }
+    reader.readAsText(file)
+    e.target.value = ''
+  }
+
+  return (
+    <div className="min-h-screen flex flex-col items-center p-6">
+      <div className="w-full max-w-md">
+        <div className="flex items-center gap-2 mb-4">
+          <button onClick={onBack} className="text-broker-text-muted hover:text-white text-sm">←</button>
+          <img src={import.meta.env.BASE_URL + 'btn-depot.png'} alt="" className="w-8 rounded" />
+          <h2 className="text-lg font-bold text-white">Depot</h2>
+        </div>
+
+        {/* Saved Games */}
+        {savedList.length > 0 ? (
+          <div className="space-y-2 mb-4">
+            <SectionLabel>Saved Games</SectionLabel>
+            {savedList.map(({ key, game }) => {
+              const date = game.createdAt ? new Date(game.createdAt).toLocaleDateString() : '—'
+              const players = game.players?.map((p) => p.name).join(', ') || '—'
+              const actions = game.actionLog?.length || 0
+              return (
+                <div key={key} className="bg-broker-surface border border-broker-border rounded-lg p-3 flex items-center justify-between">
+                  <button onClick={() => { loadGame(game); navigate('/') }} className="flex-1 text-left hover:text-broker-gold transition-colors">
+                    <div className="font-medium">{game.title?.title || key} <span className="text-broker-text-muted text-sm ml-2">{date}</span></div>
+                    <div className="text-xs text-broker-text-muted">{players} · {actions} actions</div>
+                  </button>
+                  <button onClick={(e) => {
+                    e.stopPropagation()
+                    const json = exportGame(game)
+                    const blob = new Blob([json], { type: 'application/json' })
+                    const url = URL.createObjectURL(blob)
+                    const a = document.createElement('a')
+                    a.href = url
+                    a.download = `${game.title?.titleId || 'game'}_${new Date(game.createdAt).toISOString().slice(0, 10)}.json`
+                    a.click()
+                    URL.revokeObjectURL(url)
+                  }} className="text-broker-text-muted hover:text-broker-gold ml-2 px-2 py-1 text-xs" title="Export">↓</button>
+                  <button onClick={() => { deleteGame(key); setSavedGames(loadAllGames()) }}
+                    className="text-broker-text-muted hover:text-red-400 px-2 py-1 text-sm" title="Delete">×</button>
+                </div>
+              )
+            })}
+          </div>
+        ) : (
+          <p className="text-xs text-broker-text-muted mb-4">No saved games</p>
+        )}
+
+        {/* Load from file */}
         <SectionLabel>Import</SectionLabel>
-        <div className="bg-broker-surface border border-broker-border rounded-lg p-3">
+        <button onClick={() => fileRef.current?.click()}
+          className="w-full bg-broker-surface hover:bg-broker-surface-hover border border-dashed border-broker-border rounded-lg py-3 text-sm text-broker-text-muted hover:text-white transition-colors mb-2">
+          Load from JSON file
+        </button>
+        <input ref={fileRef} type="file" accept=".json" onChange={handleImport} className="hidden" />
+
+        {/* 18xx.games import */}
+        <div className="bg-broker-surface border border-broker-border rounded-lg p-3 mb-2">
           <div className="text-xs text-broker-text-muted mb-2">From 18xx.games</div>
           <div className="flex gap-2">
             <input type="text" value={importId}
@@ -212,79 +370,64 @@ export default function GameSelector() {
           }} importing={importing} />
         </div>
 
-        <button onClick={() => fileRef.current?.click()}
-          className="w-full mt-2 bg-broker-surface hover:bg-broker-surface-hover border border-dashed border-broker-border rounded-lg py-2 text-xs text-broker-text-muted hover:text-white transition-colors">
-          Load from file
-        </button>
-        <input ref={fileRef} type="file" accept=".json" onChange={handleImport} className="hidden" />
+        <button onClick={onBack} className="mt-4 text-xs text-broker-text-muted hover:text-white w-full text-center">← Back</button>
       </div>
-
-
-      {/* About / Legal */}
-      <div className="w-full max-w-md mt-8 mb-4 text-center">
-        <button onClick={() => navigate('/about')}
-          className="text-xs text-broker-text-muted hover:text-broker-gold">
-          About / Legal / Impressum
-        </button>
-      </div>
-
-      {showLegend && <WrenchLegend title={showLegend === true ? null : showLegend} onClose={() => setShowLegend(null)} />}
-      {showInfo && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60" onClick={() => setShowInfo(null)}>
-          <div className="bg-broker-bg border border-broker-border rounded-lg p-4 shadow-xl w-80 max-w-[90vw]"
-            onClick={e => e.stopPropagation()}>
-            <div className="text-sm text-white font-bold mb-1">{showInfo.title}</div>
-            <div className="text-xs text-broker-text-muted mb-3">{showInfo.subtitle}</div>
-            {showInfo.specialties && (
-              <div className="text-xs text-broker-text space-y-0.5">
-                {showInfo.specialties.split('•').filter(s => s.trim()).map((line, i) => (
-                  <div key={i} className="flex gap-1">
-                    <span className="text-broker-gold">•</span>
-                    <span>{line.trim()}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-            <div className="text-[10px] text-broker-text-muted mt-2">
-              {showInfo.minPlayers}–{showInfo.maxPlayers} players • {showInfo.designer} • {showInfo.location}
-            </div>
-            {/* Rules summary */}
-            {(() => {
-              const t = showInfo
-              const rows = [
-                ['Cap', (t.capitalization || 'full') === 'incremental' ? 'Incremental' : 'Full'],
-                ['Float', (t.floatPercent || 60) + '%'],
-                ['Shares', (() => { const s = t.shares || [20,10]; return s[0] + '/' + (s[1]||s[0]) + ' ×' + s.length })()],
-                ['Sell move', (t.sellMovement || 'down_share').replace(/_/g, ' ')],
-                ['Sell after', (t.sellAfter || 'first SR').replace(/_/g, ' ')],
-                ['Unsold div', (t.unsoldShareDividends || 'market') + ' → corp'],
-                ['Pool limit', (t.marketShareLimit != null ? t.marketShareLimit : 50) + '%'],
-                ['Sell order', (t.sellBuyOrder || 'sell_buy').replace(/_/g, ' ')],
-              ]
-              if (t.maxOwnership) rows.push(['Max own', (typeof t.maxOwnership === 'number' ? t.maxOwnership + '%' : 'varies')])
-              if (t.dividendMovement && t.dividendMovement !== 'standard') rows.push(['Div move', t.dividendMovement.replace(/_/g, ' ')])
-              if (t.halfPay) rows.push(['Half pay', '✓'])
-              if (t.loans) rows.push(['Loans', '✓'])
-              if (t.shorts) rows.push(['Shorts', '✓'])
-              if (t.corpCanBuyShares) rows.push(['Corp trade', '✓'])
-              if (t.merger) rows.push(['Merger', t.merger.type.replace(/_/g, ' ')])
-              if (t.terrainCosts?.length > 0) rows.push(['Terrain', t.terrainCosts.join(', ')])
-              return (
-                <div className="mt-3 border-t border-broker-border pt-2 grid grid-cols-2 gap-x-3 gap-y-0.5 text-[10px]">
-                  {rows.map(([k, v]) => (
-                    <div key={k}><span className="text-broker-text-muted">{k}:</span> <span className="text-white">{v}</span></div>
-                  ))}
-                </div>
-              )
-            })()}
-            <button onClick={() => setShowInfo(null)}
-              className="mt-3 w-full text-xs text-broker-text-muted hover:text-white py-2 px-3">Close</button>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
+
+// ===== SETTINGS VIEW =====
+function SettingsView({ navigate, onBack }) {
+  const themeId = useThemeStore((s) => s.themeId)
+  const setTheme = useThemeStore((s) => s.setTheme)
+
+  return (
+    <div className="min-h-screen flex flex-col items-center p-6">
+      <div className="w-full max-w-md">
+        <div className="flex items-center gap-2 mb-4">
+          <button onClick={onBack} className="text-broker-text-muted hover:text-white text-sm">←</button>
+          <img src={import.meta.env.BASE_URL + 'btn-engine.png'} alt="" className="w-8 rounded" />
+          <h2 className="text-lg font-bold text-white">Settings</h2>
+        </div>
+
+        <SectionLabel>Theme</SectionLabel>
+        <div className="flex gap-1 mb-6">
+          {Object.values(themes).map((t) => (
+            <button key={t.id} onClick={() => setTheme(t.id)}
+              className={`text-sm px-3 py-1.5 rounded transition-colors ${
+                themeId === t.id
+                  ? 'bg-broker-gold text-broker-bg font-medium'
+                  : 'bg-broker-surface text-broker-text-muted hover:bg-broker-surface-hover'
+              }`} title={t.desc}>{t.label}</button>
+          ))}
+        </div>
+
+        <SectionLabel>Tools</SectionLabel>
+        <div className="space-y-2 mb-6">
+          <button onClick={() => navigate('/routes')}
+            className="w-full bg-broker-surface hover:bg-broker-surface-hover text-broker-text hover:text-white rounded-lg px-4 py-3 text-sm font-medium transition-colors text-left">
+            Route Calculator
+          </button>
+          <button onClick={() => navigate('/endgame')}
+            className="w-full bg-broker-surface hover:bg-broker-surface-hover text-broker-text hover:text-white rounded-lg px-4 py-3 text-sm font-medium transition-colors text-left">
+            Endgame Calculator
+          </button>
+        </div>
+
+        <div className="mt-8 text-center">
+          <button onClick={() => navigate('/about')}
+            className="text-xs text-broker-text-muted hover:text-broker-gold">
+            About / Legal / Impressum
+          </button>
+        </div>
+
+        <button onClick={onBack} className="mt-4 text-xs text-broker-text-muted hover:text-white w-full text-center">← Back</button>
+      </div>
+    </div>
+  )
+}
+
+// ===== SHARED COMPONENTS =====
 
 function SectionLabel({ children }) {
   return <div className="text-[10px] text-broker-text-muted uppercase tracking-widest mb-1">{children}</div>
@@ -303,10 +446,8 @@ function TrackIcon({ filled, size = 'w-3 h-3' }) {
   return (
     <svg className={`${size} ${filled ? 'text-broker-gold' : 'text-broker-text-muted/20'}`}
       viewBox="0 0 24 24" fill="currentColor" stroke="none">
-      {/* Two horizontal rails */}
       <rect x="0" y="4" width="24" height="2.5" rx="1" />
       <rect x="0" y="17.5" width="24" height="2.5" rx="1" />
-      {/* Vertical ties (sleepers) */}
       <rect x="3" y="1" width="2.5" height="22" rx="0.5" />
       <rect x="10.75" y="1" width="2.5" height="22" rx="0.5" />
       <rect x="18.5" y="1" width="2.5" height="22" rx="0.5" />
@@ -323,15 +464,6 @@ function WrenchIcon({ filled, size = 'w-3 h-3' }) {
   )
 }
 
-function WrenchRating({ level, onShowLegend }) {
-  return (
-    <span onClick={e => { e.stopPropagation(); onShowLegend?.() }}
-      className="flex gap-px items-center cursor-pointer" title={WRENCH_LABELS[level] || ''}>
-      {Array.from({ length: 5 }, (_, i) => <WrenchIcon key={i} filled={i < level} />)}
-    </span>
-  )
-}
-
 function WrenchLegend({ title, onClose }) {
   if (!title?.implemented) return null
   return (
@@ -343,7 +475,7 @@ function WrenchLegend({ title, onClose }) {
           <span className="flex gap-px">
             {Array.from({ length: 5 }, (_, i) => <WrenchIcon key={i} filled={i < (title.maturity || 0)} />)}
           </span>
-          <span className="flex gap-px items-center" title="Test coverage">
+          <span className="flex gap-px items-center">
             {Array.from({ length: 5 }, (_, i) => <TrackIcon key={i} filled={i < (title.testQuality || 0)} />)}
           </span>
         </div>
@@ -357,6 +489,58 @@ function WrenchLegend({ title, onClose }) {
         </div>
         <button onClick={onClose}
           className="mt-3 w-full text-xs text-broker-text-muted hover:text-broker-text py-2 px-3">Close</button>
+      </div>
+    </div>
+  )
+}
+
+function TitleInfoPopup({ title, onClose }) {
+  const t = title
+  const rows = [
+    ['Cap', (t.capitalization || 'full') === 'incremental' ? 'Incremental' : 'Full'],
+    ['Float', (t.floatPercent || 60) + '%'],
+    ['Shares', (() => { const s = t.shares || [20, 10]; return s[0] + '/' + (s[1] || s[0]) + ' ×' + s.length })()],
+    ['Sell move', (t.sellMovement || 'down_share').replace(/_/g, ' ')],
+    ['Sell after', (t.sellAfter || 'first SR').replace(/_/g, ' ')],
+    ['Unsold div', (t.unsoldShareDividends || 'market') + ' → corp'],
+    ['Pool limit', (t.marketShareLimit != null ? t.marketShareLimit : 50) + '%'],
+    ['Sell order', (t.sellBuyOrder || 'sell_buy').replace(/_/g, ' ')],
+  ]
+  if (t.maxOwnership) rows.push(['Max own', (typeof t.maxOwnership === 'number' ? t.maxOwnership + '%' : 'varies')])
+  if (t.dividendMovement && t.dividendMovement !== 'standard') rows.push(['Div move', t.dividendMovement.replace(/_/g, ' ')])
+  if (t.halfPay) rows.push(['Half pay', '✓'])
+  if (t.loans) rows.push(['Loans', '✓'])
+  if (t.shorts) rows.push(['Shorts', '✓'])
+  if (t.corpCanBuyShares) rows.push(['Corp trade', '✓'])
+  if (t.merger) rows.push(['Merger', t.merger.type.replace(/_/g, ' ')])
+  if (t.terrainCosts?.length > 0) rows.push(['Terrain', t.terrainCosts.join(', ')])
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60" onClick={onClose}>
+      <div className="bg-broker-bg border border-broker-border rounded-lg p-4 shadow-xl w-80 max-w-[90vw]"
+        onClick={e => e.stopPropagation()}>
+        <div className="text-sm text-white font-bold mb-1">{t.title}</div>
+        <div className="text-xs text-broker-text-muted mb-3">{t.subtitle}</div>
+        {t.specialties && (
+          <div className="text-xs text-broker-text space-y-0.5">
+            {t.specialties.split('•').filter(s => s.trim()).map((line, i) => (
+              <div key={i} className="flex gap-1">
+                <span className="text-broker-gold">•</span>
+                <span>{line.trim()}</span>
+              </div>
+            ))}
+          </div>
+        )}
+        <div className="text-[10px] text-broker-text-muted mt-2">
+          {t.minPlayers}–{t.maxPlayers} players • {t.designer} • {t.location}
+        </div>
+        <div className="mt-3 border-t border-broker-border pt-2 grid grid-cols-2 gap-x-3 gap-y-0.5 text-[10px]">
+          {rows.map(([k, v]) => (
+            <div key={k}><span className="text-broker-text-muted">{k}:</span> <span className="text-white">{v}</span></div>
+          ))}
+        </div>
+        <button onClick={onClose}
+          className="mt-3 w-full text-xs text-broker-text-muted hover:text-white py-2 px-3">Close</button>
       </div>
     </div>
   )
@@ -395,63 +579,11 @@ function TitleButton({ t, onClick, onShowLegend, onShowInfo }) {
   )
 }
 
-function RoomJoin({ sync }) {
-  const [code, setCode] = useState('')
-  const [showJoin, setShowJoin] = useState(false)
-
-  if (!sync) return null
-
-  if (sync.roomId) {
-    return (
-      <div className="bg-broker-surface border border-broker-border rounded-lg px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <span className={`w-3 h-3 rounded-full ${sync.status === 'connected' ? 'bg-green-400' : 'bg-amber-400 animate-pulse'}`} />
-          <div>
-            <div className="text-xs text-broker-text-muted">Compartment</div>
-            <div className="font-mono font-bold text-white text-lg tracking-wider">{sync.roomId}</div>
-          </div>
-          <span className="text-sm text-broker-text-muted">
-            {sync.peerCount > 0 ? `${sync.peerCount + 1} devices connected` : 'waiting for others...'}
-          </span>
-        </div>
-        <button onClick={sync.leaveRoom} className="text-xs text-broker-text-muted hover:text-red-300 px-2 py-1">Leave</button>
-      </div>
-    )
-  }
-
-  return (
-    <div className="bg-broker-surface border border-broker-border rounded-lg p-4">
-      <div className="text-center mb-3">
-        <div className="text-xs text-broker-text-muted uppercase tracking-wider">Coupler</div>
-        <div className="text-lg font-bold text-white">Join Compartment</div>
-        <div className="text-xs text-broker-gold italic">Your seat awaits</div>
-      </div>
-      {showJoin ? (
-        <div className="flex gap-2 justify-center items-center">
-          <input type="text" value={code} onChange={(e) => setCode(e.target.value.toUpperCase())}
-            placeholder="CODE" maxLength={6} autoFocus
-            onKeyDown={e => e.key === 'Enter' && code.trim().length >= 4 && (sync.joinRoom(code), setShowJoin(false))}
-            className="w-28 bg-broker-bg border border-broker-border rounded-lg px-3 py-2 text-white font-mono text-lg tracking-widest placeholder-broker-text-muted text-center" />
-          <button onClick={() => { if (code.trim().length >= 4) { sync.joinRoom(code); setShowJoin(false) } }}
-            disabled={code.trim().length < 4}
-            className="bg-blue-700 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium disabled:opacity-40">Board</button>
-          <button onClick={() => setShowJoin(false)} className="text-broker-text-muted hover:text-white px-2">&times;</button>
-        </div>
-      ) : (
-        <button onClick={() => setShowJoin(true)}
-          className="w-full hover:brightness-110 transition-all rounded-xl overflow-hidden">
-          <img src={import.meta.env.BASE_URL + 'btn-join.png'} alt="Join Compartment" className="w-full max-w-[200px] mx-auto rounded-xl" />
-        </button>
-      )}
-    </div>
-  )
-}
-
 const SUPPORTED_TITLES = new Set([
-  '1817','1822','1822CA','1822MX','1830','1846','1847 AE','1849','1858','1860',
-  '1861','1862','1867','1871','1880','1889',
-  '18Chesapeake','18GB','18India','18Ireland','18MEX','18MS','18RHL','18 Royal Gorge','18SJ','18USA',
-  '21Moon','22Mars',
+  '1817', '1822', '1822CA', '1822MX', '1830', '1846', '1847 AE', '1849', '1858', '1860',
+  '1861', '1862', '1867', '1871', '1880', '1889',
+  '18Chesapeake', '18GB', '18India', '18Ireland', '18MEX', '18MS', '18RHL', '18 Royal Gorge', '18SJ', '18USA',
+  '21Moon', '22Mars',
 ])
 
 const SORTED_TITLES = [...SUPPORTED_TITLES].sort()
