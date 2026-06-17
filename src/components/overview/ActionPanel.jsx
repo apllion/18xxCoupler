@@ -73,9 +73,10 @@ function PanelContent({ panel, game, player, corp, unfloated, fmt, revenueInput,
         <div className="flex gap-2 mt-1">
           {corp.ipoShares > 0 && <Btn v="green" o={() => doAction({ type: 'BUY_SHARE', playerId: player.id, corpSym: corp.sym, source: 'ipo', percent: shareSize })}>Buy IPO {fmt(price)}</Btn>}
           {corp.marketShares > 0 && <Btn v="blue" o={() => doAction({ type: 'BUY_SHARE', playerId: player.id, corpSym: corp.sym, source: 'market', percent: shareSize })}>Buy Market {fmt(price)}</Btn>}
-          {pct >= shareSize && <Btn v="red" o={() => doAction({ type: 'SELL_SHARES', playerId: player.id, corpSym: corp.sym, percent: shareSize })}>Sell {shareSize}%</Btn>}
-          {pct >= shareSize * 2 && <Btn v="red" o={() => doAction({ type: 'SELL_SHARES', playerId: player.id, corpSym: corp.sym, percent: shareSize * 2 })}>Sell {shareSize * 2}%</Btn>}
-          {pct >= shareSize * 3 && <Btn v="red" o={() => doAction({ type: 'SELL_SHARES', playerId: player.id, corpSym: corp.sym, percent: shareSize * 3 })}>Sell {shareSize * 3}%</Btn>}
+          {Array.from({ length: Math.floor(pct / shareSize) }, (_, i) => {
+            const n = (i + 1) * shareSize
+            return <Btn key={n} v="red" o={() => doAction({ type: 'SELL_SHARES', playerId: player.id, corpSym: corp.sym, percent: n })}>Sell {n}%</Btn>
+          })}
           {pct > 0 && !pres && <Btn v="yellow" o={() => doAction({ type: 'SWAP_PRESIDENT', playerId: player.id, corpSym: corp.sym })}>President</Btn>}
         </div>
       </div>
