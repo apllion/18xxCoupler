@@ -105,7 +105,7 @@ function PanelContent({ panel, game, player, corp, unfloated, fmt, revenueInput,
             useUIStore.getState().setActiveCorp(corp.sym)
             useUIStore.getState().setActiveTab('routes')
           }}>Route Calc</Btn>
-          <Btn v="red" o={() => doAction({ type: 'WITHHOLD_DIVIDEND', corpSym: corp.sym, totalRevenue: 0 })}>$0</Btn>
+          {corp.trains.length === 0 && <Btn v="red" o={() => doAction({ type: 'WITHHOLD_DIVIDEND', corpSym: corp.sym, totalRevenue: 0 })}>No Trains</Btn>}
           {rev > 0 && (
             <>
               <Btn v="green" o={() => doAction({ type: 'PAY_DIVIDEND', corpSym: corp.sym, totalRevenue: rev })}>

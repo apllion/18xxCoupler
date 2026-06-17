@@ -45,8 +45,8 @@ export default function CorpORCard({ data, corp }) {
         <div className="flex items-center gap-2">
           <input type="number" value={revInput} onChange={e => setRevInput(e.target.value)}
             placeholder="0" className="w-20 bg-broker-bg border border-broker-border rounded px-2 py-2 text-white text-center" />
-          <button onClick={() => dispatch({ type: 'WITHHOLD_DIVIDEND', corpSym: corp.sym, totalRevenue: 0 })}
-            className="text-xs bg-red-800 text-white px-3 py-2 rounded">$0</button>
+          {corp.trains.length === 0 && <button onClick={() => dispatch({ type: 'WITHHOLD_DIVIDEND', corpSym: corp.sym, totalRevenue: 0 })}
+            className="text-sm bg-red-800 text-white px-3 py-2 rounded-lg font-medium">No Trains</button>}
           {rev > 0 && (
             <>
               <button onClick={() => { dispatch({ type: 'PAY_DIVIDEND', corpSym: corp.sym, totalRevenue: rev }); setRevInput('') }}

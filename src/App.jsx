@@ -45,7 +45,7 @@ function AppContent({ game, sync }) {
             onClick={sync.leaveRoom}
             className="text-sm text-broker-text-muted hover:text-red-300 mt-4"
           >
-            Leave Room
+            ← Cancel & Leave Room
           </button>
         </div>
       </div>

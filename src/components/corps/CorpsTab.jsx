@@ -437,6 +437,15 @@ function CorpDetail({ game, corp, dispatch, fmt, onNext, plusPlus }) {
             <div>Withhold</div>
             <div className="text-xs opacity-70">price ↙</div>
           </button>
+          {corp.trains.length === 0 && (
+            <button
+              onClick={() => dispatch({ type: 'WITHHOLD_DIVIDEND', corpSym: corp.sym, totalRevenue: 0 })}
+              className="flex-1 bg-red-900 hover:bg-red-800 text-white py-3 rounded-lg font-medium transition-colors"
+            >
+              <div>No Trains</div>
+              <div className="text-xs opacity-70">price ↙</div>
+            </button>
+          )}
         </div>
       </div>
 
