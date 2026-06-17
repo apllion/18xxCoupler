@@ -4,6 +4,8 @@ import { useSyncContext } from './hooks/SyncContext.jsx'
 import GameSelector from './components/setup/GameSelector.jsx'
 import PlayerSetup from './components/setup/PlayerSetup.jsx'
 import GameShell from './components/layout/GameShell.jsx'
+import MobileShell from './components/mobile/MobileShell.jsx'
+import { useUIStore } from './store/uiStore.js'
 import AboutPage from './components/setup/AboutPage.jsx'
 import PassphraseGate from './components/setup/PassphraseGate.jsx'
 import EndgameCalcTab from './components/overview/EndgameCalcTab.jsx'
@@ -62,7 +64,8 @@ function AppContent({ game, sync }) {
     )
   }
 
-  return <GameShell />
+  const viewMode = useUIStore((s) => s.viewMode)
+  return viewMode === 'mobile' ? <MobileShell /> : <GameShell />
 }
 
 function CalcStandalone({ children }) {

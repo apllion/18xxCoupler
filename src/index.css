@@ -58,3 +58,12 @@
   --color-broker-green-light: var(--color-broker-green-light);
   --color-broker-accent: var(--color-broker-accent);
 }
+
+/* Hide scrollbar for mobile swipe */
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}

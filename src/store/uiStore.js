@@ -27,6 +27,8 @@ export const useUIStore = create((set) => ({
     autoConfig: { ...s.autoConfig, [key]: value },
   })),
 
+  viewMode: 'monitor',       // 'monitor' | 'mobile'
+  setViewMode: (mode) => set({ viewMode: mode }),
   setActiveTab: (tab) => set({ activeTab: tab }),
   setActivePlayer: (id) => set({ activePlayerId: id }),
   setMyPlayer: (id) => set({ myPlayerId: id }),

@@ -7,6 +7,7 @@ import { getCorpShares } from '../../engine/corporation.js'
 import { useUIStore } from '../../store/uiStore.js'
 import { useGameStore } from '../../store/gameStore.js'
 import { useSyncContext } from '../../hooks/SyncContext.jsx'
+import { useWakeLock } from '../../hooks/useWakeLock.js'
 import { useThemeStore, themes as brokerThemes } from '../../store/themeStore.js'
 import { exportGamePdf } from '../../utils/exportPdf.js'
 import { exportGame } from '../../utils/persistence.js'
@@ -969,6 +970,7 @@ function SettingsPanel({ game, doAction: _doAction }) {
   const turnTracking = useUIStore((s) => s.turnTracking)
   const showToasts = useUIStore((s) => s.showToasts)
   const sync = useSyncContext()
+  const wakeLock = useWakeLock()
   const setAutoConfig = useUIStore((s) => s.setAutoConfig)
   const brokerThemeId = useThemeStore((s) => s.themeId)
   const setBrokerTheme = useThemeStore((s) => s.setTheme)
@@ -1010,6 +1012,12 @@ function SettingsPanel({ game, doAction: _doAction }) {
           <div className={labelColor}>Turn Tracking</div>
           <Btn v={turnTracking === 'on' ? 'green' : 'blue'} o={() => useUIStore.getState().toggleTurnTracking()}>
             {turnTracking === 'on' ? 'On' : 'Off'}
+          </Btn>
+        </div>
+        <div>
+          <div className={labelColor}>Screen</div>
+          <Btn v={!wakeLock.supported ? 'disabled' : wakeLock.enabled ? 'green' : 'blue'} o={wakeLock.supported ? wakeLock.toggle : undefined}>
+            {!wakeLock.supported ? 'Stay On (n/a)' : wakeLock.enabled ? (wakeLock.active ? 'Stay On ✓' : 'Stay On ⏳') : 'Stay On'}
           </Btn>
         </div>
         <div>

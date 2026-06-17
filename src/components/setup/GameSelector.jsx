@@ -2,6 +2,7 @@ import { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { allTitles } from '../../titles/index.js'
 import { useGameStore } from '../../store/gameStore.js'
+import { useUIStore } from '../../store/uiStore.js'
 import { useSyncContext } from '../../hooks/SyncContext.jsx'
 import { loadAllGames, deleteGame, importGame, exportGame } from '../../utils/persistence.js'
 import { useThemeStore, themes } from '../../store/themeStore.js'
@@ -133,12 +134,19 @@ export default function GameSelector() {
 
   // ===== MOBILE VIEW (placeholder) =====
   if (view === 'mobile') {
+    // Set mobile mode — will activate when a game is loaded
+    useUIStore.getState().setViewMode('mobile')
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-6">
         <img src={import.meta.env.BASE_URL + 'btn-modern.png'} alt="" className="w-24 rounded-xl mb-4" />
         <h2 className="text-xl font-bold text-white mb-2">Mobile View</h2>
-        <p className="text-xs text-broker-text-muted mb-4">Coming soon — optimized phone layout</p>
-        <button onClick={() => setView('hub')} className="text-xs text-broker-text-muted hover:text-white">← Back</button>
+        <p className="text-xs text-broker-text-muted mb-4">Mobile mode active — load or start a game to use it</p>
+        <div className="flex gap-3">
+          <button onClick={() => setView('titles')} className="text-xs bg-broker-surface hover:bg-broker-surface-hover text-white px-4 py-2 rounded-lg">Build Track</button>
+          <button onClick={() => setView('depot')} className="text-xs bg-broker-surface hover:bg-broker-surface-hover text-white px-4 py-2 rounded-lg">Depot</button>
+        </div>
+        <button onClick={() => { useUIStore.getState().setViewMode('monitor'); setView('hub') }}
+          className="mt-4 text-xs text-broker-text-muted hover:text-white">← Back to Monitor</button>
       </div>
     )
   }
