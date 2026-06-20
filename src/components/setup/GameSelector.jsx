@@ -14,7 +14,8 @@ export default function GameSelector() {
   const sync = useSyncContext()
   const titles = allTitles()
   const [savedGames, setSavedGames] = useState(() => loadAllGames())
-  const [view, setView] = useState('hub') // 'hub' | 'titles' | 'settings' | 'join' | 'create' | 'depot' | 'modern'
+  const game = useGameStore((s) => s.game)
+  const [view, setView] = useState('hub') // 'hub' | 'titles' | 'settings' | 'compartment' | 'create' | 'depot'
   const [showLegend, setShowLegend] = useState(null)
   const [showInfo, setShowInfo] = useState(null)
 
@@ -61,19 +62,39 @@ export default function GameSelector() {
           </div>
         )}
 
-        {/* 3×2 Button Grid */}
-        <div className="grid grid-cols-3 gap-3 w-full max-w-md mb-6">
+        {/* ===== BOARD section ===== */}
+        <SectionLabel>Board</SectionLabel>
+        <div className="grid grid-cols-2 gap-3 w-full max-w-md mb-4">
           {[
-            { view: 'join', img: 'btn-join.png', label: 'Join', sub: 'Your seat awaits' },
-            { view: 'create', img: 'btn-create.png', label: 'Create', sub: 'Start a room' },
-            { view: 'titles', img: 'btn-build.png', label: 'Build Track', sub: 'Select a title' },
-            { view: 'settings', img: 'btn-engine.png', label: 'Settings', sub: 'Theme & config' },
-            { view: 'depot', img: 'btn-depot.png', label: 'Depot', sub: 'Load & import' },
-            { view: 'mobile', img: 'btn-modern.png', label: 'Mobile', sub: 'Phone view' },
+            { view: 'titles', img: 'scene-track-builders.png', label: 'New Game', sub: 'Pick a title' },
+            { view: 'compartment', img: 'scene-compartment-empty.png', label: 'Compartment', sub: 'Join or host' },
+            { view: 'depot', img: 'scene-water-tower.png', label: 'Depot', sub: 'Load & import' },
+            { view: 'settings', img: 'scene-locomotive-mechanic.png', label: 'Settings', sub: 'Theme & config' },
+          ].map(b => (
+            <button key={b.view} onClick={() => setView(b.view)}
+              className="rounded-xl overflow-hidden hover:brightness-110 transition-all text-center">
+              <img src={import.meta.env.BASE_URL + b.img} alt={b.label} className="w-full rounded-t-xl" />
+              <div className="bg-broker-surface px-2 py-1.5 rounded-b-xl">
+                <div className="text-sm font-bold text-white">{b.label}</div>
+                <div className="text-[10px] text-broker-text-muted">{b.sub}</div>
+              </div>
+            </button>
+          ))}
+        </div>
+
+        {/* ===== RIDE section ===== */}
+        <SectionLabel>Ride</SectionLabel>
+        <div className="grid grid-cols-2 gap-3 w-full max-w-md mb-6">
+          {[
+            { view: 'monitor', img: 'scene-signal-box.png', label: 'Monitor', sub: 'Umpire view' },
+            { view: 'seat', img: 'scene-compartment-passengers.png', label: 'Seat', sub: 'Player view' },
           ].map(b => (
             <button key={b.view} onClick={() => {
-              if (b.view === 'create') { sync?.createRoom(); setView('create') }
-              else setView(b.view)
+              if (b.view === 'monitor') useUIStore.getState().setViewMode('monitor')
+              else if (b.view === 'seat') useUIStore.getState().setViewMode('mobile')
+              // If game loaded, navigate to it. Otherwise load last saved.
+              if (game) { navigate('/'); return }
+              if (savedList.length > 0) { handleLoad(savedList[0].key, savedList[0].game); return }
             }}
               className="rounded-xl overflow-hidden hover:brightness-110 transition-all text-center">
               <img src={import.meta.env.BASE_URL + b.img} alt={b.label} className="w-full rounded-t-xl" />
@@ -104,6 +125,12 @@ export default function GameSelector() {
         </button>
       </div>
     )
+  }
+
+  // ===== COMPARTMENT VIEW (join or create) =====
+  if (view === 'compartment') {
+    return <CompartmentView sync={sync} onBack={() => setView('hub')}
+      onCreateThenTitles={() => { sync?.createRoom(); setView('create') }} />
   }
 
   // ===== JOIN VIEW =====
@@ -138,7 +165,7 @@ export default function GameSelector() {
     useUIStore.getState().setViewMode('mobile')
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-6">
-        <img src={import.meta.env.BASE_URL + 'btn-modern.png'} alt="" className="w-24 rounded-xl mb-4" />
+        <img src={import.meta.env.BASE_URL + 'scene-man-at-window.png'} alt="" className="w-24 rounded-xl mb-4" />
         <h2 className="text-xl font-bold text-white mb-2">Mobile View</h2>
         <p className="text-xs text-broker-text-muted mb-4">Mobile mode active — load or start a game to use it</p>
         <div className="flex gap-3">
@@ -159,13 +186,84 @@ export default function GameSelector() {
   return null
 }
 
+// ===== COMPARTMENT VIEW (join or create) =====
+function CompartmentView({ sync, onBack, onCreateThenTitles }) {
+  const [code, setCode] = useState('')
+  const [mode, setMode] = useState(null) // null | 'join'
+
+  // Already in a room — show status
+  if (sync?.roomId) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center p-6">
+        <img src={import.meta.env.BASE_URL + 'scene-compartment-passengers.png'} alt="" className="w-32 rounded-xl mb-4" />
+        <h2 className="text-xl font-bold text-white mb-2">Compartment</h2>
+        <div className="flex items-center gap-3 mb-4">
+          <span className={`w-3 h-3 rounded-full ${sync.status === 'connected' ? 'bg-green-400' : 'bg-amber-400 animate-pulse'}`} />
+          <span className="font-mono font-bold text-white text-2xl tracking-wider">{sync.roomId}</span>
+          <span className="text-sm text-broker-text-muted">
+            {sync.peerCount > 0 ? `${sync.peerCount + 1} devices` : 'waiting...'}
+          </span>
+        </div>
+        <div className="flex gap-3">
+          <button onClick={() => { sync.leaveRoom(); onBack() }}
+            className="text-sm bg-red-800 hover:bg-red-700 text-white px-4 py-2 rounded-lg">Leave Room</button>
+          <button onClick={onBack}
+            className="text-sm text-broker-text-muted hover:text-white px-4 py-2">← Back</button>
+        </div>
+      </div>
+    )
+  }
+
+  // Join mode — enter code
+  if (mode === 'join') {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center p-6">
+        <img src={import.meta.env.BASE_URL + 'scene-compartment-passengers.png'} alt="" className="w-32 rounded-xl mb-4" />
+        <h2 className="text-xl font-bold text-white mb-1">Join Compartment</h2>
+        <p className="text-xs text-broker-text-muted mb-4">Enter the room code from your host</p>
+        <div className="flex gap-2 items-center">
+          <input type="text" value={code} onChange={(e) => setCode(e.target.value.toUpperCase())}
+            placeholder="CODE" maxLength={6} autoFocus
+            onKeyDown={e => e.key === 'Enter' && code.trim().length >= 4 && sync?.joinRoom(code)}
+            className="w-32 bg-broker-surface border border-broker-border rounded-lg px-3 py-3 text-white font-mono text-xl tracking-widest placeholder-broker-text-muted text-center" />
+          <button onClick={() => { if (code.trim().length >= 4) sync?.joinRoom(code) }}
+            disabled={code.trim().length < 4}
+            className="bg-blue-700 hover:bg-blue-600 text-white px-5 py-3 rounded-lg font-bold disabled:opacity-40">
+            Board
+          </button>
+        </div>
+        <button onClick={() => setMode(null)} className="mt-6 text-xs text-broker-text-muted hover:text-white">← Back</button>
+      </div>
+    )
+  }
+
+  // Default — choose join or create
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center p-6">
+      <img src={import.meta.env.BASE_URL + 'scene-compartment-empty.png'} alt="" className="w-32 rounded-xl mb-4" />
+      <h2 className="text-xl font-bold text-white mb-4">Compartment</h2>
+      <div className="flex gap-3">
+        <button onClick={() => setMode('join')}
+          className="bg-blue-700 hover:bg-blue-600 text-white px-6 py-3 rounded-xl font-bold text-sm">
+          Join Room
+        </button>
+        <button onClick={onCreateThenTitles}
+          className="bg-green-700 hover:bg-green-600 text-white px-6 py-3 rounded-xl font-bold text-sm">
+          Create Room
+        </button>
+      </div>
+      <button onClick={onBack} className="mt-6 text-xs text-broker-text-muted hover:text-white">← Back</button>
+    </div>
+  )
+}
+
 // ===== JOIN VIEW =====
 function JoinView({ sync, onBack }) {
   const [code, setCode] = useState('')
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-6">
-      <img src={import.meta.env.BASE_URL + 'btn-join.png'} alt="Join" className="w-32 rounded-xl mb-4" />
+      <img src={import.meta.env.BASE_URL + 'scene-compartment-passengers.png'} alt="Join" className="w-32 rounded-xl mb-4" />
       <h2 className="text-xl font-bold text-white mb-1">Join Compartment</h2>
       <p className="text-xs text-broker-text-muted mb-4">Enter the room code from your host</p>
       <div className="flex gap-2 items-center">
@@ -188,7 +286,7 @@ function JoinView({ sync, onBack }) {
 function CreateView({ sync, titles, navigate, onBack, showLegend, setShowLegend, showInfo, setShowInfo }) {
   return (
     <div className="min-h-screen flex flex-col items-center p-6">
-      <img src={import.meta.env.BASE_URL + 'btn-create.png'} alt="Create" className="w-24 rounded-xl mb-3" />
+      <img src={import.meta.env.BASE_URL + 'scene-compartment-empty.png'} alt="Create" className="w-24 rounded-xl mb-3" />
       <h2 className="text-xl font-bold text-white mb-1">Create Compartment</h2>
       {sync?.roomId ? (
         <div className="flex items-center gap-3 mb-4">
@@ -262,7 +360,7 @@ function TitlesView({ titles, navigate, onBack, showLegend, setShowLegend, showI
     <div className="min-h-screen flex flex-col items-center p-6">
       <div className="w-full max-w-md mb-2 flex items-center gap-2">
         <button onClick={onBack} className="text-broker-text-muted hover:text-white text-sm">←</button>
-        <img src={import.meta.env.BASE_URL + 'btn-build.png'} alt="" className="w-8 rounded" />
+        <img src={import.meta.env.BASE_URL + 'scene-track-builders.png'} alt="" className="w-8 rounded" />
         <h2 className="text-lg font-bold text-white">Build Track</h2>
       </div>
       <TitlesGrid titles={titles} navigate={navigate} showLegend={showLegend} setShowLegend={setShowLegend} showInfo={showInfo} setShowInfo={setShowInfo} />
@@ -301,7 +399,7 @@ function DepotView({ navigate, onBack, loadGame, importFrom18xxGames, savedGames
       <div className="w-full max-w-md">
         <div className="flex items-center gap-2 mb-4">
           <button onClick={onBack} className="text-broker-text-muted hover:text-white text-sm">←</button>
-          <img src={import.meta.env.BASE_URL + 'btn-depot.png'} alt="" className="w-8 rounded" />
+          <img src={import.meta.env.BASE_URL + 'scene-water-tower.png'} alt="" className="w-8 rounded" />
           <h2 className="text-lg font-bold text-white">Depot</h2>
         </div>
 
@@ -394,7 +492,7 @@ function SettingsView({ navigate, onBack }) {
       <div className="w-full max-w-md">
         <div className="flex items-center gap-2 mb-4">
           <button onClick={onBack} className="text-broker-text-muted hover:text-white text-sm">←</button>
-          <img src={import.meta.env.BASE_URL + 'btn-engine.png'} alt="" className="w-8 rounded" />
+          <img src={import.meta.env.BASE_URL + 'scene-locomotive-mechanic.png'} alt="" className="w-8 rounded" />
           <h2 className="text-lg font-bold text-white">Settings</h2>
         </div>
 

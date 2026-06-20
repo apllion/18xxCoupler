@@ -1030,9 +1030,7 @@ function SettingsPanel({ game, doAction: _doAction }) {
               <Btn v="red" o={sync.leaveRoom}>Leave</Btn>
             </div>
           ) : (
-            <button onClick={sync?.createRoom} className="hover:brightness-110 transition-all">
-              <img src={import.meta.env.BASE_URL + 'btn-create.png'} alt="Create Compartment" className="w-24 rounded-lg" />
-            </button>
+            <Btn v="green" o={sync?.createRoom}>Create Room</Btn>
           )}
         </div>
         <div>

@@ -1,0 +1,15 @@
+scene-bridge-construction.png | free
+scene-coal-tender.png | free
+scene-compartment-empty.png | create room
+scene-compartment-passengers.png | join room
+scene-express-wagon.png | free
+scene-locomotive-mechanic.png | settings
+scene-man-at-window.png | mobile mode (renamed to passenger mode?)
+scene-night-yard.png | no use
+scene-signal-box.png | overview mode (renamed to umpire mode?)
+scene-steam-station.png | free
+scene-telegraph-office.png | free
+scene-telegraph-poles.png | free
+scene-track-builders.png | select title
+scene-water-tower.png | load from local storage, export, import, load from 18xx.games
+scene-woman-at-window.png | alternative to scene-man-at-window.png, randomly choosen
