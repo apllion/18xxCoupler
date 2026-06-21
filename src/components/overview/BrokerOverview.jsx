@@ -11,7 +11,7 @@ export default function BrokerOverview() {
   const [soldOutWarn, setSoldOutWarn] = useState(null) // { corps, targetRound }
 
   if (!d.game) return null
-  const { game, fmt, phase, label: _label, limit, corps, unfloated, depotGroups, lastRevenue, corpPrivates, playerPrivates, lastAction, selPlayer, myPlayerId, selCorp, curRow, setCurRow, curCol, setCurCol, panel, setPanel, revenueInput, setRevenueInput, revRef, rootRef, cursorRef, onKeyDown, closePanel, doAction, inReplay, fullLog, enterReplay, exitReplay, replayTo, enterWhatIf, isWhatIf, exitWhatIf, canUndo, undo, canRedo, redo, isSR, isOR, isPre: _isPre, superUmpire } = d
+  const { game, fmt, phase, label: _label, limit, corps, unfloated, depotGroups, lastRevenue, corpPrivates, playerPrivates, lastAction, selPlayer, selCorp, curRow, setCurRow, curCol, setCurCol, panel, setPanel, revenueInput, setRevenueInput, revRef, rootRef, cursorRef, onKeyDown, closePanel, doAction, inReplay, fullLog, enterReplay, exitReplay, replayTo, enterWhatIf, isWhatIf, exitWhatIf, canUndo, undo, canRedo, redo, isSR, isOR, isPre: _isPre, superUmpire } = d
   const su = superUmpire
 
   const curIdx = game.actionLog.length - 1
@@ -331,7 +331,7 @@ export default function BrokerOverview() {
           <span className="text-broker-text-muted text-xs truncate ml-1 flex-1">{curIdx < 0 ? 'Game start' : `${curIdx + 1}/${fullLog.length} — ${lastAction?.description || ''}`}</span>
         </div>
       ) : (
-        <ContextBar game={game} selPlayer={selPlayer} selCorp={selCorp} myPlayerId={myPlayerId}
+        <ContextBar game={game} selPlayer={selPlayer} selCorp={selCorp}
           setPanel={setPanel} doAction={doAction} revRef={revRef} canUndo={canUndo} undo={undo}
           enterReplay={enterReplay} lastAction={lastAction} />
       )}

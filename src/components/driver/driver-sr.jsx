@@ -1,8 +1,8 @@
 // Card 3: My SR Stats + Main Actions — shares, cash, buy/sell/par
 
 import { useState } from 'react'
-import { corpPrice, parPrices } from '../../../engine/stockMarket.js'
-import { getCorpShares } from '../../../engine/corporation.js'
+import { corpPrice, parPrices } from '../../engine/stockMarket.js'
+import { getCorpShares } from '../../engine/corporation.js'
 
 export default function MySRStats({ data }) {
   const { game, fmt, me, myPlayerId, corps, dispatch, playerSharePercent, isPresident } = data

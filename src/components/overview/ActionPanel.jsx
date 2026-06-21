@@ -106,7 +106,7 @@ function PanelContent({ panel, game, player, corp, unfloated, fmt, revenueInput,
             useUIStore.getState().setActiveCorp(corp.sym)
             useUIStore.getState().setActiveTab('routes')
           }}>Route Calc</Btn>
-          {corp.trains.length === 0 && <Btn v="red" o={() => doAction({ type: 'WITHHOLD_DIVIDEND', corpSym: corp.sym, totalRevenue: 0 })}>No Trains</Btn>}
+          <Btn v="red" o={() => doAction({ type: 'WITHHOLD_DIVIDEND', corpSym: corp.sym, totalRevenue: 0 })}>No Trains</Btn>
           {rev > 0 && (
             <>
               <Btn v="green" o={() => doAction({ type: 'PAY_DIVIDEND', corpSym: corp.sym, totalRevenue: rev })}>
@@ -967,7 +967,6 @@ function PriceInput({ label, value, onChange, onConfirm, onCancel }) {
 
 function SettingsPanel({ game, doAction: _doAction }) {
   const ac = useUIStore((s) => s.autoConfig)
-  const myPlayerId = useUIStore((s) => s.myPlayerId)
   const turnTracking = useUIStore((s) => s.turnTracking)
   const showToasts = useUIStore((s) => s.showToasts)
   const sync = useSyncContext()
@@ -996,19 +995,6 @@ function SettingsPanel({ game, doAction: _doAction }) {
     <div>
       <Title>Settings</Title>
       <div className="mt-1 flex gap-4 flex-wrap">
-        <div>
-          <div className={labelColor}>Mode</div>
-          <div className="flex gap-1 flex-wrap">
-            <Btn v={!myPlayerId ? 'green' : 'blue'} o={() => useUIStore.getState().setMyPlayer(null)}>
-              Umpire
-            </Btn>
-            {game.players.map(p => (
-              <Btn key={p.id} v={myPlayerId === p.id ? 'yellow' : 'blue'} o={() => useUIStore.getState().setMyPlayer(p.id)}>
-                {p.name.slice(0, 5)}
-              </Btn>
-            ))}
-          </div>
-        </div>
         <div>
           <div className={labelColor}>Turn Tracking</div>
           <Btn v={turnTracking === 'on' ? 'green' : 'blue'} o={() => useUIStore.getState().toggleTurnTracking()}>

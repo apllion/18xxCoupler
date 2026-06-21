@@ -1,6 +1,6 @@
 // Game Extras card — round selector, phase info, bank, misc actions
 
-import { useUIStore } from '../../../store/uiStore.js'
+import { useUIStore } from '../../store/uiStore.js'
 
 export default function GameExtras({ data }) {
   const { game, fmt, phase, rt, dispatch } = data

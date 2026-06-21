@@ -1,6 +1,6 @@
 // Card 1: Player Switch + Overview — select player AND see all players' stats
 
-import { useUIStore } from '../../../store/uiStore.js'
+import { useUIStore } from '../../store/uiStore.js'
 
 export default function PlayerSwitch({ data }) {
   const { game, fmt, myPlayerId, corps, playerSharePercent, playerCertCount, isPresident, corpPrice } = data

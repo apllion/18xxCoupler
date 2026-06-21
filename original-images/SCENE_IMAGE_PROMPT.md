@@ -1,4 +1,4 @@
-# 18xxCoupler Scene-Image Generation Prompt
+q# 18xxCoupler Scene-Image Generation Prompt
 
 ## Style Guide
 
@@ -23,8 +23,8 @@ The exact same wooden compartment, but completely empty. The overhead lamp is tu
 **1.3 — The Track Builders**
 A dynamic scene showing rugged railroad workers actively constructing tracks. They wear period-appropriate caps and work clothes, using heavy tools, sledgehammers, and welding gear to secure the steel rails, complete with flying amber sparks and a dark, hazy background.
 
-**1.4 — Surprise: Artist's choice**
-A surprise scene from the 1860s railroad world that fits the theme. Something charming, atmospheric, or unexpected — dealer's choice.
+**1.4 — Small stop**
+An athmospheric scene some people, a small station, locomotive arriving, a carriage.
 
 ### Row 2: Infrastructure & Machinery
 
@@ -37,8 +37,8 @@ A gritty scene featuring a mechanic in a heavy leather apron repairing a massive
 **2.3 — The Water Tower**
 A tall, rustic wooden and copper water tower standing alongside the tracks, used for refilling steam locomotives, set against a rolling green landscape.
 
-**2.4 — Surprise: Artist's choice**
-Another surprise railroad scene — perhaps a coal tender, a telegraph office, a bridge under construction, or a night scene with lanterns. Something that complements the set.
+**2.4 — Locomotive driver**
+A locomotive with coal tender. The driver leaning out the window.
 
 ### Row 3: The Station + Focused Vignettes
 
@@ -51,15 +51,15 @@ A focused, portrait-style shot of a bearded 1850s man in a bowler hat leaning ou
 **3.3 — The Woman at the Window**
 A focused, portrait-style shot of a 1850s young woman at the **exact same** wooden train wagon window, wearing an elegant bonnet and lace collar, Matching companion piece to the man's vignette. The wagoon fully seen.
 
-**3.4 — Surprise: Artist's choice**
-Another surprise railroad scene — perhaps a coal tender, a telegraph office, a bridge under construction, or a night scene with lanterns. Something that complements the set.
+**3.4 — The Engineer**
+A 1850s man sitting at at desk doing paperwork. A board with a locomotive sketch in the background.
 
 ### Row 4: Reserved
 
-**4.1 — Surprise: Artist's choice**
-Another surprise railroad scene — perhaps a coal tender, a telegraph office, a bridge under construction, or a night scene with lanterns. Something that complements the set.
-**4.2 — Surprise: Artist's choice**
-Another surprise railroad scene — perhaps a coal tender, a telegraph office, a bridge under construction, or a night scene with lanterns. Something that complements the set.
+**4.1 — The Analysts**
+1850s men and women around a table with paperwork. doing railroad, track, financial analysis.
+**4.2 — The Bridge**
+1850s bridge spanning across a river with a nice locomotive with passenger wagoon steaming across.
 **4.3 — Surprise: Artist's choice**
 Another surprise railroad scene — perhaps a coal tender, a telegraph office, a bridge under construction, or a night scene with lanterns. Something that complements the set.
 **4.4 — Empty (reserved for future use)**

@@ -6,7 +6,7 @@ import { create } from 'zustand'
 export const useUIStore = create((set) => ({
   activeTab: 'overview',   // 'overview' | 'market' | 'corps' | 'privates' | 'summary'
   activePlayerId: null,     // which player is "current" (soft, for filtering actions)
-  myPlayerId: null,         // "I am this player" — locks share actions to this player
+  // myPlayerId removed — umpire is always umpire mode. Driver/mobile uses its own driverPlayerId.
   activeCorpSym: null,      // which corp is selected in Corps tab
   showLog: import.meta.env.DEV,
   showToasts: true,
@@ -27,11 +27,12 @@ export const useUIStore = create((set) => ({
     autoConfig: { ...s.autoConfig, [key]: value },
   })),
 
-  viewMode: 'monitor',       // 'monitor' | 'mobile'
-  setViewMode: (mode) => set({ viewMode: mode }),
+  viewMode: 'umpire',       // 'umpire' | 'mobile'
+  readyToPlay: false,        // true after user picks Umpire/Driver from hub
+  setViewMode: (mode) => set({ viewMode: mode, readyToPlay: true }),
+  backToHub: () => set({ readyToPlay: false }),
   setActiveTab: (tab) => set({ activeTab: tab }),
   setActivePlayer: (id) => set({ activePlayerId: id }),
-  setMyPlayer: (id) => set({ myPlayerId: id }),
   setActiveCorp: (sym) => set({ activeCorpSym: sym }),
   routeRevenue: null, // { corpSym, revenue } — set by route calc, consumed by corp view
   setRouteRevenue: (corpSym, revenue) => set({ routeRevenue: { corpSym, revenue } }),

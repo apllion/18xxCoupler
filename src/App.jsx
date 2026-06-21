@@ -4,7 +4,7 @@ import { useSyncContext } from './hooks/SyncContext.jsx'
 import GameSelector from './components/setup/GameSelector.jsx'
 import PlayerSetup from './components/setup/PlayerSetup.jsx'
 import GameShell from './components/layout/GameShell.jsx'
-import MobileShell from './components/mobile/MobileShell.jsx'
+import MobileShell from './components/driver/MobileShell.jsx'
 import { useUIStore } from './store/uiStore.js'
 import AboutPage from './components/setup/AboutPage.jsx'
 import PassphraseGate from './components/setup/PassphraseGate.jsx'
@@ -52,20 +52,24 @@ function AppContent({ game, sync }) {
     )
   }
 
-  if (!game) {
-    return (
-      <Routes>
-        <Route path="/" element={<GameSelector />} />
-        <Route path="/setup/:titleId" element={<PlayerSetup />} />
-        <Route path="/endgame" element={<CalcStandalone><EndgameCalcTab /></CalcStandalone>} />
-        <Route path="/routes" element={<CalcStandalone><RouteCalcTab /></CalcStandalone>} />
-        <Route path="/about" element={<AboutPage onEnter={() => window.history.back()} />} />
-      </Routes>
-    )
+  const viewMode = useUIStore((s) => s.viewMode)
+  const readyToPlay = useUIStore((s) => s.readyToPlay)
+
+  // Game loaded and user picked Umpire/Driver → play
+  if (game && readyToPlay) {
+    return viewMode === 'driver' ? <MobileShell /> : <GameShell />
   }
 
-  const viewMode = useUIStore((s) => s.viewMode)
-  return viewMode === 'mobile' ? <MobileShell /> : <GameShell />
+  // No game, or game loaded but user still on hub (needs to pick view)
+  return (
+    <Routes>
+      <Route path="/" element={<GameSelector />} />
+      <Route path="/setup/:titleId" element={<PlayerSetup />} />
+      <Route path="/endgame" element={<CalcStandalone><EndgameCalcTab /></CalcStandalone>} />
+      <Route path="/routes" element={<CalcStandalone><RouteCalcTab /></CalcStandalone>} />
+      <Route path="/about" element={<AboutPage onEnter={() => window.history.back()} />} />
+    </Routes>
+  )
 }
 
 function CalcStandalone({ children }) {

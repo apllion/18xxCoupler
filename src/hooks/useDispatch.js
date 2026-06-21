@@ -27,7 +27,7 @@ export function useDispatch() {
       _source: {
         device: DEVICE_ID,
         view: activeTab,
-        player: useUIStore.getState().myPlayerId || null,
+        player: null,
       },
     })
   }, [dispatch, activeTab])

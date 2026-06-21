@@ -15,7 +15,8 @@ export default function GameSelector() {
   const titles = allTitles()
   const [savedGames, setSavedGames] = useState(() => loadAllGames())
   const game = useGameStore((s) => s.game)
-  const [view, setView] = useState('hub') // 'hub' | 'titles' | 'settings' | 'compartment' | 'create' | 'depot'
+  const [view, setView] = useState('hub')
+  const [soloMode, setSoloMode] = useState(false) // skipped room step
   const [showLegend, setShowLegend] = useState(null)
   const [showInfo, setShowInfo] = useState(null)
 
@@ -33,96 +34,132 @@ export default function GameSelector() {
     setSavedGames(loadAllGames())
   }
 
-  // ===== HUB VIEW =====
+  // ===== HUB VIEW — 3-step wizard =====
   if (view === 'hub') {
+    const step1Done = !!sync?.roomId || soloMode  // in a room or chose solo
+    const step2Done = !!game                      // game loaded
+
     return (
       <div className="min-h-screen flex flex-col items-center p-6">
         <h1 className="text-3xl font-bold text-white mt-2 tracking-wide">18xxCoupler</h1>
-        <img src={import.meta.env.BASE_URL + 'logo.png'} alt="18xxCoupler"
-          className="w-full max-w-md mt-1 rounded-xl" />
         <p className="text-sm text-broker-text-muted italic mb-1">Steam meets Screens</p>
-        <p className="text-[10px] text-broker-text-muted mb-6">
+        <p className="text-[10px] text-broker-text-muted mb-4">
           v{typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '?'} · {typeof __BUILD_ID__ !== 'undefined' ? __BUILD_ID__ : '?'}
         </p>
 
-        {/* Connected room banner */}
-        {sync?.roomId && (
-          <div className="w-full max-w-md mb-4 bg-broker-surface border border-broker-border rounded-lg px-4 py-3 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <span className={`w-3 h-3 rounded-full ${sync.status === 'connected' ? 'bg-green-400' : 'bg-amber-400 animate-pulse'}`} />
-              <div>
-                <div className="text-xs text-broker-text-muted">Compartment</div>
-                <div className="font-mono font-bold text-white text-lg tracking-wider">{sync.roomId}</div>
-              </div>
-              <span className="text-sm text-broker-text-muted">
-                {sync.peerCount > 0 ? `${sync.peerCount + 1} devices` : 'waiting...'}
-              </span>
-            </div>
-            <button onClick={sync.leaveRoom} className="text-xs text-broker-text-muted hover:text-red-300 px-2 py-1">Leave</button>
-          </div>
-        )}
-
-        {/* ===== BOARD section ===== */}
-        <SectionLabel>Board</SectionLabel>
-        <div className="grid grid-cols-2 gap-3 w-full max-w-md mb-4">
-          {[
-            { view: 'titles', img: 'scene-track-builders.png', label: 'New Game', sub: 'Pick a title' },
-            { view: 'compartment', img: 'scene-compartment-empty.png', label: 'Compartment', sub: 'Join or host' },
-            { view: 'depot', img: 'scene-water-tower.png', label: 'Depot', sub: 'Load & import' },
-            { view: 'settings', img: 'scene-locomotive-mechanic.png', label: 'Settings', sub: 'Theme & config' },
-          ].map(b => (
-            <button key={b.view} onClick={() => setView(b.view)}
-              className="rounded-xl overflow-hidden hover:brightness-110 transition-all text-center">
-              <img src={import.meta.env.BASE_URL + b.img} alt={b.label} className="w-full rounded-t-xl" />
-              <div className="bg-broker-surface px-2 py-1.5 rounded-b-xl">
-                <div className="text-sm font-bold text-white">{b.label}</div>
-                <div className="text-[10px] text-broker-text-muted">{b.sub}</div>
-              </div>
-            </button>
-          ))}
-        </div>
-
-        {/* ===== RIDE section ===== */}
-        <SectionLabel>Ride</SectionLabel>
-        <div className="grid grid-cols-2 gap-3 w-full max-w-md mb-6">
-          {[
-            { view: 'monitor', img: 'scene-signal-box.png', label: 'Monitor', sub: 'Umpire view' },
-            { view: 'seat', img: 'scene-compartment-passengers.png', label: 'Seat', sub: 'Player view' },
-          ].map(b => (
-            <button key={b.view} onClick={() => {
-              if (b.view === 'monitor') useUIStore.getState().setViewMode('monitor')
-              else if (b.view === 'seat') useUIStore.getState().setViewMode('mobile')
-              // If game loaded, navigate to it. Otherwise load last saved.
-              if (game) { navigate('/'); return }
-              if (savedList.length > 0) { handleLoad(savedList[0].key, savedList[0].game); return }
-            }}
-              className="rounded-xl overflow-hidden hover:brightness-110 transition-all text-center">
-              <img src={import.meta.env.BASE_URL + b.img} alt={b.label} className="w-full rounded-t-xl" />
-              <div className="bg-broker-surface px-2 py-1.5 rounded-b-xl">
-                <div className="text-sm font-bold text-white">{b.label}</div>
-                <div className="text-[10px] text-broker-text-muted">{b.sub}</div>
-              </div>
-            </button>
-          ))}
-        </div>
-
-        {/* Quick continue — show last saved game if any */}
-        {savedList.length > 0 && (
+        {/* Quick continue */}
+        {savedList.length > 0 && !game && (
           <div className="w-full max-w-md mb-4">
             <button onClick={() => handleLoad(savedList[0].key, savedList[0].game)}
-              className="w-full bg-broker-surface hover:bg-broker-surface-hover border border-broker-border rounded-lg p-3 text-left transition-colors">
-              <div className="text-[10px] text-broker-text-muted uppercase tracking-wider mb-0.5">Continue</div>
+              className="w-full bg-broker-gold/10 hover:bg-broker-gold/20 border border-broker-gold/30 rounded-xl p-3 text-left transition-colors">
+              <div className="text-[10px] text-broker-gold uppercase tracking-wider mb-0.5">Continue last game</div>
               <div className="font-medium text-white">{savedList[0].game.title?.title || savedList[0].key}</div>
-              <div className="text-xs text-broker-text-muted">{savedList[0].game.players?.map(p => p.name).join(', ')} · {savedList[0].game.actionLog?.length || 0} actions</div>
+              <div className="text-xs text-broker-text-muted">{savedList[0].game.players?.map(p => p.name).join(', ')}</div>
             </button>
           </div>
         )}
 
-        {/* About */}
-        <button onClick={() => navigate('/about')}
-          className="text-xs text-broker-text-muted hover:text-broker-gold mt-4">
-          About / Legal / Impressum
-        </button>
+        <div className="w-full max-w-md space-y-4">
+
+          {/* ===== STEP 1: Connection ===== */}
+          <div className={`rounded-xl border p-4 transition-all ${!step1Done ? 'border-broker-gold bg-broker-surface' : 'border-broker-border bg-broker-surface/50'}`}>
+            <div className="flex items-center gap-2 mb-3">
+              <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${step1Done ? 'bg-green-700 text-white' : 'bg-broker-gold text-broker-bg'}`}>1</span>
+              <span className="text-sm font-bold text-white">How are you playing?</span>
+            </div>
+            {sync?.roomId ? (
+              <div className="flex items-center gap-3">
+                <span className={`w-2.5 h-2.5 rounded-full ${sync.status === 'connected' ? 'bg-green-400' : 'bg-amber-400 animate-pulse'}`} />
+                <span className="font-mono font-bold text-white tracking-wider">{sync.roomId}</span>
+                <span className="text-xs text-broker-text-muted">{sync.peerCount > 0 ? `${sync.peerCount + 1} devices` : 'waiting'}</span>
+                <button onClick={() => { sync.leaveRoom(); setSoloMode(false) }} className="text-xs text-red-400 hover:text-red-300 ml-auto">Leave</button>
+              </div>
+            ) : soloMode ? (
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-green-400">Solo ✓</span>
+                <button onClick={() => setSoloMode(false)} className="text-xs text-broker-text-muted hover:text-white">Change</button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-3 gap-2">
+                <button onClick={() => setSoloMode(true)}
+                  className="bg-broker-surface-hover hover:bg-broker-gold/20 rounded-lg p-3 text-center transition-colors">
+                  <img src={import.meta.env.BASE_URL + 'scene-man-at-window.png'} alt="" className="w-full rounded-lg mb-1" />
+                  <div className="text-xs font-bold text-white">Solo</div>
+                </button>
+                <button onClick={() => { sync?.createRoom(); setView('create') }}
+                  className="bg-broker-surface-hover hover:bg-broker-gold/20 rounded-lg p-3 text-center transition-colors">
+                  <img src={import.meta.env.BASE_URL + 'scene-compartment-empty.png'} alt="" className="w-full rounded-lg mb-1" />
+                  <div className="text-xs font-bold text-white">Create Room</div>
+                </button>
+                <button onClick={() => setView('join')}
+                  className="bg-broker-surface-hover hover:bg-broker-gold/20 rounded-lg p-3 text-center transition-colors">
+                  <img src={import.meta.env.BASE_URL + 'scene-compartment-passengers.png'} alt="" className="w-full rounded-lg mb-1" />
+                  <div className="text-xs font-bold text-white">Join Room</div>
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* ===== STEP 2: Game ===== */}
+          <div className={`rounded-xl border p-4 transition-all ${step1Done && !step2Done ? 'border-broker-gold bg-broker-surface' : !step1Done ? 'border-broker-border bg-broker-surface/30 opacity-50' : 'border-broker-border bg-broker-surface/50'}`}>
+            <div className="flex items-center gap-2 mb-3">
+              <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${step2Done ? 'bg-green-700 text-white' : step1Done ? 'bg-broker-gold text-broker-bg' : 'bg-broker-surface-hover text-broker-text-muted'}`}>2</span>
+              <span className="text-sm font-bold text-white">Which game?</span>
+              {step2Done && <span className="text-xs text-green-400 ml-auto">{game.title.title}</span>}
+            </div>
+            {step2Done ? (
+              <div className="text-xs text-broker-text-muted">
+                {game.players.map(p => p.name).join(', ')} · {game.actionLog?.length || 0} actions
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-2">
+                <button onClick={() => setView('titles')}
+                  className="bg-broker-surface-hover hover:bg-broker-gold/20 rounded-lg p-3 text-center transition-colors">
+                  <img src={import.meta.env.BASE_URL + 'scene-track-builders.png'} alt="" className="w-full rounded-lg mb-1" />
+                  <div className="text-xs font-bold text-white">New Game</div>
+                  <div className="text-[10px] text-broker-text-muted">Pick a title</div>
+                </button>
+                <button onClick={() => setView('depot')}
+                  className="bg-broker-surface-hover hover:bg-broker-gold/20 rounded-lg p-3 text-center transition-colors">
+                  <img src={import.meta.env.BASE_URL + 'scene-water-tower.png'} alt="" className="w-full rounded-lg mb-1" />
+                  <div className="text-xs font-bold text-white">Load Game</div>
+                  <div className="text-[10px] text-broker-text-muted">Depot & import</div>
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* ===== STEP 3: View ===== */}
+          <div className={`rounded-xl border p-4 transition-all ${step2Done ? 'border-broker-gold bg-broker-surface' : 'border-broker-border bg-broker-surface/30 opacity-50'}`}>
+            <div className="flex items-center gap-2 mb-3">
+              <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${step2Done ? 'bg-broker-gold text-broker-bg' : 'bg-broker-surface-hover text-broker-text-muted'}`}>3</span>
+              <span className="text-sm font-bold text-white">How to view?</span>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <button onClick={() => useUIStore.getState().setViewMode('umpire')}
+                disabled={!step2Done}
+                className="bg-broker-surface-hover hover:bg-broker-gold/20 disabled:opacity-30 disabled:cursor-not-allowed rounded-lg p-3 text-center transition-colors">
+                <img src={import.meta.env.BASE_URL + 'scene-signal-box.png'} alt="" className="w-full rounded-lg mb-1" />
+                <div className="text-xs font-bold text-white">Umpire</div>
+                <div className="text-[10px] text-broker-text-muted">Shared table view</div>
+              </button>
+              <button onClick={() => useUIStore.getState().setViewMode('driver')}
+                disabled={!step2Done}
+                className="bg-broker-surface-hover hover:bg-broker-gold/20 disabled:opacity-30 disabled:cursor-not-allowed rounded-lg p-3 text-center transition-colors">
+                <img src={import.meta.env.BASE_URL + 'scene-compartment-passengers.png'} alt="" className="w-full rounded-lg mb-1" />
+                <div className="text-xs font-bold text-white">Driver</div>
+                <div className="text-[10px] text-broker-text-muted">Personal phone view</div>
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+        {/* Footer */}
+        <div className="flex gap-4 mt-6">
+          <button onClick={() => setView('settings')} className="text-xs text-broker-text-muted hover:text-broker-gold">Settings</button>
+          <button onClick={() => navigate('/about')} className="text-xs text-broker-text-muted hover:text-broker-gold">About / Legal</button>
+        </div>
       </div>
     )
   }
@@ -162,7 +199,7 @@ export default function GameSelector() {
   // ===== MOBILE VIEW (placeholder) =====
   if (view === 'mobile') {
     // Set mobile mode — will activate when a game is loaded
-    useUIStore.getState().setViewMode('mobile')
+    useUIStore.getState().setViewMode('driver')
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-6">
         <img src={import.meta.env.BASE_URL + 'scene-man-at-window.png'} alt="" className="w-24 rounded-xl mb-4" />
@@ -172,8 +209,8 @@ export default function GameSelector() {
           <button onClick={() => setView('titles')} className="text-xs bg-broker-surface hover:bg-broker-surface-hover text-white px-4 py-2 rounded-lg">Build Track</button>
           <button onClick={() => setView('depot')} className="text-xs bg-broker-surface hover:bg-broker-surface-hover text-white px-4 py-2 rounded-lg">Depot</button>
         </div>
-        <button onClick={() => { useUIStore.getState().setViewMode('monitor'); setView('hub') }}
-          className="mt-4 text-xs text-broker-text-muted hover:text-white">← Back to Monitor</button>
+        <button onClick={() => { useUIStore.getState().setViewMode('umpire'); setView('hub') }}
+          className="mt-4 text-xs text-broker-text-muted hover:text-white">← Back to Umpire</button>
       </div>
     )
   }
@@ -301,7 +338,7 @@ function CreateView({ sync, titles, navigate, onBack, showLegend, setShowLegend,
       )}
       <p className="text-xs text-broker-text-muted mb-4">Share the code, then select a title to start</p>
       <TitlesGrid titles={titles} navigate={navigate} showLegend={showLegend} setShowLegend={setShowLegend} showInfo={showInfo} setShowInfo={setShowInfo} />
-      <button onClick={onBack} className="mt-6 text-xs text-broker-text-muted hover:text-white">← Back</button>
+      <button onClick={onBack} className="mt-6 text-xs text-broker-text-muted hover:text-white">← Back (room stays active)</button>
     </div>
   )
 }

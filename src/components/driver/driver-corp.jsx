@@ -1,7 +1,7 @@
 // Corp OR Card — one per corp the player presides. Revenue, trains, tokens.
 
 import { useState } from 'react'
-import { nextAvailableTrains } from '../../../engine/depot.js'
+import { nextAvailableTrains } from '../../engine/depot.js'
 
 export default function CorpORCard({ data, corp }) {
   const { game, fmt, dispatch } = data

@@ -3,7 +3,7 @@
 
 import { useMemo } from 'react'
 import { useGameStore } from '../store/gameStore.js'
-import { useUIStore } from '../store/uiStore.js'
+// uiStore not needed — driver view overrides myPlayerId with driverPlayerId
 import { useDispatch } from './useDispatch.js'
 import { corpPrice } from '../engine/stockMarket.js'
 import { currentPhase, trainLimit } from '../engine/phase.js'
@@ -12,7 +12,6 @@ import { formatCurrency } from '../utils/currency.js'
 
 export function useGameData() {
   const game = useGameStore((s) => s.game)
-  const myPlayerId = useUIStore((s) => s.myPlayerId)
   const dispatch = useDispatch()
 
   const fmt = game ? (n) => formatCurrency(n, game.title.currencyFormat) : (n) => String(n)
@@ -39,12 +38,11 @@ export function useGameData() {
   const isSR = rt?.roundType === 'SR'
   const isOR = rt?.roundType === 'OR'
 
-  const me = game?.players?.find(p => p.id === myPlayerId) || null
   const certLimit = game ? (typeof game.certLimit === 'number' ? game.certLimit : game.certLimit) : 99
 
   return {
     game, fmt, phase, limit, corps, dispatch,
-    myPlayerId, me,
+    myPlayerId: null, me: null,
     isSR, isOR, rt,
     certLimit,
     // Re-export utilities for convenience

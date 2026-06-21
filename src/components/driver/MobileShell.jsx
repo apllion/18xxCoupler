@@ -5,19 +5,29 @@ import { useState, useRef } from 'react' // useRef for SwipeArea
 import { useGameData } from '../../hooks/useGameData.js'
 import { useUIStore } from '../../store/uiStore.js'
 import { useGameStore } from '../../store/gameStore.js'
-import PlayerSwitch from './cards/PlayerSwitch.jsx'
-import MySRStats from './cards/MySRStats.jsx'
-import CorpORCard from './cards/CorpORCard.jsx'
-import MarketCard from './cards/MarketCard.jsx'
-import PayCard from './cards/PayCard.jsx'
-import GameExtras from './cards/GameExtras.jsx'
+import DriverPlayers from './driver-players.jsx'
+import DriverSR from './driver-sr.jsx'
+import DriverCorp from './driver-corp.jsx'
+import DriverMarket from './driver-market.jsx'
+import DriverPay from './driver-pay.jsx'
+import DriverExtras from './driver-extras.jsx'
 
 export default function MobileShell() {
-  const data = useGameData()
+  const baseData = useGameData()
+  const [driverPlayerId, setDriverPlayerId] = useState(null)
 
-  if (!data.game) return null
+  if (!baseData.game) return null
 
-  const { game, me, myPlayerId, corps } = data
+  // Mobile has its own player selection, independent of uiStore.myPlayerId
+  const driverPlayer = baseData.game.players.find(p => p.id === driverPlayerId) || null
+  const data = {
+    ...baseData,
+    myPlayerId: driverPlayerId,
+    me: driverPlayer,
+    setDriverPlayer: setDriverPlayerId,
+  }
+
+  const { game, corps } = data
 
   // All floated corps (player sees all, acts on their own)
   const floatedCorps = corps.filter(c => c.floated)
@@ -54,20 +64,20 @@ export default function MobileShell() {
           {me && <span className="text-xs text-sky-300 font-bold">{data.fmt(me.cash)}</span>}
           <button onClick={() => { const s = useGameStore.getState(); if (s.canUndo()) s.undo() }}
             className="text-sm text-broker-text-muted hover:text-white px-1" title="Undo">↩</button>
-          <button onClick={() => useUIStore.getState().setViewMode('monitor')}
-            className="text-[10px] text-broker-text-muted hover:text-white px-1">Monitor</button>
+          <button onClick={() => useUIStore.getState().setViewMode('umpire')}
+            className="text-[10px] text-broker-text-muted hover:text-white px-1">Umpire</button>
         </div>
       </div>
 
       {/* Card display with swipe */}
       <SwipeArea onLeft={next} onRight={prev} className="flex-1 overflow-y-auto p-4">
-        {cardIds[cardIndex] === 'players' && <PlayerSwitch data={data} />}
-        {cardIds[cardIndex] === 'sr' && <MySRStats data={data} />}
-        {cardIds[cardIndex] === 'market' && <MarketCard data={data} />}
-        {cardIds[cardIndex] === 'pay' && <PayCard data={data} />}
-        {cardIds[cardIndex] === 'extras' && <GameExtras data={data} />}
+        {cardIds[cardIndex] === 'players' && <DriverPlayers data={data} />}
+        {cardIds[cardIndex] === 'sr' && <DriverSR data={data} />}
+        {cardIds[cardIndex] === 'market' && <DriverMarket data={data} />}
+        {cardIds[cardIndex] === 'pay' && <DriverPay data={data} />}
+        {cardIds[cardIndex] === 'extras' && <DriverExtras data={data} />}
         {floatedCorps.some(c => c.sym === cardIds[cardIndex]) && (
-          <CorpORCard data={data} corp={floatedCorps.find(c => c.sym === cardIds[cardIndex])} />
+          <DriverCorp data={data} corp={floatedCorps.find(c => c.sym === cardIds[cardIndex])} />
         )}
       </SwipeArea>
 

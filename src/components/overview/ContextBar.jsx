@@ -5,7 +5,7 @@ import { playerSharePercent } from './useOverviewData.js'
 import { getContextActions, groupActions } from './actionBarBuilder.js'
 import { getCorpShares } from '../../engine/corporation.js'
 
-export function ContextBar({ game, selPlayer, selCorp, myPlayerId, setPanel, doAction, revRef, canUndo, undo, enterReplay, lastAction }) {
+export function ContextBar({ game, selPlayer, selCorp, setPanel, doAction, revRef, canUndo, undo, enterReplay, lastAction }) {
   const superUmpire = useUIStore.getState().autoConfig.superUmpire
   const actions = getContextActions(game, selPlayer, selCorp, superUmpire)
   const { main, round } = groupActions(actions)
@@ -49,7 +49,6 @@ export function ContextBar({ game, selPlayer, selCorp, myPlayerId, setPanel, doA
   return (
     <div className="bg-broker-surface border-t border-broker-border px-3 py-2 flex-shrink-0 flex items-center gap-1.5 flex-wrap">
       <span className="text-xs">
-        {myPlayerId && <span className="text-broker-gold">MY </span>}
         <span className="text-white font-medium">{selPlayer?.name}</span>
         {selCorp && <> + <span className="font-bold" style={{ color: selCorp.color }}>{selCorp.sym}</span></>}
       </span>
