@@ -36,7 +36,7 @@ const TAB_COMPONENTS = {
   log: (await import('../overview/ActionLog.jsx')).default,
 }
 
-export default function GameShell() {
+export default function UmpireShell() {
   const activeTab = useUIStore((s) => s.activeTab)
   const TabComponent = TAB_COMPONENTS[activeTab] || OverviewTab
   const sync = useSyncContext()

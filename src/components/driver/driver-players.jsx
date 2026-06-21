@@ -1,9 +1,7 @@
 // Card 1: Player Switch + Overview — select player AND see all players' stats
 
-import { useUIStore } from '../../store/uiStore.js'
-
 export default function PlayerSwitch({ data }) {
-  const { game, fmt, myPlayerId, corps, playerSharePercent, playerCertCount, isPresident, corpPrice } = data
+  const { game, fmt, myPlayerId, setDriverPlayer, corps, playerSharePercent, playerCertCount, isPresident, corpPrice } = data
 
   return (
     <div className="flex flex-col h-full">
@@ -22,7 +20,7 @@ export default function PlayerSwitch({ data }) {
 
           return (
             <button key={p.id}
-              onClick={() => useUIStore.getState().setMyPlayer(p.id)}
+              onClick={() => setDriverPlayer(p.id)}
               className={`w-full text-left rounded-xl p-3 transition-colors ${
                 isMe
                   ? 'bg-broker-gold/15 border-2 border-broker-gold'

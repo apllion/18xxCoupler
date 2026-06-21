@@ -86,7 +86,7 @@ export default function GameSelector() {
                   <img src={import.meta.env.BASE_URL + 'scene-man-at-window.png'} alt="" className="w-full rounded-lg mb-1" />
                   <div className="text-xs font-bold text-white">Solo</div>
                 </button>
-                <button onClick={() => { sync?.createRoom(); setView('create') }}
+                <button onClick={() => sync?.createRoom()}
                   className="bg-broker-surface-hover hover:bg-broker-gold/20 rounded-lg p-3 text-center transition-colors">
                   <img src={import.meta.env.BASE_URL + 'scene-compartment-empty.png'} alt="" className="w-full rounded-lg mb-1" />
                   <div className="text-xs font-bold text-white">Create Room</div>
@@ -196,25 +196,6 @@ export default function GameSelector() {
       savedGames={savedGames} setSavedGames={setSavedGames} />
   }
 
-  // ===== MOBILE VIEW (placeholder) =====
-  if (view === 'mobile') {
-    // Set mobile mode — will activate when a game is loaded
-    useUIStore.getState().setViewMode('driver')
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center p-6">
-        <img src={import.meta.env.BASE_URL + 'scene-man-at-window.png'} alt="" className="w-24 rounded-xl mb-4" />
-        <h2 className="text-xl font-bold text-white mb-2">Mobile View</h2>
-        <p className="text-xs text-broker-text-muted mb-4">Mobile mode active — load or start a game to use it</p>
-        <div className="flex gap-3">
-          <button onClick={() => setView('titles')} className="text-xs bg-broker-surface hover:bg-broker-surface-hover text-white px-4 py-2 rounded-lg">Build Track</button>
-          <button onClick={() => setView('depot')} className="text-xs bg-broker-surface hover:bg-broker-surface-hover text-white px-4 py-2 rounded-lg">Depot</button>
-        </div>
-        <button onClick={() => { useUIStore.getState().setViewMode('umpire'); setView('hub') }}
-          className="mt-4 text-xs text-broker-text-muted hover:text-white">← Back to Umpire</button>
-      </div>
-    )
-  }
-
   // ===== SETTINGS VIEW =====
   if (view === 'settings') {
     return <SettingsView navigate={navigate} onBack={() => setView('hub')} />
@@ -284,7 +265,7 @@ function CompartmentView({ sync, onBack, onCreateThenTitles }) {
           className="bg-blue-700 hover:bg-blue-600 text-white px-6 py-3 rounded-xl font-bold text-sm">
           Join Room
         </button>
-        <button onClick={onCreateThenTitles}
+        <button onClick={() => { sync?.createRoom(); onBack() }}
           className="bg-green-700 hover:bg-green-600 text-white px-6 py-3 rounded-xl font-bold text-sm">
           Create Room
         </button>

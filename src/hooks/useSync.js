@@ -52,6 +52,7 @@ function clearRoomInfo() {
 
 export function useSync(gameStore) {
   const [roomId, setRoomId] = useState(null)
+  const [roomIsCreator, setRoomIsCreator] = useState(false)
   const [peerCount, setPeerCount] = useState(0)
   const [status, setStatus] = useState('disconnected')
 
@@ -101,6 +102,7 @@ export function useSync(gameStore) {
 
     setStatus('connecting')
     setRoomId(code)
+    setRoomIsCreator(isCreator)
     saveRoomInfo(code, isCreator)
 
     if (isCreator) establishedRef.current = true
@@ -237,16 +239,24 @@ export function useSync(gameStore) {
     return () => document.removeEventListener('visibilitychange', onVisible)
   }, [connect])
 
-  // When game state appears/changes and we have peers, broadcast full state
-  // This handles: creator starts game while peers are waiting
-  const prevGameRef = useRef(null)
+  // When game state changes and we have peers, broadcast full state
+  // This handles: creator starts game, undo/redo, any state rebuild
+  const prevLogLenRef = useRef(null)
   useEffect(() => {
-    if (game && !prevGameRef.current && sendStateRef.current && establishedRef.current) {
+    if (!game || !sendStateRef.current || !establishedRef.current) {
+      prevLogLenRef.current = null
+      return
+    }
+    const logLen = game.actionLog?.length ?? 0
+    if (prevLogLenRef.current === null) {
       // Game just appeared — send to all peers
       sendStateRef.current(getSharedState(game))
+    } else if (logLen < prevLogLenRef.current) {
+      // Log got shorter — undo happened — resync full state
+      sendStateRef.current(getSharedState(game))
     }
-    prevGameRef.current = game
-  }, [game])
+    prevLogLenRef.current = logLen
+  }, [game, game?.actionLog?.length])
 
   // Sync-aware dispatch: dispatches locally + broadcasts to peers
   const syncDispatch = useCallback((action) => {
@@ -274,6 +284,7 @@ export function useSync(gameStore) {
   return {
     syncDispatch,
     roomId,
+    isCreator: roomIsCreator,
     peerCount,
     status,
     createRoom,

@@ -27,7 +27,7 @@ export const useUIStore = create((set) => ({
     autoConfig: { ...s.autoConfig, [key]: value },
   })),
 
-  viewMode: 'umpire',       // 'umpire' | 'mobile'
+  viewMode: 'umpire',       // 'umpire' | 'driver'
   readyToPlay: false,        // true after user picks Umpire/Driver from hub
   setViewMode: (mode) => set({ viewMode: mode, readyToPlay: true }),
   backToHub: () => set({ readyToPlay: false }),

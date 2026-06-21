@@ -3,8 +3,8 @@ import { useGameStore } from './store/gameStore.js'
 import { useSyncContext } from './hooks/SyncContext.jsx'
 import GameSelector from './components/setup/GameSelector.jsx'
 import PlayerSetup from './components/setup/PlayerSetup.jsx'
-import GameShell from './components/layout/GameShell.jsx'
-import MobileShell from './components/driver/MobileShell.jsx'
+import UmpireShell from './components/layout/UmpireShell.jsx'
+import DriverShell from './components/driver/DriverShell.jsx'
 import { useUIStore } from './store/uiStore.js'
 import AboutPage from './components/setup/AboutPage.jsx'
 import PassphraseGate from './components/setup/PassphraseGate.jsx'
@@ -24,8 +24,8 @@ export default function App() {
 
 function AppContent({ game, sync }) {
 
-  // In a room but no game yet — waiting for host to send state
-  if (!game && sync?.roomId) {
+  // In a room as joiner but no game yet — waiting for host to send state
+  if (!game && sync?.roomId && !sync?.isCreator) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-6">
         <div className="text-center space-y-4">
@@ -57,7 +57,7 @@ function AppContent({ game, sync }) {
 
   // Game loaded and user picked Umpire/Driver → play
   if (game && readyToPlay) {
-    return viewMode === 'driver' ? <MobileShell /> : <GameShell />
+    return viewMode === 'driver' ? <DriverShell /> : <UmpireShell />
   }
 
   // No game, or game loaded but user still on hub (needs to pick view)

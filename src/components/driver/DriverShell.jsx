@@ -1,4 +1,4 @@
-// MobileShell — swipeable card-based player view for phones.
+// DriverShell — swipeable card-based player view for phones.
 // Horizontal scroll-snap cards. One player at a time.
 
 import { useState, useRef } from 'react' // useRef for SwipeArea
@@ -12,7 +12,7 @@ import DriverMarket from './driver-market.jsx'
 import DriverPay from './driver-pay.jsx'
 import DriverExtras from './driver-extras.jsx'
 
-export default function MobileShell() {
+export default function DriverShell() {
   const baseData = useGameData()
   const [driverPlayerId, setDriverPlayerId] = useState(null)
 
@@ -61,7 +61,7 @@ export default function MobileShell() {
               data.isSR ? 'bg-green-800 text-green-200' : data.isOR ? 'bg-amber-800 text-amber-200' : 'bg-purple-800 text-purple-200'
             }`}>{data.rt.roundType}</span>
           )}
-          {me && <span className="text-xs text-sky-300 font-bold">{data.fmt(me.cash)}</span>}
+          {data.me && <span className="text-xs text-sky-300 font-bold">{data.fmt(data.me.cash)}</span>}
           <button onClick={() => { const s = useGameStore.getState(); if (s.canUndo()) s.undo() }}
             className="text-sm text-broker-text-muted hover:text-white px-1" title="Undo">↩</button>
           <button onClick={() => useUIStore.getState().setViewMode('umpire')}
