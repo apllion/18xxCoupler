@@ -8,6 +8,7 @@ import { useUIStore } from '../../store/uiStore.js'
 import { useGameStore } from '../../store/gameStore.js'
 import { useSyncContext } from '../../hooks/SyncContext.jsx'
 import { useWakeLock } from '../../hooks/useWakeLock.js'
+import { REMINDER_DEFS } from '../../engine/reminders.js'
 import { useThemeStore, themes as brokerThemes } from '../../store/themeStore.js'
 import { exportGamePdf } from '../../utils/exportPdf.js'
 import { exportGame } from '../../utils/persistence.js'
@@ -153,6 +154,39 @@ function PanelContent({ panel, game, player, corp, unfloated, fmt, revenueInput,
           ) : (
             <Btn v="green" o={() => placeToken(tokenCost)}>Place {fmt(tokenCost)}</Btn>
           )}
+        </div>
+      </div>
+    )
+  }
+
+  // Player reorder
+  if (panel === 'reorder') {
+    return (
+      <div>
+        <Title>Reorder Players</Title>
+        <div className="mt-1 space-y-1">
+          {game.players.map((p, i) => (
+            <div key={p.id} className="flex items-center gap-2 bg-broker-surface rounded-lg px-3 py-2">
+              <span className="text-xs text-broker-text-muted w-4">{i + 1}</span>
+              <span className={`flex-1 text-sm font-medium ${p.id === game.priorityDeal ? 'text-broker-gold' : 'text-white'}`}>
+                {p.name} {p.id === game.priorityDeal && '★'}
+              </span>
+              <span className="text-xs text-sky-300">{fmt(p.cash)}</span>
+              <div className="flex gap-1">
+                {i > 0 && <Btn v="blue" o={() => {
+                  const order = game.players.map(pl => pl.id)
+                  ;[order[i], order[i - 1]] = [order[i - 1], order[i]]
+                  doAction({ type: 'SET_PLAYER_ORDER', order })
+                }}>↑</Btn>}
+                {i < game.players.length - 1 && <Btn v="blue" o={() => {
+                  const order = game.players.map(pl => pl.id)
+                  ;[order[i], order[i + 1]] = [order[i + 1], order[i]]
+                  doAction({ type: 'SET_PLAYER_ORDER', order })
+                }}>↓</Btn>}
+                <Btn v="yellow" o={() => doAction({ type: 'SET_PRIORITY', playerId: p.id })}>PD</Btn>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     )
@@ -969,6 +1003,7 @@ function SettingsPanel({ game, doAction: _doAction }) {
   const ac = useUIStore((s) => s.autoConfig)
   const turnTracking = useUIStore((s) => s.turnTracking)
   const showToasts = useUIStore((s) => s.showToasts)
+  const reminders = useUIStore((s) => s.reminders)
   const sync = useSyncContext()
   const wakeLock = useWakeLock()
   const setAutoConfig = useUIStore((s) => s.setAutoConfig)
@@ -1068,6 +1103,20 @@ function SettingsPanel({ game, doAction: _doAction }) {
                 {mode.charAt(0).toUpperCase() + mode.slice(1)}
               </Btn>
             ))}
+          </div>
+        </div>
+        <div className="flex-1 min-w-[200px]">
+          <div className={labelColor}>Reminders</div>
+          <div className="space-y-0.5">
+            {REMINDER_DEFS.map(r => {
+              const on = reminders[r.key]
+              return (
+                <button key={r.key} onClick={() => useUIStore.getState().toggleReminder(r.key)}
+                  className={`block w-full text-left text-xs px-2 py-0.5 rounded ${on ? onColor : offColor}`}>
+                  [{on ? 'X' : ' '}] {r.label}
+                </button>
+              )
+            })}
           </div>
         </div>
         {/* DEV only: analysis indicator */}

@@ -40,6 +40,7 @@ export function ContextBar({ game, selPlayer, selCorp, setPanel, doAction, revRe
     terrain: () => setPanel('terrain'),
     paybank: () => setPanel('paybank'),
     takecard: () => setPanel('takecard'),
+    reorder: () => setPanel('reorder'),
     collect: () => doAction({ type: 'COLLECT_ALL_REVENUE' }),
     soldout: () => doAction({ type: 'SOLD_OUT_ADJUST' }),
     undo: () => canUndo() && undo(),

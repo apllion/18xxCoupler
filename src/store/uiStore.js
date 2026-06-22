@@ -31,6 +31,20 @@ export const useUIStore = create((set) => ({
   readyToPlay: false,        // true after user picks Umpire/Driver from hub
   setViewMode: (mode) => set({ viewMode: mode, readyToPlay: true }),
   backToHub: () => set({ readyToPlay: false }),
+  // Configurable reminders
+  reminders: {
+    soldOut: true,
+    collectPrivates: true,
+    certLimit: true,
+    bankLow: true,
+    noTrains: false,
+    gameEnd: true,
+    corpNotOperated: true,
+  },
+  toggleReminder: (key) => set((s) => ({
+    reminders: { ...s.reminders, [key]: !s.reminders[key] },
+  })),
+
   setActiveTab: (tab) => set({ activeTab: tab }),
   setActivePlayer: (id) => set({ activePlayerId: id }),
   setActiveCorp: (sym) => set({ activeCorpSym: sym }),

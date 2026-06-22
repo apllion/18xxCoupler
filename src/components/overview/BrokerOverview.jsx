@@ -2,39 +2,39 @@
 
 import { useState } from 'react'
 import { useOverviewData, playerSharePercent, playerCertCount, isPresident } from './useOverviewData.js'
+import { playerNetWorth } from '../../engine/rules/netWorth.js'
+import { checkReminders } from '../../engine/reminders.js'
 import { ActionPanel } from './ActionPanel.jsx'
 import { ContextBar } from './ContextBar.jsx'
 import { InlineEdit } from './InlineEdit.jsx'
 
 export default function BrokerOverview() {
   const d = useOverviewData()
-  const [soldOutWarn, setSoldOutWarn] = useState(null) // { corps, targetRound }
+  const [activeReminder, setActiveReminder] = useState(null) // { id, message, severity, action?, targetRound }
 
   if (!d.game) return null
   const { game, fmt, phase, label: _label, limit, corps, unfloated, depotGroups, lastRevenue, corpPrivates, playerPrivates, lastAction, selPlayer, selCorp, curRow, setCurRow, curCol, setCurCol, panel, setPanel, revenueInput, setRevenueInput, revRef, rootRef, cursorRef, onKeyDown, closePanel, doAction, inReplay, fullLog, enterReplay, exitReplay, replayTo, enterWhatIf, isWhatIf, exitWhatIf, canUndo, undo, canRedo, redo, isSR, isOR, isPre: _isPre, superUmpire } = d
   const su = superUmpire
+  const enabledReminders = useUIStore((s) => s.reminders)
 
   const curIdx = game.actionLog.length - 1
 
   function handleRoundChange(rType) {
-    // Warn when leaving SR if sold-out corps exist (skip if already adjusted this SR)
-    if (isSR && rType !== 'SR' && !soldOutWarn) {
-      const log = game.actionLog || []
-      const lastSR = log.findLastIndex(e => e.action.type === 'SET_ROUND' && (e.action.roundType === 'SR' || e.action.roundType === 'stock'))
-      const alreadyAdjusted = log.slice(lastSR + 1).some(e => e.action.type === 'SOLD_OUT_ADJUST')
-      const soldOut = alreadyAdjusted ? [] : corps.filter(c => c.ipoed && c.ipoShares === 0 && c.marketShares === 0)
-      if (soldOut.length > 0) {
-        setSoldOutWarn({ corps: soldOut.map(c => c.sym).join(', '), targetRound: rType })
+    if (!activeReminder) {
+      const fromRound = game.roundTracker?.roundType || 'SR'
+      const reminders = checkReminders(game, fromRound, rType, enabledReminders)
+      if (reminders.length > 0) {
+        setActiveReminder({ ...reminders[0], targetRound: rType })
         return
       }
     }
-    setSoldOutWarn(null)
+    setActiveReminder(null)
     doAction({ type: 'SET_ROUND', roundType: rType })
   }
 
-  function dismissSoldOutWarn() {
-    const target = soldOutWarn?.targetRound
-    setSoldOutWarn(null)
+  function dismissReminder() {
+    const target = activeReminder?.targetRound
+    setActiveReminder(null)
     if (target) doAction({ type: 'SET_ROUND', roundType: target })
   }
 
@@ -89,13 +89,25 @@ export default function BrokerOverview() {
         </div>
       </div>
 
-      {/* Sold-out warning */}
-      {soldOutWarn && (
-        <div className="bg-yellow-900/80 border-b border-yellow-600 px-3 py-1.5 flex items-center justify-between flex-shrink-0">
-          <span className="text-yellow-200 text-sm">Sold out: <span className="font-bold">{soldOutWarn.corps}</span></span>
+      {/* Reminder banner */}
+      {activeReminder && (
+        <div className={`border-b px-3 py-1.5 flex items-center justify-between flex-shrink-0 ${
+          activeReminder.severity === 'critical' ? 'bg-red-900/80 border-red-600' :
+          activeReminder.severity === 'warning' ? 'bg-yellow-900/80 border-yellow-600' :
+          'bg-blue-900/80 border-blue-600'
+        }`}>
+          <span className={`text-sm ${
+            activeReminder.severity === 'critical' ? 'text-red-200' :
+            activeReminder.severity === 'warning' ? 'text-yellow-200' : 'text-blue-200'
+          }`}>{activeReminder.message}</span>
           <div className="flex gap-2">
-            <button onClick={() => { doAction({ type: 'SOLD_OUT_ADJUST' }); dismissSoldOutWarn() }} className="text-xs bg-yellow-700 hover:bg-yellow-600 text-white px-2 py-0.5 rounded font-medium">Adjust</button>
-            <button onClick={dismissSoldOutWarn} className="text-xs text-yellow-400 hover:text-white px-1">&times;</button>
+            {activeReminder.action && (
+              <button onClick={() => { doAction({ type: activeReminder.action.type }); dismissReminder() }}
+                className="text-xs bg-white/20 hover:bg-white/30 text-white px-2 py-0.5 rounded font-medium">
+                {activeReminder.action.label}
+              </button>
+            )}
+            <button onClick={dismissReminder} className="text-xs text-white/60 hover:text-white px-1">&times;</button>
           </div>
         </div>
       )}
@@ -127,6 +139,7 @@ export default function BrokerOverview() {
             <tr className="bg-broker-surface text-broker-text-muted">
               <th className="text-left px-2 py-1 sticky left-0 bg-broker-surface z-30 min-w-[90px] font-medium">Player</th>
               <th className="px-2 text-right min-w-[50px] font-bold text-sky-300">Cash</th>
+              <th className="px-2 text-right min-w-[50px] font-medium text-sky-300/60">Liq</th>
               <th className="px-2 text-center min-w-[36px] font-medium">Cert</th>
               {game.title.taxThresholds && <th className="px-1 text-center text-[10px] font-medium text-red-400">Tax</th>}
               {corps.map((c, ci) => (
@@ -175,6 +188,7 @@ export default function BrokerOverview() {
                       {fmt(p.cash)}
                     </InlineEdit>
                   </td>
+                  <td className="px-2 text-right text-sky-300/60 text-xs">{fmt(playerNetWorth(game, p.id))}</td>
                   <td className={`px-2 text-center ${playerCertCount(p) > game.certLimit ? 'text-red-400 font-bold' : 'text-broker-text-muted'}`}>{playerCertCount(p)}/{game.certLimit}</td>
                   {game.title.taxThresholds && (() => {
                     let totalTax = 0
@@ -209,7 +223,7 @@ export default function BrokerOverview() {
             })}
 
             {/* Separator */}
-            <tr><td colSpan={3 + (game.title.taxThresholds ? 1 : 0) + corps.length} className="h-px bg-broker-border"></td></tr>
+            <tr><td colSpan={4 + (game.title.taxThresholds ? 1 : 0) + corps.length} className="h-px bg-broker-border"></td></tr>
 
             {/* Corp rows */}
             <BRow extraCols={game.title.taxThresholds ? 1 : 0} l="Price" corps={corps} cc={curCol} r={c => !c.ipoed ? '' :
@@ -342,7 +356,7 @@ export default function BrokerOverview() {
 function BRow({ l, corps, cc, r, onClick, extraCols = 0, highlight, labelStyle }) {
   return (
     <tr className={`border-t border-broker-border/20 ${highlight ? 'bg-broker-surface-hover/10' : ''}`}>
-      <td colSpan={3 + extraCols} className={`px-2 py-0.5 sticky left-0 z-10 text-xs bg-broker-bg ${highlight ? 'text-sky-300 font-medium' : 'text-broker-text-muted'}`}>
+      <td colSpan={4 + extraCols} className={`px-2 py-0.5 sticky left-0 z-10 text-xs bg-broker-bg ${highlight ? 'text-sky-300 font-medium' : 'text-broker-text-muted'}`}>
         {labelStyle ? <span className="px-1 rounded font-bold" style={labelStyle}>{l}</span> : l}
       </td>
       {corps.map((c, ci) => (

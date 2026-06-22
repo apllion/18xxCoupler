@@ -74,6 +74,9 @@ const ACTIONS = [
   // Strategy cards — PTG
   { id: 'takecard', label: 'Card', round: 'any', gate: (g) => !!g.title.strategyCards },
 
+  // Player order
+  { id: 'reorder', label: 'Reorder', round: 'any', always: true, category: 'round' },
+
   // Concessions — 1822 family
   { id: 'concession', label: 'Concession', round: 'sr',
     gate: (g, rt, player) => {
