@@ -55,13 +55,12 @@ export default function Header() {
                     : 'bg-blue-800 text-blue-200'
                   : 'bg-broker-surface-hover text-broker-text-muted hover:text-white'
                 return (
-                  <button
+                  <span
                     key={rType}
-                    onClick={() => dispatch({ type: 'SET_ROUND', roundType: rType })}
-                    className={`text-sm font-medium px-2 py-0.5 first:rounded-l last:rounded-r border-r border-broker-border last:border-r-0 transition-colors ${colors}`}
+                    className={`text-sm font-medium px-2 py-0.5 first:rounded-l last:rounded-r border-r border-broker-border last:border-r-0 ${colors}`}
                   >
                     {rType}
-                  </button>
+                  </span>
                 )
               })}
             </div>
