@@ -39,14 +39,27 @@ function AppContent({ game, sync }) {
           <div className="text-sm text-broker-text-muted">
             {sync.status === 'connected'
               ? `Connected to ${sync.peerCount} device${sync.peerCount !== 1 ? 's' : ''} — waiting for game...`
-              : 'Connecting...'}
+              : 'Connecting to relay servers...'}
           </div>
-          <button
-            onClick={sync.leaveRoom}
-            className="text-sm text-broker-text-muted hover:text-red-300 mt-4"
-          >
-            ← Cancel & Leave Room
-          </button>
+          <div className="flex gap-3 mt-4">
+            <button
+              onClick={() => { sync.leaveRoom(); sync.joinRoom(sync.roomId) }}
+              className="text-sm bg-broker-surface hover:bg-broker-surface-hover text-white px-4 py-2 rounded-lg"
+            >
+              Retry
+            </button>
+            <button
+              onClick={sync.leaveRoom}
+              className="text-sm text-broker-text-muted hover:text-red-300 px-4 py-2"
+            >
+              ← Leave
+            </button>
+          </div>
+          {sync.status !== 'connected' && (
+            <p className="text-[10px] text-broker-text-muted mt-3 max-w-xs">
+              If connecting takes too long, try Retry or check that both devices are online. The host must have the game open.
+            </p>
+          )}
         </div>
       </div>
     )
