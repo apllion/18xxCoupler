@@ -142,15 +142,26 @@ export function useSync(gameStore) {
       if (reconnectRef.current) reconnectRef.current.delay = 1000
 
       if (establishedRef.current && stateRef.current) {
+        // Send immediately + retry after short delay (WebRTC channel may not be ready yet)
         sendState(getSharedState(stateRef.current), peerId)
-      } else {
-        if (stateReqTimerRef.current) clearTimeout(stateReqTimerRef.current)
-        stateReqTimerRef.current = setTimeout(() => {
-          stateReqTimerRef.current = null
-          if (!establishedRef.current && sendStateReqRef.current) {
-            sendStateReqRef.current({})
+        setTimeout(() => {
+          if (stateRef.current && sendStateRef.current) {
+            sendStateRef.current(getSharedState(stateRef.current), peerId)
           }
-        }, 5000)
+        }, 2000)
+      } else {
+        // Request state from peers — retry every 3 seconds until established
+        if (!stateReqTimerRef.current) {
+          const reqState = () => {
+            if (!establishedRef.current && sendStateReqRef.current) {
+              sendStateReqRef.current({})
+              stateReqTimerRef.current = setTimeout(reqState, 3000)
+            } else {
+              stateReqTimerRef.current = null
+            }
+          }
+          stateReqTimerRef.current = setTimeout(reqState, 2000)
+        }
       }
     })
 
