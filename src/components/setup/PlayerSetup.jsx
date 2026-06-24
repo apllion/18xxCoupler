@@ -23,10 +23,7 @@ export default function PlayerSetup() {
   const navigate = useNavigate()
   const startGame = useGameStore((s) => s.startGame)
 
-  console.log('[PlayerSetup] titleId from params:', titleId)
-
   const title = getTitle(titleId)
-  console.log('[PlayerSetup] title resolved:', title?.title)
 
   const [playerNames, setPlayerNames] = useState(() => pickRandomNames(3))
   const [selectedVariant, setSelectedVariant] = useState(null)
@@ -70,7 +67,6 @@ export default function PlayerSetup() {
 
   function handleStart() {
     const names = playerNames.filter((n) => n.trim()).map((n) => n.trim())
-    console.log('[PlayerSetup] handleStart — names:', names, 'titleId:', titleId, 'variant:', selectedVariant)
     if (names.length < title.minPlayers) return
     startGame(titleId, names, selectedVariant)
     navigate('/')
