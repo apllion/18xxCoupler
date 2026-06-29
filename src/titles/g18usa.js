@@ -5,12 +5,25 @@ export const g18usa = {
   maturity: 2, testQuality: 1, titleId: 'g18usa',
   gameInfo: '• Incremental capitalization, 20% float, unlimited bank, half pay allowed • Resource markers (coal, ore, oil) add route bonuses, 30 subsidy privates • 20 corps with 1 token each (choose home city at float), 1D single-row market • 10 phases (2 through 8), plus P-trains available from phase 5 • Train counts scale by player count, 8-train signals game end • Sell/buy stock rounds, no auction (privates chosen at float) • Massive scale: continental USA map, 2-7 player range • Sweet spot 4-5p, longest 18xx title at 5-8 hours',
   specialties: '20 corps • Resource markers (coal/ore) • Massive scale',
-  implemented: 'Shares • Half pay • Dividends • Pullman trains (config)',
+  implemented: 'Shares • Half pay • Loans (1817-style, 2-step) • Dividends • Pullman trains (config)',
   title: '18USA', subtitle: 'The Railroads Come of Age', designer: 'Edward Reece, Mark Hendrickson, Shawn Fox',
   location: 'United States', minPlayers: 2, maxPlayers: 7,
   bankCash: 99999, startingCash: { 2: 630, 3: 420, 4: 315, 5: 300, 6: 250, 7: 225 },
   certLimit: { 2: 32, 3: 21, 4: 16, 5: 16, 6: 13, 7: 11 },
   currencyFormat: '$', capitalization: 'incremental', floatPercent: 20, sellBuyOrder: 'sell_buy', halfPay: true,
+
+  // 1817-style loans: $100, escalating interest, stock moves 2 steps (not 1)
+  loans: {
+    type: '1817',
+    loanValue: 100,
+    baseRate: 5,
+    rateStep: 5,
+    loansPerTier: 5,           // 4p: 5 per tier, 5p+: varies (4 on $5, 6 on rest)
+    maxRate: 70,
+    takeSteps: 2,              // Stock moves left 2 per loan taken
+    repaySteps: 2,             // Stock moves right 2 per loan repaid
+    noRepayTakenSameOR: true,  // Cannot repay loans taken same OR
+  },
   market: [
     ['0l','0a','0a','0a','42','44','46','48','50p','53s','56p','59p','62p','66p','70p','74s','78p','82p','86p','90p','95p','100p','105p','110p','115p','120s','127p','135p','142p','150p','157p','165p','172p','180p','190p','200p','210','220','230','240','250','260','270','285','300','315','330','345','360','375','390','405','420','440','460','480','500','520','540','560','580','600','625','650','675','700','725','750','775','800'],
   ],

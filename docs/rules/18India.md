@@ -4,34 +4,40 @@
 - **Players:** 2--5
 - **Bank:** ₹9,000
 - **Starting Cash:** ₹1,100 (2p) / ₹733 (3p) / ₹550 (4p) / ₹440 (5p)
-🤖 - **Capitalization:** Incremental, 30% float
-🤖 - **Shares:** 20% president + 8x10% (GIPR: 10x10%)
-🤖 - **Sell Movement:** none (selling does NOT move price)
-🤖 - **Unsold Dividends:** market -> corp
-🤖 - **Pool Limit:** 50%
-🤖 - **Sell Order:** sell/buy
-🤖 - **SR Order:** First to pass
+- **Capitalization:** Incremental, 30% float
+- **Shares:** 20% president + 8x10% (GIPR: 10x10%)
+- **Sell Movement:** none (selling does NOT move price)
+- **Unsold Dividends:** market -> corp
+- **Pool Limit:** 50%
+- **Sell Order:** sell/buy
+- **SR Order:** First to pass
 - **Currency:** rupees
 
 ## Specialties
-🤖 - Corps can buy one share of another corp per OR (cross-ownership)
-- Multiplier trains (3x2, 3x3, 4x2, 4x3) run route multiple times
-- All tile colors available from phase 1 (no color restrictions)
-🤖 - GIPR has all-10% shares (no president cert)
-- Gauges: broad/meter/narrow
-- Guarantee companies
+- Corps can buy one share of another corp per OR (cross-ownership)
+- Multiplier trains (3x2, 3x3, 4x2, 4x3) run route multiple times ;(
+- All tile colors available from phase 1 (no color restrictions) ;(
+- GIPR has all-10% shares (no president cert)
+- Gauges: broad/meter/narrow ;(
+- Guarantee companies ;(
+
+## Issue / Redeem
+No issue/redeem. Corps buy/sell shares of OTHER corps (cross-ownership), not own shares.
+
+## Loans
+No loans.
 
 ## Stock Market Movement
-🤖 - **Pay dividend:** right 1 (up if at edge)
-🤖 - **Withhold:** left 1 (down if at edge)
-🤖 - **Sell shares:** NO movement
-🤖 - **Sold out:** up 1 at end of SR
+- **Pay dividend:** right 1 (up if at edge)
+- **Withhold:** left 1 (down if at edge)
+- **Sell shares:** NO movement
+- **Sold out:** up 1 at end of SR
 
 ## Auction
-🤖 English auction -- ascending bids on each East India Company private.
+English auction -- ascending bids on each East India Company private.
 
 ## Round System
-🤖 - SR -> OR x2 (all phases)
+- SR -> OR x2 (all phases)
 
 ## Trains
 | Train | Cost | Qty | Rusts On | Variants | Events |

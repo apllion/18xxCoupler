@@ -4,37 +4,43 @@
 - **Players:** 3--5
 - **Bank:** M13,000
 - **Starting Cash:** M465 (3p) / M465 (4p) / M465 (5p)
-🤖 - **Capitalization:** Full, 50% float
-🤖 - **Shares:** 20% president + 8x10% (railways); varies for breweries
-🤖 - **Max Ownership:** 60--70% (varies by player count)
-🤖 - **Sell Movement:** down per share
-🤖 - **Unsold Dividends:** market -> corp
-🤖 - **Pool Limit:** 50%
-🤖 - **Sell Order:** sell/buy
+- **Capitalization:** Full, 50% float
+- **Shares:** 20% president + 8x10% (railways); varies for breweries
+- **Max Ownership:** 60--70% (varies by player count)
+- **Sell Movement:** down per share
+- **Unsold Dividends:** market -> corp
+- **Pool Limit:** 50%
+- **Sell Order:** sell/buy
 - **Currency:** M (Mark)
 
 ## Specialties
-🤖 - Dual economy: railway corps AND brewery corps on separate stock tracks
-🤖 - Beer market with 6 segments determines brewery income
-- Small breweries purchased in starting round act as privates
-- Non-standard brewery shares (30/10/.../20, 40/10/.../20 splits)
-🤖 - Fixed 6 rounds
-- Capex cards serve as both trains and brewery equipment
+- Dual economy: railway corps AND brewery corps on separate stock tracks
+- Beer market with 6 segments determines brewery income
+- Small breweries purchased in starting round act as privates ;(
+- Non-standard brewery shares (30/10/.../20, 40/10/.../20 splits) ;(
+- Fixed 6 rounds
+- Capex cards serve as both trains and brewery equipment ;(
+
+## Issue / Redeem
+No issue/redeem. Full capitalization.
+
+## Loans
+No loans.
 
 ## Stock Market Movement
-🤖 - **Pay dividend:** right 1 (up if at edge)
-🤖 - **Withhold:** left 1 (down if at edge)
-🤖 - **Sell shares:** down 1 per share sold
-🤖 - **Sold out:** up 1 at end of SR
+- **Pay dividend:** right 1 (up if at edge)
+- **Withhold:** left 1 (down if at edge)
+- **Sell shares:** down 1 per share sold
+- **Sold out:** up 1 at end of SR
 
 ## Auction
-🤖 Purchase -- each player buys one small brewery in starting round.
+Purchase -- each player buys one small brewery in starting round.
 
 ## Round System
-🤖 - Fixed 6 rounds
-🤖 - SR -> OR x1 (phase 2)
-🤖 - SR -> OR x2 (phases 3--5)
-🤖 - SR -> OR x3 (phases 6--8)
+- Fixed 6 rounds
+- SR -> OR x1 (phase 2)
+- SR -> OR x2 (phases 3--5)
+- SR -> OR x3 (phases 6--8)
 
 ## Trains (Capex Cards)
 | Train | Cost | Qty (3p/4p/5p) | Rusts On | Events |

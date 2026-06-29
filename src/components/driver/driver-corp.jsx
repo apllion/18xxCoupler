@@ -123,45 +123,75 @@ export default function CorpORCard({ data, corp }) {
               className="text-xs text-broker-text-muted hover:text-red-300">Remove Token</button>
           )}
 
-          {/* Issue / Redeem (incremental cap) */}
-          {game.title.capitalization === 'incremental' && (
-            <div className="flex gap-2">
-              {corp.ipoShares > 0 && (
-                <button onClick={() => dispatch({ type: 'ISSUE_SHARES', corpSym: corp.sym, percent: shareSize })}
-                  className="text-sm bg-blue-800 text-white px-3 py-2 rounded-lg flex-1">
-                  Issue {shareSize}%
-                </button>
-              )}
-              {corp.marketShares > 0 && (
-                <button onClick={() => dispatch({ type: 'REDEEM_SHARES', corpSym: corp.sym, percent: shareSize })}
-                  className="text-sm bg-green-800 text-white px-3 py-2 rounded-lg flex-1">
-                  Redeem {shareSize}%
-                </button>
-              )}
-            </div>
-          )}
+          {/* Issue / Redeem (incremental cap or 1846-style) */}
+          {(game.title.capitalization === 'incremental' || game.title.issueRedeemRule) && (corp.ipoShares > 0 || corp.marketShares > 0) && (() => {
+            const rule = game.title.issueRedeemRule || 'standard'
+            const curPrice = corp.price || 0
+            const pos = game.stockMarket.corpPositions[corp.sym]
+            const leftPrice = pos && pos.col > 0 ? (game.stockMarket.grid[pos.row]?.[pos.col - 1]?.price || curPrice) : curPrice
+            const rightPrice = pos ? (game.stockMarket.grid[pos.row]?.[pos.col + 1]?.price || curPrice) : curPrice
+            const ip = rule === '1846' ? leftPrice : curPrice
+            const rp = rule === '1846' ? rightPrice : curPrice
+            const maxIssue = Math.floor(corp.ipoShares / shareSize)
+            const maxRedeem = rp > 0 ? Math.min(Math.floor(corp.marketShares / shareSize), Math.floor(corp.cash / rp)) : 0
+            return (
+              <div className="bg-broker-surface rounded-lg p-3">
+                <div className="text-xs text-broker-text-muted mb-1">Issue / Redeem</div>
+                {rule === '1846' && <div className="text-[10px] text-broker-text-muted mb-1">Issue @{fmt(ip)} · Redeem @{fmt(rp)}</div>}
+                <div className="flex gap-2 flex-wrap">
+                  {Array.from({ length: maxIssue }, (_, i) => i + 1).map(n => (
+                    <button key={`i${n}`} onClick={() => dispatch({ type: 'ISSUE_SHARES', corpSym: corp.sym, count: n })}
+                      className="text-sm bg-blue-800 text-white px-3 py-2 rounded-lg">Issue {n} +{fmt(ip * n)}</button>
+                  ))}
+                  {Array.from({ length: maxRedeem }, (_, i) => i + 1).map(n => (
+                    <button key={`r${n}`} onClick={() => dispatch({ type: 'REDEEM_SHARES', corpSym: corp.sym, count: n })}
+                      className="text-sm bg-green-800 text-white px-3 py-2 rounded-lg">Redeem {n} −{fmt(rp * n)}</button>
+                  ))}
+                </div>
+              </div>
+            )
+          })()}
 
-          {/* Loans */}
-          {game.title.loans && (
-            <div className="flex gap-2">
-              <button onClick={() => dispatch({ type: 'TAKE_LOAN', corpSym: corp.sym })}
-                className="text-sm bg-red-800 text-white px-3 py-2 rounded-lg flex-1">
-                Take Loan
-              </button>
-              {corp.loans > 0 && (
-                <>
-                  <button onClick={() => dispatch({ type: 'REPAY_LOAN', corpSym: corp.sym })}
-                    className="text-sm bg-green-800 text-white px-3 py-2 rounded-lg flex-1">
-                    Repay Loan
+          {/* Loans / Bonds / Debt */}
+          {game.title.loans && game.title.loans.type !== '1880_player' && (() => {
+            const lc = game.title.loans
+            if (lc.type === '18rg_debt') {
+              const dt = corp.debtTokens || 0
+              if (dt <= 0) return null
+              const dp = game.debtMarketPrice || lc.debtStartPrice || 50
+              return (
+                <div className="bg-broker-surface rounded-lg p-3">
+                  <div className="text-xs text-broker-text-muted mb-1">Debt: {dt} tokens @ {fmt(dp)}</div>
+                  <button onClick={() => dispatch({ type: 'PAY_DEBT_TOKEN', corpSym: corp.sym })}
+                    disabled={corp.cash < dp}
+                    className="text-sm bg-green-800 disabled:opacity-30 text-white px-3 py-2 rounded-lg">
+                    Pay Debt Token ({fmt(dp)})
                   </button>
-                  <button onClick={() => dispatch({ type: 'PAY_INTEREST', corpSym: corp.sym })}
-                    className="text-sm bg-amber-800 text-white px-3 py-2 rounded-lg flex-1">
-                    Interest
-                  </button>
-                </>
-              )}
-            </div>
-          )}
+                </div>
+              )
+            }
+            const label = lc.type === '1849' ? 'Bond' : 'Loan'
+            return (
+              <div className="flex gap-2">
+                <button onClick={() => dispatch({ type: 'TAKE_LOAN', corpSym: corp.sym })}
+                  className="text-sm bg-red-800 text-white px-3 py-2 rounded-lg flex-1">
+                  Take {label}
+                </button>
+                {corp.loans > 0 && (
+                  <>
+                    <button onClick={() => dispatch({ type: 'REPAY_LOAN', corpSym: corp.sym })}
+                      className="text-sm bg-green-800 text-white px-3 py-2 rounded-lg flex-1">
+                      Repay {label}
+                    </button>
+                    <button onClick={() => dispatch({ type: 'PAY_INTEREST', corpSym: corp.sym })}
+                      className="text-sm bg-amber-800 text-white px-3 py-2 rounded-lg flex-1">
+                      Interest
+                    </button>
+                  </>
+                )}
+              </div>
+            )
+          })()}
 
           {/* Corp share trading */}
           {game.title.corpCanBuyShares && (

@@ -4,35 +4,38 @@
 - **Players:** 2--5
 - **Bank:** Unlimited
 - **Starting Cash:** ₡600 (2p) / ₡540 (3p) / ₡410 (4p) / ₡340 (5p)
-🤖 - **Capitalization:** Incremental, 50% float
-🤖 - **Shares:** 20% president + 8x10%
-🤖 - **Sell Movement:** down per share
-🤖 - **Unsold Dividends:** market -> corp
-🤖 - **Pool Limit:** 50%
-🤖 - **Sell Order:** sell/buy
+- **Capitalization:** Incremental, 50% float
+- **Shares:** 20% president + 8x10%
+- **Sell Movement:** down per share
+- **Unsold Dividends:** market -> corp
+- **Pool Limit:** 50%
+- **Sell Order:** sell/buy
 - **Currency:** credits
 
 ## Specialties
-🤖 - Corporate Round: corps buy and sell shares of other corps
-- Lunar sci-fi setting on the Moon
-- Mineral resource hexes boost revenue
-🤖 - Corps can buy own shares from bank pool
-- No cert limit for corp-held shares
+- Corporate Round: corps buy and sell shares of other corps
+- Lunar sci-fi setting on the Moon ;(
+- Mineral resource hexes boost revenue ;(
+- Corps can buy own shares from bank pool
+- No cert limit for corp-held shares ;(
 
 ## Issue / Redeem
-🤖 Incremental capitalization. Corps issue/sell from treasury during Corporate Round.
+Incremental capitalization. Corps issue/sell from treasury during Corporate Round.
+
+## Loans
+No loans.
 
 ## Stock Market Movement
-🤖 - **Pay dividend:** right 1 (up if at edge)
-🤖 - **Withhold:** left 1 (down if at edge)
-🤖 - **Sell shares:** down 1 per share sold
-🤖 - **Sold out:** up 1 at end of SR
+- **Pay dividend:** right 1 (up if at edge)
+- **Withhold:** left 1 (down if at edge)
+- **Sell shares:** down 1 per share sold
+- **Sold out:** up 1 at end of SR
 
 ## Auction
-🤖 No pregame auction.
+No pregame auction.
 
 ## Round System
-- SR -> Corporate Round -> OR x2 (all phases)
+- SR -> Corporate Round -> OR x2 (all phases) ;(
 
 ## Trains
 | Train | Cost | Qty | Rusts On | Events |

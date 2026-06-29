@@ -1146,42 +1146,68 @@ function MergerPanel({ game, corp, dispatch, fmt }) {
 
 function LoanPanel({ game, corp, dispatch, fmt }) {
   const config = game.title.loans || {}
+  const loanType = config.type || '1817'
+
+  // 18RoyalGorge debt tokens — different UI
+  if (loanType === '18rg_debt') {
+    const debtTokens = corp.debtTokens || 0
+    if (debtTokens <= 0) return null
+    const debtPrice = game.debtMarketPrice || config.debtStartPrice || 50
+    return (
+      <div className="bg-broker-surface rounded-lg p-3">
+        <div className="text-xs text-broker-text-muted mb-2 font-medium uppercase">Debt Tokens</div>
+        <div className="flex gap-4 text-sm mb-2">
+          <div>Remaining: <span className="font-medium text-red-300">{debtTokens}</span></div>
+          <div>Price: <span className="font-medium text-yellow-300">{fmt(debtPrice)}</span></div>
+        </div>
+        <button onClick={() => dispatch({ type: 'PAY_DEBT_TOKEN', corpSym: corp.sym })}
+          disabled={corp.cash < debtPrice}
+          className="text-sm bg-green-800 hover:bg-green-700 disabled:opacity-30 text-white px-3 py-2 rounded">
+          Pay Debt Token ({fmt(debtPrice)})
+        </button>
+      </div>
+    )
+  }
+
+  // 1880 player loans — handled separately (not corp loans)
+  if (loanType === '1880_player') return null
+
+  // Corp loans: 1817, 1861, 1849
   const loanValue = config.loanValue || 100
+  const receiveValue = loanType === '1861' ? loanValue - (config.originationFee || 5) : loanValue
   const max = maxLoansForCorp(corp, game.title)
   const loans = corp.loans || 0
-  const rate = currentInterestRate(game)
   const interest = interestDue(game, corp.sym)
   const canTake = loans < max
   const canRepay = loans > 0 && corp.cash >= loanValue
+  const label = loanType === '1849' ? 'Bonds' : 'Loans'
 
   return (
     <div className="bg-broker-surface rounded-lg p-3">
-      <div className="text-xs text-broker-text-muted mb-2 font-medium uppercase">Loans</div>
-      <div className="flex gap-4 text-sm mb-2">
-        <div>Loans: <span className="font-medium text-broker-text">{loans}/{max}</span></div>
-        <div>Rate: <span className="font-medium text-yellow-300">{rate}%</span></div>
-        {interest > 0 && <div>Interest due: <span className="font-medium text-red-300">{fmt(interest)}</span></div>}
+      <div className="text-xs text-broker-text-muted mb-2 font-medium uppercase">{label}</div>
+      <div className="flex gap-4 text-sm mb-2 flex-wrap">
+        <div>{label}: <span className="font-medium text-broker-text">{loans}/{max}</span></div>
+        {loanType === '1817' && <div>Rate: <span className="font-medium text-yellow-300">{currentInterestRate(game)}%</span></div>}
+        {loanType === '1861' && <div>Fee: <span className="font-medium text-yellow-300">{fmt(config.originationFee || 5)}</span></div>}
+        {interest > 0 && <div>Interest: <span className="font-medium text-red-300">{fmt(interest)}</span></div>}
+        {loanType === '1861' && config.endgameLeftPerLoan && loans > 0 && (
+          <div>Endgame: <span className="text-red-400">-{config.endgameLeftPerLoan * loans} steps</span></div>
+        )}
       </div>
-      <div className="flex gap-2">
-        <button
-          onClick={() => dispatch({ type: 'TAKE_LOAN', corpSym: corp.sym })}
+      <div className="flex gap-2 flex-wrap">
+        <button onClick={() => dispatch({ type: 'TAKE_LOAN', corpSym: corp.sym })}
           disabled={!canTake}
-          className="text-sm bg-blue-800 hover:bg-blue-700 disabled:opacity-30 disabled:cursor-not-allowed text-white px-3 py-2 rounded"
-        >
-          Take Loan (+{fmt(loanValue)})
+          className="text-sm bg-blue-800 hover:bg-blue-700 disabled:opacity-30 text-white px-3 py-2 rounded">
+          Take {label === 'Bonds' ? 'Bond' : 'Loan'} (+{fmt(receiveValue)})
         </button>
-        <button
-          onClick={() => dispatch({ type: 'REPAY_LOAN', corpSym: corp.sym })}
+        <button onClick={() => dispatch({ type: 'REPAY_LOAN', corpSym: corp.sym })}
           disabled={!canRepay}
-          className="text-sm bg-green-800 hover:bg-green-700 disabled:opacity-30 disabled:cursor-not-allowed text-white px-3 py-2 rounded"
-        >
-          Repay Loan (-{fmt(loanValue)})
+          className="text-sm bg-green-800 hover:bg-green-700 disabled:opacity-30 text-white px-3 py-2 rounded">
+          Repay (-{fmt(loanValue)})
         </button>
         {interest > 0 && (
-          <button
-            onClick={() => dispatch({ type: 'PAY_INTEREST', corpSym: corp.sym })}
-            className="text-sm bg-red-800 hover:bg-red-700 text-white px-3 py-2 rounded"
-          >
+          <button onClick={() => dispatch({ type: 'PAY_INTEREST', corpSym: corp.sym })}
+            className="text-sm bg-red-800 hover:bg-red-700 text-white px-3 py-2 rounded">
             Pay Interest ({fmt(interest)})
           </button>
         )}
@@ -1422,16 +1448,18 @@ function IssueRedeemPanel({ game, corp, dispatch, fmt }) {
   const pos = game.stockMarket.corpPositions[corp.sym]
   if (!pos) return null
 
+  const rule = game.title.issueRedeemRule || 'standard'
   const currentPrice = corpPrice(game.stockMarket, corp.sym)
-  const issuePrice = priceAt(game.stockMarket, pos.row, Math.max(0, pos.col - 1))
-  const redeemPrice = priceAt(game.stockMarket, pos.row, pos.col + 1) || currentPrice
+  const leftPrice = pos.col > 0 ? (priceAt(game.stockMarket, pos.row, pos.col - 1) || currentPrice) : currentPrice
+  const rightPrice = priceAt(game.stockMarket, pos.row, pos.col + 1) || currentPrice
 
-  // Shares the corp can issue: total outstanding minus what's already in the market
-  // In incremental cap, corp has shares in its treasury (ipoShares) it can issue to the market
-  const canIssue = corp.ipoShares > 0
-  const canRedeem = corp.marketShares > 0 && corp.cash >= (redeemPrice || 0)
+  const issuePrice = rule === '1846' ? leftPrice : currentPrice
+  const redeemPrice = rule === '1846' ? rightPrice : currentPrice
 
-  if (!canIssue && !canRedeem) return null
+  const maxIssue = Math.floor(corp.ipoShares / shareSize)
+  const maxRedeem = Math.min(Math.floor(corp.marketShares / shareSize), Math.floor(corp.cash / redeemPrice))
+
+  if (maxIssue === 0 && maxRedeem === 0) return null
 
   return (
     <div className="bg-broker-surface rounded-lg p-3">
@@ -1441,23 +1469,26 @@ function IssueRedeemPanel({ game, corp, dispatch, fmt }) {
         <div>Market: <span className="font-medium text-broker-text">{corp.marketShares}%</span></div>
         <div>Price: <span className="font-medium text-broker-text">{fmt(currentPrice)}</span></div>
       </div>
-      <div className="flex gap-2">
-        {canIssue && (
-          <button
-            onClick={() => dispatch({ type: 'ISSUE_SHARES', corpSym: corp.sym, percent: shareSize })}
-            className="text-sm bg-blue-800 hover:bg-blue-700 text-white px-3 py-2 rounded"
-          >
-            Issue Share (+{fmt(issuePrice)} to corp)
+      {rule === '1846' && (
+        <div className="text-[10px] text-broker-text-muted mb-2">
+          Issue at {fmt(issuePrice)} (price−1) · Redeem at {fmt(redeemPrice)} (price+1) · No stock movement
+        </div>
+      )}
+      <div className="flex gap-2 flex-wrap">
+        {maxIssue > 0 && Array.from({ length: maxIssue }, (_, i) => i + 1).map(n => (
+          <button key={`i${n}`}
+            onClick={() => dispatch({ type: 'ISSUE_SHARES', corpSym: corp.sym, count: n })}
+            className="text-sm bg-blue-800 hover:bg-blue-700 text-white px-3 py-2 rounded">
+            Issue {n} (+{fmt(issuePrice * n)})
           </button>
-        )}
-        {canRedeem && (
-          <button
-            onClick={() => dispatch({ type: 'REDEEM_SHARES', corpSym: corp.sym, percent: shareSize })}
-            className="text-sm bg-green-800 hover:bg-green-700 text-white px-3 py-2 rounded"
-          >
-            Redeem Share (-{fmt(redeemPrice)} from corp)
+        ))}
+        {maxRedeem > 0 && Array.from({ length: maxRedeem }, (_, i) => i + 1).map(n => (
+          <button key={`r${n}`}
+            onClick={() => dispatch({ type: 'REDEEM_SHARES', corpSym: corp.sym, count: n })}
+            className="text-sm bg-green-800 hover:bg-green-700 text-white px-3 py-2 rounded">
+            Redeem {n} (−{fmt(redeemPrice * n)})
           </button>
-        )}
+        ))}
       </div>
     </div>
   )

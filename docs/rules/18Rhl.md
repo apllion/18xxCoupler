@@ -4,36 +4,42 @@
 - **Players:** 3--5
 - **Bank:** M9,000
 - **Starting Cash:** M600 (3p) / M450 (4p) / M360 (5p)
-🤖 - **Capitalization:** Full, 50% float
-🤖 - **Shares:** 20% president + 8x10% (MKB: 3x20% + 4x10%)
-🤖 - **Sell Movement:** down per block (blocked)
-🤖 - **Sell After:** Corp must have operated
-🤖 - **Unsold Dividends:** market -> corp
-🤖 - **Pool Limit:** 50%
-🤖 - **Sell Order:** sell/buy
+- **Capitalization:** Full, 50% float
+- **Shares:** 20% president + 8x10% (MKB: 3x20% + 4x10%)
+- **Sell Movement:** down per block (blocked)
+- **Sell After:** Corp must have operated
+- **Unsold Dividends:** market -> corp
+- **Pool Limit:** 50%
+- **Sell Order:** sell/buy
 - **Currency:** M (Mark)
 
 ## Specialties
-- Rhineland setting
-- RhE has delayed par (70/75/80 only) via director private
-- MKB has non-standard shares (3x20% + 4x10%), 60% float
-- CCE has dual home stations (Koln and Krefeld)
-- No emergency buy from other corps
-- English auction for 7 privates
+- Rhineland setting ;(
+- RhE has delayed par (70/75/80 only) via director private ;(
+- MKB has non-standard shares (3x20% + 4x10%), 60% float ;(
+- CCE has dual home stations (Koln and Krefeld) ;(
+- No emergency buy from other corps ;(
+- English auction for 7 privates ;(
+
+## Issue / Redeem
+No issue/redeem. Full capitalization.
+
+## Loans
+Bank credits (emergency train purchase). 2x the credit amount deducted from player total at game end. No recurring interest. Auto-trigger on emergency train shortfall ;(. Optional variant: bank credits disallowed — director must sell certs or go bankrupt ;(.
 
 ## Stock Market Movement
-🤖 - **Pay dividend:** right 1 (up if at edge)
-🤖 - **Withhold:** left 1 (down if at edge)
-🤖 - **Sell shares:** down per block (blocked)
-🤖 - **Sold out:** up 1 at end of SR
+- **Pay dividend:** right 1 (up if at edge)
+- **Withhold:** left 1 (down if at edge)
+- **Sell shares:** down per block (blocked)
+- **Sold out:** up 1 at end of SR
 
 ## Auction
-🤖 English auction -- ascending bids on each private.
+English auction -- ascending bids on each private.
 
 ## Round System
-🤖 - SR -> OR x1 (phase 2)
-🤖 - SR -> OR x2 (phases 3--4)
-🤖 - SR -> OR x3 (phases 5--8)
+- SR -> OR x1 (phase 2)
+- SR -> OR x2 (phases 3--4)
+- SR -> OR x3 (phases 5--8)
 
 ## Trains
 | Train | Cost | Qty | Rusts On | Events |

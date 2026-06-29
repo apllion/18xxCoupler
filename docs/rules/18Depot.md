@@ -4,40 +4,43 @@
 - **Players:** 2--8
 - **Bank:** Unlimited
 - **Starting Cash:** $1,200 (2p) / $800 (3p) / $600 (4p) / $480 (5p) / $400 (6p) / $350 (7p) / $300 (8p)
-🤖 - **Capitalization:** Full, 60% float
-🤖 - **Shares:** 20% president + 8x10%
-🤖 - **Sell Movement:** down per share
-🤖 - **Unsold Dividends:** market -> corp
-🤖 - **Pool Limit:** 50%
-🤖 - **Sell Order:** sell/buy
-🤖 - **Half Pay:** Yes
-🤖 - **Loans:** Yes (optional, $100 per loan)
-🤖 - **Corp Trading:** Yes (optional)
+- **Capitalization:** Full, 60% float
+- **Shares:** 20% president + 8x10%
+- **Sell Movement:** down per share
+- **Unsold Dividends:** market -> corp
+- **Pool Limit:** 50%
+- **Sell Order:** sell/buy
+- **Half Pay:** Yes
+- **Loans:** Yes (optional, $100 per loan)
+- **Corp Trading:** Yes (optional)
 - **Currency:** $
 
 ## Specialties
-- Generic sandbox title -- works for any 18xx game
-- All actions always available, no phase gates
-- Manual stock movement via action buttons
-- Toggle features on/off: half pay, loans, corp trading
-- Pure recording tool
+- Generic sandbox title -- works for any 18xx game ;(
+- All actions always available, no phase gates ;(
+- Manual stock movement via action buttons ;(
+- Toggle features on/off: half pay, loans, corp trading ;(
+- Pure recording tool ;(
 
 ## Issue / Redeem
-🤖 Not standard. Manual recording tool -- use as needed.
+Not standard. Manual recording tool -- use as needed.
+
+## Loans
+Optional. Configurable loan system for generic recording.
 
 ## Stock Market Movement
-🤖 - **Pay dividend:** right 1 (up if at edge)
-🤖 - **Withhold:** left 1 (down if at edge)
-🤖 - **Sell shares:** down 1 per share sold
-🤖 - **Sold out:** up 1 at end of SR
+- **Pay dividend:** right 1 (up if at edge)
+- **Withhold:** left 1 (down if at edge)
+- **Sell shares:** down 1 per share sold
+- **Sold out:** up 1 at end of SR
 
 ## Auction
-🤖 No pregame auction.
+No pregame auction.
 
 ## Round System
-🤖 - SR -> OR x1 (phase 2)
-🤖 - SR -> OR x2 (phases 3--4)
-🤖 - SR -> OR x3 (phases 5--D)
+- SR -> OR x1 (phase 2)
+- SR -> OR x2 (phases 3--4)
+- SR -> OR x3 (phases 5--D)
 
 ## Trains
 | Train | Cost | Qty | Rusts On | Events |

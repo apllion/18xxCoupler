@@ -6,7 +6,7 @@ export const g1849 = {
   maturity: 3, testQuality: 1, titleId: 'g1849',
   gameInfo: '• Incremental capitalization, 20% float (cheapest float in 18xx) • Par prices gated: L.68/100 from start, L.144 at 6H, L.216 at 10H • Non-standard shares: 20/10/10/10/10/10/10/20, last share is 20% • 6 corps (one removed at 3p), random sequential founding order • 2D grid market (10x16), sell drops one row per 10% sold • 6 phases using H-trains (4H through 16H), plus E and R6H trains • Earthquake event at 12H, privates close at 12H • L.7,760 bank, game ends on bank break • 3-5 players only, sweet spot 4p',
   specialties: 'Sequential random corp order • Par price gates • Sicily',
-  implemented: 'Shares • Dividends • Auto stock movement (2D) • Par price gates • Non-standard shares',
+  implemented: 'Shares • Dividends • Bonds (1849-style) • Auto stock movement (2D) • Par price gates • Non-standard shares',
   title: '1849',
   subtitle: 'The Game of Sicilian Railways',
   designer: 'Federico Vellani',
@@ -26,6 +26,18 @@ export const g1849 = {
   poolShareDrop: 'down_block',
   sellAfter: 'operate',
   ebuyFromOthers: 'never',
+
+  // Bonds: optional variant (available from brown phase)
+  loans: {
+    type: '1849',
+    loanValue: 500,           // L.500 per bond
+    interestPerLoan: 50,      // L.50 per bond per OR (10% of face)
+    maxLoansPerCorp: 1,       // Max 1 bond per corp
+    takeMovement: 'none',
+    repayMovement: 'none',
+    endgamePenaltyPerShare: 100, // L.100 per share owned deducted from player
+    availableOn: '10H',       // Available from brown phase
+  },
 
   // 1849 has a unique share structure: 20/10/10/10/10/10/10/20
   shares: [20, 10, 10, 10, 10, 10, 10, 20],

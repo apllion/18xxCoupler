@@ -3,10 +3,10 @@ import { defaults } from './defaults.js'
 export const g1822mx = {
   ...defaults,
 
-  maturity: 1, testQuality: 1, titleId: 'g1822mx',
+  maturity: 2, testQuality: 1, titleId: 'g1822mx',
   gameInfo: '• 1822 system in Mexico: 24 minors + 7 majors + NDEM national railway • Bid box auction for 7 concessions and 18 privates • Builder cubes reduce terrain costs, port tiles on coastal spikes add revenue • NDEM national closes at phase 7, forcing minor consolidation • Incremental cap (full at phase 6), 20% float, half pay, L/2 train variants • 1D single-row market (33 spaces), must sell in blocks, most-cash SR order • 7 phases (1-7), 7/E train variant, mail contracts and Pullman cars • $12,000 bank, 2-5 players, slightly smaller than 1822 base',
   specialties: 'Concessions • Minors → majors • NdM national merge • Bidbox auction',
-  implemented: 'Shares • Dividends • Concessions • Minor acquisition • Half pay',
+  implemented: 'Shares • Dividends • Player loans • Concessions • Minor acquisition • Half pay',
   title: '1822MX',
   subtitle: 'The Railways of Mexico',
   designer: 'Scott Peterson',
@@ -24,6 +24,14 @@ export const g1822mx = {
   halfPay: true,
   mustSellInBlocks: true,
   nextSRPlayerOrder: 'most_cash',
+
+  // Player loans: emergency train purchase, 150% of shortfall, compounds 50%/SR
+  loans: {
+    type: '1880_player',
+    compoundRate: 50,
+    immediateInterest: 50,
+    debtBlocksSpending: true,
+  },
 
   // Single-row market
   market: [

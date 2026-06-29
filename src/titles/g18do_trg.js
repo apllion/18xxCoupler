@@ -3,7 +3,7 @@ import { defaults } from './defaults.js'
 export const g18do_trg = {
   ...defaults,
 
-  maturity: 0, testQuality: 1, titleId: 'g18do_trg',
+  maturity: 1, testQuality: 0, titleId: 'g18do_trg',
   gameInfo: '• Dortmund railway-only variant, corps transport beer cubes for bonus revenue • Full capitalization, 50% float, 50% pool limit, ownership caps at 60-70% • Triple-jump dividend movement: pay >= 3x price moves right 2 spaces • 7 corps (3-6 tokens), sequential founding order (DGEE after KWE, etc.) • 2D grid market (6x19 descending values), sell drops per share sold • 5 privates via English auction, each tied to a small brewery • 6 phases (2/3/4/5/6/8), M9,000 bank, game ends on bank break • 3-5 players, Dortmund Germany setting, simpler than HSB variant',
   specialties: 'Triple jump dividends • Thuringia',
   implemented: 'Shares • Dividends • Triple-jump movement • Beer transport NOT working',

@@ -2,7 +2,7 @@ import { defaults } from './defaults.js'
 
 export const g1858 = {
   ...defaults,
-  untested: true, titleId: 'g1858', title: '1858', subtitle: 'The Railways of Iberia', designer: 'Ian D. Wilson',
+  maturity: 0, testQuality: 0, titleId: 'g1858', title: '1858', subtitle: 'The Railways of Iberia', designer: 'Ian D. Wilson',
   specialties: 'Private railways • Broad/narrow gauge',
   location: 'Iberia', minPlayers: 2, maxPlayers: 6,
   bankCash: { 2: 8000, 3: 12000, 4: 12000, 5: 12000, 6: 12000 },

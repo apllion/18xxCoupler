@@ -4,33 +4,39 @@
 - **Players:** 2--4
 - **Bank:** Unlimited
 - **Starting Cash:** $800 (2p) / $550 (3p) / $400 (4p)
-🤖 - **Capitalization:** Incremental, 20% float
-🤖 - **Shares:** 20% president + 8x10% (railroads); 10x10% (metal corps)
-🤖 - **Sell Movement:** down per share
-🤖 - **Unsold Dividends:** market -> corp
-🤖 - **Pool Limit:** 50%
-🤖 - **Sell Order:** sell/buy
+- **Capitalization:** Incremental, 20% float
+- **Shares:** 20% president + 8x10% (railroads); 10x10% (metal corps)
+- **Sell Movement:** down per share
+- **Unsold Dividends:** market -> corp
+- **Pool Limit:** 50%
+- **Sell Order:** sell/buy
 - **Currency:** $
 
 ## Specialties
-🤖 - Metal companies (CF&I, VGC) as non-rail investable corps
-- Gold and coal resources shipped for revenue
-- Debt tokens constrain operations
-- Treaty of Boston event reshapes competitive landscape mid-game
-- Mining tokens and coal/ore revenue bonuses
-- 18 privates across Yellow/Green/Brown tier auctions
+- Metal companies (CF&I, VGC) as non-rail investable corps
+- Gold and coal resources shipped for revenue ;(
+- Debt tokens constrain operations ;(
+- Treaty of Boston event reshapes competitive landscape mid-game ;(
+- Mining tokens and coal/ore revenue bonuses ;(
+- 18 privates across Yellow/Green/Brown tier auctions ;(
+
+## Issue / Redeem
+No issue/redeem. Incremental capitalization but no share issuance mechanics.
+
+## Loans
+Inter-corp debt (Treaty of Boston event). RG owes SF: 4 debt tokens. SF owes Doc Holliday: 2 debt tokens. Corps buy one debt token per OR turn at current DEBT market price. DEBT price rises (moves right) at end of every OR — pay early or pay more. Treaty of Boston event trigger ;(. Game-end unpaid debt penalty: RG 4/3/2/1 remaining = 8/5/3/2 steps left; SF 2/1 remaining = 3/1 steps left.
 
 ## Stock Market Movement
-🤖 - **Pay dividend:** right 1 (up if at edge)
-🤖 - **Withhold:** left 1 (down if at edge)
-🤖 - **Sell shares:** down 1 per share sold
-🤖 - **Sold out:** up 1 at end of SR
+- **Pay dividend:** right 1 (up if at edge)
+- **Withhold:** left 1 (down if at edge)
+- **Sell shares:** down 1 per share sold
+- **Sold out:** up 1 at end of SR
 
 ## Auction
-🤖 English auction -- ascending bids on privates (across three tiers).
+English auction -- ascending bids on privates (across three tiers).
 
 ## Round System
-🤖 - SR -> OR x2 (all phases)
+- SR -> OR x2 (all phases)
 
 ## Trains
 | Train | Cost | Qty | Rusts On | Events |

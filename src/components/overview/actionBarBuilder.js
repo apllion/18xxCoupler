@@ -52,8 +52,8 @@ const ACTIONS = [
   { id: 'redeem', label: 'Redeem', key: 'q', round: 'or',
     gate: (g, rt, player, corp) => g.title.capitalization === 'incremental' && corp?.marketShares > 0
   },
-  { id: 'loan', label: 'Loan', key: 'l', round: 'or', gate: (g) => !!g.title.loans },
-  { id: 'interest', label: 'Interest', round: 'or', gate: (g) => !!g.title.loans },
+  { id: 'loan', label: 'Loan', key: 'l', round: 'or', gate: (g) => !!g.title.loans && g.title.loans.type !== '1880_player' },
+  { id: 'interest', label: 'Interest', round: 'or', gate: (g) => !!g.title.loans && g.title.loans.type !== '1880_player' && g.title.loans.type !== '18rg_debt' },
   { id: 'corpshare', label: 'Corp Trade', key: 'g', round: 'or', gate: (g) => !!g.title.corpCanBuyShares },
   { id: 'execcar', label: 'Exec Car', round: 'or', gate: (g) => !!g.title.executiveCars },
   { id: 'export', label: 'Export', round: 'or', gate: (g) => !!g.title.trainExport },
@@ -67,6 +67,11 @@ const ACTIONS = [
   // Terrain costs — tile lay costs deducted from corp treasury
   { id: 'terrain', label: 'Terrain', round: 'or',
     gate: (g) => (g.title.terrainCosts || []).length > 0
+  },
+
+  // Player loan — 1822, 18MS, 1880, 18Rhl
+  { id: 'playerloan', label: 'Player Loan', round: 'any',
+    gate: (g) => !!g.title.loans && g.title.loans.type === '1880_player'
   },
 
   // Pay to bank — auctions, fees, any cash-to-bank transfer

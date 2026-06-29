@@ -22,7 +22,12 @@ export function playerNetWorth(state, playerId) {
     }
   }
 
-  return player.cash + shareValue + privateValue
+  // Subtract player debt (1822, 18MS, 1880, 18Rhl)
+  const debt = player.debt || 0
+  const debtMultiplier = state.title.loans?.endgameMultiplier || 1
+  const debtPenalty = debt * debtMultiplier
+
+  return player.cash + shareValue + privateValue - debtPenalty
 }
 
 export function allNetWorths(state) {

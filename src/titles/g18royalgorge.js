@@ -5,11 +5,24 @@ export const g18royalgorge = {
   maturity: 1, testQuality: 1, titleId: 'g18royalgorge',
   gameInfo: '• Metal companies (CF&I, VGC) as non-rail investable corps alongside 11 railroad corps • Gold and coal resources shipped for revenue, debt tokens constrain operations • Treaty of Boston event reshapes the competitive landscape mid-game • Incremental capitalization, 20% float, sell/buy stock rounds • 1D single-row market (28 spaces), unlimited bank • English auction for 18 privates across Yellow/Green/Brown tiers • 4 phases (Yellow/Green/Brown/Silver), 6x2 multiplier train is unlimited • 2-4 players, Fremont County Colorado setting, highly thematic',
   specialties: 'Mining tokens • Coal/ore revenue bonuses',
-  implemented: 'Shares • Dividends • Metal companies (config) • Debt tokens (config)',
+  implemented: 'Shares • Dividends • Debt tokens (18RG) • Metal companies (config)',
   title: '18 Royal Gorge', subtitle: 'The Royal Gorge Wars', designer: 'Kayla Ross & Denman Scofield',
   location: 'Fremont County, Colorado', minPlayers: 2, maxPlayers: 4,
   bankCash: 99999, startingCash: { 2: 800, 3: 550, 4: 400 }, certLimit: { 2: 20, 3: 14, 4: 10 },
   currencyFormat: '$', capitalization: 'incremental', floatPercent: 20, sellBuyOrder: 'sell_buy',
+
+  // Inter-corp debt: Treaty of Boston event
+  loans: {
+    type: '18rg_debt',
+    debtStartPrice: 50,       // Starting price per debt token
+    debtPriceStep: 10,        // Price increases $10 per OR
+    debts: [
+      { debtor: 'RG', creditorType: 'corp', creditor: 'SF', tokens: 4,
+        endgamePenalty: { 1: 2, 2: 3, 3: 5, 4: 8 } },  // steps left by remaining tokens
+      { debtor: 'SF', creditorType: 'private', creditor: 'G1', tokens: 2,
+        endgamePenalty: { 1: 1, 2: 3 } },
+    ],
+  },
   market: [
     ['30','35','40','45','50','55','60p','65p','70p','80p','90x','100x','110x','120x','130z','145z','160z','180z','200','220','240','260','280','310e','340e','380e','420e','460e'],
   ],

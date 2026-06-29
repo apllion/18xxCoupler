@@ -2,16 +2,24 @@ import { defaults } from './defaults.js'
 
 export const g1822ca = {
   ...defaults,
-  maturity: 1, testQuality: 1, titleId: 'g1822ca',
+  maturity: 2, testQuality: 1, titleId: 'g1822ca',
   gameInfo: '• 1822 system adapted for Canada: 30 minors + 10 majors with acquisition • Bid box auction for concessions, privates, and minors • Grain trains deliver grain from prairie elevators to port cities for bonus revenue • Incremental cap (full at phase 6), 20% float, half pay, most-cash SR order • 1D single-row market (35 spaces), must sell in blocks • 7 phases (1-7), separate L and 2-trains plus E-train endgame • Eastern and Western Regional Scenario variants for shorter games • $12,000 bank, 2-7 players, heavy-weight game',
   specialties: 'Concessions • Minors → majors • Bidbox auction',
-  implemented: 'Shares • Dividends • Concessions • Minor acquisition mergers',
+  implemented: 'Shares • Dividends • Player loans • Concessions • Minor acquisition mergers',
   title: '1822CA', subtitle: 'The Railways of Canada', designer: 'Robert Lecuyer & Simon Cutforth',
   location: 'Canada', minPlayers: 2, maxPlayers: 7,
   bankCash: 12000, startingCash: { 2: 1000, 3: 700, 4: 525, 5: 420, 6: 350, 7: 300 },
   certLimit: { 2: 40, 3: 26, 4: 20, 5: 16, 6: 13, 7: 11 },
   currencyFormat: '$', capitalization: 'incremental', floatPercent: 20, sellBuyOrder: 'sell_buy',
   mustSellInBlocks: true, nextSRPlayerOrder: 'most_cash', halfPay: true,
+
+  // Player loans: emergency train purchase, 150% of shortfall, compounds 50%/SR
+  loans: {
+    type: '1880_player',
+    compoundRate: 50,
+    immediateInterest: 50,
+    debtBlocksSpending: true,
+  },
 
   market: [
     ['5y','10y','15y','20y','25y','30y','35y','40y','45y','50p','60xp','70xp','80xp','90xp','100xp','110','120','135','150','165','180','200','220','245','270','300','330','360','400','450','500','550','600','650','700e'],

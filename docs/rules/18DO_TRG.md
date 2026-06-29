@@ -4,38 +4,44 @@
 - **Players:** 3--5
 - **Bank:** M9,000
 - **Starting Cash:** M375 (3p) / M340 (4p) / M320 (5p)
-🤖 - **Capitalization:** Full, 50% float
-🤖 - **Shares:** 20% president + 8x10%
-🤖 - **Max Ownership:** 60--70% (varies by player count)
-🤖 - **Sell Movement:** down per share
-🤖 - **Unsold Dividends:** market -> corp
-🤖 - **Pool Limit:** 50%
-🤖 - **Sell Order:** sell/buy
+- **Capitalization:** Full, 50% float
+- **Shares:** 20% president + 8x10%
+- **Max Ownership:** 60--70% (varies by player count)
+- **Sell Movement:** down per share
+- **Unsold Dividends:** market -> corp
+- **Pool Limit:** 50%
+- **Sell Order:** sell/buy
 - **Currency:** M (Mark)
 
 ## Specialties
-🤖 - Triple-jump dividend movement: pay >= 3x price moves right 2 spaces
-- Dortmund railway-only variant (simpler than HSB)
-🤖 - Corps transport beer cubes for bonus revenue
-- Sequential founding order (DGEE after KWE, etc.)
-- Descending-value 2D grid market
+- Triple-jump dividend movement: pay >= 3x price moves right 2 spaces
+- Dortmund railway-only variant (simpler than HSB) ;(
+- Corps transport beer cubes for bonus revenue
+- Sequential founding order (DGEE after KWE, etc.) ;(
+- Descending-value 2D grid market ;(
+
+## Issue / Redeem
+No issue/redeem. Full capitalization.
+
+## Loans
+No loans.
 
 ## Stock Market Movement
-🤖 - **Pay dividend < price:** no movement
-🤖 - **Pay dividend >= price but < 3x:** right 1
-🤖 - **Pay dividend >= 3x price:** right 2 (triple jump)
-🤖 - **Withhold:** left 1 (down if at edge)
-🤖 - **Sell shares:** down 1 per share sold
-🤖 - **Sold out:** up 1 at end of SR
+- **Pay dividend < price:** no movement
+- **Pay dividend >= price but < 3x:** right 1
+- **Pay dividend >= 3x price:** right 2 (triple jump)
+- **Withhold:** left 1 (down if at edge)
+- **Sell shares:** down 1 per share sold
+- **Sold out:** up 1 at end of SR
 
 ## Auction
-🤖 English auction (Starting Round) -- ascending bids on each private brewery.
+English auction (Starting Round) -- ascending bids on each private brewery.
 
 ## Round System
-🤖 - SR -> OR x1 (phase 2)
-🤖 - SR -> OR x2 (phases 3--4)
-🤖 - SR -> OR x3 (phases 5--8)
-🤖 - Game ends on bank break
+- SR -> OR x1 (phase 2)
+- SR -> OR x2 (phases 3--4)
+- SR -> OR x3 (phases 5--8)
+- Game ends on bank break
 
 ## Trains
 | Train | Cost | Qty | Rusts On | Events |

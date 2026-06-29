@@ -4,32 +4,38 @@
 - **Players:** 3--6
 - **Bank:** £4,000
 - **Starting Cash:** £330 (3p) / £250 (4p) / £200 (5p) / £160 (6p)
-🤖 - **Capitalization:** Incremental, 20% float (majors); 40% (minors)
-🤖 - **Shares:** 20% president + 8x10% (majors); 40/20/20/20 (minors)
-🤖 - **Sell Movement:** down per share
-🤖 - **Unsold Dividends:** IPO -> corp
-🤖 - **Pool Limit:** 50%
-🤖 - **Sell Order:** sell/buy
+- **Capitalization:** Incremental, 20% float (majors); 40% (minors)
+- **Shares:** 20% president + 8x10% (majors); 40/20/20/20 (minors)
+- **Sell Movement:** down per share
+- **Unsold Dividends:** IPO -> corp
+- **Pool Limit:** 50%
+- **Sell Order:** sell/buy
 - **Currency:** pounds
 
 ## Specialties
-🤖 - 14 minors (40/20/20/20 shares) merge into 7 majors after 4H phase
-🤖 - Majors can IPO only after 6H train purchased
-- Narrow gauge tile abilities on several privates
-- DKR private starts a minor with 2H train
-- Merger timing is the strategic crux
+- 14 minors (40/20/20/20 shares) merge into 7 majors after 4H phase
+- Majors can IPO only after 6H train purchased
+- Narrow gauge tile abilities on several privates ;(
+- DKR private starts a minor with 2H train ;(
+- Merger timing is the strategic crux ;(
+
+## Issue / Redeem
+No issue/redeem. Incremental capitalization; minors merge into majors.
+
+## Loans
+No loans.
 
 ## Stock Market Movement
-🤖 - **Pay dividend:** right 1 (up if at edge)
-🤖 - **Withhold:** left 1 (down if at edge)
-🤖 - **Sell shares:** down 1 per share sold
-🤖 - **Sold out:** up 1 at end of SR
+- **Pay dividend:** right 1 (up if at edge)
+- **Withhold:** left 1 (down if at edge)
+- **Sell shares:** down 1 per share sold
+- **Sold out:** up 1 at end of SR
 
 ## Auction
-🤖 Waterfall -- ascending price auction for privates in order.
+Waterfall -- ascending price auction for privates in order.
 
 ## Round System
-🤖 - SR -> OR x2 (all phases)
+- SR -> OR x2 (all phases)
 
 ## Trains
 | Train | Cost | Qty | Rusts On | Events |

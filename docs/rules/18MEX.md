@@ -4,34 +4,40 @@
 - **Players:** 3--5
 - **Bank:** $9,000
 - **Starting Cash:** $625 (3p) / $500 (4p) / $450 (5p)
-🤖 - **Capitalization:** Full, 50% float
-🤖 - **Shares:** 20% president + 8x10% (NdM has 5% certs)
-🤖 - **Sell Movement:** down per 10% sold
-🤖 - **Unsold Dividends:** market -> corp
-🤖 - **Pool Limit:** 50%
-🤖 - **Sell Order:** sell/buy
+- **Capitalization:** Full, 50% float
+- **Shares:** 20% president + 8x10% (NdM has 5% certs)
+- **Sell Movement:** down per 10% sold
+- **Unsold Dividends:** market -> corp
+- **Pool Limit:** 50%
+- **Sell Order:** sell/buy
 - **Currency:** $
 
 ## Specialties
-🤖 - NdM national merges at phase 5
-🤖 - 3 minors (A/B/C) close at phase 3.5, owners get NdM/UdY shares
-- NdM has non-standard shares including 5% certs
-- MNR private forces NdM par price
-🤖 - Game ends on bank break, bankruptcy, or stock market ceiling
+- NdM national merges at phase 5
+- 3 minors (A/B/C) close at phase 3.5, owners get NdM/UdY shares
+- NdM has non-standard shares including 5% certs ;(
+- MNR private forces NdM par price ;(
+- Game ends on bank break, bankruptcy, or stock market ceiling
+
+## Issue / Redeem
+No issue/redeem. Full capitalization.
+
+## Loans
+No loans.
 
 ## Stock Market Movement
-🤖 - **Pay dividend:** right 1 (up if at edge)
-🤖 - **Withhold:** left 1 (down if at edge)
-🤖 - **Sell shares:** down 1 per 10% sold
-🤖 - **Sold out:** up 1 at end of SR
+- **Pay dividend:** right 1 (up if at edge)
+- **Withhold:** left 1 (down if at edge)
+- **Sell shares:** down 1 per 10% sold
+- **Sold out:** up 1 at end of SR
 
 ## Auction
-🤖 Waterfall -- ascending price auction for privates in order.
+Waterfall -- ascending price auction for privates in order.
 
 ## Round System
-🤖 - SR -> OR x1 (phase 2)
-🤖 - SR -> OR x2 (phases 3--4)
-🤖 - SR -> OR x3 (phases 5--4D)
+- SR -> OR x1 (phase 2)
+- SR -> OR x2 (phases 3--4)
+- SR -> OR x3 (phases 5--4D)
 
 ## Trains
 | Train | Cost | Qty | Rusts On | Events |
@@ -81,4 +87,4 @@
 | 4D | 4D | 2 | Yellow, Green, Brown, Gray | 3 |
 
 ## Terrain
-- Terrain costs: $20, $60
+- Terrain costs: $20, $60 ;(

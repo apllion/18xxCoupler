@@ -4,36 +4,42 @@
 - **Players:** 2--7
 - **Bank:** Unlimited
 - **Starting Cash:** $630 (2p) / $420 (3p) / $315 (4p) / $300 (5p) / $250 (6p) / $225 (7p)
-🤖 - **Capitalization:** Incremental, 20% float
-🤖 - **Shares:** 20% president + 8x10%
-🤖 - **Sell Movement:** down per share
-🤖 - **Unsold Dividends:** market -> corp
-🤖 - **Pool Limit:** 50%
-🤖 - **Sell Order:** sell/buy
-🤖 - **Half Pay:** Yes
+- **Capitalization:** Incremental, 20% float
+- **Shares:** 20% president + 8x10%
+- **Sell Movement:** down per share
+- **Unsold Dividends:** market -> corp
+- **Pool Limit:** 50%
+- **Sell Order:** sell/buy
+- **Half Pay:** Yes
 - **Currency:** $
 
 ## Specialties
-- 20 corporations with 1 token each (choose home city at float)
-- Resource markers (coal, ore, oil) add route bonuses
-- 30 subsidy privates (chosen at float, no pregame auction)
-- Massive scale: continental USA map
-- P-trains available from phase 5
-- Longest 18xx title (5--8 hours)
+- 20 corporations with 1 token each (choose home city at float) ;(
+- Resource markers (coal, ore, oil) add route bonuses ;(
+- 30 subsidy privates (chosen at float, no pregame auction) ;(
+- Massive scale: continental USA map ;(
+- P-trains available from phase 5 ;(
+- Longest 18xx title (5--8 hours) ;(
+
+## Issue / Redeem
+Standard: issue at current price (price drops 1 per share issued), redeem at current price (price rises 1 per share redeemed).
+
+## Loans
+Corp bank loans (1817-style). $100 per loan. Global escalating interest. Take loan: price moves left **2** steps. Repay loan: price moves right **2** steps (max $800). Cannot repay loans taken same OR ;(. Interest tiers: 5 markers per tier (4p), varies at 5p+ ;(.
 
 ## Stock Market Movement
-🤖 - **Pay dividend:** right 1 (up if at edge)
-🤖 - **Half pay:** no movement
-🤖 - **Withhold:** left 1 (down if at edge)
-🤖 - **Sell shares:** down 1 per share sold
-🤖 - **Sold out:** up 1 at end of SR
+- **Pay dividend:** right 1 (up if at edge)
+- **Half pay:** no movement
+- **Withhold:** left 1 (down if at edge)
+- **Sell shares:** down 1 per share sold
+- **Sold out:** up 1 at end of SR
 
 ## Auction
-🤖 No pregame auction. Privates chosen when corporations float.
+No pregame auction. Privates chosen when corporations float.
 
 ## Round System
-🤖 - SR -> OR x2 (all phases)
-🤖 - 8-train signals end game
+- SR -> OR x2 (all phases)
+- 8-train signals end game
 
 ## Trains
 | Train | Cost | Qty | Rusts On | Events |

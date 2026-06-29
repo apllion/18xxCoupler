@@ -4,41 +4,44 @@
 - **Players:** 2--4
 - **Bank:** Unlimited
 - **Starting Cash:** $340 (2p) / $230 (3p) / $180 (4p)
-🤖 - **Capitalization:** Incremental, 20% float (CEO share only)
-🤖 - **Shares:** 5x20% (all shares are 20%; merged = 10x10%)
-🤖 - **Sell Movement:** down per share
-🤖 - **Unsold Dividends:** market -> corp
-🤖 - **Pool Limit:** 100% (no limit)
-🤖 - **Sell Order:** sell/buy
-- **Cert Limit:** Unlimited
+- **Capitalization:** Incremental, 20% float (CEO share only)
+- **Shares:** 5x20% (all shares are 20%; merged = 10x10%)
+- **Sell Movement:** down per share
+- **Unsold Dividends:** market -> corp
+- **Pool Limit:** 100% (no limit)
+- **Sell Order:** sell/buy
+- **Cert Limit:** Unlimited ;(
 - **Currency:** $
 
 ## Specialties
-🤖 - 8 color-coded strategy cards grant station permits and unique one-shot abilities
-🤖 - Fixed 7 rounds
-🤖 - CEO earns $10/round salary
-🤖 - Corps can buy shares of other corps and start new corps
-🤖 - Merger from Brown phase: two peers combine, shares convert 20% to 10%
-🤖 - Tax on 60%+ ownership: 60-70%=$20, 80-90%=$40, 100%=$60
-🤖 - Top bonus: extra $30/$50 per share if in green box during rounds 6/7
+- 8 color-coded strategy cards grant station permits and unique one-shot abilities
+- Fixed 7 rounds
+- CEO earns $10/round salary
+- Corps can buy shares of other corps and start new corps
+- Merger from Brown phase: two peers combine, shares convert 20% to 10%
+- Tax on 60%+ ownership: 60-70%=$20, 80-90%=$40, 100%=$60
+- Top bonus: extra $30/$50 per share if in green box during rounds 6/7
 
 ## Issue / Redeem
-🤖 Corps can sell from treasury and buy from market during operations (step 3.1 sell, step 3.7 buy one share).
+Corps can sell from treasury and buy from market during operations (step 3.1 sell, step 3.7 buy one share).
+
+## Loans
+No loans.
 
 ## Stock Market Movement
-🤖 - **Pay dividend >= 0.5x price but < 3x:** right 1
-🤖 - **Pay dividend >= 3x price:** right 2 (triple jump)
-🤖 - **Pay dividend < 0.5x price or withhold:** left 1 (down if at edge)
-🤖 - **Sell shares:** down 1 per share sold
-🤖 - **Sold out:** up 1 at end of round
-- **Bottom red row:** no CEO salary
+- **Pay dividend >= 0.5x price but < 3x:** right 1
+- **Pay dividend >= 3x price:** right 2 (triple jump)
+- **Pay dividend < 0.5x price or withhold:** left 1 (down if at edge)
+- **Sell shares:** down 1 per share sold
+- **Sold out:** up 1 at end of round
+- **Bottom red row:** no CEO salary ;(
 
 ## Auction
-🤖 Priority auction -- bid for initial turn order.
+Priority auction -- bid for initial turn order.
 
 ## Round System
-🤖 Fixed 7 rounds. Each round: SR -> OR.
-🤖 Game ends after round 7.
+Fixed 7 rounds. Each round: SR -> OR.
+Game ends after round 7.
 
 ## Trains
 | Train | Cost | Qty | Rusts On | Events |
@@ -80,4 +83,4 @@ None. Strategy cards replace privates.
 | Renovated | 3R | 2 | Yellow, Green, Brown, Gray | 1 |
 
 ## Merger
-🤖 Available from Brown phase. Both corps must have operated once. Average price of both, rounded down. Shares convert from 5x20% to 10x10%. Merged corp cannot merge again.
+Available from Brown phase. Both corps must have operated once. Average price of both, rounded down. Shares convert from 5x20% to 10x10%. Merged corp cannot merge again.

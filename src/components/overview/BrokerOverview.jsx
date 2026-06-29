@@ -188,6 +188,7 @@ export default function BrokerOverview() {
                     <InlineEdit value={p.cash} enabled={su}                      onSave={v => doAction({ type: 'SET_CASH', entityId: p.id, entityType: 'player', value: v })}>
                       {fmt(p.cash)}
                     </InlineEdit>
+                    {p.debt > 0 && <div className="text-red-400 text-[10px] font-bold">debt {fmt(p.debt)}</div>}
                   </td>
                   <td className="px-2 text-right text-sky-300/60 text-xs">{fmt(playerNetWorth(game, p.id))}</td>
                   <td className={`px-2 text-center ${playerCertCount(p) > game.certLimit ? 'text-red-400 font-bold' : 'text-broker-text-muted'}`}>{playerCertCount(p)}/{game.certLimit}</td>
@@ -265,7 +266,19 @@ export default function BrokerOverview() {
               <InlineEdit value={c.tokensPlaced} enabled={su}                onSave={v => doAction({ type: 'SET_CORP_FIELD', corpSym: c.sym, field: 'tokensPlaced', value: v })}>
                 {c.tokensPlaced}/{c.tokens.length}
               </InlineEdit>} />
-            {game.title.loans && <BRow extraCols={game.title.taxThresholds ? 1 : 0} l="Loans" corps={corps} cc={curCol} r={c => !c.floated ? '' : c.loans ? <span className="text-red-400 font-bold">{c.loans}</span> : '0'} />}
+            {game.title.loans && game.title.loans.type !== '1880_player' && (
+              <BRow extraCols={game.title.taxThresholds ? 1 : 0}
+                l={game.title.loans.type === '1849' ? 'Bonds' : game.title.loans.type === '18rg_debt' ? 'Debt' : 'Loans'}
+                corps={corps} cc={curCol}
+                r={c => {
+                  if (!c.floated) return ''
+                  if (game.title.loans.type === '18rg_debt') {
+                    const dt = c.debtTokens || 0
+                    return dt > 0 ? <span className="text-red-400 font-bold">{dt}</span> : ''
+                  }
+                  return c.loans ? <span className="text-red-400 font-bold">{c.loans}</span> : '0'
+                }} />
+            )}
             {/* Privates owned by corps */}
             {game.companies?.some(co => co.ownerType === 'corporation' && !co.closed) && (
               <BRow extraCols={game.title.taxThresholds ? 1 : 0} l="Privates" corps={corps} cc={curCol} r={c => {

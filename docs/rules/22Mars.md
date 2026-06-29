@@ -4,36 +4,42 @@
 - **Players:** 3--5
 - **Bank:** Unlimited
 - **Starting Cash:** c450 (2p) / c300 (3p) / c225 (4p) / c180 (5p)
-🤖 - **Capitalization:** Incremental, 20% float
-🤖 - **Shares:** 5x20% (all shares are 20%)
-🤖 - **Sell Movement:** down per share
-🤖 - **Unsold Dividends:** market -> corp
-🤖 - **Pool Limit:** 80%
-🤖 - **Sell Order:** sell/buy
+- **Capitalization:** Incremental, 20% float
+- **Shares:** 5x20% (all shares are 20%)
+- **Sell Movement:** down per share
+- **Unsold Dividends:** market -> corp
+- **Pool Limit:** 80%
+- **Sell Order:** sell/buy
 - **Currency:** c (credits)
 
 ## Specialties
-- Fixed round sequence: 5 SRs and 11 ORs in predetermined order
-- All shares are 20% (5 per corp)
-- Tax of 10c per share above 2 in same corp at each SR
-- 7* and 8* trains double first/last stop values
-- Revolt event strikes randomly between OR7--OR10
-- Mars colonization sci-fi setting
-- Permit cards via priority auction
+- Fixed round sequence: 5 SRs and 11 ORs in predetermined order ;(
+- All shares are 20% (5 per corp) ;(
+- Tax of 10c per share above 2 in same corp at each SR ;(
+- 7* and 8* trains double first/last stop values ;(
+- Revolt event strikes randomly between OR7--OR10 ;(
+- Mars colonization sci-fi setting ;(
+- Permit cards via priority auction ;(
+
+## Issue / Redeem
+No issue/redeem. Incremental capitalization but no share issuance mechanics.
+
+## Loans
+No loans.
 
 ## Stock Market Movement
-🤖 - **Pay dividend > 0 but < 2x price:** right 1
-🤖 - **Pay dividend >= 2x price:** right 2 (double jump)
-🤖 - **Withhold:** left 1 (down if at edge)
-🤖 - **Sell shares:** down 1 per share sold
-🤖 - **Sold out:** up 1 at end of SR
+- **Pay dividend > 0 but < 2x price:** right 1
+- **Pay dividend >= 2x price:** right 2 (double jump)
+- **Withhold:** left 1 (down if at edge)
+- **Sell shares:** down 1 per share sold
+- **Sold out:** up 1 at end of SR
 
 ## Auction
-🤖 Priority auction -- bid for turn order to select permit cards.
+Priority auction -- bid for turn order to select permit cards.
 
 ## Round System
-🤖 Fixed sequence: SR1, OR1, OR2, SR2, OR3, OR4, SR3, OR5, OR6, SR4, OR7, OR8, SR5, OR9, OR10, OR11.
-🤖 Game ends after OR11 or stock market ceiling (300c).
+Fixed sequence: SR1, OR1, OR2, SR2, OR3, OR4, SR3, OR5, OR6, SR4, OR7, OR8, SR5, OR9, OR10, OR11.
+Game ends after OR11 or stock market ceiling (300c).
 
 ## Trains
 | Train | Cost | Qty | Rusts On | Discounts | Events |
@@ -73,4 +79,4 @@ All use 5x20% share structure.
 | 8 | 8* | 3 | Yellow, Green, Brown, Gray, Black | 2 |
 
 ## Tax
-- At start of each SR: 10c tax per share above 2 in same corp
+- At start of each SR: 10c tax per share above 2 in same corp ;(

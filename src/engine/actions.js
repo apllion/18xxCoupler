@@ -10,7 +10,7 @@ import { collectRevenue, collectAllRevenue, closeAllCompanies, assignPrivate } f
 import { deliverToSegment, deliverToExport, advanceBeerMarket, removeNoDemand, placeNoDemand } from './beerMarket.js'
 import { advanceRound, setRoundType, roundLabel } from './roundTracker.js'
 import { ptgMerge, merge1862, acquireMinor1822, convertMinor1867, mergeMinors1867, rlaMerge } from './merger.js'
-import { takeLoan, repayLoan, payInterest, interestDue } from './loans.js'
+import { takeLoan, repayLoan, payInterest, interestDue, takePlayerLoan, repayPlayerLoan, compoundPlayerInterest, payDebtToken, advanceDebtPrice, autoRepayPlayerDebt } from './loans.js'
 import { convertTo5Share, convertTo10Share } from './corpConversion.js'
 import { shortSell, closeShort } from './shorts.js'
 
@@ -377,7 +377,7 @@ export function applyAction(state, action) {
     case 'BUY_EXECUTIVE_CAR':
       handleBuyExecutiveCar(state, action)
       break
-    // Loan actions (1817, 1867)
+    // Loan actions (1817, 1861/1867, 1849)
     case 'TAKE_LOAN':
       takeLoan(state, action.corpSym)
       break
@@ -387,13 +387,34 @@ export function applyAction(state, action) {
     case 'PAY_INTEREST': {
       const result = payInterest(state, action.corpSym)
       if (result < 0) {
-        // Corp can't pay — mark as liquidated
+        // Corp can't pay — mark for warning (1817: liquidation, 1861: nationalization)
         const c = state.corporations.find((co) => co.sym === action.corpSym)
-        if (c) c.liquidated = true
-        state.pendingEvents = (state.pendingEvents || []).concat([`${action.corpSym}_liquidated`])
+        if (c) c.interestDefault = true
+        state.pendingEvents = (state.pendingEvents || []).concat([`${action.corpSym}_interest_default`])
       }
       break
     }
+    // Player loan actions (1880)
+    case 'TAKE_PLAYER_LOAN':
+      takePlayerLoan(state, action.playerId, action.amount)
+      break
+    case 'REPAY_PLAYER_LOAN':
+      repayPlayerLoan(state, action.playerId, action.amount)
+      break
+    case 'COMPOUND_PLAYER_INTEREST': {
+      // Compound interest on all player debts (1880: at SDR start)
+      for (const p of state.players) {
+        if (p.debt > 0) compoundPlayerInterest(p, state.title)
+      }
+      break
+    }
+    // Debt token payment (18RoyalGorge)
+    case 'PAY_DEBT_TOKEN':
+      payDebtToken(state, action.corpSym)
+      break
+    case 'ADVANCE_DEBT_PRICE':
+      advanceDebtPrice(state)
+      break
     // Corp conversion (1817: 2→5→10)
     case 'CONVERT_CORP':
       if (action.targetSize === '5share') convertTo5Share(state, action.corpSym)
@@ -755,7 +776,7 @@ export function applyAction(state, action) {
   }
 
   // Mark corp as operated when it takes an OR action
-  const OR_ACTIONS = new Set(['PAY_DIVIDEND', 'WITHHOLD_DIVIDEND', 'HALF_DIVIDEND', 'BUY_TRAIN', 'ISSUE_SHARES', 'REDEEM_SHARES', 'TAKE_LOAN', 'REPAY_LOAN', 'PAY_INTEREST', 'CORP_BUY_SHARE', 'CORP_PAR', 'CORP_SELL_SHARES'])
+  const OR_ACTIONS = new Set(['PAY_DIVIDEND', 'WITHHOLD_DIVIDEND', 'HALF_DIVIDEND', 'BUY_TRAIN', 'ISSUE_SHARES', 'REDEEM_SHARES', 'TAKE_LOAN', 'REPAY_LOAN', 'PAY_INTEREST', 'PAY_DEBT_TOKEN', 'CORP_BUY_SHARE', 'CORP_PAR', 'CORP_SELL_SHARES'])
   if (OR_ACTIONS.has(action.type) && action.corpSym) {
     const oc = state.corporations.find((c) => c.sym === action.corpSym)
     if (oc) oc.operated = true
@@ -895,6 +916,8 @@ function handlePayDividend(state, { corpSym, totalRevenue }) {
       const payout = perShare * (pct / regShare)
       player.cash += payout
       state.bank.cash -= payout
+      // Auto-repay player debt (18MS: debts repaid when player receives money)
+      autoRepayPlayerDebt(state, player.id)
     }
   }
 
@@ -1300,12 +1323,26 @@ function describeAction(state, action) {
       return `${playerName(action.playerId)} returns ${action.cardId}`
     case 'BUY_EXECUTIVE_CAR':
       return `${action.corpSym} buys executive car for ${action.trainId}${action.price ? ` (${fmt(action.price)})` : ''}`
-    case 'TAKE_LOAN':
-      return `${action.corpSym} takes loan (+${fmt(state.title.loans?.loanValue || 100)})`
+    case 'TAKE_LOAN': {
+      const ltype = state.title.loans?.type
+      const lval = state.title.loans?.loanValue || 100
+      const lrecv = ltype === '1861' ? lval - (state.title.loans?.originationFee || 5) : lval
+      return `${action.corpSym} takes ${ltype === '1849' ? 'bond' : 'loan'} (+${fmt(lrecv)})`
+    }
     case 'REPAY_LOAN':
-      return `${action.corpSym} repays loan (-${fmt(state.title.loans?.loanValue || 100)})`
+      return `${action.corpSym} repays ${state.title.loans?.type === '1849' ? 'bond' : 'loan'} (-${fmt(state.title.loans?.loanValue || 100)})`
     case 'PAY_INTEREST':
       return `${action.corpSym} pays ${fmt(interestDue(state, action.corpSym))} interest`
+    case 'TAKE_PLAYER_LOAN':
+      return `${playerName(action.playerId)} takes loan (+${fmt(action.amount)})`
+    case 'REPAY_PLAYER_LOAN':
+      return `${playerName(action.playerId)} repays ${fmt(action.amount)} debt`
+    case 'COMPOUND_PLAYER_INTEREST':
+      return 'Player loan interest compounded'
+    case 'PAY_DEBT_TOKEN':
+      return `${action.corpSym} pays debt token (${fmt(state.debtMarketPrice || state.title.loans?.debtStartPrice || 50)})`
+    case 'ADVANCE_DEBT_PRICE':
+      return `Debt price advances to ${fmt((state.debtMarketPrice || state.title.loans?.debtStartPrice || 50) + (state.title.loans?.debtPriceStep || 10))}`
     case 'CONVERT_CORP':
       return `${action.corpSym} converts to ${action.targetSize}`
     case 'SHORT_SELL':

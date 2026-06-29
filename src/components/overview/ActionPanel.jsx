@@ -252,20 +252,55 @@ function PanelContent({ panel, game, player, corp, unfloated, fmt, revenueInput,
     )
   }
 
-  // Loans
+  // Loans / Bonds / Debt
   if (panel === 'loan' && corp) {
     const config = game.title.loans || {}
+    const loanType = config.type || '1817'
+    if (loanType === '18rg_debt') {
+      const dt = corp.debtTokens || 0
+      const dp = game.debtMarketPrice || config.debtStartPrice || 50
+      return (
+        <div>
+          <Title><CB c={corp} /> Debt — {dt} tokens</Title>
+          <div className="flex gap-2 mt-1">
+            {dt > 0 && <Btn v="green" o={() => doAction({ type: 'PAY_DEBT_TOKEN', corpSym: corp.sym })}>Pay Token {fmt(dp)}</Btn>}
+          </div>
+        </div>
+      )
+    }
     const loanValue = config.loanValue || 100
     const loans = corp.loans || 0
-    const max = config.maxLoansPerCorp || 99
+    const label = loanType === '1849' ? 'Bond' : 'Loan'
     return (
       <div>
-        <Title><CB c={corp} /> Loans — {loans}/{max}</Title>
+        <Title><CB c={corp} /> {label}s — {loans}</Title>
         <div className="flex gap-2 mt-1">
-          {loans < max && <Btn v="green" o={() => doAction({ type: 'TAKE_LOAN', corpSym: corp.sym })}>Take Loan +{fmt(loanValue)}</Btn>}
+          <Btn v="green" o={() => doAction({ type: 'TAKE_LOAN', corpSym: corp.sym })}>Take {label} +{fmt(loanType === '1861' ? loanValue - (config.originationFee || 5) : loanValue)}</Btn>
           {loans > 0 && corp.cash >= loanValue && <Btn v="red" o={() => doAction({ type: 'REPAY_LOAN', corpSym: corp.sym })}>Repay -{fmt(loanValue)}</Btn>}
           {loans > 0 && <Btn v="yellow" o={() => doAction({ type: 'PAY_INTEREST', corpSym: corp.sym })}>Pay Interest</Btn>}
         </div>
+      </div>
+    )
+  }
+
+  // Player loan (1822, 18MS, 1880, 18Rhl)
+  if (panel === 'playerloan' && player) {
+    const debt = player.debt || 0
+    return (
+      <div>
+        <Title>{player.name} — Player Loan</Title>
+        {debt > 0 && <div className="text-red-400 text-sm mb-1">Current debt: {fmt(debt)}</div>}
+        <div className="flex gap-2 mt-1 flex-wrap">
+          {[50, 100, 200, 500].map(amt => (
+            <Btn key={`t${amt}`} v="red" o={() => doAction({ type: 'TAKE_PLAYER_LOAN', playerId: player.id, amount: amt })}>Borrow {fmt(amt)}</Btn>
+          ))}
+        </div>
+        {debt > 0 && (
+          <div className="flex gap-2 mt-2 flex-wrap">
+            <Btn v="green" o={() => doAction({ type: 'REPAY_PLAYER_LOAN', playerId: player.id, amount: debt })}>Repay All ({fmt(debt)})</Btn>
+            {debt > 50 && <Btn v="green" o={() => doAction({ type: 'REPAY_PLAYER_LOAN', playerId: player.id, amount: 50 })}>Repay {fmt(50)}</Btn>}
+          </div>
+        )}
       </div>
     )
   }

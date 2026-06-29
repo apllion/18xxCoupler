@@ -3,11 +3,11 @@ import { defaults } from './defaults.js'
 export const g1867 = {
   ...defaults,
 
-  maturity: 2, testQuality: 1, titleId: 'g1867', roundTypes: ['SR', 'OR', 'MR'],
+  maturity: 3, testQuality: 1, titleId: 'g1867', roundTypes: ['SR', 'OR', 'MR'],
   unsoldShareDividends: 'none', // Bank pool shares receive no dividends
   gameInfo: '• 16 minors (100% single-share) merge into 8 majors, then nationalize into CN • Incremental capitalization, 20% float for majors, half pay dividends allowed • Dedicated Merger Rounds between ORs from phase 3 through 7 • Default 1D column market (28 spaces), optional 2D grid variant • Bid box auction for 5 privates with city-bonus revenue abilities • 7 phases (2-8), nationalization events at phases 4/6/8 with train discounts • Phase 8 trains get large discounts ($275-$500 off), 2+2 and 5+5E multiplier trains • $15,000 bank, 2-6 players, sibling to 1861, sweet spot 4-5p',
   specialties: 'Minors → majors → CN nationalization • Bidbox auction • Multiplier trains 2+2 5+5E',
-  implemented: 'Shares • Half pay • Mergers (minor→major) • Nationalization • Train discounts',
+  implemented: 'Shares • Half pay • Loans (1861-style) • Mergers (minor→major) • Nationalization • Train discounts',
   title: '1867',
   subtitle: 'Railways of Canada',
   designer: 'Ian D. Wilson',
@@ -28,6 +28,18 @@ export const g1867 = {
   sellAfter: 'operate',
   mustSellInBlocks: false,
   ebuyDepotCheapest: false,
+
+  // Loans: fixed interest, origination fee, nationalization penalty
+  loans: {
+    type: '1861',           // Same system as 1861
+    loanValue: 50,          // $50 face value
+    originationFee: 5,      // Corp receives $45 ($50 - $5 fee)
+    interestPerLoan: 5,     // Fixed $5 per loan per OR
+    maxByType: { minor: 2, major: 5, national: 100 },
+    takeMovement: 'none',
+    repayMovement: 'none',
+    endgameLeftPerLoan: 2,  // Price moves left 2 per loan at game end (stricter than 1861)
+  },
 
   gameEndCheck: {
     bank: 'current_or',

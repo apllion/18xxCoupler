@@ -4,35 +4,41 @@
 - **Players:** 3--5
 - **Bank:** ￦7,600
 - **Starting Cash:** ￦440 (3p) / ￦400 (4p) / ￦380 (5p)
-🤖 - **Capitalization:** Full, 50% float
-🤖 - **Shares:** 20% president + 8x10%
-🤖 - **Sell Movement:** down per share
-🤖 - **Unsold Dividends:** market -> corp
-🤖 - **Pool Limit:** 50%
-🤖 - **Sell Order:** sell/buy
+- **Capitalization:** Full, 50% float
+- **Shares:** 20% president + 8x10%
+- **Sell Movement:** down per share
+- **Unsold Dividends:** market -> corp
+- **Pool Limit:** 50%
+- **Sell Order:** sell/buy
 - **Currency:** won
 
 ## Specialties
-- Korean peninsula setting
-🤖 - Executive car tokens attach to trains for +1 stop range (12 available)
-- Goods transport via ports for bonus revenue
-- D-train purchase advances stock price 1--3 spaces and signals game end
-- Stations scale with par price (2 at low par, 3 at high)
+- Korean peninsula setting ;(
+- Executive car tokens attach to trains for +1 stop range (12 available)
+- Goods transport via ports for bonus revenue ;(
+- D-train purchase advances stock price 1--3 spaces and signals game end ;(
+- Stations scale with par price (2 at low par, 3 at high) ;(
+
+## Issue / Redeem
+No issue/redeem. Full capitalization.
+
+## Loans
+No loans.
 
 ## Stock Market Movement
-🤖 - **Pay dividend:** right 1 (up if at edge)
-🤖 - **Withhold:** left 1 (down if at edge)
-🤖 - **Sell shares:** down 1 per share sold
-🤖 - **Sold out:** up 1 at end of SR
+- **Pay dividend:** right 1 (up if at edge)
+- **Withhold:** left 1 (down if at edge)
+- **Sell shares:** down 1 per share sold
+- **Sold out:** up 1 at end of SR
 
 ## Auction
-🤖 Waterfall -- ascending price auction for privates in order.
+Waterfall -- ascending price auction for privates in order.
 
 ## Round System
-🤖 - SR -> OR x1 (phase 2)
-🤖 - SR -> OR x2 (phases 3--4)
-🤖 - SR -> OR x3 (phases 5--D)
-🤖 - Game ends on bank break, bankruptcy, or D-train purchase
+- SR -> OR x1 (phase 2)
+- SR -> OR x2 (phases 3--4)
+- SR -> OR x3 (phases 5--D)
+- Game ends on bank break, bankruptcy, or D-train purchase
 
 ## Trains
 | Train | Cost | Qty | Rusts On | Events |

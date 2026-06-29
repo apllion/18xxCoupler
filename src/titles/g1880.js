@@ -3,10 +3,10 @@ import { defaults } from './defaults.js'
 export const g1880 = {
   ...defaults,
 
-  maturity: 2, testQuality: 1, titleId: 'g1880',
+  maturity: 1, testQuality: 0, titleId: 'g1880',
   gameInfo: '• Building permits (A/B/C/D) gate which corps can lay track in each phase • Communist takeover at phase B3 closes stock market, reopens at phase C2 • 14 corps with 3 tokens each, 20% float, sell/buy stock rounds • 2D grid market (9x14) with letter-coded columns, 80% pool limit • 8 privates drafted, P6 grants BCR director cert and is the kingmaker pick • 11 phases (A1 through D3), float percent increases as phases advance • ¥37,860 bank, game ends after first 8-train triggers one more full OR set • 3-7 players, sweet spot 4-5p, long complex game (4-6 hours)',
   specialties: 'Variable president cert 20–40% • Foreign Investors (mini-corps) • Share Dealing Rounds (not regular SR) • 50% capitalization (two-stage) • Building permits A/B/C/D • Communist takeover closes market • Phase-dependent float 20→60%',
-  implemented: 'Shares • Dividends • Building permits (config) • Communist takeover (config)',
+  implemented: 'Shares • Dividends • Player loans (1880) • Building permits (config) • Communist takeover (config)',
   title: '1880',
   subtitle: 'China',
   designer: 'Helmut Ohley, Leonhard Orgler',
@@ -25,6 +25,12 @@ export const g1880 = {
   floatPercent: 20,
   ebuyPresSwap: false,
   ebuyDepotCheapest: false,
+
+  // Player loans: emergency train funding, 50% compound interest per SDR
+  loans: {
+    type: '1880_player',
+    compoundRate: 50,         // 50% compound interest per SDR
+  },
 
   gameEndCheck: { finalTrain: 'one_more_full_or_set' },
 
