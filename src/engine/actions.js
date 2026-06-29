@@ -499,31 +499,74 @@ export function applyAction(state, action) {
     // Issue shares: corp sells shares from IPO to raise cash (incremental cap)
     case 'ISSUE_SHARES': {
       const ic = state.corporations.find(co => co.sym === action.corpSym)
+      const issueCount = action.count || 1
       if (ic && ic.ipoShares > 0) {
         const shareSize = getCorpShares(state, action.corpSym)[1] ?? 10
-        const issuePrice = corpPrice(state.stockMarket, action.corpSym) || ic.parPrice || 0
-        const revenue = (issuePrice * shareSize) / 10
-        ic.ipoShares -= shareSize
-        ic.marketShares += shareSize
-        ic.cash += revenue
-        // Price drops one step on issue
-        moveDown(state.stockMarket, action.corpSym, 1)
+        const shares = Math.min(issueCount, Math.floor(ic.ipoShares / shareSize))
+        // Issue pricing: title-configurable
+        // '1846': price at one step left (no price movement)
+        // 'standard': price at current (price moves down per share)
+        const issueRule = state.title.issueRedeemRule || 'standard'
+        const currentPrice = corpPrice(state.stockMarket, action.corpSym) || ic.parPrice || 0
+        let perShareRevenue
+        if (issueRule === '1846') {
+          // Get price one column left
+          const pos = state.stockMarket.corpPositions[action.corpSym]
+          const leftPrice = pos && pos.col > 0
+            ? (state.stockMarket.grid[pos.row]?.[pos.col - 1]?.price || currentPrice)
+            : currentPrice
+          perShareRevenue = leftPrice
+        } else {
+          perShareRevenue = currentPrice
+        }
+        ic.ipoShares -= shareSize * shares
+        ic.marketShares += shareSize * shares
+        ic.cash += perShareRevenue * shares
+        // Price movement
+        if (issueRule === '1846') {
+          // 1846: no price movement on normal issue (6.33)
+        } else {
+          // Standard: price drops per share issued
+          const issueMove = state.title.issueMovement || 'down'
+          for (let i = 0; i < shares; i++) {
+            if (issueMove === 'left') moveLeft(state.stockMarket, action.corpSym, 1)
+            else moveDown(state.stockMarket, action.corpSym, 1)
+          }
+        }
       }
       break
     }
     // Redeem shares: corp buys shares from market pool back to IPO
     case 'REDEEM_SHARES': {
       const rc = state.corporations.find(co => co.sym === action.corpSym)
+      const redeemCount = action.count || 1
       if (rc && rc.marketShares > 0) {
         const shareSize = getCorpShares(state, action.corpSym)[1] ?? 10
-        const redeemPrice = corpPrice(state.stockMarket, action.corpSym) || rc.parPrice || 0
-        const cost = (redeemPrice * shareSize) / 10
-        if (rc.cash >= cost) {
-          rc.marketShares -= shareSize
-          rc.ipoShares += shareSize
-          rc.cash -= cost
-          // Price moves right on redeem
-          moveRight(state.stockMarket, action.corpSym, 1)
+        const shares = Math.min(redeemCount, Math.floor(rc.marketShares / shareSize))
+        const issueRule = state.title.issueRedeemRule || 'standard'
+        const currentPrice = corpPrice(state.stockMarket, action.corpSym) || rc.parPrice || 0
+        let perShareCost
+        if (issueRule === '1846') {
+          // Pay one column right of current price
+          const pos = state.stockMarket.corpPositions[action.corpSym]
+          const rightCol = pos ? pos.col + 1 : 0
+          const rightPrice = state.stockMarket.grid[pos?.row]?.[rightCol]?.price || currentPrice
+          perShareCost = rightPrice
+        } else {
+          perShareCost = currentPrice
+        }
+        const totalCost = perShareCost * shares
+        if (rc.cash >= totalCost) {
+          rc.marketShares -= shareSize * shares
+          rc.ipoShares += shareSize * shares
+          rc.cash -= totalCost
+          if (issueRule === '1846') {
+            // 1846: no price movement on redeem (6.33)
+          } else {
+            for (let i = 0; i < shares; i++) {
+              moveRight(state.stockMarket, action.corpSym, 1)
+            }
+          }
         }
       }
       break
