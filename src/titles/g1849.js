@@ -23,6 +23,7 @@ export const g1849 = {
   floatPercent: 20,
   sellBuyOrder: 'sell_buy',
   sellMovement: 'down_per_10',
+  dividendMovement: 'standard_no_double', // >=price right1; else nothing; no double jump
   poolShareDrop: 'down_block',
   sellAfter: 'operate',
   ebuyFromOthers: 'never',

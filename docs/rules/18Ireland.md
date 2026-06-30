@@ -26,8 +26,8 @@ No issue/redeem. Incremental capitalization; minors merge into majors.
 No loans.
 
 ## Stock Market Movement
-- **Pay dividend:** right 1 (up if at edge)
-- **Withhold:** left 1 (down if at edge)
+- **Pay dividend:** right 1 if revenue >= price; else no movement
+- **Withhold:** left 1
 - **Sell shares:** down 1 per share sold
 - **Sold out:** up 1 at end of SR
 

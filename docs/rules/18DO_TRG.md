@@ -27,9 +27,7 @@ No issue/redeem. Full capitalization.
 No loans.
 
 ## Stock Market Movement
-- **Pay dividend < price:** no movement
-- **Pay dividend >= price but < 3x:** right 1
-- **Pay dividend >= 3x price:** right 2 (triple jump)
+- **Pay dividend:** right 1 if >= price; right 2 if >= 3× (triple jump)
 - **Withhold:** left 1 (down if at edge)
 - **Sell shares:** down 1 per share sold
 - **Sold out:** up 1 at end of SR

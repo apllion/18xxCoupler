@@ -28,8 +28,8 @@ No issue/redeem. Full capitalization.
 No loans.
 
 ## Stock Market Movement
-- **Pay dividend:** right 1 (up if at edge)
-- **Withhold:** left 1 (down if at edge)
+- **Pay dividend:** right 1; right 2 if revenue >= price
+- **Withhold:** left 1
 - **Sell shares:** down 1 per share sold
 - **Sold out:** up 1 at end of SR
 

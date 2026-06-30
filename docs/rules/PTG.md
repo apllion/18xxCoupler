@@ -29,12 +29,10 @@ Corps can sell from treasury and buy from market during operations (step 3.1 sel
 No loans.
 
 ## Stock Market Movement
-- **Pay dividend >= 0.5x price but < 3x:** right 1
-- **Pay dividend >= 3x price:** right 2 (triple jump)
-- **Pay dividend < 0.5x price or withhold:** left 1 (down if at edge)
+- **Pay dividend:** right 1 if total revenue >= 0.5× price; right 2 if >= 3×; left 1 if < 0.5×
+- **Withhold:** left 1 (down if at edge)
 - **Sell shares:** down 1 per share sold
-- **Sold out:** up 1 at end of round
-- **Bottom red row:** no CEO salary ;(
+- **Sold out:** up 1 at end of SR
 
 ## Auction
 Priority auction -- bid for initial turn order.

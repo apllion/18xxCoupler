@@ -12,6 +12,7 @@ export const g18ireland = {
   bankCash: 4000, startingCash: { 3: 330, 4: 250, 5: 200, 6: 160 },
   certLimit: { 3: 16, 4: 12, 5: 10, 6: 8 },
   currencyFormat: '£', capitalization: 'incremental', floatPercent: 20, sellBuyOrder: 'sell_buy',
+  dividendMovement: 'standard_no_double', // >=price right1; else nothing; no double jump
 
   market: [
     ['','62','68','76','84','92','100p','110','122','134','148','170','196','225','260e'],

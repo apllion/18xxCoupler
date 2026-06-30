@@ -27,9 +27,9 @@ No issue/redeem. Incremental capitalization but no share issuance mechanics.
 Inter-corp debt (Treaty of Boston event). RG owes SF: 4 debt tokens. SF owes Doc Holliday: 2 debt tokens. Corps buy one debt token per OR turn at current DEBT market price. DEBT price rises (moves right) at end of every OR — pay early or pay more. Treaty of Boston event trigger ;(. Game-end unpaid debt penalty: RG 4/3/2/1 remaining = 8/5/3/2 steps left; SF 2/1 remaining = 3/1 steps left.
 
 ## Stock Market Movement
-- **Pay dividend:** right 1 (up if at edge)
-- **Withhold:** left 1 (down if at edge)
-- **Sell shares:** down 1 per share sold
+- **Pay dividend:** right = floor(revenue / price), max 3 steps
+- **Withhold:** left 1
+- **Sell shares:** left 1 per share sold (blocked by president; metals: no movement)
 - **Sold out:** up 1 at end of SR
 
 ## Auction

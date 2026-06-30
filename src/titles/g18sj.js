@@ -23,6 +23,7 @@ export const g18sj = {
   capitalization: 'incremental', // switches to full in phase 5
   floatPercent: 60,
   sellBuyOrder: 'sell_buy_sell',
+  dividendMovement: '18sj',        // >=price right1; >=2x right2 (if price>82)
 
   gameEndCheck: {
     bankrupt: 'immediate',

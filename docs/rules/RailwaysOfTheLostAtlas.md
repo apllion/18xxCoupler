@@ -28,9 +28,9 @@ No issue/redeem. Minors merge into majors during Merger Rounds.
 No loans.
 
 ## Stock Market Movement
-- **Pay dividend:** right 1 (up if at edge)
-- **Withhold:** left 1 (down if at edge)
-- **Sell shares:** down 1 per sale (variant: per share)
+- **Pay dividend:** right 1; right 2 if revenue >= price
+- **Withhold:** left 1
+- **Sell shares:** down 1 per sale (per-share variant available)
 - **Sold out:** up 1 at end of SR
 
 ## Auction

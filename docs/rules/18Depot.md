@@ -29,8 +29,8 @@ Not standard. Manual recording tool -- use as needed.
 Optional. Configurable loan system for generic recording.
 
 ## Stock Market Movement
-- **Pay dividend:** right 1 (up if at edge)
-- **Withhold:** left 1 (down if at edge)
+- **Pay dividend:** right 1; right 2 if revenue >= price
+- **Withhold:** left 1
 - **Sell shares:** down 1 per share sold
 - **Sold out:** up 1 at end of SR
 

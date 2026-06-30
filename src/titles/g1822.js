@@ -11,6 +11,7 @@ export const g1822 = {
   bankCash: 12000, startingCash: { 2: 900, 3: 700, 4: 525, 5: 420, 6: 350, 7: 300 },
   certLimit: { 2: 33, 3: 26, 4: 20, 5: 16, 6: 13, 7: 11 },
   currencyFormat: '£', capitalization: 'incremental', floatPercent: 20, sellBuyOrder: 'sell_buy', mustSellInBlocks: false, nextSRPlayerOrder: 'most_cash', halfPay: true,
+  dividendMovement: '1822',        // rev>0 right1; >=price right1; >=2x right2 (majors only)
 
   // Player loans: emergency train purchase, 150% of shortfall, compounds 50%/SR
   loans: {

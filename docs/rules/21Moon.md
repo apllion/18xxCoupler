@@ -26,9 +26,9 @@ Incremental capitalization. Corps issue/sell from treasury during Corporate Roun
 No loans.
 
 ## Stock Market Movement
-- **Pay dividend:** right 1 (up if at edge)
-- **Withhold:** left 1 (down if at edge)
-- **Sell shares:** down 1 per share sold
+- **Pay dividend:** right 1 if >= half price; right 2 if >= 2×; else no movement
+- **Withhold:** left 1
+- **Sell shares:** down 1 per sale (blocked)
 - **Sold out:** up 1 at end of SR
 
 ## Auction

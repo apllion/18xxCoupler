@@ -165,79 +165,132 @@ export function moveUp(market, corpSym, steps = 1) {
 }
 
 // --- Dividend-based movement ---
-// dividendMovement config:
-//   undefined / 'standard': withhold=left, pay<price=right1, pay>=price=right2
-//   'trg_triple_jump': withhold=left(down if at edge), pay<price=none, pay>=price=right1, pay>=3x=right2
-// Returns positive for right moves, -1 for left, -2 for down
+// dividendMovement config: see switch below for all supported types.
+// Returns positive for right moves, -1 for left
 export function moveDividend(market, corpSym, perShare, dividendMovement, totalRevenue) {
   const pos = market.corpPositions[corpSym]
   if (!pos) return 0
-  const currentPrice = priceAt(market, pos.row, pos.col)
-  if (!currentPrice) return 0
+  const price = priceAt(market, pos.row, pos.col)
+  if (!price) return 0
 
-  if (dividendMovement === 'trg_triple_jump') {
-    // 18DO TRG rules:
-    // withhold: left 1 (if at left edge, down 1)
-    // pay > 0 but < price: no movement
-    // pay >= price but < 3x: right 1 (up if at right edge)
-    // pay >= 3x: right 2
-    if (perShare <= 0) {
-      if (!stepLeft(market, pos)) stepDown(market, pos)
-      return -1
-    }
-    if (perShare < currentPrice) return 0
-    if (perShare >= currentPrice * 3) {
-      let moved = 0
-      if (stepRight(market, pos)) moved++
-      if (stepRight(market, pos)) moved++
-      return moved
-    }
-    // >= price but < 3x
-    if (stepRight(market, pos)) return 1
-    if (stepUp(market, pos)) return 1
-    return 0
-  }
+  const doRight = (n) => { let m = 0; for (let i = 0; i < n; i++) if (stepRight(market, pos)) m++; return m }
+  const doLeft = () => { stepLeft(market, pos); return -1 }
+  const doLeftOrDown = () => { if (!stepLeft(market, pos)) stepDown(market, pos); return -1 }
 
-  if (dividendMovement === 'ptg_triple') {
-    // PTG rules: compare TOTAL REVENUE vs share price
-    // withhold: left 1 (handled in handleWithholdDividend)
-    // pay < 0.5× share price: left 1 (down if can't go left)
-    // pay >= 0.5× and < 3× share price: right 1 (up if can't go right)
-    // pay >= 3× share price: right 2 (up if can't go right)
-    const rev = totalRevenue ?? perShare * 10
-    if (perShare <= 0) {
-      if (!stepLeft(market, pos)) stepDown(market, pos)
-      return -1
-    }
-    if (rev < currentPrice * 0.5) {
-      if (!stepLeft(market, pos)) stepDown(market, pos)
-      return -1
-    }
-    if (rev >= currentPrice * 3) {
-      let moved = 0
-      if (stepRight(market, pos) || stepUp(market, pos)) moved++
-      if (stepRight(market, pos) || stepUp(market, pos)) moved++
-      return moved
-    }
-    // >= 0.5x but < 3x: right 1, up if can't go right
-    if (stepRight(market, pos) || stepUp(market, pos)) return 1
-    return 0
-  }
-
-  // Standard rules (most 18xx):
-  // withhold: left 1
-  // pay > 0: right 1. If perShare >= currentPrice: right 2 (double jump)
+  // Withhold always moves left (all types)
   if (perShare <= 0) {
-    stepLeft(market, pos)
-    return -1
+    switch (dividendMovement) {
+      case 'trg_triple_jump':
+      case 'ptg_triple':
+        return doLeftOrDown()
+      default:
+        return doLeft()
+    }
   }
 
-  const jumps = perShare >= currentPrice ? 2 : 1
-  let moved = 0
-  for (let i = 0; i < jumps; i++) {
-    if (stepRight(market, pos)) moved++
+  // Revenue-based jumps
+  switch (dividendMovement) {
+    // 1830, 1889, 18Ches, 18MS, 1817 — simple: rev>0 right 1, no double jump
+    case 'no_double':
+      return doRight(1)
+
+    // 1867, 1849, 18Rhl, 18Ireland — >=price right 1, else nothing
+    case 'standard_no_double':
+      return perShare >= price ? doRight(1) : 0
+
+    // 1858 — per_share*10 >= price → right 1, else nothing
+    case '1858':
+      return perShare * 10 >= price ? doRight(1) : 0
+
+    // 1846 — <half→left; >=1x→right1; >=2x→right2; >=3x→right3 (if price>=165)
+    case '1846': {
+      if (perShare < price * 0.5) return doLeft()
+      let t = 0
+      if (perShare >= price) t = 1
+      if (perShare >= price * 2) t = 2
+      if (perShare >= price * 3 && price >= 165) t = 3
+      return t > 0 ? doRight(t) : 0
+    }
+
+    // 1822 — rev>0 right1; >=2x right2 (majors; minors always just right 1)
+    case '1822':
+      return doRight(perShare >= price * 2 ? 2 : 1)
+
+    // 18SJ — >=price right1; >=2x right2 (if price>82)
+    case '18sj':
+      if (perShare < price) return 0
+      return doRight(perShare >= price * 2 && price > 82 ? 2 : 1)
+
+    // 1860, 1862 — >=1x→1; >=2x→2; >=3x→3; >=4x→4
+    case 'multi_jump': {
+      if (perShare < price) return 0
+      const t = Math.min(Math.floor(perShare / price), 4)
+      return doRight(t)
+    }
+
+    // 18GB — rev>0 always right; >=2x→2; >=3x→3; >=4x→4
+    case '18gb': {
+      const t = Math.min(Math.max(Math.floor(perShare / price), 1), 4)
+      return doRight(t)
+    }
+
+    // 18USA — >=0.5x→1; >=1x→2; >=1.5x→3; >=2x→4
+    case '18usa': {
+      let t = 0
+      if (perShare >= Math.floor(price * 0.5)) t = 1
+      if (perShare >= price) t = 2
+      if (perShare >= Math.floor(price * 1.5)) t = 3
+      if (perShare >= price * 2) t = 4
+      return t > 0 ? doRight(t) : 0
+    }
+
+    // 18RG — right = floor(rev/price), max 3
+    case '18rg': {
+      const t = Math.min(Math.floor(perShare / price), 3)
+      return t > 0 ? doRight(t) : 0
+    }
+
+    // 21Moon — >=2x right2; >=half right1; else nothing
+    case '21moon': {
+      if (perShare >= price * 2) return doRight(2)
+      if (perShare >= price * 0.5) return doRight(1)
+      return 0
+    }
+
+    // 22Mars — >=2x right2; else right1
+    // (already handled by 'standard' default, but explicit)
+
+    // 1871 — full payout right1; half pay nothing (handled by caller)
+    case '1871':
+      return doRight(1)
+
+    // 18DO TRG — withhold=left/down; <price=none; >=price right1; >=3x right2
+    case 'trg_triple_jump':
+      if (perShare < price) return 0
+      if (perShare >= price * 3) return doRight(2)
+      if (stepRight(market, pos)) return 1
+      if (stepUp(market, pos)) return 1
+      return 0
+
+    // PTG — compare TOTAL revenue vs price
+    case 'ptg_triple': {
+      const rev = totalRevenue ?? perShare * 10
+      if (rev < price * 0.5) return doLeftOrDown()
+      if (rev >= price * 3) {
+        let m = 0
+        if (stepRight(market, pos) || stepUp(market, pos)) m++
+        if (stepRight(market, pos) || stepUp(market, pos)) m++
+        return m
+      }
+      if (stepRight(market, pos) || stepUp(market, pos)) return 1
+      return 0
+    }
+
+    // Standard (default for most 18xx):
+    // rev>0: right 1. If perShare >= price: right 2 (double jump)
+    default:
+      return doRight(perShare >= price ? 2 : 1)
   }
-  return moved
 }
 
 // --- Sell movement (title-aware) ---

@@ -28,9 +28,9 @@ No issue/redeem. Full capitalization.
 Bank credits (emergency train purchase). 2x the credit amount deducted from player total at game end. No recurring interest. Auto-trigger on emergency train shortfall ;(. Optional variant: bank credits disallowed — director must sell certs or go bankrupt ;(.
 
 ## Stock Market Movement
-- **Pay dividend:** right 1 (up if at edge)
-- **Withhold:** left 1 (down if at edge)
-- **Sell shares:** down per block (blocked)
+- **Pay dividend:** right 1 if revenue >= price; else no movement
+- **Withhold:** left 1
+- **Sell shares:** down 1 per sale (blocked)
 - **Sold out:** up 1 at end of SR
 
 ## Auction

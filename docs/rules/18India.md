@@ -28,8 +28,8 @@ No issue/redeem. Corps buy/sell shares of OTHER corps (cross-ownership), not own
 No loans.
 
 ## Stock Market Movement
-- **Pay dividend:** right 1 (up if at edge)
-- **Withhold:** left 1 (down if at edge)
+- **Pay dividend:** right 1; right 2 if revenue >= price
+- **Withhold:** left 1
 - **Sell shares:** NO movement
 - **Sold out:** up 1 at end of SR
 

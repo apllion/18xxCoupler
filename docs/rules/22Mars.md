@@ -28,9 +28,8 @@ No issue/redeem. Incremental capitalization but no share issuance mechanics.
 No loans.
 
 ## Stock Market Movement
-- **Pay dividend > 0 but < 2x price:** right 1
-- **Pay dividend >= 2x price:** right 2 (double jump)
-- **Withhold:** left 1 (down if at edge)
+- **Pay dividend:** right 1; right 2 if revenue >= 2× price
+- **Withhold:** left 1
 - **Sell shares:** down 1 per share sold
 - **Sold out:** up 1 at end of SR
 

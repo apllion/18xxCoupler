@@ -11,6 +11,7 @@ export const g18gb = {
   bankCash: 99999, startingCash: { 2: 375, 3: 330, 4: 330, 5: 320, 6: 305 },
   certLimit: { 2: 19, 3: 14, 4: 14, 5: 14, 6: 12 },
   currencyFormat: '£', capitalization: 'full', floatPercent: 40, sellBuyOrder: 'sell_buy',
+  dividendMovement: '18gb',        // rev>0 always right; >=2x→right2; >=3x→right3; >=4x→right4
   marketShareLimit: 100,
 
   // 5-share corporations: shares = [40, 20, 20, 20] for 5-share; converts to 10-share later

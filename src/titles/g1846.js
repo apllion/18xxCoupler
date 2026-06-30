@@ -32,6 +32,7 @@ export const g1846 = {
   sellBuyOrder: 'sell_buy',
   halfPay: true,
   sellMovement: 'left_block_pres',
+  dividendMovement: '1846',        // <half→left1; >=1x→right1; >=2x→right2; >=3x→right3 (if price>=165)
   poolShareDrop: 'down_block',
   sellAfter: 'p_any_operate',
   mustSellInBlocks: true,

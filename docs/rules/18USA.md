@@ -28,9 +28,9 @@ Standard: issue at current price (price drops 1 per share issued), redeem at cur
 Corp bank loans (1817-style). $100 per loan. Global escalating interest. Take loan: price moves left **2** steps. Repay loan: price moves right **2** steps (max $800). Cannot repay loans taken same OR ;(. Interest tiers: 5 markers per tier (4p), varies at 5p+ ;(.
 
 ## Stock Market Movement
-- **Pay dividend:** right 1 (up if at edge)
+- **Pay dividend:** right 1 if >= 0.5×; right 2 if >= 1×; right 3 if >= 1.5×; right 4 if >= 2×
 - **Half pay:** no movement
-- **Withhold:** left 1 (down if at edge)
+- **Withhold:** left 1
 - **Sell shares:** down 1 per share sold
 - **Sold out:** up 1 at end of SR
 

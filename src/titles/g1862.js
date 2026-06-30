@@ -12,6 +12,7 @@ export const g1862 = {
   startingCash: { 2: 1200, 3: 800, 4: 600, 5: 480, 6: 400, 7: 345, 8: 300 },
   certLimit: { 2: 25, 3: 18, 4: 13, 5: 11, 6: 10, 7: 9, 8: 8 },
   currencyFormat: '£', capitalization: 'full', floatPercent: 50, sellBuyOrder: 'sell_buy', sellAfter: 'round',
+  dividendMovement: 'multi_jump',  // >=1x→right1; >=2x→right2; >=3x→right3; >=4x→right4
   // Shares: 30% president + 7x10%
   shares: [30, 10, 10, 10, 10, 10, 10, 10],
   // Single-row market

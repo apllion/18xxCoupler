@@ -23,6 +23,7 @@ export const g18rhl = {
   floatPercent: 50,
   sellBuyOrder: 'sell_buy',
   sellMovement: 'down_block',
+  dividendMovement: 'standard_no_double', // >=price right1; else nothing; no double jump
   sellAfter: 'operate',
   ebuyFromOthers: 'never',
 
