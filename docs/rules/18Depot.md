@@ -34,6 +34,9 @@ Optional. Configurable loan system for generic recording.
 - **Sell shares:** down 1 per share sold
 - **Sold out:** up 1 at end of SR
 
+## Emergency Buy
+President contributes cash (generic recording tool).
+
 ## Auction
 No pregame auction.
 
@@ -41,6 +44,9 @@ No pregame auction.
 - SR -> OR x1 (phase 2)
 - SR -> OR x2 (phases 3--4)
 - SR -> OR x3 (phases 5--D)
+
+## Game End
+Configurable (generic recording tool).
 
 ## Trains
 | Train | Cost | Qty | Rusts On | Events |

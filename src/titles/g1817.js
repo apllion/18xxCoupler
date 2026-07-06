@@ -13,6 +13,7 @@ export const g1817 = {
   startingCash: { 3: 420, 4: 315, 5: 252, 6: 210, 7: 180, 8: 158, 9: 140, 10: 126, 11: 115, 12: 105 },
   certLimit: { 3: 21, 4: 16, 5: 13, 6: 11, 7: 9, 8: 8, 9: 7, 10: 6, 11: 6, 12: 5 },
   currencyFormat: '$', capitalization: 'incremental', floatPercent: 20, sellBuyOrder: 'sell_buy', seedMoney: 200,
+  emergencyBuy: 'loans',           // Take loans to cover; liquidation if max loans
   ebuyPresSwap: false, sellAfter: 'after_sr_floated',
   sellMovement: 'none', // selling shares causes NO stock price movement in 1817
   halfPay: true,

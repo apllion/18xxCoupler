@@ -10,6 +10,7 @@ export const g1871 = {
   location: 'Prince Edward Island', minPlayers: 3, maxPlayers: 4,
   bankCash: 99999, startingCash: { 3: 580, 4: 480 }, certLimit: { 3: 20, 4: 16 },
   currencyFormat: '$', capitalization: 'full', floatPercent: 60, sellBuyOrder: 'sell_buy', sellMovement: 'down_block', halfPay: true, nextSRPlayerOrder: 'first_to_pass',
+  emergencyBuy: 'president_pays',  // President contributes cash; bankruptcy ends game
   dividendMovement: '1871',        // full payout right1; half pay nothing; withhold left1
   market: [
     ['','','111','122','136','152','170','190','215','240','270','300','330','360','400B'],

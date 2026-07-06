@@ -23,6 +23,7 @@ export const g1861 = {
   capitalization: 'incremental',
   floatPercent: 20,
   sellBuyOrder: 'sell_buy',
+  emergencyBuy: 'loans',           // Take loans; nationalization if max loans
   sellMovement: 'down_block_pres',
   sellAfter: 'operate',
 

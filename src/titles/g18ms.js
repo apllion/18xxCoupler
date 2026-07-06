@@ -16,6 +16,7 @@ export const g18ms = {
 
   capitalization: 'full',
   floatPercent: 60,
+  emergencyBuy: 'loans',           // Player takes loan for shortfall (50% interest)
   maxOwnership: 70,
   ebuyPresSwap: false,
   ebuyDepotCheapest: false,

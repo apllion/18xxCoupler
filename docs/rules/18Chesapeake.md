@@ -30,6 +30,9 @@ No loans.
 - **Sell shares:** down 1 per share sold
 - **Sold out:** up 1 at end of SR
 
+## Emergency Buy
+President sells shares then contributes cash. Bankruptcy ends game immediately.
+
 ## Auction
 Waterfall -- ascending price auction for privates in order.
 
@@ -37,6 +40,9 @@ Waterfall -- ascending price auction for privates in order.
 - SR -> OR x1 (phase 2)
 - SR -> OR x2 (phases 3--4)
 - SR -> OR x3 (phases 5--D)
+
+## Game End
+Bankruptcy ends game immediately. Bank break ends after current OR set.
 
 ## Trains
 | Train | Cost | Qty | Rusts On | Events |

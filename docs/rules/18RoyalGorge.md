@@ -32,11 +32,17 @@ Inter-corp debt (Treaty of Boston event). RG owes SF: 4 debt tokens. SF owes Doc
 - **Sell shares:** left 1 per share sold (blocked by president; metals: no movement)
 - **Sold out:** up 1 at end of SR
 
+## Emergency Buy
+President contributes personal cash.
+
 ## Auction
 English auction -- ascending bids on privates (across three tiers).
 
 ## Round System
 - SR -> OR x2 (all phases)
+
+## Game End
+Bank is unlimited. Bankruptcy ends game.
 
 ## Trains
 | Train | Cost | Qty | Rusts On | Events |

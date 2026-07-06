@@ -21,6 +21,7 @@ export const g1822mx = {
 
   capitalization: 'incremental',
   floatPercent: 20,
+  emergencyBuy: 'loans',           // Player loan for shortfall (150% of amount)
   halfPay: true,
   mustSellInBlocks: true,
   nextSRPlayerOrder: 'most_cash',

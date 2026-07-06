@@ -22,6 +22,7 @@ export const gptg = {
   capitalization: 'incremental', // Floats on CEO share purchase
   floatPercent: 20, // CEO share = 20%, company floats immediately
   sellBuyOrder: 'sell_buy',
+  emergencyBuy: 'president_pays',  // CEO contributes cash; bankruptcy ends game
   sellMovement: 'down_share', // One row down per share sold
   marketShareLimit: 100, // No pool limit mentioned
 

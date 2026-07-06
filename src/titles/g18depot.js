@@ -23,6 +23,7 @@ export const g18depot = {
   floatPercent: 60,
   sellBuyOrder: 'sell_buy',
   sellMovement: 'down_share',
+  emergencyBuy: 'president_pays',
   marketShareLimit: 50,
   halfPay: true,
 

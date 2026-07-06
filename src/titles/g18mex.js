@@ -11,6 +11,7 @@ export const g18mex = {
   bankCash: 9000, startingCash: { 3: 625, 4: 500, 5: 450 },
   certLimit: { 3: 19, 4: 14, 5: 11 },
   currencyFormat: '$', capitalization: 'full', floatPercent: 50, sellBuyOrder: 'sell_buy',
+  emergencyBuy: 'president_pays',  // President contributes cash
   sellMovement: 'down_per_10',
 
   market: [

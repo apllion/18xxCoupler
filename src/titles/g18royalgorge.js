@@ -10,6 +10,7 @@ export const g18royalgorge = {
   location: 'Fremont County, Colorado', minPlayers: 2, maxPlayers: 4,
   bankCash: 99999, startingCash: { 2: 800, 3: 550, 4: 400 }, certLimit: { 2: 20, 3: 14, 4: 10 },
   currencyFormat: '$', capitalization: 'incremental', floatPercent: 20, sellBuyOrder: 'sell_buy',
+  emergencyBuy: 'president_pays',  // President contributes cash
   sellMovement: 'left_share_pres', // Rails: left per share (blocked by pres). Metals: none (handled via type check)
   dividendMovement: '18rg',        // right = floor(rev/price), max 3; withhold left 1
 

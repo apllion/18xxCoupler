@@ -20,6 +20,7 @@ export const g1880 = {
   currencyFormat: '¥',
 
   sellBuyOrder: 'sell_buy',
+  emergencyBuy: 'loans',           // Player takes loan for shortfall
   sellMovement: 'down_per_10',
   marketShareLimit: 80,
   floatPercent: 20,

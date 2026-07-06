@@ -22,6 +22,7 @@ export const g1847ae = {
   capitalization: 'incremental',
   floatPercent: 50,
   sellBuyOrder: 'sell_buy',
+  emergencyBuy: 'president_pays',  // President contributes cash (borrowing prohibited)
   sellMovement: 'down_block',
   sellAfter: 'operate',
   mustSellInBlocks: true,

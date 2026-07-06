@@ -22,6 +22,7 @@ export const g18rhl = {
   capitalization: 'full',
   floatPercent: 50,
   sellBuyOrder: 'sell_buy',
+  emergencyBuy: 'loans',           // Bank credit (2x penalty at game end)
   sellMovement: 'down_block',
   dividendMovement: 'standard_no_double', // >=price right1; else nothing; no double jump
   sellAfter: 'operate',

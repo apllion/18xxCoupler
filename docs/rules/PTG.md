@@ -34,12 +34,18 @@ No loans.
 - **Sell shares:** down 1 per share sold
 - **Sold out:** up 1 at end of SR
 
+## Emergency Buy
+CEO contributes personal cash. Bankruptcy ends game.
+
 ## Auction
 Priority auction -- bid for initial turn order.
 
 ## Round System
 Fixed 7 rounds. Each round: SR -> OR.
 Game ends after round 7.
+
+## Game End
+Fixed 7 rounds. Bankruptcy ends game.
 
 ## Trains
 | Train | Cost | Qty | Rusts On | Events |

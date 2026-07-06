@@ -33,6 +33,9 @@ No loans.
 - **Sell shares:** down 1 per share sold
 - **Sold out:** up 1 at end of SR
 
+## Emergency Buy
+President contributes personal cash.
+
 ## Auction
 Purchase -- each player buys one small brewery in starting round.
 
@@ -41,6 +44,9 @@ Purchase -- each player buys one small brewery in starting round.
 - SR -> OR x1 (phase 2)
 - SR -> OR x2 (phases 3--5)
 - SR -> OR x3 (phases 6--8)
+
+## Game End
+Fixed 6 rounds.
 
 ## Trains (Capex Cards)
 | Train | Cost | Qty (3p/4p/5p) | Rusts On | Events |

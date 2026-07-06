@@ -32,6 +32,9 @@ No loans.
 - **Sell shares:** down 1 per share sold
 - **Sold out:** up 1 at end of SR
 
+## Emergency Buy
+President contributes personal cash.
+
 ## Auction
 English auction (Starting Round) -- ascending bids on each private brewery.
 
@@ -40,6 +43,9 @@ English auction (Starting Round) -- ascending bids on each private brewery.
 - SR -> OR x2 (phases 3--4)
 - SR -> OR x3 (phases 5--8)
 - Game ends on bank break
+
+## Game End
+Bank break. M9,000 bank.
 
 ## Trains
 | Train | Cost | Qty | Rusts On | Events |

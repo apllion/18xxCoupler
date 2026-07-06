@@ -31,11 +31,17 @@ No loans.
 - **Sell shares:** down 1 per sale (blocked)
 - **Sold out:** up 1 at end of SR
 
+## Emergency Buy
+President contributes cash. Bankruptcy possible (corp enters receivership).
+
 ## Auction
 No pregame auction.
 
 ## Round System
 - SR -> Corporate Round -> OR x2 (all phases) ;(
+
+## Game End
+Bank is unlimited. Bankruptcy possible. Stock ceiling.
 
 ## Trains
 | Train | Cost | Qty | Rusts On | Events |

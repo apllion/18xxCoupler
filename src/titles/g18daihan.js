@@ -12,6 +12,7 @@ export const g18daihan = {
   startingCash: { 3: 440, 4: 400, 5: 380 },
   certLimit: { 3: 20, 4: 16, 5: 13 },
   currencyFormat: '￦', capitalization: 'full', floatPercent: 50, sellBuyOrder: 'sell_buy',
+  emergencyBuy: 'president_pays',  // Bankruptcy ends game
   // Float: 5 of 10 shares sold from IPO → 10x par goes to corp
   // Par values: 65, 70, 75, 80, 90, 100
   // Stations: par 65-75 = 2 stations, par 80-100 = 3 stations

@@ -22,6 +22,7 @@ export const grla = {
   capitalization: 'incremental', // President's bid goes to company treasury
   floatPercent: 0, // Floats immediately on auction
   sellBuyOrder: 'sell_buy',
+  emergencyBuy: 'president_pays',  // President contributes cash
   sellMovement: 'down_per_sale', // Stock drops per sale (variant: per share)
 
   // Fixed rounds: 4 cycles (short) or 6 cycles (long)

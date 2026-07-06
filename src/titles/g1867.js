@@ -23,6 +23,7 @@ export const g1867 = {
   capitalization: 'incremental',
   floatPercent: 20,
   sellBuyOrder: 'sell_buy',
+  emergencyBuy: 'loans',           // Take loans; nationalization if max loans
   halfPay: true,
   sellMovement: 'down_block_pres',
   dividendMovement: 'standard_no_double', // >=price right1; else nothing; no double jump

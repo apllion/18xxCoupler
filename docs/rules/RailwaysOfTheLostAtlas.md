@@ -33,12 +33,18 @@ No loans.
 - **Sell shares:** down 1 per sale (per-share variant available)
 - **Sold out:** up 1 at end of SR
 
+## Emergency Buy
+President contributes personal cash. Bankruptcy ends game.
+
 ## Auction
 English auction -- ascending bids on minor companies.
 
 ## Round System
 Each cycle: SR -> OR -> OR -> Merger Round.
 4 cycles (short game) or 6 cycles (long variant).
+
+## Game End
+Fixed 4 or 6 cycles (short/long variant).
 
 ## Trains
 | Train | Cost | Qty | Rusts On | Events |

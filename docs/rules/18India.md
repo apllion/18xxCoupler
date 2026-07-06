@@ -33,11 +33,17 @@ No loans.
 - **Sell shares:** NO movement
 - **Sold out:** up 1 at end of SR
 
+## Emergency Buy
+No forced train purchase. Corps are never required to own a train.
+
 ## Auction
 English auction -- ascending bids on each East India Company private.
 
 ## Round System
 - SR -> OR x2 (all phases)
+
+## Game End
+Bank break. ₹9,000 bank.
 
 ## Trains
 | Train | Cost | Qty | Rusts On | Variants | Events |

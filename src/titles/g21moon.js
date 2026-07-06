@@ -10,6 +10,7 @@ export const g21moon = {
   location: 'The Moon', minPlayers: 2, maxPlayers: 5,
   bankCash: 99999, startingCash: { 2: 600, 3: 540, 4: 410, 5: 340 }, certLimit: { 2: 15, 3: 15, 4: 12, 5: 10 },
   currencyFormat: '₡', capitalization: 'incremental', floatPercent: 50, sellBuyOrder: 'sell_buy',
+  emergencyBuy: 'president_pays',  // President contributes cash; bankruptcy possible
   sellMovement: 'down_block',
   dividendMovement: '21moon',      // >=2x right 2; >=half right 1; else nothing; withhold left 1
   market: [

@@ -20,6 +20,7 @@ export const g1830 = {
   currencyFormat: '$',
 
   sellBuyOrder: 'sell_buy_sell',
+  emergencyBuy: 'president_pays',  // President sells shares, contributes cash; bankruptcy ends game
 
   market: [
     ['60y','67','71','76','82','90','100p','112','126','142','160','180','200','225','250','275','300','325','350'],

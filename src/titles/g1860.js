@@ -23,6 +23,7 @@ export const g1860 = {
   capitalization: 'full',
   mustSellInBlocks: true,
   sellBuyOrder: 'sell_buy',
+  emergencyBuy: 'none',            // No forced purchase; insolvency → lease train
   sellAfter: 'any_time',
   dividendMovement: 'multi_jump',  // >=1x→right1; >=2x→right2; >=3x→right3; >=4x→right4
   ebuyPresSwap: false,

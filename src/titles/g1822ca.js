@@ -11,6 +11,7 @@ export const g1822ca = {
   bankCash: 12000, startingCash: { 2: 1000, 3: 700, 4: 525, 5: 420, 6: 350, 7: 300 },
   certLimit: { 2: 40, 3: 26, 4: 20, 5: 16, 6: 13, 7: 11 },
   currencyFormat: '$', capitalization: 'incremental', floatPercent: 20, sellBuyOrder: 'sell_buy',
+  emergencyBuy: 'loans',           // Player loan for shortfall (150% of amount)
   mustSellInBlocks: true, nextSRPlayerOrder: 'most_cash', halfPay: true,
 
   // Player loans: emergency train purchase, 150% of shortfall, compounds 50%/SR

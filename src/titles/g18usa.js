@@ -11,6 +11,7 @@ export const g18usa = {
   bankCash: 99999, startingCash: { 2: 630, 3: 420, 4: 315, 5: 300, 6: 250, 7: 225 },
   certLimit: { 2: 32, 3: 21, 4: 16, 5: 16, 6: 13, 7: 11 },
   currencyFormat: '$', capitalization: 'incremental', floatPercent: 20, sellBuyOrder: 'sell_buy', halfPay: true,
+  emergencyBuy: 'loans',           // Take loans (1817-style)
   dividendMovement: '18usa',       // >=0.5x→right1; >=1x→right2; >=1.5x→right3; >=2x→right4
 
   // 1817-style loans: $100, escalating interest, stock moves 2 steps (not 1)

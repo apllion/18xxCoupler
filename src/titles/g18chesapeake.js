@@ -20,6 +20,7 @@ export const g18chesapeake = {
   currencyFormat: '$',
 
   sellBuyOrder: 'sell_buy',
+  emergencyBuy: 'president_pays',  // President sells shares, contributes cash; bankruptcy ends game
 
   market: [
     ['80','85','90','100','110','125','140','160','180','200','225','250','275','300','325','350','375'],

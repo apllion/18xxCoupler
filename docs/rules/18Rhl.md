@@ -33,6 +33,9 @@ Bank credits (emergency train purchase). 2x the credit amount deducted from play
 - **Sell shares:** down 1 per sale (blocked)
 - **Sold out:** up 1 at end of SR
 
+## Emergency Buy
+Bank credit for shortfall. 2x deducted from player total at game end. Optional variant: no credits, bankruptcy instead ;(.
+
 ## Auction
 English auction -- ascending bids on each private.
 
@@ -40,6 +43,9 @@ English auction -- ascending bids on each private.
 - SR -> OR x1 (phase 2)
 - SR -> OR x2 (phases 3--4)
 - SR -> OR x3 (phases 5--8)
+
+## Game End
+Bank break. M9,000 bank.
 
 ## Trains
 | Train | Cost | Qty | Rusts On | Events |

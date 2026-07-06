@@ -22,6 +22,7 @@ export const g18do_trg = {
   floatPercent: 50,
   capitalization: 'full',
   sellBuyOrder: 'sell_buy',
+  emergencyBuy: 'president_pays',  // President contributes cash
   sellMovement: 'down_share',
   marketShareLimit: 50,
 

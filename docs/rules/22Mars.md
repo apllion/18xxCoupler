@@ -33,12 +33,18 @@ No loans.
 - **Sell shares:** down 1 per share sold
 - **Sold out:** up 1 at end of SR
 
+## Emergency Buy
+President sells shares. Bankruptcy: corps close, shares discarded without compensation.
+
 ## Auction
 Priority auction -- bid for turn order to select permit cards.
 
 ## Round System
 Fixed sequence: SR1, OR1, OR2, SR2, OR3, OR4, SR3, OR5, OR6, SR4, OR7, OR8, SR5, OR9, OR10, OR11.
 Game ends after OR11 or stock market ceiling (300c).
+
+## Game End
+Fixed sequence: game ends after OR11 or stock ceiling.
 
 ## Trains
 | Train | Cost | Qty | Rusts On | Discounts | Events |

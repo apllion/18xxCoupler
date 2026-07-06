@@ -30,6 +30,7 @@ export const g1846 = {
   capitalization: 'incremental',
   floatPercent: 20,
   sellBuyOrder: 'sell_buy',
+  emergencyBuy: 'president_pays',  // President contributes cash; may issue shares first
   halfPay: true,
   sellMovement: 'left_block_pres',
   dividendMovement: '1846',        // <half→left1; >=1x→right1; >=2x→right2; >=3x→right3 (if price>=165)

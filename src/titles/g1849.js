@@ -22,6 +22,7 @@ export const g1849 = {
   capitalization: 'incremental',
   floatPercent: 20,
   sellBuyOrder: 'sell_buy',
+  emergencyBuy: 'president_pays',  // President sells shares; L.500 player loan if still short
   sellMovement: 'down_per_10',
   dividendMovement: 'standard_no_double', // >=price right1; else nothing; no double jump
   poolShareDrop: 'down_block',

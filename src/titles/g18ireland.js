@@ -12,6 +12,7 @@ export const g18ireland = {
   bankCash: 4000, startingCash: { 3: 330, 4: 250, 5: 200, 6: 160 },
   certLimit: { 3: 16, 4: 12, 5: 10, 6: 8 },
   currencyFormat: '£', capitalization: 'incremental', floatPercent: 20, sellBuyOrder: 'sell_buy',
+  emergencyBuy: 'president_pays',  // President contributes cash; bankruptcy ends game
   dividendMovement: 'standard_no_double', // >=price right1; else nothing; no double jump
 
   market: [

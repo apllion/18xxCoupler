@@ -31,6 +31,9 @@ No loans.
 - **Sell shares:** down 1 per 10% sold
 - **Sold out:** up 1 at end of SR
 
+## Emergency Buy
+President contributes personal cash.
+
 ## Auction
 Waterfall -- ascending price auction for privates in order.
 
@@ -38,6 +41,9 @@ Waterfall -- ascending price auction for privates in order.
 - SR -> OR x1 (phase 2)
 - SR -> OR x2 (phases 3--4)
 - SR -> OR x3 (phases 5--4D)
+
+## Game End
+Bank break.
 
 ## Trains
 | Train | Cost | Qty | Rusts On | Events |

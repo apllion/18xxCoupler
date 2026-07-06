@@ -17,6 +17,7 @@ export const g22mars = {
   capitalization: 'incremental',
   floatPercent: 20, // Floats on CEO share purchase
   sellBuyOrder: 'sell_buy',
+  emergencyBuy: 'president_pays',  // President sells shares; bankruptcy possible
   sellMovement: 'down_share',
   marketShareLimit: 80,
 

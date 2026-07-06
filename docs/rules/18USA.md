@@ -34,12 +34,18 @@ Corp bank loans (1817-style). $100 per loan. Global escalating interest. Take lo
 - **Sell shares:** down 1 per share sold
 - **Sold out:** up 1 at end of SR
 
+## Emergency Buy
+Take loans (1817-style, stock moves left 2 steps per loan).
+
 ## Auction
 No pregame auction. Privates chosen when corporations float.
 
 ## Round System
 - SR -> OR x2 (all phases)
 - 8-train signals end game
+
+## Game End
+8-train signals game end.
 
 ## Trains
 | Train | Cost | Qty | Rusts On | Events |

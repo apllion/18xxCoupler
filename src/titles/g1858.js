@@ -9,6 +9,7 @@ export const g1858 = {
   startingCash: { 2: 500, 3: 500, 4: 375, 5: 300, 6: 250 },
   certLimit: { 2: 21, 3: 21, 4: 16, 5: 13, 6: 11 },
   currencyFormat: 'Pt', capitalization: 'incremental', floatPercent: 40, sellBuyOrder: 'sell_buy', halfPay: true,
+  emergencyBuy: 'president_pays',  // President contributes cash
   sellMovement: 'left_block_pres',
   dividendMovement: '1858',        // per_share*10 >= price → right 1; else nothing; withhold left 1
   market: [

@@ -20,6 +20,7 @@ export const g1889 = {
   currencyFormat: '¥',
 
   floatPercent: 50,
+  emergencyBuy: 'president_pays',  // President sells shares, contributes cash; bankruptcy ends game
   mustSellInBlocks: true,
   ebuyPresSwap: false,
   ebuyFromOthers: 'never',
