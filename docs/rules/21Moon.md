@@ -19,6 +19,12 @@
 - Corps can buy own shares from bank pool
 - No cert limit for corp-held shares ;(
 
+## Share Structure
+20% president + 8×10% (standard 10-share).
+
+## Par Prices
+Par from market. 50% float.
+
 ## Issue / Redeem
 Incremental capitalization. Corps issue/sell from treasury during Corporate Round.
 
@@ -31,6 +37,9 @@ No loans.
 - **Sell shares:** down 1 per sale (blocked)
 - **Sold out:** up 1 at end of SR
 
+## Mergers
+No mergers.
+
 ## Emergency Buy
 President contributes cash. Bankruptcy possible (corp enters receivership).
 
@@ -42,6 +51,9 @@ No pregame auction.
 
 ## Game End
 Bank is unlimited. Bankruptcy possible. Stock ceiling.
+
+## Train Events
+10-train is unlimited. Mineral resource hexes.
 
 ## Trains
 | Train | Cost | Qty | Rusts On | Events |

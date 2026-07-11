@@ -21,6 +21,12 @@
 - Fixed 6 rounds
 - Capex cards serve as both trains and brewery equipment ;(
 
+## Share Structure
+Non-standard per corp: railways 20/20/10... or 30/10.../20; breweries 40/10.../20 or 20/20/20/10...
+
+## Par Prices
+Par from market.
+
 ## Issue / Redeem
 No issue/redeem. Full capitalization.
 
@@ -33,11 +39,14 @@ No loans.
 - **Sell shares:** down 1 per share sold
 - **Sold out:** up 1 at end of SR
 
+## Mergers
+No mergers.
+
 ## Emergency Buy
 President contributes personal cash.
 
 ## Auction
-Purchase -- each player buys one small brewery in starting round.
+Brewery purchase round.
 
 ## Round System
 - Fixed 6 rounds
@@ -47,6 +56,9 @@ Purchase -- each player buys one small brewery in starting round.
 
 ## Game End
 Fixed 6 rounds.
+
+## Train Events
+Capex cards serve as both trains and brewery equipment.
 
 ## Trains (Capex Cards)
 | Train | Cost | Qty (3p/4p/5p) | Rusts On | Events |

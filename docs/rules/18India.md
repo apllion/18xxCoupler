@@ -21,6 +21,12 @@
 - Gauges: broad/meter/narrow ;(
 - Guarantee companies ;(
 
+## Share Structure
+20% president + 8×10%. GIPR exception: all 10×10% (no president).
+
+## Par Prices
+Par from market. 30% float (3 of 10 shares).
+
 ## Issue / Redeem
 No issue/redeem. Corps buy/sell shares of OTHER corps (cross-ownership), not own shares.
 
@@ -33,17 +39,23 @@ No loans.
 - **Sell shares:** NO movement
 - **Sold out:** up 1 at end of SR
 
+## Mergers
+No mergers. Corps buy shares of other corps (cross-ownership).
+
 ## Emergency Buy
 No forced train purchase. Corps are never required to own a train.
 
 ## Auction
-English auction -- ascending bids on each East India Company private.
+English auction for 6 East India Company privates.
 
 ## Round System
 - SR -> OR x2 (all phases)
 
 ## Game End
 Bank break. ₹9,000 bank.
+
+## Train Events
+Multiplier trains: 3x2, 3x3, 4x2, 4x3. All tile colors from phase 1.
 
 ## Trains
 | Train | Cost | Qty | Rusts On | Variants | Events |

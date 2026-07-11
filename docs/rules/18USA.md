@@ -21,6 +21,12 @@
 - P-trains available from phase 5 ;(
 - Longest 18xx title (5--8 hours) ;(
 
+## Share Structure
+20% president + 8×10% (standard 10-share).
+
+## Par Prices
+Par from market. Choose home city at float.
+
 ## Issue / Redeem
 Standard: issue at current price (price drops 1 per share issued), redeem at current price (price rises 1 per share redeemed).
 
@@ -34,6 +40,9 @@ Corp bank loans (1817-style). $100 per loan. Global escalating interest. Take lo
 - **Sell shares:** down 1 per share sold
 - **Sold out:** up 1 at end of SR
 
+## Mergers
+No mergers.
+
 ## Emergency Buy
 Take loans (1817-style, stock moves left 2 steps per loan).
 
@@ -46,6 +55,9 @@ No pregame auction. Privates chosen when corporations float.
 
 ## Game End
 8-train signals game end.
+
+## Train Events
+P-trains available from phase 5. Train counts scale by player count. 8-train signals game end.
 
 ## Trains
 | Train | Cost | Qty | Rusts On | Events |

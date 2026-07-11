@@ -19,6 +19,12 @@
 - D-train purchase advances stock price 1--3 spaces and signals game end ;(
 - Stations scale with par price (2 at low par, 3 at high) ;(
 
+## Share Structure
+20% president + 8×10% (standard 10-share).
+
+## Par Prices
+Par from market.
+
 ## Issue / Redeem
 No issue/redeem. Full capitalization.
 
@@ -31,11 +37,14 @@ No loans.
 - **Sell shares:** down 1 per share sold
 - **Sold out:** up 1 at end of SR
 
+## Mergers
+No mergers.
+
 ## Emergency Buy
 President contributes cash. Bankruptcy ends game immediately.
 
 ## Auction
-Waterfall -- ascending price auction for privates in order.
+English auction.
 
 ## Round System
 - SR -> OR x1 (phase 2)
@@ -45,6 +54,9 @@ Waterfall -- ascending price auction for privates in order.
 
 ## Game End
 Bankruptcy ends game immediately.
+
+## Train Events
+Rusting varies. Standard phase progression.
 
 ## Trains
 | Train | Cost | Qty | Rusts On | Events |

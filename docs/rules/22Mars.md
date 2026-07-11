@@ -21,6 +21,12 @@
 - Mars colonization sci-fi setting ;(
 - Permit cards via priority auction ;(
 
+## Share Structure
+5×20% (all shares equal, tax above 2 shares).
+
+## Par Prices
+Par from market. 20% float.
+
 ## Issue / Redeem
 No issue/redeem. Incremental capitalization but no share issuance mechanics.
 
@@ -33,11 +39,14 @@ No loans.
 - **Sell shares:** down 1 per share sold
 - **Sold out:** up 1 at end of SR
 
+## Mergers
+No mergers.
+
 ## Emergency Buy
 President sells shares. Bankruptcy: corps close, shares discarded without compensation.
 
 ## Auction
-Priority auction -- bid for turn order to select permit cards.
+Priority auction for 9 permit cards.
 
 ## Round System
 Fixed sequence: SR1, OR1, OR2, SR2, OR3, OR4, SR3, OR5, OR6, SR4, OR7, OR8, SR5, OR9, OR10, OR11.
@@ -45,6 +54,9 @@ Game ends after OR11 or stock market ceiling (300c).
 
 ## Game End
 Fixed sequence: game ends after OR11 or stock ceiling.
+
+## Train Events
+7* and 8* trains double first/last stop. Revolt event between OR7–OR10.
 
 ## Trains
 | Train | Cost | Qty | Rusts On | Discounts | Events |

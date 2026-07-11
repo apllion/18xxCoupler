@@ -20,6 +20,12 @@
 - Mining tokens and coal/ore revenue bonuses ;(
 - 18 privates across Yellow/Green/Brown tier auctions ;(
 
+## Share Structure
+20% president + 8×10% (rails). CF&I/VGC metals: 10×10% (no president).
+
+## Par Prices
+Par from market row.
+
 ## Issue / Redeem
 No issue/redeem. Incremental capitalization but no share issuance mechanics.
 
@@ -32,17 +38,23 @@ Inter-corp debt (Treaty of Boston event). RG owes SF: 4 debt tokens. SF owes Doc
 - **Sell shares:** left 1 per share sold (blocked by president; metals: no movement)
 - **Sold out:** up 1 at end of SR
 
+## Mergers
+No mergers.
+
 ## Emergency Buy
 President contributes personal cash.
 
 ## Auction
-English auction -- ascending bids on privates (across three tiers).
+English auction for 18 privates across Yellow/Green/Brown tiers.
 
 ## Round System
 - SR -> OR x2 (all phases)
 
 ## Game End
 Bank is unlimited. Bankruptcy ends game.
+
+## Train Events
+Rusting: 2+→4+. 6x2 multiplier train is unlimited. Treaty of Boston event.
 
 ## Trains
 | Train | Cost | Qty | Rusts On | Events |

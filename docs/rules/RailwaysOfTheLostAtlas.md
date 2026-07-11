@@ -21,6 +21,12 @@
 - Merger Rounds after ORs from Green phase
 - Fixed 4 cycles (short game) or 6 cycles (long variant) ;(
 
+## Share Structure
+40/20/20/20 (minors, 4-share); 20% president + 8×10% (majors).
+
+## Par Prices
+English auction for minors. Par at auction price.
+
 ## Issue / Redeem
 No issue/redeem. Minors merge into majors during Merger Rounds.
 
@@ -33,11 +39,14 @@ No loans.
 - **Sell shares:** down 1 per sale (per-share variant available)
 - **Sold out:** up 1 at end of SR
 
+## Mergers
+12 minors merge into 6 majors during Merger Rounds. Major identity chosen from two options.
+
 ## Emergency Buy
 President contributes personal cash. Bankruptcy ends game.
 
 ## Auction
-English auction -- ascending bids on minor companies.
+English auction for minors.
 
 ## Round System
 Each cycle: SR -> OR -> OR -> Merger Round.
@@ -45,6 +54,9 @@ Each cycle: SR -> OR -> OR -> Merger Round.
 
 ## Game End
 Fixed 4 or 6 cycles (short/long variant).
+
+## Train Events
+Infinite-distance train. Fixed 4/6 cycles.
 
 ## Trains
 | Train | Cost | Qty | Rusts On | Events |

@@ -20,6 +20,12 @@
 - Sequential founding order (DGEE after KWE, etc.) ;(
 - Descending-value 2D grid market ;(
 
+## Share Structure
+20/20/10/10/10/10/10/10 — dual 20% shares.
+
+## Par Prices
+Par from market.
+
 ## Issue / Redeem
 No issue/redeem. Full capitalization.
 
@@ -32,11 +38,14 @@ No loans.
 - **Sell shares:** down 1 per share sold
 - **Sold out:** up 1 at end of SR
 
+## Mergers
+No mergers.
+
 ## Emergency Buy
 President contributes personal cash.
 
 ## Auction
-English auction (Starting Round) -- ascending bids on each private brewery.
+English auction for 5 privates.
 
 ## Round System
 - SR -> OR x1 (phase 2)
@@ -46,6 +55,9 @@ English auction (Starting Round) -- ascending bids on each private brewery.
 
 ## Game End
 Bank break. M9,000 bank.
+
+## Train Events
+Standard rusting. Triple-jump dividend movement.
 
 ## Trains
 | Train | Cost | Qty | Rusts On | Events |

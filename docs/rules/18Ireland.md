@@ -19,6 +19,12 @@
 - DKR private starts a minor with 2H train ;(
 - Merger timing is the strategic crux ;(
 
+## Share Structure
+40/20/20/20 (minors, 4-share); 20% president + 8×10% (majors).
+
+## Par Prices
+Par from market. Minors: 40% float.
+
 ## Issue / Redeem
 No issue/redeem. Incremental capitalization; minors merge into majors.
 
@@ -31,17 +37,23 @@ No loans.
 - **Sell shares:** down 1 per share sold
 - **Sold out:** up 1 at end of SR
 
+## Mergers
+14 minors merge into 7 majors after 4H phase.
+
 ## Emergency Buy
 President sells shares then contributes cash. Bankruptcy ends game.
 
 ## Auction
-Waterfall -- ascending price auction for privates in order.
+Waterfall auction for 11 privates. DKR private starts a minor.
 
 ## Round System
 - SR -> OR x2 (all phases)
 
 ## Game End
 Bankruptcy ends game. Bank break.
+
+## Train Events
+Rusting: 2→6, 4→8. Minors cannot start after 8H.
 
 ## Trains
 | Train | Cost | Qty | Rusts On | Events |

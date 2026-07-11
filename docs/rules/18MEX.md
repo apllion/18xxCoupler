@@ -19,6 +19,12 @@
 - MNR private forces NdM par price ;(
 - Game ends on bank break, bankruptcy, or stock market ceiling
 
+## Share Structure
+20% president + rest 10%. NdM: 20/10/10/10/10/10/10/5/5/10 — non-standard.
+
+## Par Prices
+Par from market.
+
 ## Issue / Redeem
 No issue/redeem. Full capitalization.
 
@@ -31,11 +37,14 @@ No loans.
 - **Sell shares:** down 1 per 10% sold
 - **Sold out:** up 1 at end of SR
 
+## Mergers
+NdM national merger.
+
 ## Emergency Buy
 President contributes personal cash.
 
 ## Auction
-Waterfall -- ascending price auction for privates in order.
+English auction.
 
 ## Round System
 - SR -> OR x1 (phase 2)
@@ -44,6 +53,9 @@ Waterfall -- ascending price auction for privates in order.
 
 ## Game End
 Bank break.
+
+## Train Events
+Rusting: 2→4, 3→6, 4→D. NdM national merger event.
 
 ## Trains
 | Train | Cost | Qty | Rusts On | Events |

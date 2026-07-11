@@ -18,6 +18,12 @@
 - D-train trade-in discount of $200 (from 4/5/6) ;(
 - 2p variant: 30% president share, 7-share corps ;(
 
+## Share Structure
+30% president + 7×10%. Non-standard president share.
+
+## Par Prices
+Par from market row.
+
 ## Issue / Redeem
 No issue/redeem. Full capitalization.
 
@@ -30,11 +36,14 @@ No loans.
 - **Sell shares:** down 1 per share sold
 - **Sold out:** up 1 at end of SR
 
+## Mergers
+No mergers.
+
 ## Emergency Buy
 President sells shares then contributes cash. Bankruptcy ends game immediately.
 
 ## Auction
-Waterfall -- ascending price auction for privates in order.
+Waterfall — ascending price auction for privates in order.
 
 ## Round System
 - SR -> OR x1 (phase 2)
@@ -43,6 +52,9 @@ Waterfall -- ascending price auction for privates in order.
 
 ## Game End
 Bankruptcy ends game immediately. Bank break ends after current OR set.
+
+## Train Events
+Rusting: 2→4, 3→6. Privates close at phase 5.
 
 ## Trains
 | Train | Cost | Qty | Rusts On | Events |

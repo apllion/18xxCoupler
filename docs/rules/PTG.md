@@ -22,6 +22,12 @@
 - Tax on 60%+ ownership: 60-70%=$20, 80-90%=$40, 100%=$60
 - Top bonus: extra $30/$50 per share if in green box during rounds 6/7
 
+## Share Structure
+5×20% (all shares equal, CEO share = president).
+
+## Par Prices
+Par from market. CEO share = 20% president.
+
 ## Issue / Redeem
 Corps can sell from treasury and buy from market during operations (step 3.1 sell, step 3.7 buy one share).
 
@@ -34,11 +40,14 @@ No loans.
 - **Sell shares:** down 1 per share sold
 - **Sold out:** up 1 at end of SR
 
+## Mergers
+5-share → 10-share merger (each old cert → one new cert).
+
 ## Emergency Buy
 CEO contributes personal cash. Bankruptcy ends game.
 
 ## Auction
-Priority auction -- bid for initial turn order.
+No pregame auction. Corps par directly.
 
 ## Round System
 Fixed 7 rounds. Each round: SR -> OR.
@@ -46,6 +55,9 @@ Game ends after round 7.
 
 ## Game End
 Fixed 7 rounds. Bankruptcy ends game.
+
+## Train Events
+Fixed 7 rounds. Strategy cards. Top bonus in rounds 6/7.
 
 ## Trains
 | Train | Cost | Qty | Rusts On | Events |

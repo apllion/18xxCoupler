@@ -22,6 +22,12 @@
 - Toggle features on/off: half pay, loans, corp trading ;(
 - Pure recording tool ;(
 
+## Share Structure
+20% president + 8×10% (configurable).
+
+## Par Prices
+Par from market (configurable).
+
 ## Issue / Redeem
 Not standard. Manual recording tool -- use as needed.
 
@@ -34,11 +40,14 @@ Optional. Configurable loan system for generic recording.
 - **Sell shares:** down 1 per share sold
 - **Sold out:** up 1 at end of SR
 
+## Mergers
+No mergers.
+
 ## Emergency Buy
 President contributes cash (generic recording tool).
 
 ## Auction
-No pregame auction.
+Configurable (generic recording tool).
 
 ## Round System
 - SR -> OR x1 (phase 2)
@@ -47,6 +56,9 @@ No pregame auction.
 
 ## Game End
 Configurable (generic recording tool).
+
+## Train Events
+Configurable trains (generic recording tool).
 
 ## Trains
 | Train | Cost | Qty | Rusts On | Events |

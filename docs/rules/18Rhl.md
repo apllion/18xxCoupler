@@ -21,6 +21,12 @@
 - No emergency buy from other corps ;(
 - English auction for 7 privates ;(
 
+## Share Structure
+20% president + 8×10%. MKB exception: 20/20/20/10/10/10/10 (3×20% + 4×10%).
+
+## Par Prices
+Par from market. RhE delayed par (70/75/80 only via private).
+
 ## Issue / Redeem
 No issue/redeem. Full capitalization.
 
@@ -33,11 +39,14 @@ Bank credits (emergency train purchase). 2x the credit amount deducted from play
 - **Sell shares:** down 1 per sale (blocked)
 - **Sold out:** up 1 at end of SR
 
+## Mergers
+No mergers.
+
 ## Emergency Buy
 Bank credit for shortfall. 2x deducted from player total at game end. Optional variant: no credits, bankruptcy instead ;(.
 
 ## Auction
-English auction -- ascending bids on each private.
+English auction for 7 privates.
 
 ## Round System
 - SR -> OR x1 (phase 2)
@@ -46,6 +55,9 @@ English auction -- ascending bids on each private.
 
 ## Game End
 Bank break. M9,000 bank.
+
+## Train Events
+Rusting: 2→4, 3→5. Privates close at phase 5. RhE delayed par.
 
 ## Trains
 | Train | Cost | Qty | Rusts On | Events |
