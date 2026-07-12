@@ -25,6 +25,7 @@ export const g1860 = {
   sellBuyOrder: 'sell_buy',
   emergencyBuy: 'none',            // No forced purchase; insolvency → lease train
   sellAfter: 'any_time',
+  routeStopValues: [10, 20, 30, 40, 50, 60, 70, 80, 100, 120, 150],
   dividendMovement: 'multi_jump',  // >=1x→right1; >=2x→right2; >=3x→right3; >=4x→right4
   ebuyPresSwap: false,
   ebuyFromOthers: 'never',

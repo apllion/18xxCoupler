@@ -24,6 +24,7 @@ export const gptg = {
   sellBuyOrder: 'sell_buy',
   emergencyBuy: 'president_pays',  // CEO contributes cash; bankruptcy ends game
   sellMovement: 'down_share', // One row down per share sold
+  routeStopValues: [10, 20, 30, 40, 50, 60, 70, 80],
   marketShareLimit: 100, // No pool limit mentioned
 
   // Fixed 7 rounds

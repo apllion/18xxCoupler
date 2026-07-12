@@ -89,10 +89,20 @@ function PanelContent({ panel, game, player, corp, unfloated, fmt, revenueInput,
     const rev = parseInt(revenueInput, 10) || 0
     const perShare = Math.floor(rev / 10)
     const dblJump = price > 0 && perShare >= price
+    // Last revenue for this corp from action log
+    const lastRev = (() => {
+      for (let i = (game.actionLog || []).length - 1; i >= 0; i--) {
+        const a = game.actionLog[i].action
+        if ((a.type === 'PAY_DIVIDEND' || a.type === 'WITHHOLD_DIVIDEND' || a.type === 'HALF_DIVIDEND') && a.corpSym === corp.sym) {
+          return a.totalRevenue
+        }
+      }
+      return 0
+    })()
     return (
       <div>
         <Title><CB c={corp} /> Revenue</Title>
-        <div className="flex items-center gap-2 mt-1">
+        <div className="flex items-center gap-2 mt-1 flex-wrap">
           <input ref={revRef} type="number" value={revenueInput} onChange={e => setRevenueInput(e.target.value)}
             placeholder="Enter revenue" autoFocus
             className="w-24 bg-broker-bg border border-broker-border rounded px-2 py-1.5 text-white text-center"
@@ -103,10 +113,13 @@ function PanelContent({ panel, game, player, corp, unfloated, fmt, revenueInput,
               if (e.key === 'h') { e.preventDefault(); doAction({ type: 'HALF_DIVIDEND', corpSym: corp.sym, totalRevenue: rev }) }
             }}
           />
+          {lastRev > 0 && !revenueInput && (
+            <Btn v="blue" o={() => setRevenueInput(String(lastRev))}>Last: {fmt(lastRev)}</Btn>
+          )}
           <Btn v="blue" o={() => {
             useUIStore.getState().setActiveCorp(corp.sym)
             useUIStore.getState().setActiveTab('routes')
-          }}>Route Calc</Btn>
+          }}>Calc</Btn>
           <Btn v="red" o={() => doAction({ type: 'WITHHOLD_DIVIDEND', corpSym: corp.sym, totalRevenue: 0 })}>No Trains</Btn>
           {rev > 0 && (
             <>

@@ -19,6 +19,7 @@ export const g22mars = {
   sellBuyOrder: 'sell_buy',
   emergencyBuy: 'president_pays',  // President sells shares; bankruptcy possible
   sellMovement: 'down_share',
+  routeStopValues: [10, 20, 30, 40, 50, 60, 80, 100, 120, 150, 200],
   marketShareLimit: 80,
 
   // Dividend: >0 and <2x price = right 1, >=2x price = right 2

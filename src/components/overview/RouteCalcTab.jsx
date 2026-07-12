@@ -79,6 +79,16 @@ function RouteCalc({ game, fmt }) {
     if (corp.sym) saveRoutes(corp.sym, { corp, trains })
   }, [corp.sym, trains])
 
+  // Detect stale routes: trains in game changed vs saved
+  const trainsMismatch = useMemo(() => {
+    if (!game || !corp.sym) return false
+    const c = game.corporations.find(x => x.sym === corp.sym && x.floated)
+    if (!c) return false
+    const gameTrainNames = c.trains.map(t => t.name).sort().join(',')
+    const calcTrainNames = trains.map(t => t.name).sort().join(',')
+    return gameTrainNames !== calcTrainNames && c.trains.length > 0
+  }, [game, corp.sym, trains])
+
   // --- Train ops ---
   const addTrain = () => setTrains(prev => [...prev, { id: String(Date.now()), name: '', stops: [], mult: 1 }])
   const removeTrain = (idx) => {
@@ -96,8 +106,9 @@ function RouteCalc({ game, fmt }) {
     setTrains(prev => prev.map(t => t.id === trainId ? { ...t, stops: [] } : t))
   }
 
-  // Custom stop buttons added via input
-  const quickValues = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+  // Stop value buttons — title-aware defaults or standard
+  const titleStopValues = game?.title?.routeStopValues
+  const quickValues = titleStopValues || [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
   const [extraValues, setExtraValues] = useState([])
   const allQuickValues = [...new Set([...quickValues, ...extraValues])].sort((a, b) => a - b)
 
@@ -118,8 +129,17 @@ function RouteCalc({ game, fmt }) {
   const nameInput = 'w-10 bg-broker-bg border border-broker-border rounded px-1 py-0.5 text-xs text-white focus:outline-none'
   return (
     <>
+      {/* Trains changed warning */}
+      {trainsMismatch && (
+        <div className="bg-amber-900/40 border border-amber-600 rounded-lg px-3 py-2 flex items-center gap-2">
+          <span className="text-amber-300 text-xs font-medium">Trains changed in game</span>
+          <button onClick={loadFromGame} className="text-xs bg-amber-700 hover:bg-amber-600 text-white px-3 py-1.5 rounded font-bold"
+          >Reload trains</button>
+        </div>
+      )}
+
       {/* Load from game */}
-      {game && corp.sym && game.corporations.some(c => c.sym === corp.sym && c.floated) && (
+      {!trainsMismatch && game && corp.sym && game.corporations.some(c => c.sym === corp.sym && c.floated) && (
         <button onClick={loadFromGame} className="text-xs bg-broker-surface-hover text-broker-text hover:text-white px-3 py-1.5 rounded self-start"
         >Load {corp.sym} trains from game</button>
       )}

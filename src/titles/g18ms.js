@@ -18,6 +18,7 @@ export const g18ms = {
   floatPercent: 60,
   emergencyBuy: 'loans',           // Player takes loan for shortfall (50% interest)
   maxOwnership: 70,
+  routeStopValues: [10, 20, 30, 40, 50, 60, 70, 80],
   ebuyPresSwap: false,
   ebuyDepotCheapest: false,
 

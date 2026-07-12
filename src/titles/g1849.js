@@ -24,6 +24,7 @@ export const g1849 = {
   sellBuyOrder: 'sell_buy',
   emergencyBuy: 'president_pays',  // President sells shares; L.500 player loan if still short
   sellMovement: 'down_per_10',
+  routeStopValues: [10, 20, 30, 40, 50, 60, 80, 100, 120],
   dividendMovement: 'standard_no_double', // >=price right1; else nothing; no double jump
   poolShareDrop: 'down_block',
   sellAfter: 'operate',

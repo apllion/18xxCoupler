@@ -24,6 +24,7 @@ export const g18do_trg = {
   sellBuyOrder: 'sell_buy',
   emergencyBuy: 'president_pays',  // President contributes cash
   sellMovement: 'down_share',
+  routeStopValues: [20, 30, 40, 50, 60, 70, 80, 90, 100, 120],
   marketShareLimit: 50,
 
   // Per-player max ownership varies: 3p=70%, 4-5p=60%
