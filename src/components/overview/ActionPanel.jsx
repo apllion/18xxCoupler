@@ -264,6 +264,17 @@ function PanelContent({ panel, game, player, corp, unfloated, fmt, revenueInput,
               onConfirm={() => { const pr = parseInt(priceValue); if (pr > 0) doAction({ type: 'BUY_TRAIN', corpSym: priceTarget.corpSym, trainName: priceTarget.trainName, price: pr, fromCorpSym: priceTarget.fromCorpSym }) }}
               onCancel={() => setPriceTarget(null)} />
           )}
+          {/* Grant train — private exchange, event, etc. */}
+          <div className="flex gap-1 items-center mt-1">
+            <span className="text-broker-text-muted text-xs">Grant:</span>
+            <input type="text" value={priceValue} onChange={e => setPriceValue(e.target.value)}
+              placeholder="train name"
+              className="w-16 bg-broker-bg border border-broker-border rounded px-2 py-1 text-white text-center text-xs"
+              onKeyDown={e => { if (e.key === 'Enter' && priceValue.trim()) { doAction({ type: 'ADD_TRAIN_MANUAL', corpSym: corp.sym, trainName: priceValue.trim() }); setPriceValue('') }}} />
+            <Btn v="blue" o={() => { if (priceValue.trim()) { doAction({ type: 'ADD_TRAIN_MANUAL', corpSym: corp.sym, trainName: priceValue.trim() }); setPriceValue('') }}}>
+              + Free
+            </Btn>
+          </div>
         </div>
       </div>
     )
@@ -616,12 +627,21 @@ function PanelContent({ panel, game, player, corp, unfloated, fmt, revenueInput,
     if (corp.trains.length === 0) return <Title>{corp.sym} has no trains to discard</Title>
     return (
       <div>
-        <Title><CB c={corp} /> — Discard Train</Title>
+        <Title><CB c={corp} /> — Discard / Remove Train</Title>
         <div className="flex gap-1 mt-1 flex-wrap">
           {corp.trains.map((t, i) => (
             <Btn key={t.id || i} v="red"
               o={() => doAction({ type: 'DISCARD_TRAIN', corpSym: corp.sym, trainName: t.name })}>
-              {t.name}-train
+              {t.name} → depot
+            </Btn>
+          ))}
+        </div>
+        <div className="flex gap-1 mt-1 flex-wrap">
+          <span className="text-broker-text-muted text-xs self-center">Remove (no depot):</span>
+          {corp.trains.map((t, i) => (
+            <Btn key={`rm-${t.id || i}`} v="yellow"
+              o={() => doAction({ type: 'REMOVE_TRAIN_MANUAL', corpSym: corp.sym, trainName: t.name })}>
+              {t.name} ×
             </Btn>
           ))}
         </div>
