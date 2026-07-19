@@ -144,28 +144,32 @@ function PanelContent({ panel, game, player, corp, unfloated, fmt, revenueInput,
     const total = corp.tokens.length
     const remaining = total - placed
     const tokenCost = placed < total ? (corp.tokens[placed] || 0) : 0
-    const variableTokenCost = game.title.variableTokenCost
     if (remaining <= 0) return <div><Title><CB c={corp} /> Tokens</Title><span className="text-broker-text-muted">All tokens placed</span></div>
 
     const placeToken = (cost) => {
       doAction({ type: 'PLACE_TOKEN', corpSym: corp.sym, price: cost })
     }
 
+    // Show all remaining token costs
+    const upcomingCosts = corp.tokens.slice(placed).filter(c => c != null)
+
     return (
       <div>
-        <Title><CB c={corp} /> Place Token ({placed}/{total}) — next: {fmt(tokenCost)}</Title>
+        <Title><CB c={corp} /> Place Token ({placed}/{total})</Title>
+        <div className="text-xs text-broker-text-muted mb-1">
+          Costs: {upcomingCosts.map((c, i) => <span key={i} className={i === 0 ? 'text-white font-bold' : ''}>{i > 0 && ' → '}{fmt(c)}</span>)}
+        </div>
         <div className="flex items-center gap-1 flex-wrap mt-1">
-          {variableTokenCost ? (
-            <>
-              <input type="number" value={priceValue} onChange={e => setPriceValue(e.target.value)}
-                placeholder="0"
-                className="w-20 bg-broker-bg border border-broker-border rounded px-2 py-1 text-white text-center text-xs" />
-              <Btn v="green" o={() => { placeToken(parseInt(priceValue, 10) || 0); setPriceValue('') }}>
-                Place {fmt(parseInt(priceValue, 10) || 0)}
-              </Btn>
-            </>
-          ) : (
-            <Btn v="green" o={() => placeToken(tokenCost)}>Place {fmt(tokenCost)}</Btn>
+          {/* Quick place at expected cost */}
+          <Btn v="green" o={() => placeToken(tokenCost)}>Place {fmt(tokenCost)}</Btn>
+          {/* Custom cost input for terrain/surcharges */}
+          <input type="number" value={priceValue} onChange={e => setPriceValue(e.target.value)}
+            placeholder="custom"
+            className="w-20 bg-broker-bg border border-broker-border rounded px-2 py-1 text-white text-center text-xs" />
+          {priceValue && (
+            <Btn v="blue" o={() => { placeToken(parseInt(priceValue, 10) || 0); setPriceValue('') }}>
+              Place {fmt(parseInt(priceValue, 10) || 0)}
+            </Btn>
           )}
         </div>
       </div>
