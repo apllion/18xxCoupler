@@ -34,6 +34,11 @@ export const defaults = {
   // Market share limit (percent in pool before no more can be sold)
   marketShareLimit: 50,
 
+  // Private company sale price range (multiplier of face value)
+  // Most titles: 50%–200% (0.5–2.0). Some titles differ.
+  privateSaleMin: 0.5,  // minimum price as multiplier of face value
+  privateSaleMax: 2.0,  // maximum price as multiplier of face value
+
   // Corp-to-corp share purchasing (disabled by default)
   // Dividend on unsold shares: 'market' = market pays corp (standard), 'ipo' = IPO/treasury pays corp, 'both' = both, 'none' = neither
   unsoldShareDividends: 'market',

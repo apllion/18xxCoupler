@@ -75,15 +75,33 @@ export function sellShares(state, playerId, corpSym, percent = 10) {
   player.cash += revenue
   state.bank.cash -= revenue
 
-  // Remove shares from player
+  // Remove shares from player — prefer removing non-president certs first,
+  // and prefer certs that exactly match the remaining percent needed.
   let remaining = percent
-  player.shares = player.shares.filter((s) => {
-    if (s.corpSym === corpSym && remaining > 0) {
+  const toRemove = []
+
+  // First pass: find non-president certs that fit
+  for (let i = 0; i < player.shares.length && remaining > 0; i++) {
+    const s = player.shares[i]
+    if (s.corpSym === corpSym && !s.isPresident && s.percent <= remaining) {
+      toRemove.push(i)
       remaining -= s.percent
-      return false
     }
-    return true
-  })
+  }
+
+  // Second pass: if still need more, use president cert
+  if (remaining > 0) {
+    for (let i = 0; i < player.shares.length && remaining > 0; i++) {
+      const s = player.shares[i]
+      if (s.corpSym === corpSym && !toRemove.includes(i) && s.percent <= remaining) {
+        toRemove.push(i)
+        remaining -= s.percent
+      }
+    }
+  }
+
+  const removeSet = new Set(toRemove)
+  player.shares = player.shares.filter((_, i) => !removeSet.has(i))
 
   corp.marketShares += percent
 }
