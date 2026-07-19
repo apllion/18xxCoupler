@@ -16,6 +16,67 @@ import { shortSell, closeShort } from './shorts.js'
 
 let actionSeq = 0
 
+// Build operating order for OR turn queue.
+// Default: highest price → rightmost col → top row → first placed in cell → name
+// Title overrides: '1846_first_reverse', 'minors_first'
+function buildOperatingOrder(state) {
+  const positions = state.stockMarket.corpPositions || {}
+  const opOrder = state.title.operatingOrder
+  const isFirstOR = (state.orCount || 0) === 0
+
+  let corps = state.corporations.filter(c => c.floated)
+
+  // Separate minors from majors if title uses minors-first ordering (1861, 1867, 1846)
+  let minors = []
+  if (opOrder === 'minors_first' || opOrder === '1846') {
+    minors = corps.filter(c => c.type === 'minor')
+    corps = corps.filter(c => c.type !== 'minor' && c.type !== 'national')
+  }
+
+  // Sort function: match 18xx.games default sort_order_key
+  const sortKey = (c) => {
+    const pos = positions[c.sym]
+    const price = corpPrice(state.stockMarket, c.sym) || 0
+    const col = pos?.col ?? 0
+    const row = pos?.row ?? 0
+    const order = pos?.order ?? 0
+    return { price, col, row, order, name: c.sym }
+  }
+
+  const compare = (a, b) => {
+    const ka = sortKey(a)
+    const kb = sortKey(b)
+    // Highest price first
+    if (ka.price !== kb.price) return kb.price - ka.price
+    // Rightmost column first (higher col = further right)
+    if (ka.col !== kb.col) return kb.col - ka.col
+    // Top row first (lower row = higher up)
+    if (ka.row !== kb.row) return ka.row - kb.row
+    // First placed in cell first (lower order)
+    if (ka.order !== kb.order) return ka.order - kb.order
+    // Alphabetical
+    return ka.name.localeCompare(kb.name)
+  }
+
+  const reverseCompare = (a, b) => -compare(a, b)
+
+  // 1846: first OR is reverse (lowest price first)
+  if (opOrder === '1846' && isFirstOR) {
+    corps.sort(reverseCompare)
+    minors.sort(reverseCompare)
+  } else {
+    corps.sort(compare)
+    minors.sort(compare)
+  }
+
+  // Minors operate before majors
+  const ordered = [...minors, ...corps]
+
+  // Nationals operate last (1861/1867)
+  const nationals = state.corporations.filter(c => c.type === 'national' && c.floated)
+  return [...ordered, ...nationals].map(c => c.sym)
+}
+
 // Actions that mutate state but shouldn't be logged (turn navigation)
 const SILENT_ACTIONS = new Set(['NEXT_TURN', 'PREV_TURN', 'SET_TURN_QUEUE', 'SET_OR_STEP', 'OR_NEXT_CORP'])
 
@@ -298,11 +359,8 @@ export function applyAction(state, action) {
           state.turnIndex = 0
           state.srPassed = []
         } else if (action.roundType === 'OR') {
-          state.turnQueue = state.corporations
-            .filter((c) => c.floated)
-            .map((c) => ({ sym: c.sym, price: corpPrice(state.stockMarket, c.sym) || 0 }))
-            .sort((a, b) => b.price - a.price)
-            .map((c) => c.sym)
+          state.turnQueue = buildOperatingOrder(state)
+          state.orCount = (state.orCount || 0) + 1  // increment AFTER building queue
           state.turnIndex = 0
           state.orStep = 0
         }

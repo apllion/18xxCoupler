@@ -10,6 +10,25 @@ export function checkReminders(state, fromRound, toRound, enabled) {
 
   // ── Leaving SR ────────────────────────────────────────────────────
 
+  // ── Entering SR ────────────────────────────────────────────────────
+
+  if (toRound === 'SR') {
+    if (enabled.sellRestriction) {
+      const rule = title.sellAfter || 'first_sr'
+      const descs = {
+        'operate': 'Cannot sell shares until corp has operated',
+        'after_sr_floated': 'Cannot sell shares until SR after corp floated',
+        'p_any_operate': 'President can sell any time; others wait until operated',
+        'round': 'Can sell shares before corp operates',
+      }
+      if (descs[rule]) {
+        reminders.push({ id: 'sellRestriction', message: descs[rule], severity: 'info' })
+      }
+    }
+  }
+
+  // ── Leaving SR ────────────────────────────────────────────────────
+
   if (fromRound === 'SR' && toRound !== 'SR') {
     if (enabled.soldOut) {
       const log = state.actionLog || []
@@ -223,6 +242,7 @@ export function checkReminders(state, fromRound, toRound, enabled) {
 
 export const REMINDER_DEFS = [
   // Stock round
+  { key: 'sellRestriction', label: 'Sell restriction rule (entering SR)', defaultOn: false },
   { key: 'soldOut', label: 'Sold-out corps (leaving SR)', defaultOn: true },
   { key: 'certLimit', label: 'Certificate limit exceeded (leaving SR)', defaultOn: true },
   { key: 'playerDebt', label: 'Player debt compounds (leaving SR)', defaultOn: true },

@@ -24,6 +24,7 @@ export const g1861 = {
   floatPercent: 20,
   sellBuyOrder: 'sell_buy',
   emergencyBuy: 'loans',           // Take loans; nationalization if max loans
+  operatingOrder: 'minors_first',  // Minors operate before majors. National (RSR) last.
   sellMovement: 'down_block_pres',
   sellAfter: 'operate',
 

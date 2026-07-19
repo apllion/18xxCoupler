@@ -31,6 +31,7 @@ export const g1846 = {
   floatPercent: 20,
   sellBuyOrder: 'sell_buy',
   emergencyBuy: 'president_pays',  // President contributes cash; may issue shares first
+  operatingOrder: '1846',          // First OR: reverse (lowest price first). Minors before majors.
   halfPay: true,
   sellMovement: 'left_block_pres',
   dividendMovement: '1846',        // <half→left1; >=1x→right1; >=2x→right2; >=3x→right3 (if price>=165)

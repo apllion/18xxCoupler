@@ -46,6 +46,7 @@ export const useUIStore = create((set) => ({
     trainExport: true,
     emergencyBuy: false,
     halfPay: false,
+    sellRestriction: false,
   },
   toggleReminder: (key) => set((s) => ({
     reminders: { ...s.reminders, [key]: !s.reminders[key] },
