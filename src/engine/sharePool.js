@@ -70,11 +70,6 @@ export function sellShares(state, playerId, corpSym, percent = 10) {
 
   if (!player || !corp || !price) return
 
-  const baseShare = regularSharePercent(state, corpSym)
-  const revenue = price * (percent / baseShare)
-  player.cash += revenue
-  state.bank.cash -= revenue
-
   // Remove shares from player — prefer removing non-president certs first,
   // and prefer certs that exactly match the remaining percent needed.
   let remaining = percent
@@ -100,10 +95,19 @@ export function sellShares(state, playerId, corpSym, percent = 10) {
     }
   }
 
+  // Only credit cash and market pool for what was actually removed
+  const actualSold = percent - remaining
+  if (actualSold <= 0) return
+
+  const baseShare = regularSharePercent(state, corpSym)
+  const revenue = price * (actualSold / baseShare)
+  player.cash += revenue
+  state.bank.cash -= revenue
+
   const removeSet = new Set(toRemove)
   player.shares = player.shares.filter((_, i) => !removeSet.has(i))
 
-  corp.marketShares += percent
+  corp.marketShares += actualSold
 }
 
 // --- Corp-to-corp share operations ---
@@ -163,21 +167,29 @@ export function corpSellShares(state, sellerCorpSym, targetCorpSym, percent = 10
 
   if (!seller || !target || !price) return
 
-  const baseShare = regularSharePercent(state, targetCorpSym); const revenue = price * (percent / baseShare)
+  // Remove shares from corp's holdings — prefer certs that fit
+  let remaining = percent
+  const toRemove = []
+  for (let i = 0; i < seller.sharesHeld.length && remaining > 0; i++) {
+    const s = seller.sharesHeld[i]
+    if (s.corpSym === targetCorpSym && s.percent <= remaining) {
+      toRemove.push(i)
+      remaining -= s.percent
+    }
+  }
+
+  const actualSold = percent - remaining
+  if (actualSold <= 0) return
+
+  const baseShare = regularSharePercent(state, targetCorpSym)
+  const revenue = price * (actualSold / baseShare)
   seller.cash += revenue
   state.bank.cash -= revenue
 
-  // Remove shares from corp's holdings
-  let remaining = percent
-  seller.sharesHeld = seller.sharesHeld.filter((s) => {
-    if (s.corpSym === targetCorpSym && remaining > 0) {
-      remaining -= s.percent
-      return false
-    }
-    return true
-  })
+  const removeSet = new Set(toRemove)
+  seller.sharesHeld = seller.sharesHeld.filter((_, i) => !removeSet.has(i))
 
-  target.marketShares += percent
+  target.marketShares += actualSold
 }
 
 function priceForCorp(state, corpSym) {

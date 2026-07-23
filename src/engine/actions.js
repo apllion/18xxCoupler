@@ -601,6 +601,7 @@ export function applyAction(state, action) {
         ic.ipoShares -= shareSize * shares
         ic.marketShares += shareSize * shares
         ic.cash += perShareRevenue * shares
+        state.bank.cash -= perShareRevenue * shares
         // Price movement
         if (issueRule === '1846') {
           // 1846: no price movement on normal issue (6.33)
@@ -639,6 +640,7 @@ export function applyAction(state, action) {
           rc.marketShares -= shareSize * shares
           rc.ipoShares += shareSize * shares
           rc.cash -= totalCost
+          state.bank.cash += totalCost
           if (issueRule === '1846') {
             // 1846: no price movement on redeem (6.33)
           } else {
@@ -725,6 +727,11 @@ export function applyAction(state, action) {
       if (bp) {
         bp.bankrupt = true
         bp.cash = 0
+        // Return all shares to market pool
+        for (const s of bp.shares) {
+          const corp = state.corporations.find(c => c.sym === s.corpSym)
+          if (corp) corp.marketShares += s.percent
+        }
         bp.shares = []
         bp.privates = []
         if (state.turnQueue) {
@@ -993,7 +1000,7 @@ function handlePayDividend(state, { corpSym, totalRevenue }) {
   }
 
   // Unsold share dividends: title-configurable
-  const unsoldRule = state.title.unsoldShareDividends || 'ipo'
+  const unsoldRule = state.title.unsoldShareDividends || 'market'
   if ((unsoldRule === 'ipo' || unsoldRule === 'both') && corp.ipoShares > 0) {
     const ipoPayout = perShare * (corp.ipoShares / regShare)
     corp.cash += ipoPayout
@@ -1017,8 +1024,8 @@ function handleWithholdDividend(state, { corpSym, totalRevenue }) {
   corp.cash += totalRevenue
   state.bank.cash -= totalRevenue
 
-  // Price moves left once
-  moveLeft(state.stockMarket, corpSym, 1)
+  // Price movement: use title-specific rules (perShare=0 triggers withhold path)
+  moveDividend(state.stockMarket, corpSym, 0, state.title.dividendMovement, totalRevenue)
 }
 
 function handleHalfDividend(state, { corpSym, totalRevenue }) {
