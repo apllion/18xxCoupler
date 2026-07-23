@@ -1,5 +1,18 @@
 // Accounting invariant tests — verify cash and share balance after every action.
 // Cross-referenced with 18xx.games Ruby source (tobymao/18xx).
+//
+// Rule citations use format: [Title Section] e.g. [1830 9.1] [1846 6.33]
+// Verified against:
+//   - 18xx.games Ruby engine: lib/engine/share_pool.rb, lib/engine/step/dividend.rb
+//   - Local rulebook PDFs: ~/Library/CloudStorage/Dropbox/Brettspiele/18xx/
+//
+// Invariants that must hold for ALL 18xx titles:
+//   1. Cash conservation: player_cash + corp_cash + bank_cash = constant
+//      [Universal: money is never created or destroyed, only transferred]
+//   2. Share conservation: ipo% + market% + player% + corp_held% = title_total%
+//      [Universal: certificates are physical objects, never created/destroyed]
+//   3. President uniqueness: exactly one president cert per corp at all times
+//      [Universal: president cert is a special physical certificate]
 
 import { describe, it, expect } from 'vitest'
 import { createGame } from '../src/engine/setup.js'
@@ -66,6 +79,8 @@ function floatCorp1830(game, playerId, corpSym, parPrice = 100) {
 
 // ── Invariant Checks ────────────────────────────────────────────────
 
+// [1830 3.1] Player pays par × 2 for 20% president cert → bank (full cap)
+// [1846 4.1] Player pays par × 2 for 20% president cert → corp treasury (incremental cap)
 describe('Cash invariant', () => {
   it('1830: total cash constant after par', () => {
     const game = makeGame('g1830')
@@ -74,6 +89,7 @@ describe('Cash invariant', () => {
     expect(totalCash(game)).toBe(initial)
   })
 
+  // [1830 3.1] Buying from IPO: player pays par price per share → bank
   it('1830: total cash constant after buy from IPO', () => {
     const game = makeGame('g1830')
     parCorp(game, 'p0', 'PRR', 100, 'g1830')
@@ -82,6 +98,7 @@ describe('Cash invariant', () => {
     expect(totalCash(game)).toBe(after_par)
   })
 
+  // [1830 3.1] Selling: bank pays current market price per share → player
   it('1830: total cash constant after sell', () => {
     const game = makeGame('g1830')
     parCorp(game, 'p0', 'PRR', 100, 'g1830')
@@ -91,6 +108,7 @@ describe('Cash invariant', () => {
     expect(totalCash(game)).toBe(before)
   })
 
+  // [1830 9.1] Dividends: bank pays revenue ÷ 10 per share to each holder
   it('1830: total cash constant after pay dividend', () => {
     const game = makeGame('g1830')
     floatCorp1830(game, 'p0', 'PRR', 100)
@@ -99,6 +117,7 @@ describe('Cash invariant', () => {
     expect(totalCash(game)).toBe(before)
   })
 
+  // [1830 9.1] Withhold: entire revenue → corp treasury, bank pays
   it('1830: total cash constant after withhold', () => {
     const game = makeGame('g1830')
     floatCorp1830(game, 'p0', 'PRR', 100)
@@ -107,6 +126,7 @@ describe('Cash invariant', () => {
     expect(totalCash(game)).toBe(before)
   })
 
+  // [1846 6.3] Half pay: half to shareholders, half to corp treasury
   it('1846: total cash constant after half dividend', () => {
     const game = makeGame('g1846')
     parCorp(game, 'p0', 'PRR', 100, 'g1846')
@@ -116,6 +136,7 @@ describe('Cash invariant', () => {
     expect(totalCash(game)).toBe(before)
   })
 
+  // [1846 6.33] Issue: corp sells share from IPO to market, receives price-1 column
   it('1846: total cash constant after issue shares', () => {
     const game = makeGame('g1846')
     parCorp(game, 'p0', 'PRR', 100, 'g1846')
@@ -124,6 +145,7 @@ describe('Cash invariant', () => {
     expect(totalCash(game)).toBe(before)
   })
 
+  // [1846 6.33] Redeem: corp buys share from market to IPO, pays price+1 column
   it('1846: total cash constant after redeem shares', () => {
     const game = makeGame('g1846')
     parCorp(game, 'p0', 'PRR', 100, 'g1846')
@@ -136,6 +158,7 @@ describe('Cash invariant', () => {
     expect(totalCash(game)).toBe(before)
   })
 
+  // [1830 9.1] Buy train: corp pays listed price → bank
   it('1830: total cash constant after buy train', () => {
     const game = makeGame('g1830')
     floatCorp1830(game, 'p0', 'PRR', 100)
@@ -144,6 +167,7 @@ describe('Cash invariant', () => {
     expect(totalCash(game)).toBe(before)
   })
 
+  // [1830 2.2] Buy private: player pays price → bank
   it('1830: total cash constant after buy private', () => {
     const game = makeGame('g1830')
     const before = totalCash(game)
@@ -151,6 +175,7 @@ describe('Cash invariant', () => {
     expect(totalCash(game)).toBe(before)
   })
 
+  // [1817 6.6/6.9] Loan: bank pays $100 → corp on take; corp pays $100 → bank on repay
   it('1817: total cash constant after take/repay loan', () => {
     const game = makeGame('g1817', 3)
     parCorp(game, 'p0', 'A&S', 50, 'g1817')
@@ -162,6 +187,7 @@ describe('Cash invariant', () => {
     expect(totalCash(game)).toBe(afterLoan)
   })
 
+  // [1830 13.1] Bankruptcy: player eliminated, shares return to market pool
   it('1830: total cash constant after player bankruptcy', () => {
     const game = makeGame('g1830')
     parCorp(game, 'p0', 'PRR', 100, 'g1830')
@@ -177,6 +203,8 @@ describe('Cash invariant', () => {
 
 // ── Share invariant ─────────────────────────────────────────────────
 
+// [Universal] Shares are physical certificates. Total percent in IPO + market + players + corps = constant.
+// Ruby: lib/engine/share_pool.rb transfer_shares — share_holders[owner] -= %, share_holders[to] += %
 describe('Share invariant (total = 100%)', () => {
   it('1830: shares sum to 100% after par', () => {
     const game = makeGame('g1830')
@@ -237,6 +265,9 @@ describe('Share invariant (total = 100%)', () => {
 
 // ── Sell shares: cert selection ─────────────────────────────────────
 
+// [Universal] When selling shares, regular (non-president) certificates are sold first.
+// President cert can only be sold if no regular certs remain AND another player holds enough to take presidency.
+// Ruby: lib/engine/share_bundle.rb — bundles prefer non-president shares
 describe('Sell shares: cert selection', () => {
   it('selling 10% removes regular cert, not president (1830)', () => {
     const game = makeGame('g1830')
@@ -278,6 +309,11 @@ describe('Sell shares: cert selection', () => {
 
 // ── Dividend cash balance ───────────────────────────────────────────
 
+// [1830 9.1] Revenue ÷ total_shares = per_share amount. Each holder receives per_share × their_shares.
+// [1830 9.1] Unsold shares (IPO): no payment in 1830 (unsoldShareDividends='market')
+// [1846 6.3] Unsold shares (IPO): pay to corp treasury (unsoldShareDividends='ipo')
+// [1867 8.2] Unsold shares: no payment (unsoldShareDividends='none')
+// Ruby: lib/engine/step/dividend.rb payout_per_share — revenue / total_shares.to_f
 describe('Dividend cash balance', () => {
   it('1830: pay dividend — exact per-share calculation', () => {
     const game = makeGame('g1830')
@@ -328,6 +364,13 @@ describe('Dividend cash balance', () => {
 
 // ── Stock market movement ───────────────────────────────────────────
 
+// [1830 9.1] Pay: right 1, double jump if per_share >= price
+// [1830 9.1] Withhold: left 1
+// [1830 3.1] Sell: down 1 per share sold
+// [1817 5.1] Sell: NO movement
+// [1846 5.3] Sell: left 1 (blocked by president share in market)
+// [18India 5.3] Sell: NO movement
+// Ruby: lib/engine/corporation.rb sort_order_key — [-price, -col, row, order, name]
 describe('Stock market movement', () => {
   it('1830: pay dividend moves right 1 (no double jump — rev < price)', () => {
     const game = makeGame('g1830')
@@ -416,6 +459,10 @@ describe('Stock market movement', () => {
 
 // ── Issue / Redeem ──────────────────────────────────────────────────
 
+// [1846 6.33] Issue: shares move IPO→market, corp receives price at one column LEFT of current
+// [1846 6.33] Redeem: shares move market→IPO, corp pays price at one column RIGHT of current
+// [1846 6.33] No stock price movement from issue/redeem
+// [Standard] Issue: shares move IPO→market, corp receives current price, price drops per share
 describe('Issue / Redeem accounting', () => {
   it('1846: issue shares — corp gets cash, bank pays, shares move IPO→market', () => {
     const game = makeGame('g1846')
@@ -457,6 +504,11 @@ describe('Issue / Redeem accounting', () => {
 
 // ── Loan accounting ─────────────────────────────────────────────────
 
+// [1817 6.6] Take loan: bank pays $100 → corp. Price moves left 1.
+// [1817 6.9] Repay loan: corp pays $100 → bank. Price moves right 1.
+// [1817 6.8] Interest: variable rate × loans × $100, paid at start of OR
+// [1861/1867 8.2] Take loan: face $50, corp receives $45 ($5 fee). No price movement.
+// [1861/1867 8.10] Repay: corp pays $50 → bank. No price movement.
 describe('Loan accounting', () => {
   it('1817: take loan — bank pays corp, cash balanced', () => {
     const game = makeGame('g1817', 3)
@@ -493,6 +545,8 @@ describe('Loan accounting', () => {
 
 // ── Bankruptcy ───────────────────────────────────────────────────────
 
+// [1830 13.1] Bankrupt player's shares return to market pool (bank pool).
+// Share conservation must hold: all % accounted for after bankruptcy.
 describe('Player bankruptcy', () => {
   it('shares return to market pool', () => {
     const game = makeGame('g1830')
@@ -666,6 +720,9 @@ describe('All titles: buy train preserves cash', () => {
 
 // ── Half-pay cash balance (all halfPay titles) ──────────────────────
 
+// [1846 6.3] Half pay: half revenue → shareholders (per share), other half → corp treasury
+// [1822 5.6] Half pay: same split. No stock movement for half pay.
+// Ruby: lib/engine/step/dividend.rb half — { corporation: revenue/2, per_share: payout_per_share(entity, revenue/2) }
 describe('All halfPay titles: half dividend preserves cash', () => {
   const halfPayTitles = ALL_TITLES.filter(id => {
     try { return getTitle(id).halfPay } catch { return false }
@@ -805,6 +862,11 @@ describe('Loan types: cash invariant', () => {
 
 // ── Dividend movement per title ─────────────────────────────────────
 
+// [1830 9.1] Standard: pay → right 1; per_share >= price → right 2 (double jump)
+// [1867 8.5] No double jump: pay → right 1 if per_share >= price, else no movement
+// [1817 5.1] Sell: NO price movement
+// [1846 5.3] Sell: left 1 per sale (blocked by president in market)
+// Ruby: lib/engine/step/dividend.rb share_price_change — title-specific overrides
 describe('Dividend movement: title-specific rules', () => {
   it('1830: standard — right 1 if rev > 0, right 2 if per_share >= price', () => {
     const game = makeGame('g1830')
@@ -897,6 +959,10 @@ describe('Dividend movement: title-specific rules', () => {
 
 // ── Operating order ─────────────────────────────────────────────────
 
+// [Universal] Operating order: highest price first. Tiebreakers: rightmost col, top row, first placed.
+// [1846 4.5] First OR only: REVERSE order (lowest price first). Minors operate before majors.
+// [1861/1867] Minors operate before majors. National operates last.
+// Ruby: lib/engine/corporation.rb sort_order_key — [-price, -col, row, order, name]
 describe('Operating order', () => {
   it('higher price operates first', () => {
     const game = makeGame('g1830')
@@ -936,6 +1002,10 @@ describe('Operating order', () => {
 
 // ── Unsold share dividends ──────────────────────────────────────────
 
+// [1830 9.1] Unsold IPO shares: no dividend (market pool shares pay corp = 'market' rule)
+// [1846 6.3] Unsold IPO shares: pay to corp treasury ('ipo' rule)
+// [1867 8.2] Unsold shares: no payment at all ('none' rule)
+// Ruby: lib/engine/step/dividend.rb holder_for_corporation — incremental → corp, full → share_pool
 describe('Unsold share dividends', () => {
   it('1830: market rule — IPO shares do NOT pay corp', () => {
     const game = makeGame('g1830')
@@ -979,6 +1049,12 @@ describe('Unsold share dividends', () => {
 
 // ── President cert handling ─────────────────────────────────────────
 
+// [Universal] President certificate: exactly one per corp, represents 20% (or title-specific %).
+// [1830 3.1] First share purchased is always the president cert.
+// [1830 3.1] Subsequent purchases from IPO are regular (non-president) certs.
+// [1830 9.2] President swap: when another player holds more %, they receive the president cert
+//            in exchange for regular certs of equal total %.
+// Ruby: lib/engine/share_pool.rb transfer_shares — change_president check
 describe('President cert handling', () => {
   it('only one president cert exists after par', () => {
     const game = makeGame('g1830')
