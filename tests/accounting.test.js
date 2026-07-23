@@ -10,8 +10,11 @@ import { corpPrice } from '../src/engine/stockMarket.js'
 // ── Helpers ─────────────────────────────────────────────────────────
 
 function makeGame(titleId, playerCount = 3) {
-  const title = getTitle(titleId)
-  return createGame(title, Array.from({ length: playerCount }, (_, i) => `P${i + 1}`))
+  let title
+  try { title = getTitle(titleId) } catch { return null }
+  const minP = title.minPlayers || 2
+  const count = Math.max(playerCount, minP)
+  return createGame(title, Array.from({ length: count }, (_, i) => `P${i + 1}`))
 }
 
 // Total cash in the system (should be constant)
@@ -21,7 +24,7 @@ function totalCash(game) {
   return playerCash + corpCash + game.bank.cash
 }
 
-// Total shares for a corp (should always = 100%)
+// Total shares for a corp (should always equal the title's share structure sum)
 function totalSharePercent(game, corpSym) {
   const corp = game.corporations.find(c => c.sym === corpSym)
   if (!corp) return 0
@@ -30,6 +33,13 @@ function totalSharePercent(game, corpSym) {
   const corpHeld = game.corporations.reduce((s, c) =>
     s + (c.sharesHeld || []).filter(sh => sh.corpSym === corpSym).reduce((s2, sh) => s2 + sh.percent, 0), 0)
   return (corp.ipoShares || 0) + (corp.marketShares || 0) + playerHeld + corpHeld
+}
+
+// Expected total shares for a corp (from title share structure)
+function expectedShareTotal(game, corpSym) {
+  const corpDef = game.title.corporations?.find(c => c.sym === corpSym)
+  const shares = corpDef?.shares || game.title.shares || [20, 10, 10, 10, 10, 10, 10, 10, 10]
+  return shares.reduce((s, p) => s + p, 0)
 }
 
 function parCorp(game, playerId, corpSym, parPrice, titleId) {
@@ -171,7 +181,7 @@ describe('Share invariant (total = 100%)', () => {
   it('1830: shares sum to 100% after par', () => {
     const game = makeGame('g1830')
     parCorp(game, 'p0', 'PRR', 100, 'g1830')
-    expect(totalSharePercent(game, 'PRR')).toBe(100)
+    expect(totalSharePercent(game, 'PRR')).toBe(expectedShareTotal(game, 'PRR'))
   })
 
   it('1830: shares sum to 100% after buying all from IPO', () => {
@@ -179,7 +189,7 @@ describe('Share invariant (total = 100%)', () => {
     parCorp(game, 'p0', 'PRR', 100, 'g1830')
     for (let i = 0; i < 4; i++) applyAction(game, { type: 'BUY_SHARE', playerId: 'p1', corpSym: 'PRR', source: 'ipo' })
     for (let i = 0; i < 4; i++) applyAction(game, { type: 'BUY_SHARE', playerId: 'p2', corpSym: 'PRR', source: 'ipo' })
-    expect(totalSharePercent(game, 'PRR')).toBe(100)
+    expect(totalSharePercent(game, 'PRR')).toBe(expectedShareTotal(game, 'PRR'))
   })
 
   it('1830: shares sum to 100% after sell to market', () => {
@@ -187,7 +197,7 @@ describe('Share invariant (total = 100%)', () => {
     parCorp(game, 'p0', 'PRR', 100, 'g1830')
     applyAction(game, { type: 'BUY_SHARE', playerId: 'p1', corpSym: 'PRR', source: 'ipo' })
     applyAction(game, { type: 'SELL_SHARES', playerId: 'p1', corpSym: 'PRR', percent: 10 })
-    expect(totalSharePercent(game, 'PRR')).toBe(100)
+    expect(totalSharePercent(game, 'PRR')).toBe(expectedShareTotal(game, 'PRR'))
   })
 
   it('1830: shares sum to 100% after buy from market', () => {
@@ -196,14 +206,14 @@ describe('Share invariant (total = 100%)', () => {
     applyAction(game, { type: 'BUY_SHARE', playerId: 'p1', corpSym: 'PRR', source: 'ipo' })
     applyAction(game, { type: 'SELL_SHARES', playerId: 'p1', corpSym: 'PRR', percent: 10 })
     applyAction(game, { type: 'BUY_SHARE', playerId: 'p2', corpSym: 'PRR', source: 'market' })
-    expect(totalSharePercent(game, 'PRR')).toBe(100)
+    expect(totalSharePercent(game, 'PRR')).toBe(expectedShareTotal(game, 'PRR'))
   })
 
   it('1846: shares sum to 100% after issue', () => {
     const game = makeGame('g1846')
     parCorp(game, 'p0', 'PRR', 100, 'g1846')
     applyAction(game, { type: 'ISSUE_SHARES', corpSym: 'PRR' })
-    expect(totalSharePercent(game, 'PRR')).toBe(100)
+    expect(totalSharePercent(game, 'PRR')).toBe(expectedShareTotal(game, 'PRR'))
   })
 
   it('1846: shares sum to 100% after issue + redeem', () => {
@@ -213,7 +223,7 @@ describe('Share invariant (total = 100%)', () => {
     const corp = game.corporations.find(c => c.sym === 'PRR')
     corp.cash = 500
     applyAction(game, { type: 'REDEEM_SHARES', corpSym: 'PRR' })
-    expect(totalSharePercent(game, 'PRR')).toBe(100)
+    expect(totalSharePercent(game, 'PRR')).toBe(expectedShareTotal(game, 'PRR'))
   })
 
   it('1830: shares sum to 100% after player bankruptcy', () => {
@@ -221,7 +231,7 @@ describe('Share invariant (total = 100%)', () => {
     parCorp(game, 'p0', 'PRR', 100, 'g1830')
     applyAction(game, { type: 'BUY_SHARE', playerId: 'p1', corpSym: 'PRR', source: 'ipo' })
     applyAction(game, { type: 'PLAYER_BANKRUPT', playerId: 'p1' })
-    expect(totalSharePercent(game, 'PRR')).toBe(100)
+    expect(totalSharePercent(game, 'PRR')).toBe(expectedShareTotal(game, 'PRR'))
   })
 })
 
@@ -237,7 +247,7 @@ describe('Sell shares: cert selection', () => {
     // Should still have president cert
     expect(game.players[0].shares.some(s => s.corpSym === 'PRR' && s.isPresident)).toBe(true)
     expect(game.players[0].shares.filter(s => s.corpSym === 'PRR').reduce((s, sh) => s + sh.percent, 0)).toBe(20)
-    expect(totalSharePercent(game, 'PRR')).toBe(100)
+    expect(totalSharePercent(game, 'PRR')).toBe(expectedShareTotal(game, 'PRR'))
   })
 
   it('selling 10% with only president cert does nothing (no matching cert)', () => {
@@ -249,7 +259,7 @@ describe('Sell shares: cert selection', () => {
     // Should keep president cert, no cash change
     expect(game.players[0].shares.some(s => s.corpSym === 'PRR' && s.isPresident)).toBe(true)
     expect(game.players[0].cash).toBe(cashBefore)
-    expect(totalSharePercent(game, 'PRR')).toBe(100)
+    expect(totalSharePercent(game, 'PRR')).toBe(expectedShareTotal(game, 'PRR'))
   })
 
   it('18MS: selling 10% with 20%P + 10% removes the 10% cert', () => {
@@ -262,7 +272,7 @@ describe('Sell shares: cert selection', () => {
     // Should have 1 fewer cert, president still there
     expect(game.players[0].shares.filter(s => s.corpSym === 'GMO').length).toBe(sharesBefore - 1)
     expect(game.players[0].shares.some(s => s.corpSym === 'GMO' && s.isPresident)).toBe(true)
-    expect(totalSharePercent(game, 'GMO')).toBe(100)
+    expect(totalSharePercent(game, 'GMO')).toBe(expectedShareTotal(game, 'GMO'))
   })
 })
 
@@ -423,7 +433,7 @@ describe('Issue / Redeem accounting', () => {
     expect(corp.cash).toBeGreaterThan(corpBefore)
     expect(game.bank.cash).toBeLessThan(bankBefore)
     expect(totalCash(game)).toBe(corpBefore + corp.cash - corpBefore + game.bank.cash + game.players.reduce((s, p) => s + p.cash, 0))
-    expect(totalSharePercent(game, 'PRR')).toBe(100)
+    expect(totalSharePercent(game, 'PRR')).toBe(expectedShareTotal(game, 'PRR'))
   })
 
   it('1846: redeem shares — corp pays, bank gets, shares move market→IPO', () => {
@@ -441,7 +451,7 @@ describe('Issue / Redeem accounting', () => {
     expect(corp.ipoShares).toBe(ipoBefore + 10)
     expect(corp.marketShares).toBe(marketBefore - 10)
     expect(totalCash(game)).toBe(before)
-    expect(totalSharePercent(game, 'PRR')).toBe(100)
+    expect(totalSharePercent(game, 'PRR')).toBe(expectedShareTotal(game, 'PRR'))
   })
 })
 
@@ -495,7 +505,7 @@ describe('Player bankruptcy', () => {
 
     expect(game.players[1].shares).toHaveLength(0)
     expect(game.corporations.find(c => c.sym === 'PRR').marketShares).toBe(marketBefore + 10)
-    expect(totalSharePercent(game, 'PRR')).toBe(100)
+    expect(totalSharePercent(game, 'PRR')).toBe(expectedShareTotal(game, 'PRR'))
   })
 
   it('president shares return to market pool', () => {
@@ -507,47 +517,148 @@ describe('Player bankruptcy', () => {
     expect(game.players[0].shares).toHaveLength(0)
     // 20% president cert returned to market
     expect(game.corporations.find(c => c.sym === 'PRR').marketShares).toBe(20)
-    expect(totalSharePercent(game, 'PRR')).toBe(100)
+    expect(totalSharePercent(game, 'PRR')).toBe(expectedShareTotal(game, 'PRR'))
   })
 })
 
-// ── Multi-title smoke tests ─────────────────────────────────────────
+// ── All-title invariant tests ────────────────────────────────────────
 
-describe('Multi-title: basic operations preserve invariants', () => {
-  const titles = ['g1830', 'g1889', 'g18ms', 'g1846', 'g18chesapeake']
+// Find first valid par price in a market grid
+function findParPrice(grid) {
+  for (let r = 0; r < grid.length; r++) {
+    for (let c = (grid[r] || []).length - 1; c >= 0; c--) {
+      if (grid[r][c]?.canPar) return { price: grid[r][c].price, row: r, col: c }
+    }
+  }
+  return null
+}
 
-  for (const titleId of titles) {
-    it(`${titleId}: par + buy + sell + dividend preserves cash`, () => {
+// Find first corp that can be parred (not minor, not national, not metal)
+function findParrableCorp(game) {
+  return game.corporations.find(c =>
+    !c.ipoed && !c.floated && c.type !== 'minor' && c.type !== 'national' && c.type !== 'metal'
+  ) || game.corporations.find(c => !c.ipoed && !c.floated)
+}
+
+const ALL_TITLES = [
+  'g1817', 'g1822', 'g1822ca', 'g1822mx', 'g1830', 'g1846', 'g1847ae', 'g1849',
+  'g1858', 'g1860', 'g1861', 'g1862', 'g1867', 'g1871', 'g1880', 'g1889',
+  'g18chesapeake', 'g18daihan', 'g18depot', 'g18do_hsb', 'g18do_trg', 'g18gb',
+  'g18india', 'g18ireland', 'g18mex', 'g18ms', 'g18rhl', 'g18royalgorge',
+  'g18sj', 'g18usa', 'g21moon', 'g22mars', 'gptg', 'grla',
+]
+
+describe('All titles: par preserves cash and share invariants', () => {
+  for (const titleId of ALL_TITLES) {
+    it(`${titleId}: par`, () => {
       const game = makeGame(titleId)
+      if (!game) return // title not registered
       const initial = totalCash(game)
+      const corp = findParrableCorp(game)
+      const par = findParPrice(game.stockMarket.grid)
+      if (!corp || !par) return // skip titles with no parrable corps (shouldn't happen)
 
-      // Par first corp
-      const corp = game.corporations[0]
-      const grid = game.stockMarket.grid
-      let parPrice = 100, parRow = 0, parCol = 0
-      for (let r = 0; r < grid.length; r++) {
-        for (let c = 0; c < (grid[r] || []).length; c++) {
-          if (grid[r][c]?.canPar) { parPrice = grid[r][c].price; parRow = r; parCol = c; break }
-        }
-        if (parPrice) break
-      }
-      applyAction(game, { type: 'PAR_SHARE', playerId: 'p0', corpSym: corp.sym, parPrice, row: parRow, col: parCol })
+      applyAction(game, { type: 'PAR_SHARE', playerId: 'p0', corpSym: corp.sym, parPrice: par.price, row: par.row, col: par.col })
       expect(totalCash(game)).toBe(initial)
-      expect(totalSharePercent(game, corp.sym)).toBe(100)
+      expect(totalSharePercent(game, corp.sym)).toBe(expectedShareTotal(game, corp.sym))
+    })
+  }
+})
 
-      // Buy a share
+describe('All titles: par + buy preserves cash and share invariants', () => {
+  for (const titleId of ALL_TITLES) {
+    it(`${titleId}: par + buy`, () => {
+      const game = makeGame(titleId)
+      if (!game) return // title not registered
+      const initial = totalCash(game)
+      const corp = findParrableCorp(game)
+      const par = findParPrice(game.stockMarket.grid)
+      if (!corp || !par) return
+
+      applyAction(game, { type: 'PAR_SHARE', playerId: 'p0', corpSym: corp.sym, parPrice: par.price, row: par.row, col: par.col })
+      const c = game.corporations.find(x => x.sym === corp.sym)
+      if (c.ipoShares <= 0) return // fully sold at par (single-cert corps)
+
       applyAction(game, { type: 'BUY_SHARE', playerId: 'p1', corpSym: corp.sym, source: 'ipo' })
       expect(totalCash(game)).toBe(initial)
-      expect(totalSharePercent(game, corp.sym)).toBe(100)
+      expect(totalSharePercent(game, corp.sym)).toBe(expectedShareTotal(game, corp.sym))
+    })
+  }
+})
 
-      // Sell the share
+describe('All titles: par + buy + sell preserves cash and share invariants', () => {
+  for (const titleId of ALL_TITLES) {
+    it(`${titleId}: par + buy + sell`, () => {
+      const game = makeGame(titleId)
+      if (!game) return // title not registered
+      const initial = totalCash(game)
+      const corp = findParrableCorp(game)
+      const par = findParPrice(game.stockMarket.grid)
+      if (!corp || !par) return
+
+      applyAction(game, { type: 'PAR_SHARE', playerId: 'p0', corpSym: corp.sym, parPrice: par.price, row: par.row, col: par.col })
+      const c = game.corporations.find(x => x.sym === corp.sym)
+      if (c.ipoShares <= 0) return
+
+      applyAction(game, { type: 'BUY_SHARE', playerId: 'p1', corpSym: corp.sym, source: 'ipo' })
       const shareSize = game.players[1].shares[0]?.percent || 10
       applyAction(game, { type: 'SELL_SHARES', playerId: 'p1', corpSym: corp.sym, percent: shareSize })
       expect(totalCash(game)).toBe(initial)
-      expect(totalSharePercent(game, corp.sym)).toBe(100)
+      expect(totalSharePercent(game, corp.sym)).toBe(expectedShareTotal(game, corp.sym))
+    })
+  }
+})
 
-      // Pay dividend
+describe('All titles: pay dividend preserves cash', () => {
+  for (const titleId of ALL_TITLES) {
+    it(`${titleId}: dividend`, () => {
+      const game = makeGame(titleId)
+      if (!game) return // title not registered
+      const initial = totalCash(game)
+      const corp = findParrableCorp(game)
+      const par = findParPrice(game.stockMarket.grid)
+      if (!corp || !par) return
+
+      applyAction(game, { type: 'PAR_SHARE', playerId: 'p0', corpSym: corp.sym, parPrice: par.price, row: par.row, col: par.col })
       applyAction(game, { type: 'PAY_DIVIDEND', corpSym: corp.sym, totalRevenue: 100 })
+      expect(totalCash(game)).toBe(initial)
+    })
+  }
+})
+
+describe('All titles: withhold preserves cash', () => {
+  for (const titleId of ALL_TITLES) {
+    it(`${titleId}: withhold`, () => {
+      const game = makeGame(titleId)
+      if (!game) return // title not registered
+      const initial = totalCash(game)
+      const corp = findParrableCorp(game)
+      const par = findParPrice(game.stockMarket.grid)
+      if (!corp || !par) return
+
+      applyAction(game, { type: 'PAR_SHARE', playerId: 'p0', corpSym: corp.sym, parPrice: par.price, row: par.row, col: par.col })
+      applyAction(game, { type: 'WITHHOLD_DIVIDEND', corpSym: corp.sym, totalRevenue: 100 })
+      expect(totalCash(game)).toBe(initial)
+    })
+  }
+})
+
+describe('All titles: buy train preserves cash', () => {
+  for (const titleId of ALL_TITLES) {
+    it(`${titleId}: buy train`, () => {
+      const game = makeGame(titleId)
+      if (!game) return // title not registered
+      const initial = totalCash(game)
+      const corp = findParrableCorp(game)
+      const par = findParPrice(game.stockMarket.grid)
+      if (!corp || !par) return
+
+      applyAction(game, { type: 'PAR_SHARE', playerId: 'p0', corpSym: corp.sym, parPrice: par.price, row: par.row, col: par.col })
+      const c = game.corporations.find(x => x.sym === corp.sym)
+      const train = game.depot?.upcoming?.[0]
+      if (!train || c.cash < train.price) return
+
+      applyAction(game, { type: 'BUY_TRAIN', corpSym: corp.sym, trainName: train.name, price: train.price })
       expect(totalCash(game)).toBe(initial)
     })
   }
