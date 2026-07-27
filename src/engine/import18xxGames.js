@@ -75,14 +75,18 @@ function buildPlayerMap(gamePlayers) {
   return map
 }
 
-// Determine if a share buy is from IPO or market based on current state
+// Determine if a share buy is from IPO or market based on current state.
+// In 18xx.games, share index determines location. IPO shares are bought first
+// (indices 1,2,3...). Shares sold to market can be re-bought.
+// Heuristic: if no market shares, must be IPO. If no IPO shares, must be market.
+// If both exist: prefer IPO (most games buy IPO first, market only if specifically chosen).
+// This is imperfect — 18xx.games doesn't record the source in the JSON.
 function inferShareSource(state, corpSym, _shareIndex) {
   const corp = state.corporations.find(c => c.sym === corpSym)
   if (!corp) return 'ipo'
-  // Index 0 is president cert — always IPO if available
-  // If IPO shares remain, buying from IPO; otherwise market
-  if (corp.ipoShares > 0) return 'ipo'
-  if (corp.marketShares > 0) return 'market'
+  if (corp.ipoShares > 0 && corp.marketShares <= 0) return 'ipo'
+  if (corp.ipoShares <= 0 && corp.marketShares > 0) return 'market'
+  if (corp.ipoShares > 0) return 'ipo' // prefer IPO when both available
   return 'ipo'
 }
 
@@ -257,24 +261,18 @@ function convertAction(action, state, playerMap, revenueMap, variantToBase) {
       const variantName = action.variant || action.train.split('-')[0]
       const trainName = variantToBase[variantName] || variantName
 
-      // Detect inter-corp train purchase: check if any other corp owns this train ID
-      const trainId = action.train
+      // Detect inter-corp train purchase.
+      // Strategy: if train is NOT available in depot, it must be from another corp.
+      // Note: price-based detection is unreliable (emergency buys can have odd prices).
       let fromCorpSym = null
-      for (const c of state.corporations) {
-        if (c.sym !== action.entity && c.trains.some(t => t.id === trainId)) {
-          fromCorpSym = c.sym
-          break
-        }
-      }
-      // Also detect by: no matching train in depot but another corp has one with this name
-      if (!fromCorpSym) {
-        const inDepot = state.depot.upcoming.some(t => t.name === trainName)
-        if (!inDepot) {
-          for (const c of state.corporations) {
-            if (c.sym !== action.entity && c.trains.some(t => t.name === trainName)) {
-              fromCorpSym = c.sym
-              break
-            }
+      const depotTrain = state.depot.upcoming.find(t => t.name === trainName && !t.availableOn)
+
+      if (!depotTrain) {
+        // Not available in depot — must be from another corp
+        for (const c of state.corporations) {
+          if (c.sym !== action.entity && c.trains.some(t => t.name === trainName)) {
+            fromCorpSym = c.sym
+            break
           }
         }
       }

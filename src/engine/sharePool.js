@@ -5,9 +5,10 @@ import { regularSharePercent } from './corporation.js'
 export function buyShareFromIPO(state, playerId, corpSym, percent = 10) {
   const player = state.players.find((p) => p.id === playerId)
   const corp = state.corporations.find((c) => c.sym === corpSym)
-  const price = state.stockMarket.corpPositions[corpSym]
-    ? priceForCorp(state, corpSym)
-    : corp.parPrice
+  // IPO shares cost par price (not current market price)
+  // [1830 3.1] "Shares in the IPO are bought at par price"
+  // Ruby: share_pool.rb — IPO shares use corporation.par_price
+  const price = corp.parPrice || priceForCorp(state, corpSym)
 
   if (!player || !corp || !price) return
 
