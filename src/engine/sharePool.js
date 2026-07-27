@@ -1,6 +1,6 @@
 // SharePool — buy/sell shares between players, IPO, and market pool.
 // Advisory only — never blocks actions.
-import { regularSharePercent } from './corporation.js'
+import { regularSharePercent, getCorpShares } from './corporation.js'
 
 export function buyShareFromIPO(state, playerId, corpSym, percent = 10) {
   const player = state.players.find((p) => p.id === playerId)
@@ -39,8 +39,13 @@ export function buyShareFromIPO(state, playerId, corpSym, percent = 10) {
   if (!corp.floated && soldPercent >= corp.floatPercent) {
     corp.floated = true
     if (state.title.capitalization !== 'incremental') {
-      // Full cap: corp receives par × 10 from bank on float
-      const capitalization = corp.parPrice * 10
+      // Full cap: corp receives par × totalShares from bank on float
+      // totalShares = 100 / share_percent where share_percent is the smallest regular share
+      // [Ruby: corporation.total_shares = shares.sum(&:percent) / share_percent]
+      const shares = getCorpShares(state, corpSym)
+      const sharePercent = Math.min(...shares.filter((_, i) => i > 0)) || shares[0] || 10
+      const totalShares = Math.round(100 / sharePercent)
+      const capitalization = corp.parPrice * totalShares
       corp.cash += capitalization
       state.bank.cash -= capitalization
     }
@@ -139,7 +144,10 @@ export function corpBuyShareFromIPO(state, buyerCorpSym, targetCorpSym, percent 
   if (!target.floated && soldPercent >= target.floatPercent) {
     target.floated = true
     if (state.title.capitalization !== 'incremental') {
-      const capitalization = target.parPrice * 10
+      const tShares = getCorpShares(state, targetCorpSym)
+      const tSharePct = Math.min(...tShares.filter((_, i) => i > 0)) || tShares[0] || 10
+      const totalShares = Math.round(100 / tSharePct)
+      const capitalization = target.parPrice * totalShares
       target.cash += capitalization
       state.bank.cash -= capitalization
     }

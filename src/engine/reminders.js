@@ -48,7 +48,15 @@ export function checkReminders(state, fromRound, toRound, enabled) {
     }
 
     if (enabled.certLimit) {
-      const certLimit = typeof state.certLimit === 'number' ? state.certLimit : 99
+      // Dynamic cert limit: recompute from title def and current corp count (1846 varies by corp count)
+      const corpCount = state.corporations.filter(c => c.floated).length
+      const certLimitDef = title.certLimit
+      let certLimit = state.certLimit || 99
+      if (typeof certLimitDef === 'object') {
+        const val = certLimitDef[state.playerCount]
+        if (typeof val === 'number') certLimit = val
+        else if (typeof val === 'object') certLimit = val[corpCount] ?? val[Math.max(...Object.keys(val).map(Number).filter(n => n <= corpCount))] ?? certLimit
+      }
       const over = state.players.filter(p => playerCertCount(p) > certLimit)
       if (over.length > 0) {
         reminders.push({
