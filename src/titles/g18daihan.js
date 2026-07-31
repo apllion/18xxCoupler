@@ -21,6 +21,7 @@ export const g18daihan = {
   // Dividend: right (up if blocked)
   // Sold-out: up at end of SR
   sellMovement: 'down_share',
+  dividendMovement: 'no_double', // PDF 7-6-1: "moves one space to the right" — no double jump
 
   // Stock market — single track per corp on the board
   // Par values in grey boxes
