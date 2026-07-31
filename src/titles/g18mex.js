@@ -13,6 +13,7 @@ export const g18mex = {
   currencyFormat: '$', capitalization: 'full', floatPercent: 50, sellBuyOrder: 'sell_buy',
   emergencyBuy: 'president_pays',  // President contributes cash
   sellMovement: 'down_per_10',
+  privateSaleMin: 0.5, privateSaleMax: 1.5, // CompanyPrice50To150Percent
 
   market: [
     ['60','65','70','75','80p','90p','100','110','120','130','140','150','165','180','200e'],

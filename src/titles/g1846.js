@@ -38,6 +38,7 @@ export const g1846 = {
   poolShareDrop: 'down_block',
   sellAfter: 'p_any_operate',
   mustSellInBlocks: true,
+  privateSaleMin: 0, privateSaleMax: 1.0, // CompanyPriceUpToFace — can sell for $0 to face value
   ebuyFromOthers: 'never',
   ebuyDepotCheapest: false,
   ebuyMustIssueBefore: true,

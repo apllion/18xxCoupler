@@ -30,6 +30,7 @@ export const g1867 = {
   dividendMovement: 'standard_no_double', // >=price right1; else nothing; no double jump
   sellAfter: 'operate',
   mustSellInBlocks: false,
+  privateSaleMin: 0, privateSaleMax: 1.0, // CompanyPriceUpToFace
   ebuyDepotCheapest: false,
 
   // Loans: fixed interest, origination fee, nationalization penalty

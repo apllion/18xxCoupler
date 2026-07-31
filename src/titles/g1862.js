@@ -13,6 +13,7 @@ export const g1862 = {
   certLimit: { 2: 25, 3: 18, 4: 13, 5: 11, 6: 10, 7: 9, 8: 8 },
   currencyFormat: '£', capitalization: 'full', floatPercent: 50, sellBuyOrder: 'sell_buy', sellAfter: 'round',
   routeStopValues: [10, 20, 30, 40, 50, 60, 80, 100, 120, 150],
+  unsoldShareDividends: 'ipo',     // holder_for_corporation → entity (corp treasury)
   emergencyBuy: 'president_pays',  // President sells/refinances; bankruptcy if can't
   dividendMovement: 'multi_jump',  // >=1x→right1; >=2x→right2; >=3x→right3; >=4x→right4
   // Shares: 30% president + 7x10%

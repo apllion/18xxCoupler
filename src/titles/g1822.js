@@ -12,6 +12,7 @@ export const g1822 = {
   certLimit: { 2: 33, 3: 26, 4: 20, 5: 16, 6: 13, 7: 11 },
   currencyFormat: '£', capitalization: 'incremental', floatPercent: 20, sellBuyOrder: 'sell_buy', mustSellInBlocks: false, nextSRPlayerOrder: 'most_cash', halfPay: true,
   emergencyBuy: 'loans',           // Player loan for shortfall (150% of amount)
+  unsoldShareDividends: 'ipo',     // holder_for_corporation → entity (corp treasury)
   dividendMovement: '1822',        // rev>0 right1; >=price right1; >=2x right2 (majors only)
 
   // Player loans: emergency train purchase, 150% of shortfall, compounds 50%/SR

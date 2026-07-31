@@ -25,7 +25,7 @@ export const g1861 = {
   sellBuyOrder: 'sell_buy',
   emergencyBuy: 'loans',           // Take loans; nationalization if max loans
   operatingOrder: 'minors_first',  // Minors operate before majors. National (RSR) last.
-  sellMovement: 'down_block_pres',
+  sellMovement: 'down_share', // Ruby default — per share, NOT per block like 1867
   sellAfter: 'operate',
 
   // Loans: fixed interest, origination fee, nationalization penalty
