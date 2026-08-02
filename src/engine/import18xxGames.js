@@ -173,6 +173,46 @@ function stripUndoRedo(actions) {
   return stack
 }
 
+// Resolve auction bids: convert sequences of bids on the same company into
+// a single winning bid. In waterfall/English auctions, multiple players bid
+// on the same private — only the highest bid wins.
+// In 1846 secret draft, each bid IS a purchase (no competing bids per company).
+function resolveAuctionBids(actions) {
+  // Find all bid actions and group by company
+  const hasBids = actions.some(a => a.type === 'bid')
+  if (!hasBids) return actions
+
+  // Check if multiple players bid on the same company (= competitive auction)
+  const bidsByCompany = {}
+  for (const a of actions) {
+    if (a.type === 'bid' && a.company) {
+      if (!bidsByCompany[a.company]) bidsByCompany[a.company] = []
+      bidsByCompany[a.company].push(a)
+    }
+  }
+
+  const isCompetitive = Object.values(bidsByCompany).some(bids => {
+    const entities = new Set(bids.map(b => b.entity))
+    return entities.size > 1 // multiple bidders on same company
+  })
+
+  if (!isCompetitive) return actions // 1846-style: each bid is a purchase
+
+  // Competitive auction: keep only the last (winning) bid per company,
+  // remove all intermediate/losing bids.
+  // For in-progress auctions, the last bid is the current high bid.
+  const winningBids = {}
+  for (const [company, bids] of Object.entries(bidsByCompany)) {
+    winningBids[company] = bids[bids.length - 1]
+  }
+
+  const winIds = new Set(Object.values(winningBids).map(b => b.id))
+  return actions.filter(a => {
+    if (a.type !== 'bid') return true
+    return winIds.has(a.id)
+  })
+}
+
 // Flatten auto_actions into the main action stream
 function flattenAutoActions(actions) {
   const result = []
@@ -309,7 +349,11 @@ function convertAction(action, state, playerMap, revenueMap, variantToBase) {
     }
 
     case 'bid': {
-      // 1846 draft: bid == buy private at price
+      // Auction bids: resolve to BUY_PRIVATE only for winning bids.
+      // Pre-processing (resolveAuctionBids) converts bid sequences into
+      // single BUY_PRIVATE actions with the winning price.
+      // If we reach here, it's already been resolved or it's a 1846-style
+      // draft where each bid IS a purchase.
       return {
         type: 'BUY_PRIVATE',
         playerId: playerMap[action.entity],
@@ -421,6 +465,7 @@ export function importGame(gameJson) {
   // Strip undo/redo BEFORE flattening, so undoing an action also removes its auto_actions
   let actions = stripUndoRedo(gameJson.actions)
   actions = flattenAutoActions(actions)
+  actions = resolveAuctionBids(actions)
 
   // Build revenue map from run_routes → dividend pairing
   const revenueMap = buildRevenueMap(actions)
