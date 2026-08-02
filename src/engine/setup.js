@@ -32,8 +32,14 @@ export function createGame(baseTitle, playerNames, userVariant = null) {
   const corpDefs = filterCorporations(title, playerCount)
   const companyDefs = filterCompanies(title, playerCount)
 
-  const corporations = corpDefs.map((def) => createCorporation(def, title))
+  let corporations = corpDefs.map((def) => createCorporation(def, title))
   const companies = companyDefs.map((def) => createPrivateCompany(def))
+
+  // Shuffle corp order for titles with sequential random founding (1849)
+  if (title.corpOrder === 'sequential_random') {
+    corporations = shuffleArray(corporations)
+    corporations[0].nextToPar = true
+  }
 
   const certLimit = resolveCertLimit(title.certLimit, playerCount, corporations.length)
 
@@ -74,6 +80,16 @@ export function createGame(baseTitle, playerNames, userVariant = null) {
     actionLog: [],
     createdAt: Date.now(),
   }
+}
+
+// Fisher-Yates shuffle
+function shuffleArray(arr) {
+  const a = [...arr]
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[a[i], a[j]] = [a[j], a[i]]
+  }
+  return a
 }
 
 function resolveCertLimit(certLimitDef, playerCount, corpCount) {

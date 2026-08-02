@@ -108,7 +108,13 @@ export function describeGameState(game) {
 
   const unstarted = game.corporations.filter(c => !c.ipoed && !c.floated)
   if (unstarted.length > 0) {
-    lines.push(`Available corps: ${unstarted.map(c => c.sym).join(', ')}`)
+    if (game.title.corpOrder === 'sequential_random') {
+      const nextCorp = unstarted.find(c => c.nextToPar)
+      lines.push(`Founding order: ${unstarted.map(c => c.nextToPar ? `[${c.sym}]` : c.sym).join(' → ')}`)
+      if (nextCorp) lines.push(`Next to par: ${nextCorp.sym}`)
+    } else {
+      lines.push(`Available corps: ${unstarted.map(c => c.sym).join(', ')}`)
+    }
   }
   lines.push('')
 

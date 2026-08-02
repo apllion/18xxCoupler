@@ -890,12 +890,23 @@ function handlePar(state, { playerId, corpSym, parPrice, row, col }) {
   if (soldPercent >= corp.floatPercent) {
     corp.floated = true
     if (state.title.capitalization !== 'incremental') {
-      // Full cap: corp receives par × 10 from bank on float
-      const capitalization = parPrice * 10
+      // Full cap: corp receives par × totalShares from bank on float
+      const shares = getCorpShares(state, corpSym)
+      const sharePercent = Math.min(...shares.filter((_, i) => i > 0)) || shares[0] || 10
+      const totalShares = Math.round(100 / sharePercent)
+      const capitalization = parPrice * totalShares
       corp.cash += capitalization
       state.bank.cash -= capitalization
     }
     // Incremental: no lump sum — corp already received the share payment
+  }
+
+  // Sequential founding: advance nextToPar to next corp (1849)
+  if (state.title.corpOrder === 'sequential_random') {
+    corp.nextToPar = false
+    const idx = state.corporations.indexOf(corp)
+    const next = state.corporations[idx + 1]
+    if (next && !next.ipoed) next.nextToPar = true
   }
 }
 
