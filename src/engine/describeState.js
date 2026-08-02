@@ -15,6 +15,10 @@ export function describeGameState(game) {
   const fmt = (n) => formatCurrency(n, game.title.currencyFormat)
   const lines = []
 
+  // ── System Prompt ─────────────────────────────────────────────────
+  lines.push(buildSystemPrompt(game))
+  lines.push('')
+
   // ── Header ────────────────────────────────────────────────────────
   lines.push(`# ${game.title.title} — Game State`)
   lines.push('')
@@ -186,6 +190,63 @@ export function describeGameState(game) {
   for (let i = 0; i < worths.length; i++) {
     lines.push(`${i + 1}. ${worths[i].name}: ${fmt(worths[i].total)} (cash ${fmt(worths[i].cash)}, shares ${fmt(worths[i].shareValue)}, privates ${fmt(worths[i].privateValue)})`)
   }
+
+  return lines.join('\n')
+}
+
+// ── System Prompt Builder ───────────────────────────────────────────
+
+function buildSystemPrompt(game) {
+  const t = game.title
+  const title = t.title || 'Unknown'
+  const subtitle = t.subtitle ? ` — ${t.subtitle}` : ''
+  const designer = t.designer ? ` by ${t.designer}` : ''
+  const location = t.location || ''
+
+  // Train names from title config
+  const trainNames = (t.trains || []).map(tr => {
+    const variants = (tr.variants || []).map(v => v.name)
+    return variants.length > 0 ? `${tr.name} (variant: ${variants.join('/')})` : tr.name
+  }).join(', ')
+
+  // Corp names
+  const corpNames = (t.corporations || []).map(c => c.sym).join(', ')
+
+  // Key mechanics from specialties and config
+  const mechanics = []
+  if (t.capitalization) mechanics.push(`${t.capitalization} capitalization`)
+  if (t.halfPay) mechanics.push('half pay allowed')
+  if (t.loans) mechanics.push(`loans (${t.loans.type})`)
+  if (t.issueRedeemRule) mechanics.push(`issue/redeem (${t.issueRedeemRule})`)
+  if (t.sellMovement && t.sellMovement !== 'down_share') mechanics.push(`sell movement: ${t.sellMovement}`)
+  if (t.merger) mechanics.push('mergers')
+  if (t.corpCanBuyShares) mechanics.push('corp share trading')
+  if (t.trainExport) mechanics.push('train export')
+
+  const specialties = t.specialties || ''
+
+  const lines = [
+    `Act strictly as an expert in "${title}${subtitle}"${designer}.`,
+    `Maintain 100% focus on ${title} rules, ${location ? `map geography (${location}), ` : ''}trains (${trainNames}), and game-specific mechanics.`,
+    `Do NOT mix, import, or hallucinate mechanics, trains, rules, or terminologies from any other 18XX title.`,
+    `If a requested concept does not exist specifically in ${title}, state that clearly.`,
+    '',
+    `Key mechanics: ${mechanics.join(', ') || 'standard 18xx'}.`,
+    `Corporations: ${corpNames}.`,
+  ]
+
+  if (specialties) lines.push(`Specialties: ${specialties}.`)
+
+  // Share structure
+  const shares = t.shares || [20, 10, 10, 10, 10, 10, 10, 10, 10]
+  const presPct = shares[0]
+  const regPct = shares[1] || shares[0]
+  const numShares = shares.length
+  lines.push(`Shares: ${presPct}% president + ${numShares - 1}x${regPct}% (${numShares}-cert corps). Float at ${t.floatPercent || 60}%.`)
+
+  // Sell/dividend movement summary
+  const divMove = t.dividendMovement || 'standard'
+  lines.push(`Dividend movement: ${divMove}. Sell movement: ${t.sellMovement || 'down_share'}.`)
 
   return lines.join('\n')
 }
