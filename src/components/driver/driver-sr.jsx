@@ -77,7 +77,7 @@ export default function MySRStats({ data }) {
               {buyTarget.ipoShares > 0 && (
                 <button onClick={() => { dispatch({ type: 'BUY_SHARE', playerId: myPlayerId, corpSym: buyCorpSym, source: 'ipo', percent: shareSize }); setBuyCorpSym(null) }}
                   className="text-sm bg-green-700 hover:bg-green-600 text-white px-4 py-3 rounded-lg font-medium flex-1">
-                  IPO {fmt(corpPrice(game.stockMarket, buyCorpSym) || buyTarget.parPrice)}
+                  IPO {fmt(buyTarget.parPrice || corpPrice(game.stockMarket, buyCorpSym))}
                 </button>
               )}
               {buyTarget.marketShares > 0 && (

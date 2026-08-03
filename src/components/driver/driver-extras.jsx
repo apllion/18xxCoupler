@@ -60,9 +60,9 @@ export default function GameExtras({ data }) {
 
       {/* Switch to monitor */}
       <div className="mt-auto">
-        <button onClick={() => useUIStore.getState().setViewMode('monitor')}
+        <button onClick={() => useUIStore.getState().setViewMode('umpire')}
           className="w-full text-xs bg-broker-surface hover:bg-broker-surface-hover text-broker-text-muted hover:text-white py-3 rounded-lg">
-          Switch to Monitor View
+          Switch to Umpire View
         </button>
       </div>
     </div>

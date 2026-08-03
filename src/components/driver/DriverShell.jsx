@@ -32,9 +32,14 @@ export default function DriverShell() {
   // All floated corps (player sees all, acts on their own)
   const floatedCorps = corps.filter(c => c.floated)
 
+  // Order: my corps first, then others
+  const myCorps = floatedCorps.filter(c => driverPlayer && driverPlayer.shares.some(s => s.corpSym === c.sym && s.isPresident))
+  const otherCorps = floatedCorps.filter(c => !myCorps.includes(c))
+
   const cardIds = [
     'players', 'sr',
-    ...floatedCorps.map(c => c.sym),
+    ...myCorps.map(c => c.sym),
+    ...otherCorps.map(c => c.sym),
     'market', 'pay', 'extras',
   ]
   const [cardIndex, setCardIndex] = useState(0)
@@ -81,18 +86,25 @@ export default function DriverShell() {
         )}
       </SwipeArea>
 
-      {/* Dot indicators + arrows */}
-      <div className="flex items-center justify-center gap-1 py-2 bg-broker-surface border-t border-broker-border flex-shrink-0">
-        <button onClick={prev} className="text-broker-text-muted hover:text-white px-2 text-sm">◀</button>
-        {cardIds.map((id, i) => (
-          <button key={id} onClick={() => setCardIndex(i)}
-            className={`w-2.5 h-2.5 rounded-full transition-colors ${
-              i === cardIndex ? 'bg-broker-gold' : 'bg-broker-text-muted/30 hover:bg-broker-text-muted'
-            }`}
-            title={id}
-          />
-        ))}
-        <button onClick={next} className="text-broker-text-muted hover:text-white px-2 text-sm">▶</button>
+      {/* Tab bar */}
+      <div className="flex items-center gap-0.5 px-1 py-1.5 bg-broker-surface border-t border-broker-border flex-shrink-0 overflow-x-auto">
+        <button onClick={prev} className="text-broker-text-muted hover:text-white px-1 text-xs flex-shrink-0">◀</button>
+        {cardIds.map((id, i) => {
+          const active = i === cardIndex
+          const corp = floatedCorps.find(c => c.sym === id)
+          const isMyCorp = corp && myCorps.includes(corp)
+          const label = id === 'players' ? '👤' : id === 'sr' ? 'SR' : id === 'market' ? '📊' : id === 'pay' ? '💰' : id === 'extras' ? '⚙' : id
+          return (
+            <button key={id} onClick={() => setCardIndex(i)}
+              className={`text-[10px] px-1.5 py-1 rounded font-medium flex-shrink-0 transition-colors ${
+                active ? 'bg-broker-gold text-black' : isMyCorp ? 'bg-broker-surface-hover text-white' : 'text-broker-text-muted hover:text-white'
+              }`}
+              style={corp && active ? { backgroundColor: corp.color, color: corp.textColor || '#fff' } : corp && !active ? { borderBottom: `2px solid ${corp.color}` } : undefined}>
+              {label}
+            </button>
+          )
+        })}
+        <button onClick={next} className="text-broker-text-muted hover:text-white px-1 text-xs flex-shrink-0">▶</button>
       </div>
     </div>
   )
