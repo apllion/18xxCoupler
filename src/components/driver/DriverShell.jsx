@@ -11,6 +11,7 @@ import DriverCorp from './driver-corp.jsx'
 import DriverMarket from './driver-market.jsx'
 import DriverPay from './driver-pay.jsx'
 import DriverExtras from './driver-extras.jsx'
+import DriverInfo from './driver-info.jsx'
 
 export default function DriverShell() {
   const baseData = useGameData()
@@ -40,7 +41,7 @@ export default function DriverShell() {
     'players', 'sr',
     ...myCorps.map(c => c.sym),
     ...otherCorps.map(c => c.sym),
-    'market', 'pay', 'extras',
+    'info', 'market', 'pay', 'extras',
   ]
   const [cardIndex, setCardIndex] = useState(0)
 
@@ -78,6 +79,7 @@ export default function DriverShell() {
       <SwipeArea onLeft={next} onRight={prev} className="flex-1 overflow-y-auto p-4">
         {cardIds[cardIndex] === 'players' && <DriverPlayers data={data} />}
         {cardIds[cardIndex] === 'sr' && <DriverSR data={data} />}
+        {cardIds[cardIndex] === 'info' && <DriverInfo data={data} />}
         {cardIds[cardIndex] === 'market' && <DriverMarket data={data} />}
         {cardIds[cardIndex] === 'pay' && <DriverPay data={data} />}
         {cardIds[cardIndex] === 'extras' && <DriverExtras data={data} />}
@@ -93,7 +95,7 @@ export default function DriverShell() {
           const active = i === cardIndex
           const corp = floatedCorps.find(c => c.sym === id)
           const isMyCorp = corp && myCorps.includes(corp)
-          const label = id === 'players' ? '👤' : id === 'sr' ? 'SR' : id === 'market' ? '📊' : id === 'pay' ? '💰' : id === 'extras' ? '⚙' : id
+          const label = id === 'players' ? '👤' : id === 'sr' ? 'SR' : id === 'info' ? 'ℹ' : id === 'market' ? '📊' : id === 'pay' ? '💰' : id === 'extras' ? '⚙' : id
           return (
             <button key={id} onClick={() => setCardIndex(i)}
               className={`text-[10px] px-1.5 py-1 rounded font-medium flex-shrink-0 transition-colors ${

@@ -9,8 +9,18 @@ export default function CorpORCard({ data, corp }) {
   const me = game.players.find(p => p.id === myPlayerId)
   const isMyCorp = me && isPresident(me, corp.sym)
   const [revInput, setRevInput] = useState('')
+  const [grantName, setGrantName] = useState('')
   const rev = parseInt(revInput, 10) || 0
   const shareSize = game.title.shares?.[1] ?? 10
+
+  // Last revenue for this corp
+  const lastRev = (() => {
+    for (let i = (game.actionLog || []).length - 1; i >= 0; i--) {
+      const a = game.actionLog[i].action
+      if ((a.type === 'PAY_DIVIDEND' || a.type === 'WITHHOLD_DIVIDEND' || a.type === 'HALF_DIVIDEND') && a.corpSym === corp.sym) return a.totalRevenue
+    }
+    return 0
+  })()
 
   return (
     <div className="flex flex-col h-full">
@@ -53,8 +63,12 @@ export default function CorpORCard({ data, corp }) {
             <div className="flex items-center gap-2 flex-wrap">
               <input type="number" value={revInput} onChange={e => setRevInput(e.target.value)}
                 placeholder="0" className="w-20 bg-broker-bg border border-broker-border rounded px-2 py-2 text-white text-center" />
+              {lastRev > 0 && !revInput && (
+                <button onClick={() => setRevInput(String(lastRev))}
+                  className="text-sm bg-blue-800 text-blue-200 px-3 py-2 rounded-lg font-medium">Last {fmt(lastRev)}</button>
+              )}
               <button onClick={() => dispatch({ type: 'WITHHOLD_DIVIDEND', corpSym: corp.sym, totalRevenue: 0 })}
-                className="text-sm bg-red-800 text-white px-3 py-2 rounded-lg font-medium">No Trains</button>
+                className="text-sm bg-red-800 text-white px-3 py-2 rounded-lg font-medium">$0</button>
               {rev > 0 && (
                 <>
                   <button onClick={() => { dispatch({ type: 'PAY_DIVIDEND', corpSym: corp.sym, totalRevenue: rev }); setRevInput('') }}
@@ -83,7 +97,7 @@ export default function CorpORCard({ data, corp }) {
                 </button>
               ))}
             </div>
-            {/* Discard train */}
+            {/* Discard / Remove train */}
             {corp.trains.length > 0 && (
               <div className="flex gap-2 flex-wrap mt-2">
                 <span className="text-[10px] text-broker-text-muted self-center">Discard:</span>
@@ -95,6 +109,16 @@ export default function CorpORCard({ data, corp }) {
                 ))}
               </div>
             )}
+            {/* Grant train (private exchange) */}
+            <div className="flex gap-1 items-center mt-1">
+              <input type="text" value={grantName} onChange={e => setGrantName(e.target.value)}
+                placeholder="grant train" className="w-20 bg-broker-bg border border-broker-border rounded px-2 py-1 text-white text-center text-xs"
+                onKeyDown={e => { if (e.key === 'Enter' && grantName.trim()) { dispatch({ type: 'ADD_TRAIN_MANUAL', corpSym: corp.sym, trainName: grantName.trim() }); setGrantName('') }}} />
+              {grantName.trim() && (
+                <button onClick={() => { dispatch({ type: 'ADD_TRAIN_MANUAL', corpSym: corp.sym, trainName: grantName.trim() }); setGrantName('') }}
+                  className="text-xs bg-blue-800 text-white px-2 py-1 rounded">+Free</button>
+              )}
+            </div>
           </div>
 
           {/* Token */}
