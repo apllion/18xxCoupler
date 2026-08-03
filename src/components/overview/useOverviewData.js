@@ -7,7 +7,6 @@ import { useUIStore } from '../../store/uiStore.js'
 import { useDispatch } from '../../hooks/useDispatch.js'
 import { formatCurrency } from '../../utils/currency.js'
 import { corpPrice, parPrices } from '../../engine/stockMarket.js'
-import { describeGameState } from '../../engine/describeState.js'
 import { currentPhase, trainLimit } from '../../engine/phase.js'
 import { playerSharePercent, playerCertCount, isPresident } from '../../engine/player.js'
 import { remainingCount, nextAvailableTrains } from '../../engine/depot.js'
@@ -172,8 +171,6 @@ export function useOverviewData() {
     }
     if (key >= '1' && key <= '9' && !panel) { const idx = parseInt(key) - 1; if (idx < (game?.players?.length || 0)) setCurRow(idx) }
     if (key === 'z' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); if (canUndo()) undo() }
-    // Hidden: Ctrl/Cmd+Shift+D → copy game state description to clipboard
-    if (key === 'D' && (e.metaKey || e.ctrlKey) && e.shiftKey) { e.preventDefault(); navigator.clipboard?.writeText(describeGameState(game)).then(() => console.log('Game state copied to clipboard')); return }
     if (key === 'u' && !panel) { if (canUndo()) undo() }
     // Replay
     if (key === '[' || key === ',') { e.preventDefault(); if (inReplay) { replayTo(Math.max(-1, (game?.actionLog?.length || 0) - 2)) } else if (game?.actionLog?.length > 0) { enterReplay(); setTimeout(() => replayTo((game?.actionLog?.length || 1) - 2), 0) }; return }
