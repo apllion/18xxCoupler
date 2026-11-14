@@ -4,14 +4,22 @@
 
 import { create } from 'zustand'
 
-const STORAGE_KEY = '18xxCoupler_theme'
+const OLD_KEY = '18xxCoupler_theme'
+const STORAGE_KEY = 'laytrack_theme'
 
 const savedTheme = (() => {
-  try { return localStorage.getItem(STORAGE_KEY) || 'broker' } catch { return 'broker' }
+  try {
+    // Migrate from old key if needed
+    const oldVal = localStorage.getItem(OLD_KEY)
+    if (oldVal && !localStorage.getItem(STORAGE_KEY)) {
+      localStorage.setItem(STORAGE_KEY, oldVal)
+    }
+    return localStorage.getItem(STORAGE_KEY) || 'broker'
+  } catch { return 'broker' }
 })()
 
 export const themes = {
-  broker: { id: 'broker', label: 'Coupler', desc: 'Teal & orange' },
+  broker: { id: 'broker', label: 'Classic', desc: 'Teal & orange' },
   dark:   { id: 'dark',   label: 'Dark',   desc: 'Classic dark mode' },
   light:  { id: 'light',  label: 'Light',  desc: 'Light mode' },
 }

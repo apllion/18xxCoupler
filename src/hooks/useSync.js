@@ -3,8 +3,9 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { joinRoom } from 'trystero/nostr'
+import { useRoleStore } from '../store/roleStore.js'
 
-const APP_ID = '18xx-coupler-v1'
+const APP_ID = 'laytrack-v1'
 
 // Actions that are purely local UI and should not be broadcast
 const LOCAL_ONLY = new Set([])
@@ -38,7 +39,7 @@ function getSharedState(game) {
   }
 }
 
-const ROOM_KEY = '18xxCoupler_room'
+const ROOM_KEY = 'laytrack_room'
 
 function saveRoomInfo(code, isCreator) {
   try { localStorage.setItem(ROOM_KEY, JSON.stringify({ code, isCreator })) } catch { /* no-op */ }
@@ -60,11 +61,13 @@ export function useSync(gameStore) {
   const sendActionRef = useRef(null)
   const sendStateRef = useRef(null)
   const sendStateReqRef = useRef(null)
+  const sendRoleRef = useRef(null)
   const stateRef = useRef(null)
   const establishedRef = useRef(false)
   const reconnectRef = useRef(null)
   const heartbeatRef = useRef(null)
   const stateReqTimerRef = useRef(null)
+  const connectedPeersRef = useRef({}) // { peerId: { role } }
 
   // Keep stateRef current
   const game = gameStore((s) => s.game)
@@ -85,6 +88,8 @@ export function useSync(gameStore) {
     sendActionRef.current = null
     sendStateRef.current = null
     sendStateReqRef.current = null
+    sendRoleRef.current = null
+    connectedPeersRef.current = {}
     establishedRef.current = false
     setPeerCount(0)
     setStatus('disconnected')
@@ -99,6 +104,7 @@ export function useSync(gameStore) {
     sendActionRef.current = null
     sendStateRef.current = null
     sendStateReqRef.current = null
+    sendRoleRef.current = null
 
     setStatus('connecting')
     setRoomId(code)
@@ -125,10 +131,19 @@ export function useSync(gameStore) {
     const [sendState, onState] = room.makeAction('state')
     const [sendPing, onPing] = room.makeAction('ping')
     const [sendStateReq, onStateReq] = room.makeAction('stateReq')
+    const [sendRole, onRole] = room.makeAction('role')
 
     sendActionRef.current = sendAction
     sendStateRef.current = sendState
     sendStateReqRef.current = sendStateReq
+    sendRoleRef.current = sendRole
+
+    // Track peer roles
+    onRole((data, peerId) => {
+      if (data?.role) {
+        connectedPeersRef.current[peerId] = { role: data.role }
+      }
+    })
 
     // Heartbeat
     heartbeatRef.current = setInterval(() => {
@@ -140,6 +155,12 @@ export function useSync(gameStore) {
       setPeerCount(Object.keys(room.getPeers()).length)
       setStatus('connected')
       if (reconnectRef.current) reconnectRef.current.delay = 1000
+
+      // Send our role to the new peer
+      const myRole = useRoleStore.getState().role
+      if (myRole && sendRoleRef.current) {
+        sendRole({ role: myRole }, peerId)
+      }
 
       if (establishedRef.current && stateRef.current) {
         // Send immediately + retry after short delay (WebRTC channel may not be ready yet)
@@ -165,7 +186,8 @@ export function useSync(gameStore) {
       }
     })
 
-    room.onPeerLeave(() => {
+    room.onPeerLeave((peerId) => {
+      delete connectedPeersRef.current[peerId]
       const count = Object.keys(room.getPeers()).length
       setPeerCount(count)
       if (count === 0) {
@@ -270,7 +292,10 @@ export function useSync(gameStore) {
   }, [game, game?.actionLog?.length])
 
   // Sync-aware dispatch: dispatches locally + broadcasts to peers
+  // Only umpire role can broadcast actions to peers
   const syncDispatch = useCallback((action) => {
+    const role = useRoleStore.getState().role
+    if (role !== 'umpire') return // non-umpire dispatch is silently ignored
     rawDispatch(action)
     if (sendActionRef.current && !LOCAL_ONLY.has(action.type)) {
       sendActionRef.current(action)

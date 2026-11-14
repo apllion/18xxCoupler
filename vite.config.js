@@ -18,7 +18,7 @@ export default defineConfig({
     tailwindcss(),
     ...(process.env.NO_SSL ? [] : [basicSsl()]),
   ],
-  base: '/18xxCoupler/',
+  base: '/laytrack/',
   server: {
     proxy: {
       '/18xx-games-api': {

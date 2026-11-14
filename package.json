@@ -1,5 +1,5 @@
 {
-  "name": "18xx-coupler",
+  "name": "laytrack",
   "private": true,
   "version": "0.10.2",
   "type": "module",
@@ -7,7 +7,7 @@
     "dev": "vite --host",
     "build": "vite build",
     "build:pp": "VITE_PLUSPLUS=1 vite build",
-    "deploy:coupler": "vite build && gh-pages -d dist",
+    "deploy:laytrack": "vite build && gh-pages -d dist",
     "deploy:pp": "VITE_PLUSPLUS=1 vite build --outDir dist-pp && gh-pages -d dist-pp -b gh-pages -r git@github.com:apllion/18xxCouplerPlusPlus.git",
     "lint": "eslint .",
     "preview": "vite preview",

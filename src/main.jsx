@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom'
 import './index.css'
 import App from './App.jsx'
 import { SyncProvider } from './hooks/SyncContext.jsx'
+import { NumPadProvider } from './components/input/NumPadContext.jsx'
 import { useThemeStore } from './store/themeStore.js'
 
 // Apply saved theme on load
@@ -13,7 +14,9 @@ createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter basename={import.meta.env.BASE_URL}>
       <SyncProvider>
-        <App />
+        <NumPadProvider>
+          <App />
+        </NumPadProvider>
       </SyncProvider>
     </BrowserRouter>
   </StrictMode>,

@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { getTitle } from '../../titles/index.js'
 import { useGameStore } from '../../store/gameStore.js'
 import { formatCurrency } from '../../utils/currency.js'
+import { IconBack, IconClose } from '../shared/Icons.jsx'
 import { getSelectableVariants, getAutoVariants } from '../../engine/variants.js'
 
 const TRAIN_NAMES = [
@@ -78,7 +79,7 @@ export default function PlayerSetup() {
         onClick={() => navigate('/')}
         className="self-start text-broker-text-muted hover:text-broker-gold mb-4"
       >
-        ← Back
+        <IconBack className="w-3 h-3 inline" /> Back
       </button>
 
       <h1 className="text-2xl font-bold mb-1">{title.title}</h1>
@@ -97,9 +98,9 @@ export default function PlayerSetup() {
             {playerNames.length > 2 && (
               <button
                 onClick={() => removePlayer(idx)}
-                className="text-broker-text-muted hover:text-red-400 px-2"
+                className="text-broker-text-muted hover:text-red-400 px-2 min-h-[44px] min-w-[44px] flex items-center justify-center"
               >
-                ×
+                <IconClose className="w-4 h-4" />
               </button>
             )}
           </div>

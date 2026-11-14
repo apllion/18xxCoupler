@@ -1,7 +1,8 @@
 // Persistence — localStorage save/load, JSON export/import.
 // Only persist what's needed to replay: titleId, player names, action log, createdAt.
 
-const STORAGE_KEY = '18xxCoupler_games'
+const OLD_KEY = '18xxCoupler_games'
+const STORAGE_KEY = 'laytrack_games'
 
 export function saveGame(game) {
   try {
@@ -36,6 +37,11 @@ export function loadGame(key) {
 
 export function loadAllGames() {
   try {
+    // Migrate from old key if needed
+    const oldRaw = localStorage.getItem(OLD_KEY)
+    if (oldRaw && !localStorage.getItem(STORAGE_KEY)) {
+      localStorage.setItem(STORAGE_KEY, oldRaw)
+    }
     const raw = localStorage.getItem(STORAGE_KEY)
     return raw ? JSON.parse(raw) : {}
   } catch {

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useGameStore } from '../../store/gameStore.js'
 import { useUIStore } from '../../store/uiStore.js'
+import { IconClose } from '../shared/Icons.jsx'
 
 const PP = !!import.meta.env.VITE_PLUSPLUS || import.meta.env.DEV
 
@@ -58,7 +59,7 @@ export default function BottomNav() {
             onClick={e => e.stopPropagation()}>
             <div className="flex justify-between items-center px-4 py-2 border-b border-broker-border">
               <span className="text-sm font-medium text-broker-text">More</span>
-              <button onClick={() => setMenuOpen(false)} className="text-broker-text-muted hover:text-broker-text px-2">×</button>
+              <button onClick={() => setMenuOpen(false)} className="text-broker-text-muted hover:text-broker-text px-2 min-h-[44px] min-w-[44px] flex items-center justify-center"><IconClose className="w-4 h-4" /></button>
             </div>
             <div className="py-1">
               {moreItems.map(item => (

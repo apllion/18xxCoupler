@@ -3,7 +3,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 
-const STORAGE_KEY = '18xxCoupler_wakeLock'
+const STORAGE_KEY = 'laytrack_wakeLock'
 
 export function useWakeLock() {
   const [enabled, setEnabled] = useState(() => {

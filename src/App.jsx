@@ -4,12 +4,15 @@ import { useSyncContext } from './hooks/SyncContext.jsx'
 import GameSelector from './components/setup/GameSelector.jsx'
 import PlayerSetup from './components/setup/PlayerSetup.jsx'
 import UmpireShell from './components/layout/UmpireShell.jsx'
-import DriverShell from './components/driver/DriverShell.jsx'
-import { useUIStore } from './store/uiStore.js'
+import PlayerShell from './components/player/PlayerShell.jsx'
+import KibitzerShell from './components/kibitzer/KibitzerShell.jsx'
+import DisplayShell from './components/display/DisplayShell.jsx'
+import { useRoleStore } from './store/roleStore.js'
 import AboutPage from './components/setup/AboutPage.jsx'
 import PassphraseGate from './components/setup/PassphraseGate.jsx'
 import EndgameCalcTab from './components/overview/EndgameCalcTab.jsx'
 import RouteCalcTab from './components/overview/RouteCalcTab.jsx'
+import { IconBack } from './components/shared/Icons.jsx'
 
 export default function App() {
   const game = useGameStore((s) => s.game)
@@ -52,7 +55,7 @@ function AppContent({ game, sync }) {
               onClick={sync.leaveRoom}
               className="text-sm text-broker-text-muted hover:text-red-300 px-4 py-2"
             >
-              ← Leave
+              <IconBack className="w-3 h-3 inline" /> Leave
             </button>
           </div>
           {sync.status !== 'connected' && (
@@ -65,12 +68,17 @@ function AppContent({ game, sync }) {
     )
   }
 
-  const viewMode = useUIStore((s) => s.viewMode)
-  const readyToPlay = useUIStore((s) => s.readyToPlay)
+  const role = useRoleStore((s) => s.role)
 
-  // Game loaded and user picked Umpire/Driver → play
-  if (game && readyToPlay) {
-    return viewMode === 'driver' ? <DriverShell /> : <UmpireShell />
+  // Game loaded and role picked → play
+  if (game && role) {
+    switch (role) {
+      case 'umpire': return <UmpireShell />
+      case 'player': return <PlayerShell />
+      case 'kibitzer': return <KibitzerShell />
+      case 'display': return <DisplayShell />
+      default: useRoleStore.getState().reset(); return null
+    }
   }
 
   // No game, or game loaded but user still on hub (needs to pick view)
@@ -89,7 +97,7 @@ function CalcStandalone({ children }) {
   return (
     <div className="min-h-screen bg-broker-bg">
       <div className="flex items-center justify-between p-3 border-b border-broker-border">
-        <button onClick={() => window.history.back()} className="text-sm text-broker-text-muted hover:text-white">← Back</button>
+        <button onClick={() => window.history.back()} className="text-sm text-broker-text-muted hover:text-white inline-flex items-center gap-1"><IconBack className="w-3 h-3" /> Back</button>
       </div>
       {children}
     </div>

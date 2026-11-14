@@ -2,10 +2,11 @@ import { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { allTitles } from '../../titles/index.js'
 import { useGameStore } from '../../store/gameStore.js'
-import { useUIStore } from '../../store/uiStore.js'
+import { useRoleStore } from '../../store/roleStore.js'
 import { useSyncContext } from '../../hooks/SyncContext.jsx'
 import { loadAllGames, deleteGame, importGame, exportGame } from '../../utils/persistence.js'
 import { useThemeStore, themes } from '../../store/themeStore.js'
+import { IconBack, IconClose } from '../shared/Icons.jsx'
 
 export default function GameSelector() {
   const navigate = useNavigate()
@@ -41,8 +42,8 @@ export default function GameSelector() {
 
     return (
       <div className="min-h-screen flex flex-col items-center p-6">
-        <h1 className="text-3xl font-bold text-white mt-2 tracking-wide">18xxCoupler</h1>
-        <p className="text-sm text-broker-text-muted italic mb-1">Steam meets Screens</p>
+        <h1 className="text-3xl font-bold text-white mt-2 tracking-wide">Laytrack</h1>
+        <p className="text-sm text-broker-text-muted italic mb-0.5">Lay track. I do the numbers.</p>
         <p className="text-[10px] text-broker-text-muted mb-4">
           v{typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '?'} · {typeof __BUILD_ID__ !== 'undefined' ? __BUILD_ID__ : '?'}
         </p>
@@ -129,29 +130,8 @@ export default function GameSelector() {
             )}
           </div>
 
-          {/* ===== STEP 3: View ===== */}
-          <div className={`rounded-xl border p-4 transition-all ${step2Done ? 'border-broker-gold bg-broker-surface' : 'border-broker-border bg-broker-surface/30 opacity-50'}`}>
-            <div className="flex items-center gap-2 mb-3">
-              <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${step2Done ? 'bg-broker-gold text-broker-bg' : 'bg-broker-surface-hover text-broker-text-muted'}`}>3</span>
-              <span className="text-sm font-bold text-white">How to view?</span>
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              <button onClick={() => useUIStore.getState().setViewMode('umpire')}
-                disabled={!step2Done}
-                className="bg-broker-surface-hover hover:bg-broker-gold/20 disabled:opacity-30 disabled:cursor-not-allowed rounded-lg p-3 text-center transition-colors">
-                <img src={import.meta.env.BASE_URL + 'scene-signal-box.png'} alt="" className="w-full rounded-lg mb-1" />
-                <div className="text-xs font-bold text-white">Umpire</div>
-                <div className="text-[10px] text-broker-text-muted">Shared table view</div>
-              </button>
-              <button onClick={() => useUIStore.getState().setViewMode('driver')}
-                disabled={!step2Done}
-                className="bg-broker-surface-hover hover:bg-broker-gold/20 disabled:opacity-30 disabled:cursor-not-allowed rounded-lg p-3 text-center transition-colors">
-                <img src={import.meta.env.BASE_URL + 'scene-compartment-passengers.png'} alt="" className="w-full rounded-lg mb-1" />
-                <div className="text-xs font-bold text-white">Driver</div>
-                <div className="text-[10px] text-broker-text-muted">Personal phone view</div>
-              </button>
-            </div>
-          </div>
+          {/* ===== STEP 3: Role ===== */}
+          <RolePicker step2Done={step2Done} game={game} />
 
         </div>
 
@@ -162,12 +142,6 @@ export default function GameSelector() {
         </div>
       </div>
     )
-  }
-
-  // ===== COMPARTMENT VIEW (join or create) =====
-  if (view === 'compartment') {
-    return <CompartmentView sync={sync} onBack={() => setView('hub')}
-      onCreateThenTitles={() => { sync?.createRoom(); setView('create') }} />
   }
 
   // ===== JOIN VIEW =====
@@ -204,77 +178,6 @@ export default function GameSelector() {
   return null
 }
 
-// ===== COMPARTMENT VIEW (join or create) =====
-function CompartmentView({ sync, onBack, onCreateThenTitles }) {
-  const [code, setCode] = useState('')
-  const [mode, setMode] = useState(null) // null | 'join'
-
-  // Already in a room — show status
-  if (sync?.roomId) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center p-6">
-        <img src={import.meta.env.BASE_URL + 'scene-compartment-passengers.png'} alt="" className="w-32 rounded-xl mb-4" />
-        <h2 className="text-xl font-bold text-white mb-2">Compartment</h2>
-        <div className="flex items-center gap-3 mb-4">
-          <span className={`w-3 h-3 rounded-full ${sync.status === 'connected' ? 'bg-green-400' : 'bg-amber-400 animate-pulse'}`} />
-          <span className="font-mono font-bold text-white text-2xl tracking-wider">{sync.roomId}</span>
-          <span className="text-sm text-broker-text-muted">
-            {sync.peerCount > 0 ? `${sync.peerCount + 1} devices` : 'waiting...'}
-          </span>
-        </div>
-        <div className="flex gap-3">
-          <button onClick={() => { sync.leaveRoom(); onBack() }}
-            className="text-sm bg-red-800 hover:bg-red-700 text-white px-4 py-2 rounded-lg">Leave Room</button>
-          <button onClick={onBack}
-            className="text-sm text-broker-text-muted hover:text-white px-4 py-2">← Back</button>
-        </div>
-      </div>
-    )
-  }
-
-  // Join mode — enter code
-  if (mode === 'join') {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center p-6">
-        <img src={import.meta.env.BASE_URL + 'scene-compartment-passengers.png'} alt="" className="w-32 rounded-xl mb-4" />
-        <h2 className="text-xl font-bold text-white mb-1">Join Compartment</h2>
-        <p className="text-xs text-broker-text-muted mb-4">Enter the room code from your host</p>
-        <div className="flex gap-2 items-center">
-          <input type="text" value={code} onChange={(e) => setCode(e.target.value.toUpperCase())}
-            placeholder="CODE" maxLength={6} autoFocus
-            onKeyDown={e => e.key === 'Enter' && code.trim().length >= 4 && sync?.joinRoom(code)}
-            className="w-32 bg-broker-surface border border-broker-border rounded-lg px-3 py-3 text-white font-mono text-xl tracking-widest placeholder-broker-text-muted text-center" />
-          <button onClick={() => { if (code.trim().length >= 4) sync?.joinRoom(code) }}
-            disabled={code.trim().length < 4}
-            className="bg-blue-700 hover:bg-blue-600 text-white px-5 py-3 rounded-lg font-bold disabled:opacity-40">
-            Board
-          </button>
-        </div>
-        <button onClick={() => setMode(null)} className="mt-6 text-xs text-broker-text-muted hover:text-white">← Back</button>
-      </div>
-    )
-  }
-
-  // Default — choose join or create
-  return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-6">
-      <img src={import.meta.env.BASE_URL + 'scene-compartment-empty.png'} alt="" className="w-32 rounded-xl mb-4" />
-      <h2 className="text-xl font-bold text-white mb-4">Compartment</h2>
-      <div className="flex gap-3">
-        <button onClick={() => setMode('join')}
-          className="bg-blue-700 hover:bg-blue-600 text-white px-6 py-3 rounded-xl font-bold text-sm">
-          Join Room
-        </button>
-        <button onClick={() => { sync?.createRoom(); onBack() }}
-          className="bg-green-700 hover:bg-green-600 text-white px-6 py-3 rounded-xl font-bold text-sm">
-          Create Room
-        </button>
-      </div>
-      <button onClick={onBack} className="mt-6 text-xs text-broker-text-muted hover:text-white">← Back</button>
-    </div>
-  )
-}
-
 // ===== JOIN VIEW =====
 function JoinView({ sync, onBack }) {
   const [code, setCode] = useState('')
@@ -295,7 +198,7 @@ function JoinView({ sync, onBack }) {
           Board
         </button>
       </div>
-      <button onClick={onBack} className="mt-6 text-xs text-broker-text-muted hover:text-white">← Back</button>
+      <button onClick={onBack} className="mt-6 text-xs text-broker-text-muted hover:text-white"><IconBack className="w-3 h-3 inline" /> Back</button>
     </div>
   )
 }
@@ -319,7 +222,7 @@ function CreateView({ sync, titles, navigate, onBack, showLegend, setShowLegend,
       )}
       <p className="text-xs text-broker-text-muted mb-4">Share the code, then select a title to start</p>
       <TitlesGrid titles={titles} navigate={navigate} showLegend={showLegend} setShowLegend={setShowLegend} showInfo={showInfo} setShowInfo={setShowInfo} />
-      <button onClick={onBack} className="mt-6 text-xs text-broker-text-muted hover:text-white">← Back (room stays active)</button>
+      <button onClick={onBack} className="mt-6 text-xs text-broker-text-muted hover:text-white"><IconBack className="w-3 h-3 inline" /> Back (room stays active)</button>
     </div>
   )
 }
@@ -377,12 +280,12 @@ function TitlesView({ titles, navigate, onBack, showLegend, setShowLegend, showI
   return (
     <div className="min-h-screen flex flex-col items-center p-6">
       <div className="w-full max-w-md mb-2 flex items-center gap-2">
-        <button onClick={onBack} className="text-broker-text-muted hover:text-white text-sm">←</button>
+        <button onClick={onBack} className="text-broker-text-muted hover:text-white text-sm"><IconBack className="w-4 h-4" /></button>
         <img src={import.meta.env.BASE_URL + 'scene-track-builders.png'} alt="" className="w-8 rounded" />
         <h2 className="text-lg font-bold text-white">Build Track</h2>
       </div>
       <TitlesGrid titles={titles} navigate={navigate} showLegend={showLegend} setShowLegend={setShowLegend} showInfo={showInfo} setShowInfo={setShowInfo} />
-      <button onClick={onBack} className="mt-6 text-xs text-broker-text-muted hover:text-white">← Back</button>
+      <button onClick={onBack} className="mt-6 text-xs text-broker-text-muted hover:text-white"><IconBack className="w-3 h-3 inline" /> Back</button>
     </div>
   )
 }
@@ -416,7 +319,7 @@ function DepotView({ navigate, onBack, loadGame, importFrom18xxGames, savedGames
     <div className="min-h-screen flex flex-col items-center p-6">
       <div className="w-full max-w-md">
         <div className="flex items-center gap-2 mb-4">
-          <button onClick={onBack} className="text-broker-text-muted hover:text-white text-sm">←</button>
+          <button onClick={onBack} className="text-broker-text-muted hover:text-white text-sm"><IconBack className="w-4 h-4" /></button>
           <img src={import.meta.env.BASE_URL + 'scene-water-tower.png'} alt="" className="w-8 rounded" />
           <h2 className="text-lg font-bold text-white">Depot</h2>
         </div>
@@ -447,7 +350,7 @@ function DepotView({ navigate, onBack, loadGame, importFrom18xxGames, savedGames
                     URL.revokeObjectURL(url)
                   }} className="text-broker-text-muted hover:text-broker-gold ml-2 px-2 py-1 text-xs" title="Export">↓</button>
                   <button onClick={() => { deleteGame(key); setSavedGames(loadAllGames()) }}
-                    className="text-broker-text-muted hover:text-red-400 px-2 py-1 text-sm" title="Delete">×</button>
+                    className="text-broker-text-muted hover:text-red-400 px-2 py-1 min-h-[44px] min-w-[44px] flex items-center justify-center" title="Delete"><IconClose className="w-4 h-4" /></button>
                 </div>
               )
             })}
@@ -494,7 +397,7 @@ function DepotView({ navigate, onBack, loadGame, importFrom18xxGames, savedGames
           }} importing={importing} />
         </div>
 
-        <button onClick={onBack} className="mt-4 text-xs text-broker-text-muted hover:text-white w-full text-center">← Back</button>
+        <button onClick={onBack} className="mt-4 text-xs text-broker-text-muted hover:text-white w-full text-center"><IconBack className="w-3 h-3 inline" /> Back</button>
       </div>
     </div>
   )
@@ -509,7 +412,7 @@ function SettingsView({ navigate, onBack }) {
     <div className="min-h-screen flex flex-col items-center p-6">
       <div className="w-full max-w-md">
         <div className="flex items-center gap-2 mb-4">
-          <button onClick={onBack} className="text-broker-text-muted hover:text-white text-sm">←</button>
+          <button onClick={onBack} className="text-broker-text-muted hover:text-white text-sm"><IconBack className="w-4 h-4" /></button>
           <img src={import.meta.env.BASE_URL + 'scene-locomotive-mechanic.png'} alt="" className="w-8 rounded" />
           <h2 className="text-lg font-bold text-white">Settings</h2>
         </div>
@@ -545,7 +448,7 @@ function SettingsView({ navigate, onBack }) {
           </button>
         </div>
 
-        <button onClick={onBack} className="mt-4 text-xs text-broker-text-muted hover:text-white w-full text-center">← Back</button>
+        <button onClick={onBack} className="mt-4 text-xs text-broker-text-muted hover:text-white w-full text-center"><IconBack className="w-3 h-3 inline" /> Back</button>
       </div>
     </div>
   )
@@ -711,6 +614,65 @@ const SUPPORTED_TITLES = new Set([
 ])
 
 const SORTED_TITLES = [...SUPPORTED_TITLES].sort()
+
+// ===== ROLE PICKER =====
+const ROLES = [
+  { id: 'umpire',   label: 'Umpire',   desc: 'Full control. Desktop/laptop.' },
+  { id: 'player',   label: 'Player',   desc: 'Your holdings & actions. Phone.' },
+  { id: 'kibitzer', label: 'Kibitzer', desc: 'Watch the game. Phone.' },
+  { id: 'display',  label: 'Display',  desc: 'Auto-rotating dashboard. TV/monitor.' },
+]
+
+function RolePicker({ step2Done, game }) {
+  const [pendingRole, setPendingRole] = useState(null)
+
+  function pickRole(roleId) {
+    if (roleId === 'player') {
+      setPendingRole('player')
+    } else {
+      useRoleStore.getState().setRole(roleId)
+    }
+  }
+
+  function confirmPlayer(playerId) {
+    const store = useRoleStore.getState()
+    store.setRole('player')
+    store.setPlayerId(playerId)
+  }
+
+  return (
+    <div className={`rounded-xl border p-4 transition-all ${step2Done ? 'border-broker-gold bg-broker-surface' : 'border-broker-border bg-broker-surface/30 opacity-50'}`}>
+      <div className="flex items-center gap-2 mb-3">
+        <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${step2Done ? 'bg-broker-gold text-broker-bg' : 'bg-broker-surface-hover text-broker-text-muted'}`}>3</span>
+        <span className="text-sm font-bold text-white">Your role</span>
+      </div>
+      {pendingRole === 'player' && game ? (
+        <div className="space-y-2">
+          <div className="text-xs text-broker-text-muted mb-1">Which player are you?</div>
+          {game.players.map(p => (
+            <button key={p.id} onClick={() => confirmPlayer(p.id)}
+              className="w-full bg-broker-surface-hover hover:bg-broker-gold/20 rounded-lg p-3 text-left transition-all duration-200 hover:scale-[1.02]">
+              <span className="text-sm font-bold text-white">{p.name}</span>
+            </button>
+          ))}
+          <button onClick={() => setPendingRole(null)}
+            className="text-xs text-broker-text-muted hover:text-white mt-1"><IconBack className="w-3 h-3 inline" /> Back</button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 gap-2">
+          {ROLES.map(r => (
+            <button key={r.id} onClick={() => pickRole(r.id)}
+              disabled={!step2Done}
+              className="bg-broker-surface-hover hover:bg-broker-gold/20 disabled:opacity-30 disabled:cursor-not-allowed rounded-lg p-3 text-center transition-all duration-200 hover:scale-105">
+              <div className="text-xs font-bold text-white">{r.label}</div>
+              <div className="text-[10px] text-broker-text-muted">{r.desc}</div>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
 
 function LiveGames({ onImport, importing }) {
   const [games, setGames] = useState(null)

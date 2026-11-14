@@ -1,4 +1,5 @@
 // StockMarket — parse cells, track corp positions, move prices.
+import { dividendStrategies, sellStrategies } from './families/index.js'
 
 // Parse a market cell string. Conventions from 18xx.games:
 //   "100p" = par price, "40y" = yellow, "30o" = orange, "25b" = brown, "0c" = close
@@ -165,7 +166,7 @@ export function moveUp(market, corpSym, steps = 1) {
 }
 
 // --- Dividend-based movement ---
-// dividendMovement config: see switch below for all supported types.
+// dividendMovement config: dispatches to family strategy functions.
 // Returns positive for right moves, -1 for left
 export function moveDividend(market, corpSym, perShare, dividendMovement, totalRevenue) {
   const pos = market.corpPositions[corpSym]
@@ -173,128 +174,25 @@ export function moveDividend(market, corpSym, perShare, dividendMovement, totalR
   const price = priceAt(market, pos.row, pos.col)
   if (!price) return 0
 
-  const doRight = (n) => { let m = 0; for (let i = 0; i < n; i++) if (stepRight(market, pos)) m++; return m }
-  const doLeft = () => { stepLeft(market, pos); return -1 }
-  const doLeftOrDown = () => { if (!stepLeft(market, pos)) stepDown(market, pos); return -1 }
-
-  // Withhold always moves left (all types)
-  if (perShare <= 0) {
-    switch (dividendMovement) {
-      case 'trg_triple_jump':
-      case 'ptg_triple':
-        return doLeftOrDown()
-      default:
-        return doLeft()
-    }
+  // Build helpers object that strategies use to move the token.
+  // This keeps step primitives private to stockMarket.js while letting
+  // family strategies express movement intent.
+  const helpers = {
+    doRight: (n) => { let m = 0; for (let i = 0; i < n; i++) if (stepRight(market, pos)) m++; return m },
+    doLeft: () => { stepLeft(market, pos); return -1 },
+    doLeftOrDown: () => { if (!stepLeft(market, pos)) stepDown(market, pos); return -1 },
+    tryStepRight: () => stepRight(market, pos),
+    tryStepUp: () => stepUp(market, pos),
   }
 
-  // Revenue-based jumps
-  switch (dividendMovement) {
-    // 1830, 1889, 18Ches, 18MS, 1817 — simple: rev>0 right 1, no double jump
-    case 'no_double':
-      return doRight(1)
-
-    // 1867, 1849, 18Rhl, 18Ireland — >=price right 1, else nothing
-    case 'standard_no_double':
-      return perShare >= price ? doRight(1) : 0
-
-    // 1858 — per_share*10 >= price → right 1, else nothing
-    case '1858':
-      return perShare * 10 >= price ? doRight(1) : 0
-
-    // 1846 — <half→left; >=1x→right1; >=2x→right2; >=3x→right3 (if price>=165)
-    case '1846': {
-      if (perShare < price * 0.5) return doLeft()
-      let t = 0
-      if (perShare >= price) t = 1
-      if (perShare >= price * 2) t = 2
-      if (perShare >= price * 3 && price >= 165) t = 3
-      return t > 0 ? doRight(t) : 0
-    }
-
-    // 1822 — rev>0 right1; >=2x right2 (majors; minors always just right 1)
-    case '1822':
-      return doRight(perShare >= price * 2 ? 2 : 1)
-
-    // 18SJ — >=price right1; >=2x right2 (if price>82)
-    case '18sj':
-      if (perShare < price) return 0
-      return doRight(perShare >= price * 2 && price > 82 ? 2 : 1)
-
-    // 1860, 1862 — >=1x→1; >=2x→2; >=3x→3; >=4x→4
-    case 'multi_jump': {
-      if (perShare < price) return 0
-      const t = Math.min(Math.floor(perShare / price), 4)
-      return doRight(t)
-    }
-
-    // 18GB — rev>0 always right; >=2x→2; >=3x→3; >=4x→4
-    case '18gb': {
-      const t = Math.min(Math.max(Math.floor(perShare / price), 1), 4)
-      return doRight(t)
-    }
-
-    // 18USA — >=0.5x→1; >=1x→2; >=1.5x→3; >=2x→4
-    case '18usa': {
-      let t = 0
-      if (perShare >= Math.floor(price * 0.5)) t = 1
-      if (perShare >= price) t = 2
-      if (perShare >= Math.floor(price * 1.5)) t = 3
-      if (perShare >= price * 2) t = 4
-      return t > 0 ? doRight(t) : 0
-    }
-
-    // 18RG — right = floor(rev/price), max 3
-    case '18rg': {
-      const t = Math.min(Math.floor(perShare / price), 3)
-      return t > 0 ? doRight(t) : 0
-    }
-
-    // 21Moon — >=2x right2; >=half right1; else nothing
-    case '21moon': {
-      if (perShare >= price * 2) return doRight(2)
-      if (perShare >= price * 0.5) return doRight(1)
-      return 0
-    }
-
-    // 22Mars — >=2x right2; else right1
-    // (already handled by 'standard' default, but explicit)
-
-    // 1871 — full payout right1; half pay nothing (handled by caller)
-    case '1871':
-      return doRight(1)
-
-    // 18DO TRG — withhold=left/down; <price=none; >=price right1; >=3x right2
-    case 'trg_triple_jump':
-      if (perShare < price) return 0
-      if (perShare >= price * 3) return doRight(2)
-      if (stepRight(market, pos)) return 1
-      if (stepUp(market, pos)) return 1
-      return 0
-
-    // PTG — compare TOTAL revenue vs price
-    case 'ptg_triple': {
-      const rev = totalRevenue ?? perShare * 10
-      if (rev < price * 0.5) return doLeftOrDown()
-      if (rev >= price * 3) {
-        let m = 0
-        if (stepRight(market, pos) || stepUp(market, pos)) m++
-        if (stepRight(market, pos) || stepUp(market, pos)) m++
-        return m
-      }
-      if (stepRight(market, pos) || stepUp(market, pos)) return 1
-      return 0
-    }
-
-    // Standard (default for most 18xx):
-    // rev>0: right 1. If perShare >= price: right 2 (double jump)
-    default:
-      return doRight(perShare >= price ? 2 : 1)
-  }
+  // Look up the strategy function for this title's dividend movement type.
+  // Falls back to classic (standard double-jump) if the key is not found.
+  const strategy = dividendStrategies[dividendMovement] || dividendStrategies['standard']
+  return strategy(market, pos, perShare, price, totalRevenue, helpers)
 }
 
 // --- Sell movement (title-aware) ---
-// sellMovement config: 'down_share' | 'down_per_10' | 'down_per_sale' | 'left_block_pres' | 'down_block' | 'none'
+// sellMovement config: dispatches to family strategy functions.
 // baseSharePercent: size of one regular cert (10 for standard, 20 for PTG 5-share corps)
 export function moveSell(market, corpSym, percentSold, sellMovement = 'down_share', baseSharePercent = 10) {
   const pos = market.corpPositions[corpSym]
@@ -304,42 +202,15 @@ export function moveSell(market, corpSym, percentSold, sellMovement = 'down_shar
 
   const shares = Math.floor(percentSold / baseSharePercent)
 
-  switch (sellMovement) {
-    case 'down_share':
-    case 'down_per_10':
-      // One space down per 10% sold
-      for (let i = 0; i < shares; i++) {
-        stepDown(market, pos)
-      }
-      break
-
-    case 'down_per_sale':
-    case 'down_block':
-    case 'down_block_pres':
-      // Move down once regardless of how many sold
-      stepDown(market, pos)
-      break
-
-    case 'left_share':
-      // Move left per share
-      for (let i = 0; i < shares; i++) {
-        stepLeft(market, pos)
-      }
-      break
-
-    case 'left_block':
-    case 'left_block_pres':
-      // Move left once regardless
-      stepLeft(market, pos)
-      break
-
-    default:
-      // Default: down per share
-      for (let i = 0; i < shares; i++) {
-        stepDown(market, pos)
-      }
-      break
+  // Build helpers for sell strategies
+  const helpers = {
+    stepDown: () => stepDown(market, pos),
+    stepLeft: () => stepLeft(market, pos),
   }
+
+  // Look up sell strategy; fall back to down-per-share default
+  const strategy = sellStrategies[sellMovement] || sellStrategies['down_share']
+  strategy(market, pos, shares, helpers)
 }
 
 // --- Sold-out check ---

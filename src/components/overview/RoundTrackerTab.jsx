@@ -298,7 +298,7 @@ function SyncSection({ sync }) {
             className="text-xs bg-blue-800 hover:bg-blue-700 text-white px-2 py-1 rounded">
             Reconnect
           </button>
-          <button onClick={() => { localStorage.removeItem('18xxCoupler_room'); location.reload() }}
+          <button onClick={() => { localStorage.removeItem('laytrack_room'); location.reload() }}
             className="text-xs text-broker-text-muted hover:text-red-300 px-1">
             Dismiss
           </button>

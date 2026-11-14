@@ -3,6 +3,7 @@ import { useGameStore } from '../../store/gameStore.js'
 import { useUIStore } from '../../store/uiStore.js'
 import { formatCurrency } from '../../utils/currency.js'
 import { allNetWorths } from '../../engine/rules/netWorth.js'
+import { IconExpand, IconNext, IconPrev } from '../shared/Icons.jsx'
 import { gameEndWarnings } from '../../engine/rules/gameEnd.js'
 import { certLimitWarnings } from '../../engine/rules/certLimit.js'
 import { currentPhase } from '../../engine/phase.js'
@@ -209,7 +210,7 @@ function ActionLog({ game, showLog, toggleLog }) {
           onClick={toggleLog}
           className="text-xs text-broker-text-muted font-medium uppercase"
         >
-          Log ({game.actionLog.length}{inReplay ? `/${totalActions}` : ''} actions) {showLog ? '▼' : '▶'}
+          Log ({game.actionLog.length}{inReplay ? `/${totalActions}` : ''} actions) {showLog ? <IconExpand className="w-3 h-3 inline" /> : <IconNext className="w-3 h-3 inline" />}
         </button>
         {!inReplay && game.actionLog.length > 0 && (
           <button
@@ -260,7 +261,7 @@ function ActionLog({ game, showLog, toggleLog }) {
               disabled={currentIdx < 0}
               className="text-xs px-2 py-1 rounded bg-broker-surface-hover hover:bg-broker-surface disabled:opacity-30 text-white"
             >
-              ◀ Prev
+              <IconPrev className="w-3 h-3 inline" /> Prev
             </button>
             <span className="text-xs text-broker-text-muted">
               {currentIdx < 0 ? 'Start' : `Action ${currentIdx + 1} of ${totalActions}`}
@@ -270,7 +271,7 @@ function ActionLog({ game, showLog, toggleLog }) {
               disabled={currentIdx >= totalActions - 1}
               className="text-xs px-2 py-1 rounded bg-broker-surface-hover hover:bg-broker-surface disabled:opacity-30 text-white"
             >
-              Next ▶
+              Next <IconNext className="w-3 h-3 inline" />
             </button>
           </div>
         </div>

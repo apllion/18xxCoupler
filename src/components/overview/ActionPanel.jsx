@@ -14,6 +14,7 @@ import { exportGamePdf } from '../../utils/exportPdf.js'
 import { exportGame } from '../../utils/persistence.js'
 import { CorpCard } from './CorpCard.jsx'
 import { PlayerCard } from './PlayerCard.jsx'
+import { CorpBadge } from '../shared/CorpBadge.jsx'
 
 export function ActionPanel({ panel, game, player, corp, unfloated, fmt, revenueInput, setRevenueInput, revRef, onClose, doAction }) {
   return (
@@ -1209,11 +1210,5 @@ function Btn({ v, o, children }) {
 
 function CB({ c }) {
   if (!c) return null
-  const style = c.stripeColor
-    ? { background: `linear-gradient(135deg, ${c.color} 50%, ${c.stripeColor} 50%)` }
-    : { backgroundColor: c.color, color: c.textColor }
-  const sym = c.stripeColor
-    ? c.sym.split('-').map((part, i) => <span key={i} style={{ color: i === 0 ? c.textColor : (c.stripeTextColor || '#fff') }}>{i > 0 ? '-' : ''}{part}</span>)
-    : c.sym
-  return <span className="px-1 rounded font-bold text-xs" style={style}>{sym}</span>
+  return <CorpBadge sym={c.sym} color={c.color} textColor={c.textColor} stripeColor={c.stripeColor} stripeTextColor={c.stripeTextColor} size="xs" />
 }

@@ -8,6 +8,8 @@ import { useUIStore } from '../../store/uiStore.js'
 import { ActionPanel } from './ActionPanel.jsx'
 import { ContextBar } from './ContextBar.jsx'
 import { InlineEdit } from './InlineEdit.jsx'
+import { IconUndo, IconRedo } from '../shared/Icons.jsx'
+import { CorpBadge } from '../shared/CorpBadge.jsx'
 
 export default function BrokerOverview() {
   const d = useOverviewData()
@@ -84,8 +86,8 @@ export default function BrokerOverview() {
         <div className="flex items-center gap-2">
           {inReplay && <span className="text-xs font-medium text-purple-300 bg-purple-900/40 px-2 py-0.5 rounded">{curIdx + 1}/{fullLog.length}</span>}
           <span className={`text-sm font-medium ${game.bank.cash <= 0 ? 'text-red-400' : 'text-broker-text'}`}>Bank <InlineEdit value={game.bank.cash} enabled={su}            onSave={v => doAction({ type: 'SET_CASH', entityId: 'bank', entityType: 'bank', value: v })}>{fmt(game.bank.cash)}</InlineEdit></span>
-          <button onClick={() => canUndo() && undo()} className="text-xs text-broker-text-muted hover:text-white px-1" title="Undo">↩</button>
-          <button onClick={() => canRedo() && redo()} className="text-xs text-broker-text-muted hover:text-white px-1" title="Redo">↪</button>
+          <button onClick={() => canUndo() && undo()} className="text-broker-text-muted hover:text-white px-1" title="Undo"><IconUndo className="w-3.5 h-3.5" /></button>
+          <button onClick={() => canRedo() && redo()} className="text-broker-text-muted hover:text-white px-1" title="Redo"><IconRedo className="w-3.5 h-3.5" /></button>
           <button onClick={() => setPanel(panel === 'settings' ? null : 'settings')} className="text-xs text-broker-text-muted hover:text-white bg-broker-surface-hover px-2 py-0.5 rounded">Settings</button>
         </div>
       </div>
@@ -146,19 +148,14 @@ export default function BrokerOverview() {
               {corps.map((c, ci) => (
                 <th key={c.sym} className={`px-1 py-1 text-center min-w-[48px] cursor-pointer bg-broker-surface ${ci === curCol ? '!bg-broker-surface-hover' : ''} ${!c.ipoed ? 'opacity-30' : ''} ${c.operated ? 'border-b-2 border-green-500' : ''}`}
                   onClick={() => setCurCol(ci)}>
-                  <span className="px-1 rounded font-bold inline-flex items-center" style={c.stripeColor
-                    ? { background: `linear-gradient(135deg, ${c.color} 50%, ${c.stripeColor} 50%)` }
-                    : { backgroundColor: c.color, color: c.textColor }
-                  }>{c.stripeColor
-                    ? c.sym.split('-').map((part, i) => <span key={i} style={{ color: i === 0 ? c.textColor : (c.stripeTextColor || '#fff') }}>{i > 0 ? '-' : ''}{part}</span>)
-                    : c.sym}{(() => {
+                  <CorpBadge sym={c.sym} color={c.color} textColor={c.textColor} stripeColor={c.stripeColor} stripeTextColor={c.stripeTextColor} size="xs" />{(() => {
                     if (!c.ipoed) return null
                     const shareSize = game.title.shares?.[1] ?? 10
                     const avail = c.ipoShares + c.marketShares
                     if (avail === 0) return <span className="text-[8px] ml-0.5" title="Sold out">&#x25B2;</span>
                     if (avail <= shareSize) return <span className="text-[8px] ml-0.5 opacity-70" title="One share from sold out">&#x25AA;</span>
                     return null
-                  })()}</span>
+                  })()}
                 </th>
               ))}
             </tr>
@@ -306,19 +303,7 @@ export default function BrokerOverview() {
               if (targets.length === 0) return null
               return targets.map(target => (
                 <BRow key={`ch_${target.sym}`} extraCols={game.title.taxThresholds ? 1 : 0}
-                  l={<>{target.stripeColor
-                    ? target.sym.split('-').map((part, i) => <span key={i} style={{ color: i === 0 ? target.textColor : (target.stripeTextColor || '#fff') }}>{i > 0 ? '-' : ''}{part}</span>)
-                    : target.sym}{(() => {
-                    if (!target.ipoed) return null
-                    const shareSize = game.title.shares?.[1] ?? 10
-                    const avail = target.ipoShares + target.marketShares
-                    if (avail === 0) return <span className="text-[8px] ml-0.5" title="Sold out">&#x25B2;</span>
-                    if (avail <= shareSize) return <span className="text-[8px] ml-0.5 opacity-70" title="One share from sold out">&#x25AA;</span>
-                    return null
-                  })()}</>}
-                  labelStyle={target.stripeColor
-                    ? { background: `linear-gradient(135deg, ${target.color} 50%, ${target.stripeColor} 50%)` }
-                    : { backgroundColor: target.color, color: target.textColor }}
+                  l={<CorpBadge sym={target.sym} color={target.color} textColor={target.textColor} stripeColor={target.stripeColor} stripeTextColor={target.stripeTextColor} size="xs" />}
                   corps={corps} cc={curCol}
                   r={c => {
                     const pct = (c.sharesHeld || []).filter(s => s.corpSym === target.sym).reduce((sum, s) => sum + s.percent, 0)
