@@ -3,6 +3,7 @@ import { useDispatch } from '../../hooks/useDispatch.js'
 import { currentPhase } from '../../engine/phase.js'
 import { getEventInfo } from '../../engine/events.js'
 import { formatCurrency } from '../../utils/currency.js'
+import { IconUndo, IconRedo } from '../shared/Icons.jsx'
 
 export default function Header() {
   const game = useGameStore((s) => s.game)
@@ -11,7 +12,6 @@ export default function Header() {
   const redo = useGameStore((s) => s.redo)
   const canUndo = useGameStore((s) => s.canUndo)
   const canRedo = useGameStore((s) => s.canRedo)
-
 
   // What-if mode
   const whatIfSnapshot = useGameStore((s) => s.whatIfSnapshot)
@@ -34,72 +34,57 @@ export default function Header() {
   const roundTypes = rt?.roundTypes || ['SR', 'OR']
   const currentRoundType = rt?.roundType || 'SR'
 
-  function handleUndo() {
-    undo()
-  }
-
   return (
     <>
-      <header className="sticky top-0 z-10 bg-broker-surface border-b border-broker-border px-3 py-2">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="font-bold text-lg">{game.title.title}</span>
-            <span className="text-xs bg-broker-surface-hover px-2 py-0.5 rounded">Phase {phase.name}</span>
-            <div className="flex">
-              {roundTypes.map((rType) => {
-                const active = rType === currentRoundType
-                const colors = active
-                  ? rType === 'SR' ? 'bg-broker-green text-broker-gold'
-                    : rType === 'OR' ? 'bg-amber-900 text-amber-200'
-                    : rType === 'Pregame' ? 'bg-broker-green text-white'
-                    : 'bg-blue-800 text-blue-200'
-                  : 'bg-broker-surface-hover text-broker-text-muted hover:text-white'
-                return (
-                  <span
-                    key={rType}
-                    className={`text-sm font-medium px-2 py-0.5 first:rounded-l last:rounded-r border-r border-broker-border last:border-r-0 ${colors}`}
-                  >
-                    {rType}
-                  </span>
-                )
-              })}
-            </div>
+      <header className="sticky top-0 z-10 bg-broker-surface border-b border-broker-border px-3 py-1.5">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+          <span className="font-bold text-base text-white">{game.title.title}</span>
+          <div className="flex">
+            {roundTypes.map((rType) => {
+              const active = rType === currentRoundType
+              const colors = active
+                ? rType === 'SR' ? 'bg-green-800 text-green-200'
+                  : rType === 'OR' ? 'bg-amber-800 text-amber-200'
+                  : rType === 'Pregame' ? 'bg-broker-green text-white'
+                  : 'bg-blue-800 text-blue-200'
+                : 'bg-broker-surface-hover text-broker-text-muted'
+              return (
+                <span key={rType}
+                  className={`text-xs font-medium px-1.5 py-0.5 first:rounded-l last:rounded-r border-r border-broker-border last:border-r-0 ${colors}`}
+                >{rType}</span>
+              )
+            })}
           </div>
-
-          <div className="flex items-center gap-2">
-            <span className={`text-xs ${game.bank.broken ? 'text-red-400 font-bold' : 'text-broker-text-muted'}`}>
-              Bank: {fmt(game.bank.cash)}
-            </span>
-
-            {/* What-if toggle */}
-            {(
-              <button
-                onClick={() => isWhatIf ? exitWhatIf(true) : enterWhatIf()}
-                className={`text-xs px-2.5 py-0.5 rounded transition-colors ${
-                  isWhatIf
-                    ? 'bg-amber-700 text-amber-100 ring-1 ring-amber-400'
-                    : 'bg-broker-surface-hover text-broker-text-muted hover:text-broker-text'
-                }`}
-              >
-                {isWhatIf ? 'Exit' : 'What-if'}
-              </button>
-            )}
-
-            {/* Guided / Open toggle — dormant */}
-
-<button
-              onClick={handleUndo}
-              disabled={!canUndo()}
-              className="bg-broker-surface-hover hover:bg-broker-surface-hover disabled:opacity-30 disabled:cursor-not-allowed text-white px-2 py-1 rounded text-xs font-medium"
+          <span className="text-xs text-broker-text-muted whitespace-nowrap">Ph{phase.name} L{game.title.trainLimit?.[phase.name] || '?'}</span>
+          <span className={`text-xs font-medium whitespace-nowrap ${game.bank.cash <= 0 ? 'text-red-400' : 'text-broker-text'}`}>
+            Bank {fmt(game.bank.cash)}
+          </span>
+          <div className="flex items-center gap-1 ml-auto">
+            <button
+              onClick={() => isWhatIf ? exitWhatIf(true) : enterWhatIf()}
+              className={`text-xs px-2 py-1 min-h-[36px] rounded transition-colors ${
+                isWhatIf
+                  ? 'bg-amber-700 text-amber-100 ring-1 ring-amber-400'
+                  : 'bg-broker-surface-hover text-broker-text-muted hover:text-broker-text'
+              }`}
             >
-              Undo
+              {isWhatIf ? 'Exit' : 'What-if'}
             </button>
             <button
-              onClick={() => redo()}
-              disabled={!canRedo()}
-              className="bg-broker-surface-hover hover:bg-broker-surface-hover disabled:opacity-30 disabled:cursor-not-allowed text-white px-2 py-1 rounded text-xs font-medium"
+              onClick={() => canUndo() && undo()}
+              className="text-broker-text-muted hover:text-white p-1.5 min-h-[36px] min-w-[36px] flex items-center justify-center disabled:opacity-30"
+              disabled={!canUndo()}
+              title="Undo"
             >
-              Redo
+              <IconUndo className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => canRedo() && redo()}
+              className="text-broker-text-muted hover:text-white p-1.5 min-h-[36px] min-w-[36px] flex items-center justify-center disabled:opacity-30"
+              disabled={!canRedo()}
+              title="Redo"
+            >
+              <IconRedo className="w-4 h-4" />
             </button>
           </div>
         </div>
@@ -107,19 +92,15 @@ export default function Header() {
 
       {/* What-if mode banner */}
       {isWhatIf && (
-        <div className="bg-amber-900/80 border-b border-amber-600 px-3 py-2 flex items-center justify-between">
-          <span className="text-sm text-amber-200 font-medium">What-if mode — changes are local only</span>
+        <div className="bg-amber-900/80 border-b border-amber-600 px-3 py-1.5 flex items-center justify-between">
+          <span className="text-sm text-amber-200 font-medium">What-if — changes are local only</span>
           <div className="flex gap-2">
-            <button
-              onClick={() => exitWhatIf(true)}
-              className="bg-amber-700 hover:bg-amber-600 text-white px-3 py-1 rounded text-xs font-medium"
-            >
+            <button onClick={() => exitWhatIf(true)}
+              className="bg-amber-700 hover:bg-amber-600 text-white px-3 py-1 rounded text-xs font-medium min-h-[36px]">
               Discard
             </button>
-            <button
-              onClick={() => exitWhatIf(false)}
-              className="text-amber-300 hover:text-amber-100 text-xs px-2"
-            >
+            <button onClick={() => exitWhatIf(false)}
+              className="text-amber-300 hover:text-amber-100 text-xs px-2 min-h-[36px]">
               Keep
             </button>
           </div>
@@ -136,17 +117,13 @@ export default function Header() {
             </span>
             <div className="flex gap-2">
               {!isWhatIf && (
-                <button
-                  onClick={() => { exitReplay(); enterWhatIf() }}
-                  className="text-xs bg-amber-700 hover:bg-amber-600 text-amber-200 px-2 py-1 rounded"
-                >
+                <button onClick={() => { exitReplay(); enterWhatIf() }}
+                  className="text-xs bg-amber-700 hover:bg-amber-600 text-amber-200 px-2 py-1 rounded min-h-[36px]">
                   What-if
                 </button>
               )}
-              <button
-                onClick={exitReplay}
-                className="text-xs bg-blue-700 hover:bg-blue-600 text-white px-2 py-1 rounded"
-              >
+              <button onClick={exitReplay}
+                className="text-xs bg-blue-700 hover:bg-blue-600 text-white px-2 py-1 rounded min-h-[36px]">
                 Exit Replay
               </button>
             </div>
@@ -155,36 +132,28 @@ export default function Header() {
             <button
               onClick={() => replayTo(Math.max(-1, game.actionLog.length - 2))}
               disabled={game.actionLog.length <= 0}
-              className="text-xs px-2 py-1 rounded bg-blue-800 hover:bg-blue-700 disabled:opacity-30 text-white"
-            >
+              className="text-xs px-2 py-1 rounded bg-blue-800 hover:bg-blue-700 disabled:opacity-30 text-white min-h-[36px]">
               Prev
             </button>
-            <input
-              type="range"
-              min={-1}
-              max={fullLog.length - 1}
+            <input type="range" min={-1} max={fullLog.length - 1}
               value={game.actionLog.length - 1}
               onChange={(e) => replayTo(parseInt(e.target.value, 10))}
-              className="flex-1 accent-blue-400"
-            />
+              className="flex-1 accent-blue-400" />
             <button
               onClick={() => replayTo(Math.min(fullLog.length - 1, game.actionLog.length))}
               disabled={game.actionLog.length >= fullLog.length}
-              className="text-xs px-2 py-1 rounded bg-blue-800 hover:bg-blue-700 disabled:opacity-30 text-white"
-            >
+              className="text-xs px-2 py-1 rounded bg-blue-800 hover:bg-blue-700 disabled:opacity-30 text-white min-h-[36px]">
               Next
             </button>
           </div>
         </div>
       )}
 
-      {/* Enter replay button (when not in replay and game has actions) */}
+      {/* Enter replay button */}
       {!inReplay && game.actionLog.length > 0 && (
         <div className="bg-broker-surface border-b border-broker-border px-3 py-1 flex justify-end">
-          <button
-            onClick={enterReplay}
-            className="text-xs bg-blue-900/60 hover:bg-blue-800 text-blue-200 px-2 py-1 rounded"
-          >
+          <button onClick={enterReplay}
+            className="text-xs bg-blue-900/60 hover:bg-blue-800 text-blue-200 px-2 py-1 rounded min-h-[36px]">
             Replay
           </button>
         </div>
@@ -194,7 +163,6 @@ export default function Header() {
       {game.pendingEvents?.length > 0 && (
         <EventBanner events={game.pendingEvents} dispatch={dispatch} />
       )}
-
     </>
   )
 }
@@ -210,10 +178,8 @@ function EventBanner({ events, dispatch }) {
               <div className="text-sm font-medium text-red-200">{info.label}</div>
               <div className="text-xs text-red-300/70 mt-0.5">{info.desc}</div>
             </div>
-            <button
-              onClick={() => dispatch({ type: 'DISMISS_EVENT', event: eventName })}
-              className="flex-shrink-0 text-xs bg-red-800 hover:bg-red-700 text-white px-2 py-1 rounded"
-            >
+            <button onClick={() => dispatch({ type: 'DISMISS_EVENT', event: eventName })}
+              className="flex-shrink-0 text-xs bg-red-800 hover:bg-red-700 text-white px-2 py-1 rounded min-h-[36px]">
               OK
             </button>
           </div>
@@ -222,4 +188,3 @@ function EventBanner({ events, dispatch }) {
     </div>
   )
 }
-

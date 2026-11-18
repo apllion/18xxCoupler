@@ -1095,7 +1095,7 @@ function SettingsPanel({ game, doAction: _doAction }) {
     { key: 'presidentSwap', label: 'Auto-swap presidency on share majority' },
     { key: 'superUmpire', label: 'Edit mode: show all actions + click values to edit' },
   ]
-  const onColor = 'bg-green-700/30 text-green-300'
+  const onColor = 'bg-broker-green/30 text-broker-accent'
   const offColor = 'bg-broker-surface-hover/50 text-broker-text-muted'
   const labelColor = 'text-broker-text-muted text-xs mb-1'
 
@@ -1204,8 +1204,8 @@ function SettingsPanel({ game, doAction: _doAction }) {
 }
 
 function Btn({ v, o, children }) {
-  const styles = { green: 'bg-green-700 text-white hover:bg-green-600', red: 'bg-red-700 text-white hover:bg-red-600', blue: 'bg-blue-700 text-white hover:bg-blue-600', yellow: 'bg-amber-700 text-white hover:bg-amber-600', disabled: 'bg-broker-surface-hover text-broker-text-muted cursor-not-allowed' }
-  return <button onClick={o} className={`px-2 py-1 rounded text-xs font-medium ${styles[v] || styles.green}`}>{children}</button>
+  const styles = { green: 'bg-broker-green text-white hover:bg-broker-green-light', red: 'bg-red-800 text-red-200 hover:bg-red-700', blue: 'bg-broker-surface-hover text-broker-accent hover:bg-broker-border', yellow: 'bg-amber-800 text-amber-200 hover:bg-amber-700', disabled: 'bg-broker-surface-hover text-broker-text-muted cursor-not-allowed' }
+  return <button onClick={o} className={`px-2 py-1.5 min-h-[36px] rounded text-xs font-medium transition-colors ${styles[v] || styles.green}`}>{children}</button>
 }
 
 function CB({ c }) {

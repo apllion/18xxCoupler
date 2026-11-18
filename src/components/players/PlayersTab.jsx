@@ -157,7 +157,7 @@ export default function PlayersTab() {
       <div className="bg-broker-surface rounded-lg p-3">
         <div className="flex justify-between items-center mb-1">
           <span className="text-xs text-broker-text-muted font-medium uppercase">Cash</span>
-          <span className="text-xl font-bold">{fmt(selected.cash)}</span>
+          <span className="text-xl font-bold text-broker-cash">{fmt(selected.cash)}</span>
         </div>
         <div className="flex justify-between text-sm text-broker-text-muted">
           <span>Shares: {fmt(totalShareValue)}</span>

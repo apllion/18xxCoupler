@@ -73,19 +73,19 @@ export default function BrokerOverview() {
               return (
                 <button key={rType}
                   onClick={() => handleRoundChange(rType)}
-                  className={`text-xs font-medium px-1.5 py-0.5 first:rounded-l last:rounded-r border-r border-broker-border last:border-r-0 transition-colors ${colors}`}
-                >{rType}{count > 0 && <span className="text-[8px] opacity-60 ml-0.5">{count}</span>}</button>
+                  className={`text-sm font-medium px-2 py-1 min-h-[32px] first:rounded-l last:rounded-r border-r border-broker-border last:border-r-0 transition-colors ${colors}`}
+                >{rType}{count > 0 && <span className="text-[9px] opacity-60 ml-0.5">{count}</span>}</button>
               )
             })}
           </div>
           )})()}
-        <span className="text-[10px] text-broker-text-muted whitespace-nowrap">Ph{phase.name} L{limit}</span>
+        <span className="text-xs text-broker-text-muted whitespace-nowrap">Ph{phase.name} L{limit}</span>
         <span className={`text-xs font-medium whitespace-nowrap ${game.bank.cash <= 0 ? 'text-red-400' : 'text-broker-text'}`}>Bank <InlineEdit value={game.bank.cash} enabled={su} onSave={v => doAction({ type: 'SET_CASH', entityId: 'bank', entityType: 'bank', value: v })}>{fmt(game.bank.cash)}</InlineEdit></span>
         {inReplay && <span className="text-[10px] font-medium text-amber-300 bg-amber-900/40 px-1.5 py-0.5 rounded whitespace-nowrap">{curIdx + 1}/{fullLog.length}</span>}
         <div className="flex items-center gap-1 ml-auto">
           <button onClick={() => canUndo() && undo()} className="text-broker-text-muted hover:text-white p-1.5 min-h-[36px] min-w-[36px] flex items-center justify-center" title="Undo"><IconUndo className="w-4 h-4" /></button>
           <button onClick={() => canRedo() && redo()} className="text-broker-text-muted hover:text-white p-1.5 min-h-[36px] min-w-[36px] flex items-center justify-center" title="Redo"><IconRedo className="w-4 h-4" /></button>
-          <button onClick={() => setPanel(panel === 'settings' ? null : 'settings')} className="text-[10px] text-broker-text-muted hover:text-white bg-broker-surface-hover px-2 py-1 rounded min-h-[36px] flex items-center">Settings</button>
+          <button onClick={() => setPanel(panel === 'settings' ? null : 'settings')} className="text-xs text-broker-text-muted hover:text-white bg-broker-surface-hover px-2 py-1 rounded min-h-[36px] flex items-center">Settings</button>
         </div>
       </div>
 

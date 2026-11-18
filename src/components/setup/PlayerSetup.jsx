@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { getTitle } from '../../titles/index.js'
 import { useGameStore } from '../../store/gameStore.js'
 import { useRoleStore } from '../../store/roleStore.js'
@@ -23,6 +23,7 @@ function pickRandomNames(count) {
 export default function PlayerSetup() {
   const { titleId } = useParams()
   const navigate = useNavigate()
+  const location = useLocation()
   const startGame = useGameStore((s) => s.startGame)
 
   const title = getTitle(titleId)
@@ -78,7 +79,7 @@ export default function PlayerSetup() {
   return (
     <div className="min-h-screen flex flex-col items-center p-6">
       <button
-        onClick={() => navigate(-1)}
+        onClick={() => navigate('/', { state: { view: location.state?.fromView || 'titles' } })}
         className="self-start text-broker-text-muted hover:text-broker-gold mb-4"
       >
         <IconBack className="w-3 h-3 inline" /> Back

@@ -75,9 +75,12 @@ function PlayerShellInner() {
   const twoPanel = isLandscape && hasPhysicalKeyboard
 
   // Active view based on round type
+  const isPre = rt?.roundType === 'Pregame'
   const activeView = isSR
     ? <SRView {...data} />
-    : <ORView {...data} />
+    : isPre
+      ? <PregameView game={game} me={me} fmt={fmt} />
+      : <ORView {...data} />
 
   const modeColor = isSR ? 'green' : isOR ? 'amber' : 'teal'
 
@@ -128,7 +131,7 @@ function TopBar({ game, fmt, rt, isSR, isOR, me, onChangePlayer }) {
           <IconBack />
         </button>
         <span className="text-sm font-bold">{game.title.title}</span>
-        <span className="text-[10px] text-broker-text-muted">Ph {game.phaseManager?.currentPhaseIndex != null ? game.phaseManager.currentPhaseIndex + 1 : '?'}</span>
+        <span className="text-xs text-broker-text-muted">Ph{game.phaseManager?.currentPhase?.name || '1'}</span>
       </div>
       <div className="flex items-center gap-2">
         {rt && (
@@ -144,7 +147,7 @@ function TopBar({ game, fmt, rt, isSR, isOR, me, onChangePlayer }) {
         </button>
         {me && onChangePlayer && (
           <button onClick={onChangePlayer}
-            className="text-[10px] text-broker-text-muted hover:text-white px-1">Switch</button>
+            className="text-xs text-broker-text-muted hover:text-white px-2 py-1 min-h-[36px]">Switch</button>
         )}
       </div>
     </div>
@@ -222,6 +225,50 @@ function PlayerHoldings({ me, fmt, holdings, corps, shareSize, certLimit, player
       )}
       {(me.debt || 0) > 0 && (
         <div className="text-sm text-red-300">Debt: {fmt(me.debt)}</div>
+      )}
+    </div>
+  )
+}
+
+function PregameView({ game, me, fmt }) {
+  const companies = (game.companies || []).filter(c => !c.closed)
+  const myPrivates = companies.filter(c => c.ownerId === me?.id)
+  const available = companies.filter(c => !c.ownerId)
+
+  return (
+    <div className="space-y-4">
+      <div className="text-sm text-broker-text-muted">
+        {game.title.pregame?.[0]?.label || 'Private Auction'} in progress
+      </div>
+
+      {myPrivates.length > 0 && (
+        <div>
+          <div className="text-xs text-broker-text-muted uppercase tracking-wider mb-1">Your Privates</div>
+          <div className="space-y-1">
+            {myPrivates.map(c => (
+              <div key={c.sym} className="bg-broker-gold/10 border border-broker-gold/30 rounded-lg px-3 py-2 text-sm">
+                <span className="font-bold text-broker-gold">{c.sym}</span>
+                <span className="text-broker-text-muted ml-2">{fmt(c.value)}</span>
+                {c.revenue > 0 && <span className="text-broker-accent ml-2">+{fmt(c.revenue)}/OR</span>}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {available.length > 0 && (
+        <div>
+          <div className="text-xs text-broker-text-muted uppercase tracking-wider mb-1">Available</div>
+          <div className="space-y-1">
+            {available.map(c => (
+              <div key={c.sym} className="bg-broker-surface border border-broker-border rounded-lg px-3 py-2 text-sm">
+                <span className="font-bold text-white">{c.sym}</span>
+                <span className="text-broker-text-muted ml-2">{fmt(c.value)}</span>
+                {c.revenue > 0 && <span className="text-broker-accent ml-2">+{fmt(c.revenue)}/OR</span>}
+              </div>
+            ))}
+          </div>
+        </div>
       )}
     </div>
   )

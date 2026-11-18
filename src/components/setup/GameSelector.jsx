@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { allTitles } from '../../titles/index.js'
 import { useGameStore } from '../../store/gameStore.js'
 import { useRoleStore } from '../../store/roleStore.js'
@@ -10,14 +10,15 @@ import { IconBack, IconClose } from '../shared/Icons.jsx'
 
 export default function GameSelector() {
   const navigate = useNavigate()
+  const location = useLocation()
   const loadGame = useGameStore((s) => s.loadGame)
   const importFrom18xxGames = useGameStore((s) => s.importFrom18xxGames)
   const sync = useSyncContext()
   const titles = allTitles()
   const [savedGames, setSavedGames] = useState(() => loadAllGames())
   const game = useGameStore((s) => s.game)
-  const [view, setView] = useState('hub')
-  const [soloMode, setSoloMode] = useState(false)
+  const [view, setView] = useState(() => location.state?.view || 'hub')
+  const [soloMode, setSoloMode] = useState(() => !!location.state?.view || false)
   const [showLegend, setShowLegend] = useState(null)
   const [showInfo, setShowInfo] = useState(null)
 
@@ -75,10 +76,10 @@ export default function GameSelector() {
                 <span className="text-xs text-broker-text-muted">{sync.peerCount > 0 ? `${sync.peerCount + 1} devices` : 'waiting'}</span>
                 <button onClick={() => { sync.leaveRoom(); setSoloMode(false) }} className="text-xs text-red-400 hover:text-red-300 ml-auto">Leave</button>
               </div>
-            ) : soloMode ? (
+            ) : soloMode || step2Done ? (
               <div className="flex items-center justify-between">
                 <span className="text-sm text-broker-accent font-medium">Solo mode</span>
-                <button onClick={() => setSoloMode(false)} className="text-xs text-broker-text-muted hover:text-white">Change</button>
+                {!step2Done && <button onClick={() => setSoloMode(false)} className="text-xs text-broker-text-muted hover:text-white">Change</button>}
               </div>
             ) : (
               <div className="grid grid-cols-3 gap-2">
@@ -332,7 +333,7 @@ function TitlesGrid({ titles, navigate, showLegend, setShowLegend, showInfo, set
       </div>
       <div className="grid grid-cols-2 gap-3 w-full max-w-md">
         {sorted.map((t) => (
-          <TitleButton key={t.titleId} t={t} onClick={() => navigate(`/setup/${t.titleId}`)}
+          <TitleButton key={t.titleId} t={t} onClick={() => navigate(`/setup/${t.titleId}`, { state: { fromView: 'titles' } })}
             onShowLegend={setShowLegend} onShowInfo={setShowInfo} />
         ))}
       </div>
