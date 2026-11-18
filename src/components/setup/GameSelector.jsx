@@ -17,7 +17,7 @@ export default function GameSelector() {
   const [savedGames, setSavedGames] = useState(() => loadAllGames())
   const game = useGameStore((s) => s.game)
   const [view, setView] = useState('hub')
-  const [soloMode, setSoloMode] = useState(false) // skipped room step
+  const [soloMode, setSoloMode] = useState(false)
   const [showLegend, setShowLegend] = useState(null)
   const [showInfo, setShowInfo] = useState(null)
 
@@ -37,14 +37,18 @@ export default function GameSelector() {
 
   // ===== HUB VIEW — 3-step wizard =====
   if (view === 'hub') {
-    const step1Done = !!sync?.roomId || soloMode  // in a room or chose solo
-    const step2Done = !!game                      // game loaded
+    const step2Done = !!game
+    const step1Done = !!sync?.roomId || soloMode || step2Done
 
     return (
-      <div className="min-h-screen flex flex-col items-center p-6">
-        <h1 className="text-3xl font-bold text-white mt-2 tracking-wide">Laytrack</h1>
-        <p className="text-sm text-broker-text-muted italic mb-0.5">Lay track. I do the numbers.</p>
-        <p className="text-[10px] text-broker-text-muted mb-4">
+      <div className="min-h-screen flex flex-col items-center p-6 bg-broker-bg">
+        {/* Brand header */}
+        <div className="flex items-center gap-3 mt-2 mb-1">
+          <img src={import.meta.env.BASE_URL + 'logo.png'} alt="" className="w-10 h-10 rounded-lg" />
+          <h1 className="text-2xl font-bold text-white tracking-wide">Laytrack</h1>
+        </div>
+        <p className="text-sm text-broker-accent italic mb-1">Lay track. I do the numbers.</p>
+        <p className="text-[10px] text-broker-text-muted/50 mb-5">
           v{typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '?'} · {typeof __BUILD_ID__ !== 'undefined' ? __BUILD_ID__ : '?'}
         </p>
 
@@ -52,83 +56,53 @@ export default function GameSelector() {
         {savedList.length > 0 && !game && (
           <div className="w-full max-w-md mb-4">
             <button onClick={() => handleLoad(savedList[0].key, savedList[0].game)}
-              className="w-full bg-broker-gold/10 hover:bg-broker-gold/20 border border-broker-gold/30 rounded-xl p-3 text-left transition-colors">
-              <div className="text-[10px] text-broker-gold uppercase tracking-wider mb-0.5">Continue last game</div>
+              className="w-full bg-broker-surface hover:bg-broker-surface-hover border border-broker-gold/40 rounded-xl p-3 text-left transition-colors group">
+              <div className="text-[10px] text-broker-gold uppercase tracking-wider mb-0.5 group-hover:text-broker-gold">Continue last game</div>
               <div className="font-medium text-white">{savedList[0].game.title?.title || savedList[0].key}</div>
               <div className="text-xs text-broker-text-muted">{savedList[0].game.players?.map(p => p.name).join(', ')}</div>
             </button>
           </div>
         )}
 
-        <div className="w-full max-w-md space-y-4">
+        <div className="w-full max-w-md space-y-3">
 
           {/* ===== STEP 1: Connection ===== */}
-          <div className={`rounded-xl border p-4 transition-all ${!step1Done ? 'border-broker-gold bg-broker-surface' : 'border-broker-border bg-broker-surface/50'}`}>
-            <div className="flex items-center gap-2 mb-3">
-              <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${step1Done ? 'bg-green-700 text-white' : 'bg-broker-gold text-broker-bg'}`}>1</span>
-              <span className="text-sm font-bold text-white">How are you playing?</span>
-            </div>
+          <StepCard active={!step1Done} done={step1Done} num={1} label="How are you playing?">
             {sync?.roomId ? (
               <div className="flex items-center gap-3">
-                <span className={`w-2.5 h-2.5 rounded-full ${sync.status === 'connected' ? 'bg-green-400' : 'bg-amber-400 animate-pulse'}`} />
+                <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${sync.status === 'connected' ? 'bg-broker-accent' : 'bg-broker-gold animate-pulse'}`} />
                 <span className="font-mono font-bold text-white tracking-wider">{sync.roomId}</span>
                 <span className="text-xs text-broker-text-muted">{sync.peerCount > 0 ? `${sync.peerCount + 1} devices` : 'waiting'}</span>
                 <button onClick={() => { sync.leaveRoom(); setSoloMode(false) }} className="text-xs text-red-400 hover:text-red-300 ml-auto">Leave</button>
               </div>
             ) : soloMode ? (
               <div className="flex items-center justify-between">
-                <span className="text-sm text-green-400">Solo ✓</span>
+                <span className="text-sm text-broker-accent font-medium">Solo mode</span>
                 <button onClick={() => setSoloMode(false)} className="text-xs text-broker-text-muted hover:text-white">Change</button>
               </div>
             ) : (
               <div className="grid grid-cols-3 gap-2">
-                <button onClick={() => setSoloMode(true)}
-                  className="bg-broker-surface-hover hover:bg-broker-gold/20 rounded-lg p-3 text-center transition-colors">
-                  <img src={import.meta.env.BASE_URL + 'scene-man-at-window.png'} alt="" className="w-full rounded-lg mb-1" />
-                  <div className="text-xs font-bold text-white">Solo</div>
-                </button>
-                <button onClick={() => sync?.createRoom()}
-                  className="bg-broker-surface-hover hover:bg-broker-gold/20 rounded-lg p-3 text-center transition-colors">
-                  <img src={import.meta.env.BASE_URL + 'scene-compartment-empty.png'} alt="" className="w-full rounded-lg mb-1" />
-                  <div className="text-xs font-bold text-white">Create Room</div>
-                </button>
-                <button onClick={() => setView('join')}
-                  className="bg-broker-surface-hover hover:bg-broker-gold/20 rounded-lg p-3 text-center transition-colors">
-                  <img src={import.meta.env.BASE_URL + 'scene-compartment-passengers.png'} alt="" className="w-full rounded-lg mb-1" />
-                  <div className="text-xs font-bold text-white">Join Room</div>
-                </button>
+                <HubButton onClick={() => setSoloMode(true)} icon={<SoloIcon />} label="Solo" />
+                <HubButton onClick={() => sync?.createRoom()} icon={<CreateIcon />} label="Create Room" />
+                <HubButton onClick={() => setView('join')} icon={<JoinIcon />} label="Join Room" />
               </div>
             )}
-          </div>
+          </StepCard>
 
           {/* ===== STEP 2: Game ===== */}
-          <div className={`rounded-xl border p-4 transition-all ${step1Done && !step2Done ? 'border-broker-gold bg-broker-surface' : !step1Done ? 'border-broker-border bg-broker-surface/30 opacity-50' : 'border-broker-border bg-broker-surface/50'}`}>
-            <div className="flex items-center gap-2 mb-3">
-              <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${step2Done ? 'bg-green-700 text-white' : step1Done ? 'bg-broker-gold text-broker-bg' : 'bg-broker-surface-hover text-broker-text-muted'}`}>2</span>
-              <span className="text-sm font-bold text-white">Which game?</span>
-              {step2Done && <span className="text-xs text-green-400 ml-auto">{game.title.title}</span>}
-            </div>
+          <StepCard active={step1Done && !step2Done} done={step2Done} disabled={!step1Done} num={2} label="Which game?"
+            detail={step2Done && <span className="text-xs text-broker-accent ml-auto">{game.title.title}</span>}>
             {step2Done ? (
               <div className="text-xs text-broker-text-muted">
                 {game.players.map(p => p.name).join(', ')} · {game.actionLog?.length || 0} actions
               </div>
             ) : (
               <div className="grid grid-cols-2 gap-2">
-                <button onClick={() => setView('titles')}
-                  className="bg-broker-surface-hover hover:bg-broker-gold/20 rounded-lg p-3 text-center transition-colors">
-                  <img src={import.meta.env.BASE_URL + 'scene-track-builders.png'} alt="" className="w-full rounded-lg mb-1" />
-                  <div className="text-xs font-bold text-white">New Game</div>
-                  <div className="text-[10px] text-broker-text-muted">Pick a title</div>
-                </button>
-                <button onClick={() => setView('depot')}
-                  className="bg-broker-surface-hover hover:bg-broker-gold/20 rounded-lg p-3 text-center transition-colors">
-                  <img src={import.meta.env.BASE_URL + 'scene-water-tower.png'} alt="" className="w-full rounded-lg mb-1" />
-                  <div className="text-xs font-bold text-white">Load Game</div>
-                  <div className="text-[10px] text-broker-text-muted">Depot & import</div>
-                </button>
+                <HubButton onClick={() => setView('titles')} icon={<NewGameIcon />} label="New Game" sub="Pick a title" />
+                <HubButton onClick={() => setView('depot')} icon={<DepotIcon />} label="Load Game" sub="Depot & import" />
               </div>
             )}
-          </div>
+          </StepCard>
 
           {/* ===== STEP 3: Role ===== */}
           <RolePicker step2Done={step2Done} game={game} />
@@ -137,8 +111,8 @@ export default function GameSelector() {
 
         {/* Footer */}
         <div className="flex gap-4 mt-6">
-          <button onClick={() => setView('settings')} className="text-xs text-broker-text-muted hover:text-broker-gold">Settings</button>
-          <button onClick={() => navigate('/about')} className="text-xs text-broker-text-muted hover:text-broker-gold">About / Legal</button>
+          <button onClick={() => setView('settings')} className="text-xs text-broker-text-muted hover:text-broker-gold transition-colors">Settings</button>
+          <button onClick={() => navigate('/about')} className="text-xs text-broker-text-muted hover:text-broker-gold transition-colors">About / Legal</button>
         </div>
       </div>
     )
@@ -178,23 +152,119 @@ export default function GameSelector() {
   return null
 }
 
+// ===== STEP CARD WRAPPER =====
+function StepCard({ active, done, disabled, num, label, detail, children }) {
+  return (
+    <div className={`rounded-xl border p-4 transition-all ${
+      active ? 'border-broker-gold bg-broker-surface' :
+      disabled ? 'border-broker-border/50 bg-broker-surface/30 opacity-50' :
+      done ? 'border-broker-accent/30 bg-broker-surface/70' :
+      'border-broker-border bg-broker-surface/50'
+    }`}>
+      <div className="flex items-center gap-2 mb-3">
+        <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+          done ? 'bg-broker-accent text-broker-bg' :
+          active ? 'bg-broker-gold text-broker-bg' :
+          'bg-broker-surface-hover text-broker-text-muted'
+        }`}>{done ? '✓' : num}</span>
+        <span className="text-sm font-bold text-white">{label}</span>
+        {detail}
+      </div>
+      {children}
+    </div>
+  )
+}
+
+// ===== HUB BUTTON (icon + label, replaces scene images) =====
+function HubButton({ onClick, icon, label, sub }) {
+  return (
+    <button onClick={onClick}
+      className="bg-broker-surface-hover hover:bg-broker-gold/15 border border-broker-border hover:border-broker-gold/40 rounded-lg p-3 text-center transition-all group">
+      <div className="w-10 h-10 mx-auto mb-1.5 flex items-center justify-center text-broker-text-muted group-hover:text-broker-gold transition-colors">
+        {icon}
+      </div>
+      <div className="text-xs font-bold text-white">{label}</div>
+      {sub && <div className="text-[10px] text-broker-text-muted">{sub}</div>}
+    </button>
+  )
+}
+
+// ===== INLINE SVG ICONS =====
+function SoloIcon() {
+  return (
+    <svg className="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="8" r="4" />
+      <path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2" />
+    </svg>
+  )
+}
+
+function CreateIcon() {
+  return (
+    <svg className="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="3" width="18" height="18" rx="3" />
+      <line x1="12" y1="8" x2="12" y2="16" />
+      <line x1="8" y1="12" x2="16" y2="12" />
+    </svg>
+  )
+}
+
+function JoinIcon() {
+  return (
+    <svg className="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4" />
+      <polyline points="10 17 15 12 10 7" />
+      <line x1="15" y1="12" x2="3" y2="12" />
+    </svg>
+  )
+}
+
+function NewGameIcon() {
+  return (
+    <svg className="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 2L2 7l10 5 10-5-10-5z" />
+      <path d="M2 17l10 5 10-5" />
+      <path d="M2 12l10 5 10-5" />
+    </svg>
+  )
+}
+
+function DepotIcon() {
+  return (
+    <svg className="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z" />
+    </svg>
+  )
+}
+
+function SettingsIcon() {
+  return (
+    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="3" />
+      <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" />
+    </svg>
+  )
+}
+
 // ===== JOIN VIEW =====
 function JoinView({ sync, onBack }) {
   const [code, setCode] = useState('')
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-6">
-      <img src={import.meta.env.BASE_URL + 'scene-compartment-passengers.png'} alt="Join" className="w-32 rounded-xl mb-4" />
-      <h2 className="text-xl font-bold text-white mb-1">Join Compartment</h2>
+    <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-broker-bg">
+      <div className="w-12 h-12 mb-4 flex items-center justify-center text-broker-gold">
+        <JoinIcon />
+      </div>
+      <h2 className="text-xl font-bold text-white mb-1">Join Room</h2>
       <p className="text-xs text-broker-text-muted mb-4">Enter the room code from your host</p>
       <div className="flex gap-2 items-center">
         <input type="text" value={code} onChange={(e) => setCode(e.target.value.toUpperCase())}
           placeholder="CODE" maxLength={6} autoFocus
           onKeyDown={e => e.key === 'Enter' && code.trim().length >= 4 && sync?.joinRoom(code)}
-          className="w-32 bg-broker-surface border border-broker-border rounded-lg px-3 py-3 text-white font-mono text-xl tracking-widest placeholder-broker-text-muted text-center" />
+          className="w-32 bg-broker-surface border border-broker-border rounded-lg px-3 py-3 text-white font-mono text-xl tracking-widest placeholder-broker-text-muted text-center focus:outline-none focus:border-broker-gold transition-colors" />
         <button onClick={() => { if (code.trim().length >= 4) sync?.joinRoom(code) }}
           disabled={code.trim().length < 4}
-          className="bg-blue-700 hover:bg-blue-600 text-white px-5 py-3 rounded-lg font-bold disabled:opacity-40">
+          className="bg-broker-gold hover:bg-broker-gold-dim text-broker-bg px-5 py-3 rounded-lg font-bold disabled:opacity-40 transition-colors">
           Board
         </button>
       </div>
@@ -206,12 +276,14 @@ function JoinView({ sync, onBack }) {
 // ===== CREATE VIEW =====
 function CreateView({ sync, titles, navigate, onBack, showLegend, setShowLegend, showInfo, setShowInfo }) {
   return (
-    <div className="min-h-screen flex flex-col items-center p-6">
-      <img src={import.meta.env.BASE_URL + 'scene-compartment-empty.png'} alt="Create" className="w-24 rounded-xl mb-3" />
-      <h2 className="text-xl font-bold text-white mb-1">Create Compartment</h2>
+    <div className="min-h-screen flex flex-col items-center p-6 bg-broker-bg">
+      <div className="w-12 h-12 mb-3 flex items-center justify-center text-broker-gold">
+        <CreateIcon />
+      </div>
+      <h2 className="text-xl font-bold text-white mb-1">Create Room</h2>
       {sync?.roomId ? (
         <div className="flex items-center gap-3 mb-4">
-          <span className={`w-3 h-3 rounded-full ${sync.status === 'connected' ? 'bg-green-400' : 'bg-amber-400 animate-pulse'}`} />
+          <span className={`w-3 h-3 rounded-full ${sync.status === 'connected' ? 'bg-broker-accent' : 'bg-broker-gold animate-pulse'}`} />
           <span className="font-mono font-bold text-white text-2xl tracking-wider">{sync.roomId}</span>
           <span className="text-sm text-broker-text-muted">
             {sync.peerCount > 0 ? `${sync.peerCount + 1} devices` : 'waiting...'}
@@ -243,7 +315,7 @@ function TitlesGrid({ titles, navigate, showLegend, setShowLegend, showInfo, set
         <div className="flex gap-1 items-center">
           {[['rating', 'Rating'], ['name', 'A-Z']].map(([id, label]) => (
             <button key={id} onClick={() => setSortBy(id)}
-              className={`text-xs px-2 py-1 rounded ${sortBy === id
+              className={`text-xs px-2 py-1 rounded transition-colors ${sortBy === id
                 ? 'bg-broker-gold text-broker-bg font-medium'
                 : 'text-broker-text-muted hover:text-white'
               }`}>{label}</button>
@@ -251,7 +323,7 @@ function TitlesGrid({ titles, navigate, showLegend, setShowLegend, showInfo, set
           <span className="text-broker-text-muted/30 mx-0.5">|</span>
           {[0, 1, 2, 3, 4].map(r => (
             <button key={r} onClick={() => setMinRating(minRating === r ? 0 : r)}
-              className={`text-xs px-2 py-1 rounded ${minRating === r
+              className={`text-xs px-2 py-1 rounded transition-colors ${minRating === r
                 ? 'bg-broker-gold text-broker-bg font-medium'
                 : 'text-broker-text-muted hover:text-white'
               }`}>{r}+</button>
@@ -278,11 +350,13 @@ function TitlesGrid({ titles, navigate, showLegend, setShowLegend, showInfo, set
 // ===== TITLES VIEW =====
 function TitlesView({ titles, navigate, onBack, showLegend, setShowLegend, showInfo, setShowInfo }) {
   return (
-    <div className="min-h-screen flex flex-col items-center p-6">
-      <div className="w-full max-w-md mb-2 flex items-center gap-2">
-        <button onClick={onBack} className="text-broker-text-muted hover:text-white text-sm"><IconBack className="w-4 h-4" /></button>
-        <img src={import.meta.env.BASE_URL + 'scene-track-builders.png'} alt="" className="w-8 rounded" />
-        <h2 className="text-lg font-bold text-white">Build Track</h2>
+    <div className="min-h-screen flex flex-col items-center p-6 bg-broker-bg">
+      <div className="w-full max-w-md mb-3 flex items-center gap-3">
+        <button onClick={onBack} className="text-broker-text-muted hover:text-white"><IconBack className="w-4 h-4" /></button>
+        <div className="w-8 h-8 flex items-center justify-center text-broker-gold">
+          <NewGameIcon />
+        </div>
+        <h2 className="text-lg font-bold text-white">New Game</h2>
       </div>
       <TitlesGrid titles={titles} navigate={navigate} showLegend={showLegend} setShowLegend={setShowLegend} showInfo={showInfo} setShowInfo={setShowInfo} />
       <button onClick={onBack} className="mt-6 text-xs text-broker-text-muted hover:text-white"><IconBack className="w-3 h-3 inline" /> Back</button>
@@ -316,11 +390,13 @@ function DepotView({ navigate, onBack, loadGame, importFrom18xxGames, savedGames
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center p-6">
+    <div className="min-h-screen flex flex-col items-center p-6 bg-broker-bg">
       <div className="w-full max-w-md">
-        <div className="flex items-center gap-2 mb-4">
-          <button onClick={onBack} className="text-broker-text-muted hover:text-white text-sm"><IconBack className="w-4 h-4" /></button>
-          <img src={import.meta.env.BASE_URL + 'scene-water-tower.png'} alt="" className="w-8 rounded" />
+        <div className="flex items-center gap-3 mb-4">
+          <button onClick={onBack} className="text-broker-text-muted hover:text-white"><IconBack className="w-4 h-4" /></button>
+          <div className="w-8 h-8 flex items-center justify-center text-broker-gold">
+            <DepotIcon />
+          </div>
           <h2 className="text-lg font-bold text-white">Depot</h2>
         </div>
 
@@ -374,7 +450,7 @@ function DepotView({ navigate, onBack, loadGame, importFrom18xxGames, savedGames
             <input type="text" value={importId}
               onChange={(e) => { setImportId(e.target.value.replace(/\D/g, '')); setImportError(null) }}
               placeholder="Game ID"
-              className="flex-1 bg-broker-bg border border-broker-border rounded px-3 py-2 text-sm text-white placeholder-broker-text-muted font-mono" />
+              className="flex-1 bg-broker-bg border border-broker-border rounded px-3 py-2 text-sm text-white placeholder-broker-text-muted font-mono focus:outline-none focus:border-broker-gold transition-colors" />
             <button
               onClick={async () => {
                 if (!importId || importing) return
@@ -384,7 +460,7 @@ function DepotView({ navigate, onBack, loadGame, importFrom18xxGames, savedGames
                 finally { setImporting(false) }
               }}
               disabled={!importId || importing}
-              className="bg-purple-800 hover:bg-purple-700 text-white px-4 py-2 rounded text-sm disabled:opacity-40">
+              className="bg-broker-green hover:bg-broker-green-light text-white px-4 py-2 rounded text-sm disabled:opacity-40 transition-colors">
               {importing ? '...' : 'Import'}
             </button>
           </div>
@@ -409,11 +485,13 @@ function SettingsView({ navigate, onBack }) {
   const setTheme = useThemeStore((s) => s.setTheme)
 
   return (
-    <div className="min-h-screen flex flex-col items-center p-6">
+    <div className="min-h-screen flex flex-col items-center p-6 bg-broker-bg">
       <div className="w-full max-w-md">
-        <div className="flex items-center gap-2 mb-4">
-          <button onClick={onBack} className="text-broker-text-muted hover:text-white text-sm"><IconBack className="w-4 h-4" /></button>
-          <img src={import.meta.env.BASE_URL + 'scene-locomotive-mechanic.png'} alt="" className="w-8 rounded" />
+        <div className="flex items-center gap-3 mb-4">
+          <button onClick={onBack} className="text-broker-text-muted hover:text-white"><IconBack className="w-4 h-4" /></button>
+          <div className="w-8 h-8 flex items-center justify-center text-broker-gold">
+            <SettingsIcon />
+          </div>
           <h2 className="text-lg font-bold text-white">Settings</h2>
         </div>
 
@@ -443,7 +521,7 @@ function SettingsView({ navigate, onBack }) {
 
         <div className="mt-8 text-center">
           <button onClick={() => navigate('/about')}
-            className="text-xs text-broker-text-muted hover:text-broker-gold">
+            className="text-xs text-broker-text-muted hover:text-broker-gold transition-colors">
             About / Legal / Impressum
           </button>
         </div>
@@ -509,7 +587,7 @@ function WrenchLegend({ title, onClose }) {
         <div className="text-xs text-broker-text space-y-0.5">
           {title.implemented.split('•').filter(s => s.trim()).map((line, i) => (
             <div key={i} className="flex gap-1">
-              <span className="text-green-400">✓</span>
+              <span className="text-broker-accent">✓</span>
               <span>{line.trim()}</span>
             </div>
           ))}
@@ -577,7 +655,7 @@ function TitleButton({ t, onClick, onShowLegend, onShowInfo }) {
   const m = t.maturity || 0
   return (
     <button onClick={onClick}
-      className="bg-broker-surface hover:bg-broker-surface-hover border border-broker-border rounded-lg p-4 text-left transition-colors relative overflow-hidden">
+      className="bg-broker-surface hover:bg-broker-surface-hover border border-broker-border hover:border-broker-gold/40 rounded-lg p-4 text-left transition-all relative overflow-hidden">
       <div className="flex items-center gap-2">
         <span className="text-xl font-bold text-broker-text">{t.title}</span>
         {t.gameInfo && (
@@ -617,10 +695,10 @@ const SORTED_TITLES = [...SUPPORTED_TITLES].sort()
 
 // ===== ROLE PICKER =====
 const ROLES = [
-  { id: 'umpire',   label: 'Umpire',   desc: 'Full control. Desktop/laptop.' },
-  { id: 'player',   label: 'Player',   desc: 'Your holdings & actions. Phone.' },
-  { id: 'kibitzer', label: 'Kibitzer', desc: 'Watch the game. Phone.' },
-  { id: 'display',  label: 'Display',  desc: 'Auto-rotating dashboard. TV/monitor.' },
+  { id: 'umpire',   label: 'Umpire',   desc: 'Full control. Desktop/laptop.',    icon: 'U' },
+  { id: 'player',   label: 'Player',   desc: 'Your holdings & actions. Phone.',  icon: 'P' },
+  { id: 'kibitzer', label: 'Kibitzer', desc: 'Watch the game. Phone.',           icon: 'K' },
+  { id: 'display',  label: 'Display',  desc: 'Auto-rotating dashboard. TV.',     icon: 'D' },
 ]
 
 function RolePicker({ step2Done, game }) {
@@ -641,17 +719,13 @@ function RolePicker({ step2Done, game }) {
   }
 
   return (
-    <div className={`rounded-xl border p-4 transition-all ${step2Done ? 'border-broker-gold bg-broker-surface' : 'border-broker-border bg-broker-surface/30 opacity-50'}`}>
-      <div className="flex items-center gap-2 mb-3">
-        <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${step2Done ? 'bg-broker-gold text-broker-bg' : 'bg-broker-surface-hover text-broker-text-muted'}`}>3</span>
-        <span className="text-sm font-bold text-white">Your role</span>
-      </div>
+    <StepCard active={step2Done} disabled={!step2Done} num={3} label="Your role">
       {pendingRole === 'player' && game ? (
         <div className="space-y-2">
           <div className="text-xs text-broker-text-muted mb-1">Which player are you?</div>
           {game.players.map(p => (
             <button key={p.id} onClick={() => confirmPlayer(p.id)}
-              className="w-full bg-broker-surface-hover hover:bg-broker-gold/20 rounded-lg p-3 text-left transition-all duration-200 hover:scale-[1.02]">
+              className="w-full bg-broker-surface-hover hover:bg-broker-gold/15 border border-broker-border hover:border-broker-gold/40 rounded-lg p-3 text-left transition-all">
               <span className="text-sm font-bold text-white">{p.name}</span>
             </button>
           ))}
@@ -663,14 +737,15 @@ function RolePicker({ step2Done, game }) {
           {ROLES.map(r => (
             <button key={r.id} onClick={() => pickRole(r.id)}
               disabled={!step2Done}
-              className="bg-broker-surface-hover hover:bg-broker-gold/20 disabled:opacity-30 disabled:cursor-not-allowed rounded-lg p-3 text-center transition-all duration-200 hover:scale-105">
+              className="bg-broker-surface-hover hover:bg-broker-gold/15 border border-broker-border hover:border-broker-gold/40 disabled:opacity-30 disabled:cursor-not-allowed rounded-lg p-3 text-center transition-all group">
+              <div className="w-8 h-8 mx-auto mb-1 rounded-full bg-broker-border/50 group-hover:bg-broker-gold/20 flex items-center justify-center text-xs font-bold text-broker-text-muted group-hover:text-broker-gold transition-colors">{r.icon}</div>
               <div className="text-xs font-bold text-white">{r.label}</div>
               <div className="text-[10px] text-broker-text-muted">{r.desc}</div>
             </button>
           ))}
         </div>
       )}
-    </div>
+    </StepCard>
   )
 }
 
@@ -706,11 +781,11 @@ function LiveGames({ onImport, importing }) {
           {SORTED_TITLES.map(t => <option key={t} value={t}>{t}</option>)}
         </select>
         <button onClick={() => fetchGames('active', titleFilter)}
-          className={`text-xs px-2 py-0.5 rounded ${tab === 'active' && games ? 'bg-green-800 text-green-200' : 'bg-broker-surface-hover text-broker-text-muted hover:text-white'}`}>
+          className={`text-xs px-2 py-0.5 rounded transition-colors ${tab === 'active' && games ? 'bg-broker-green text-white' : 'bg-broker-surface-hover text-broker-text-muted hover:text-white'}`}>
           Active
         </button>
         <button onClick={() => fetchGames('finished', titleFilter)}
-          className={`text-xs px-2 py-0.5 rounded ${tab === 'finished' && games ? 'bg-blue-800 text-blue-200' : 'bg-broker-surface-hover text-broker-text-muted hover:text-white'}`}>
+          className={`text-xs px-2 py-0.5 rounded transition-colors ${tab === 'finished' && games ? 'bg-broker-green text-white' : 'bg-broker-surface-hover text-broker-text-muted hover:text-white'}`}>
           Finished
         </button>
         {loading && <span className="text-xs text-broker-text-muted animate-pulse">Loading...</span>}
@@ -727,7 +802,7 @@ function LiveGames({ onImport, importing }) {
                 <span className="text-broker-text-muted ml-1 truncate">{g.players.map(p => p.name).join(', ')}</span>
               </div>
               <button onClick={() => onImport(g.id)} disabled={importing}
-                className="text-xs bg-purple-800 hover:bg-purple-700 text-white px-2 py-0.5 rounded ml-2 disabled:opacity-40 flex-shrink-0">
+                className="text-xs bg-broker-green hover:bg-broker-green-light text-white px-2 py-0.5 rounded ml-2 disabled:opacity-40 flex-shrink-0 transition-colors">
                 Load
               </button>
             </div>

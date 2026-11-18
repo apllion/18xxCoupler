@@ -83,8 +83,8 @@ export default function SummaryTab() {
 
       {/* Import source info */}
       {game.importSource && (
-        <div className="bg-purple-900/20 border border-purple-800/50 rounded-lg p-3 text-sm">
-          <div className="text-xs text-purple-300 font-medium uppercase mb-1">Imported from 18xx.games</div>
+        <div className="bg-broker-accent/20 border border-broker-accent/30 rounded-lg p-3 text-sm">
+          <div className="text-xs text-broker-accent font-medium uppercase mb-1">Imported from 18xx.games</div>
           <div className="text-broker-text-muted">
             Game #{game.importSource.gameId} · {game.importSource.status} · {game.importSource.stats.applied} actions replayed
           </div>
@@ -225,7 +225,7 @@ function ActionLog({ game, showLog, toggleLog }) {
             {!whatIfSnapshot && (
               <button
                 onClick={() => { exitReplay(); enterWhatIf() }}
-                className="text-xs bg-purple-800 hover:bg-purple-700 text-purple-200 px-2 py-1 rounded"
+                className="text-xs bg-amber-700 hover:bg-amber-600 text-amber-100 px-2 py-1 rounded"
               >
                 What-if
               </button>

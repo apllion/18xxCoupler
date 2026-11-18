@@ -131,7 +131,7 @@ function CorpCard({ game, fmt, me, myPlayerId, corps, dispatch, corp, isMyPres, 
         <div className="flex items-center gap-2">
           <CorpBadge sym={corp.sym} color={corp.color} textColor={corp.textColor}
             stripeColor={corp.stripeColor} stripeTextColor={corp.stripeTextColor} />
-          <span className="text-sky-300 font-bold">{fmt(corp.cash)}</span>
+          <span className="text-broker-cash font-bold">{fmt(corp.cash)}</span>
           <span className="text-xs text-broker-text-muted">@ {fmt(corp.price)}</span>
           {corp.operated && <span className="text-[10px] text-green-400">done</span>}
         </div>
@@ -329,7 +329,7 @@ function CorpCard({ game, fmt, me, myPlayerId, corps, dispatch, corp, isMyPres, 
               {/* Sell private to corp */}
               {me.privates.length > 0 && (
                 <div>
-                  <div className="text-xs text-broker-text-muted mb-1 border-l-2 border-purple-500 pl-2">Sell Private</div>
+                  <div className="text-xs text-broker-text-muted mb-1 border-l-2 border-broker-accent pl-2">Sell Private</div>
                   <div className="flex gap-2 flex-wrap">
                     {me.privates.map(sym => {
                       const company = (game.companies || []).find(c => c.sym === sym)
@@ -342,7 +342,7 @@ function CorpCard({ game, fmt, me, myPlayerId, corps, dispatch, corp, isMyPres, 
                             openPrivatePriceNumPad(sym, company.value)
                           }
                         }}
-                          className="text-sm bg-purple-800 text-purple-200 px-3 py-2 rounded-lg min-h-[44px]">
+                          className="text-sm bg-broker-green text-white px-3 py-2 rounded-lg min-h-[44px]">
                           {sym} {fmt(company.value)}
                         </button>
                       )
@@ -490,7 +490,7 @@ function CorpCard({ game, fmt, me, myPlayerId, corps, dispatch, corp, isMyPres, 
                       const mergerTypes = Array.isArray(game.title.merger) ? game.title.merger : [game.title.merger]
                       return (
                         <div>
-                          <div className="text-xs text-broker-text-muted mb-1 border-l-2 border-purple-500 pl-2">Merge / Acquire</div>
+                          <div className="text-xs text-broker-text-muted mb-1 border-l-2 border-broker-accent pl-2">Merge / Acquire</div>
                           {mergerStep ? (
                             <div className="bg-broker-bg rounded-lg p-3">
                               <div className="text-xs text-broker-text-muted mb-2">
@@ -503,7 +503,7 @@ function CorpCard({ game, fmt, me, myPlayerId, corps, dispatch, corp, isMyPres, 
                                       dispatch({ type: 'MERGE', acquirerCorpSym: corp.sym, targetCorpSym: target.sym, mergerType: mergerStep.type })
                                       setMergerStep(null)
                                     }}
-                                    className="text-sm bg-purple-800 text-white px-3 py-2 rounded-lg min-h-[44px]">
+                                    className="text-sm bg-broker-green text-white px-3 py-2 rounded-lg min-h-[44px]">
                                     <CorpBadge sym={target.sym} color={target.color} textColor={target.textColor} />
                                   </button>
                                 ))}
@@ -518,7 +518,7 @@ function CorpCard({ game, fmt, me, myPlayerId, corps, dispatch, corp, isMyPres, 
                                 return (
                                   <button key={typeName}
                                     onClick={() => setMergerStep({ type: typeName })}
-                                    className="text-sm bg-purple-800 hover:bg-purple-700 text-white px-3 py-2 rounded-lg min-h-[44px]">
+                                    className="text-sm bg-broker-green hover:bg-broker-green-light text-white px-3 py-2 rounded-lg min-h-[44px]">
                                     {typeName}
                                   </button>
                                 )

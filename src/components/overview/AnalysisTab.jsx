@@ -828,7 +828,7 @@ function CapitalVelocity({ game, fmt }) {
         <div className="flex gap-4">
           <span className="text-green-400">Bank→Players: {fmt(bankToPlayer)}</span>
           <span className="text-blue-400">Players→Corps: {fmt(playerToCorp)}</span>
-          <span className="text-purple-400">Corps→Bank: {fmt(corpToBank)}</span>
+          <span className="text-broker-gold">Corps→Bank: {fmt(corpToBank)}</span>
         </div>
         <div className="text-white">
           Total flow: {fmt(totalFlow)} · Velocity: {velocity}x bank
@@ -1367,7 +1367,7 @@ function Review({ game, fmt, titleData: _titleData }) {
                   <div className="h-3 rounded flex" style={{ width: barPct + '%' }}>
                     <div className="bg-green-700 h-full" style={{ width: w.total > 0 ? Math.round((w.cash / w.total) * 100) + '%' : '0' }} />
                     <div className="bg-blue-700 h-full" style={{ width: w.total > 0 ? Math.round((w.shareValue / w.total) * 100) + '%' : '0' }} />
-                    <div className="bg-purple-700 h-full" style={{ width: w.total > 0 ? Math.round((w.privateValue / w.total) * 100) + '%' : '0' }} />
+                    <div className="bg-broker-gold-dim h-full" style={{ width: w.total > 0 ? Math.round((w.privateValue / w.total) * 100) + '%' : '0' }} />
                   </div>
                 </div>
                 <span className="text-white w-16 text-right font-bold">{fmt(w.total)}</span>
@@ -1379,7 +1379,7 @@ function Review({ game, fmt, titleData: _titleData }) {
         <div className="flex gap-3 mt-1 text-[10px]">
           <span className="text-broker-text-muted"><span className="inline-block w-2 h-2 bg-green-700 rounded-sm mr-0.5" />Cash</span>
           <span className="text-broker-text-muted"><span className="inline-block w-2 h-2 bg-blue-700 rounded-sm mr-0.5" />Shares</span>
-          <span className="text-broker-text-muted"><span className="inline-block w-2 h-2 bg-purple-700 rounded-sm mr-0.5" />Privates</span>
+          <span className="text-broker-text-muted"><span className="inline-block w-2 h-2 bg-broker-gold-dim rounded-sm mr-0.5" />Privates</span>
         </div>
       </Panel>
 

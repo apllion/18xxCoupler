@@ -16,7 +16,7 @@ export default function BrokerOverview() {
   const [activeReminder, setActiveReminder] = useState(null) // { id, message, severity, action?, targetRound }
 
   if (!d.game) return null
-  const { game, fmt, phase, label: _label, limit, corps, unfloated, depotGroups, lastRevenue, corpPrivates, playerPrivates, lastAction, selPlayer, selCorp, curRow, setCurRow, curCol, setCurCol, panel, setPanel, revenueInput, setRevenueInput, revRef, rootRef, cursorRef, onKeyDown, closePanel, doAction, inReplay, fullLog, enterReplay, exitReplay, replayTo, enterWhatIf, isWhatIf, exitWhatIf, canUndo, undo, canRedo, redo, isSR, isOR, isPre: _isPre, superUmpire } = d
+  const { game, fmt, phase, label: _label, limit, corps, unfloated, depotGroups, lastRevenue, corpPrivates, playerPrivates, lastAction, selPlayer, selCorp, curRow, setCurRow, curCol, setCurCol, panel, setPanel, revenueInput, setRevenueInput, revRef, rootRef, cursorRef, onKeyDown, closePanel, doAction, inReplay, fullLog, enterReplay, exitReplay, replayTo, enterWhatIf, isWhatIf, exitWhatIf, canUndo, undo, canRedo, redo, isSR, isOR, isPre, superUmpire } = d
   const su = superUmpire
   const enabledReminders = useUIStore((s) => s.reminders)
 
@@ -47,21 +47,19 @@ export default function BrokerOverview() {
       className={`text-sm select-none h-full flex flex-col bg-broker-bg outline-none ${su ? 'ring-2 ring-orange-500/50' : ''}`}>
 
       {/* Header */}
-      <div className={`px-3 py-2 flex items-center justify-between flex-shrink-0 border-b ${
+      <div className={`px-3 py-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 flex-shrink-0 border-b ${
         isSR ? 'bg-green-900/20 border-green-800/30' : isOR ? 'bg-amber-900/20 border-amber-800/30' : 'bg-broker-surface border-broker-border'
       }`}>
-        <div className="flex items-center gap-3">
-          <span className="font-bold text-lg text-white">{game.title.title}</span>
-          {(() => {
-            // Count rounds per type from action log
-            const counts = {}
-            for (const e of (game.actionLog || [])) {
-              if (e.action.type === 'SET_ROUND') {
-                const rt = e.action.roundType
-                counts[rt] = (counts[rt] || 0) + 1
-              }
+        <span className="font-bold text-base text-white">{game.title.title}</span>
+        {(() => {
+          const counts = {}
+          for (const e of (game.actionLog || [])) {
+            if (e.action.type === 'SET_ROUND') {
+              const rt = e.action.roundType
+              counts[rt] = (counts[rt] || 0) + 1
             }
-            return (
+          }
+          return (
           <div className="flex">
             {(game.roundTracker?.roundTypes || ['SR', 'OR']).map((rType) => {
               const count = counts[rType] || 0
@@ -69,26 +67,25 @@ export default function BrokerOverview() {
               const colors = active
                 ? rType === 'SR' ? 'bg-green-800 text-green-200'
                   : rType === 'OR' ? 'bg-amber-800 text-amber-200'
-                  : rType === 'Pregame' ? 'bg-purple-800 text-purple-200'
+                  : rType === 'Pregame' ? 'bg-broker-green text-white'
                   : 'bg-blue-800 text-blue-200'
                 : 'bg-broker-surface-hover text-broker-text-muted hover:text-white'
               return (
                 <button key={rType}
                   onClick={() => handleRoundChange(rType)}
-                  className={`text-sm font-medium px-2 py-0.5 first:rounded-l last:rounded-r border-r border-broker-border last:border-r-0 transition-colors ${colors}`}
-                >{rType}{count > 0 && <span className="text-[9px] opacity-60 ml-0.5">{count}</span>}</button>
+                  className={`text-xs font-medium px-1.5 py-0.5 first:rounded-l last:rounded-r border-r border-broker-border last:border-r-0 transition-colors ${colors}`}
+                >{rType}{count > 0 && <span className="text-[8px] opacity-60 ml-0.5">{count}</span>}</button>
               )
             })}
           </div>
-            )})()}
-          <span className="text-xs text-broker-text-muted">Phase {phase.name} / Limit {limit}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          {inReplay && <span className="text-xs font-medium text-purple-300 bg-purple-900/40 px-2 py-0.5 rounded">{curIdx + 1}/{fullLog.length}</span>}
-          <span className={`text-sm font-medium ${game.bank.cash <= 0 ? 'text-red-400' : 'text-broker-text'}`}>Bank <InlineEdit value={game.bank.cash} enabled={su}            onSave={v => doAction({ type: 'SET_CASH', entityId: 'bank', entityType: 'bank', value: v })}>{fmt(game.bank.cash)}</InlineEdit></span>
-          <button onClick={() => canUndo() && undo()} className="text-broker-text-muted hover:text-white px-1" title="Undo"><IconUndo className="w-3.5 h-3.5" /></button>
-          <button onClick={() => canRedo() && redo()} className="text-broker-text-muted hover:text-white px-1" title="Redo"><IconRedo className="w-3.5 h-3.5" /></button>
-          <button onClick={() => setPanel(panel === 'settings' ? null : 'settings')} className="text-xs text-broker-text-muted hover:text-white bg-broker-surface-hover px-2 py-0.5 rounded">Settings</button>
+          )})()}
+        <span className="text-[10px] text-broker-text-muted whitespace-nowrap">Ph{phase.name} L{limit}</span>
+        <span className={`text-xs font-medium whitespace-nowrap ${game.bank.cash <= 0 ? 'text-red-400' : 'text-broker-text'}`}>Bank <InlineEdit value={game.bank.cash} enabled={su} onSave={v => doAction({ type: 'SET_CASH', entityId: 'bank', entityType: 'bank', value: v })}>{fmt(game.bank.cash)}</InlineEdit></span>
+        {inReplay && <span className="text-[10px] font-medium text-amber-300 bg-amber-900/40 px-1.5 py-0.5 rounded whitespace-nowrap">{curIdx + 1}/{fullLog.length}</span>}
+        <div className="flex items-center gap-1 ml-auto">
+          <button onClick={() => canUndo() && undo()} className="text-broker-text-muted hover:text-white p-1.5 min-h-[36px] min-w-[36px] flex items-center justify-center" title="Undo"><IconUndo className="w-4 h-4" /></button>
+          <button onClick={() => canRedo() && redo()} className="text-broker-text-muted hover:text-white p-1.5 min-h-[36px] min-w-[36px] flex items-center justify-center" title="Redo"><IconRedo className="w-4 h-4" /></button>
+          <button onClick={() => setPanel(panel === 'settings' ? null : 'settings')} className="text-[10px] text-broker-text-muted hover:text-white bg-broker-surface-hover px-2 py-1 rounded min-h-[36px] flex items-center">Settings</button>
         </div>
       </div>
 
@@ -117,11 +114,11 @@ export default function BrokerOverview() {
 
       {/* Mode indicator banners */}
       {isWhatIf && (
-        <div className="bg-purple-900 border-b border-purple-600 px-3 py-1.5 flex items-center justify-between flex-shrink-0">
-          <span className="text-purple-200 text-sm font-bold">WHAT-IF — exploring, nothing saved</span>
+        <div className="bg-amber-900 border-b border-amber-600 px-3 py-1.5 flex items-center justify-between flex-shrink-0">
+          <span className="text-amber-200 text-sm font-bold">WHAT-IF — exploring, nothing saved</span>
           <div className="flex gap-2">
-            <button onClick={() => exitWhatIf(true)} className="text-xs bg-purple-700 hover:bg-purple-600 text-white px-2 py-0.5 rounded">Discard</button>
-            <button onClick={() => exitWhatIf(false)} className="text-xs text-purple-300 hover:text-white px-2">Keep</button>
+            <button onClick={() => exitWhatIf(true)} className="text-xs bg-amber-700 hover:bg-amber-600 text-white px-2 py-0.5 rounded">Discard</button>
+            <button onClick={() => exitWhatIf(false)} className="text-xs text-amber-300 hover:text-white px-2">Keep</button>
           </div>
         </div>
       )}
@@ -129,8 +126,37 @@ export default function BrokerOverview() {
         <div className="bg-blue-900 border-b border-blue-600 px-3 py-1.5 flex items-center justify-between flex-shrink-0">
           <span className="text-blue-200 text-sm font-bold">REPLAY {curIdx + 1}/{fullLog.length} — {lastAction?.description || 'Game start'}</span>
           <div className="flex gap-2">
-            <button onClick={() => { exitReplay(); enterWhatIf() }} className="text-xs bg-purple-700 hover:bg-purple-600 text-white px-2 py-0.5 rounded">What-if</button>
+            <button onClick={() => { exitReplay(); enterWhatIf() }} className="text-xs bg-amber-700 hover:bg-amber-600 text-white px-2 py-0.5 rounded">What-if</button>
             <button onClick={() => exitReplay()} className="text-xs bg-blue-700 hover:bg-blue-600 text-white px-2 py-0.5 rounded">Exit</button>
+          </div>
+        </div>
+      )}
+
+      {/* Pregame: show available privates */}
+      {isPre && (game.companies || []).some(c => !c.closed) && (
+        <div className="bg-broker-surface border-b border-broker-border px-3 py-2 flex-shrink-0">
+          <div className="text-[10px] text-broker-text-muted uppercase tracking-widest mb-1.5">
+            {game.title.pregame?.[0]?.label || 'Private Companies'}
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {(game.companies || []).filter(c => !c.closed).map(c => {
+              const owned = !!c.ownerId
+              const owner = owned ? game.players.find(p => p.id === c.ownerId)?.name : null
+              return (
+                <button key={c.sym}
+                  onClick={() => !owned && setPanel('buyprivate')}
+                  className={`text-xs rounded px-2 py-1.5 text-left transition-colors ${
+                    owned
+                      ? 'bg-broker-gold/10 border border-broker-gold/30 text-broker-gold cursor-default'
+                      : 'bg-broker-surface-hover border border-broker-border hover:border-broker-gold/40 text-white cursor-pointer'
+                  }`}>
+                  <span className="font-bold">{c.sym}</span>
+                  <span className="text-broker-text-muted ml-1">{fmt(c.value)}</span>
+                  {c.revenue > 0 && <span className="text-broker-accent ml-1">+{fmt(c.revenue)}</span>}
+                  {owner && <span className="text-broker-gold ml-1">{owner}</span>}
+                </button>
+              )
+            })}
           </div>
         </div>
       )}
@@ -141,8 +167,8 @@ export default function BrokerOverview() {
           <thead className="sticky top-0 z-20">
             <tr className="bg-broker-surface text-broker-text-muted">
               <th className="text-left px-2 py-1 sticky left-0 bg-broker-surface z-30 min-w-[90px] font-medium">Player</th>
-              <th className="px-2 text-right min-w-[50px] font-bold text-sky-300">Cash</th>
-              <th className="px-2 text-right min-w-[50px] font-medium text-sky-300/60">Liq</th>
+              <th className="px-2 text-right min-w-[50px] font-bold text-broker-cash">Cash</th>
+              <th className="px-2 text-right min-w-[50px] font-medium text-broker-cash/60">Liq</th>
               <th className="px-2 text-center min-w-[36px] font-medium">Cert</th>
               {game.title.taxThresholds && <th className="px-1 text-center text-[10px] font-medium text-red-400">Tax</th>}
               {corps.map((c, ci) => (
@@ -170,7 +196,7 @@ export default function BrokerOverview() {
                     <div>{p.name}</div>
                     {/* Player-owned privates */}
                     {playerPrivates[p.id]?.length > 0 && (
-                      <div className="text-[9px] text-purple-300 leading-tight">{playerPrivates[p.id].map(c => c.sym).join(' ')}</div>
+                      <div className="text-[9px] text-broker-gold leading-tight">{playerPrivates[p.id].map(c => c.sym).join(' ')}</div>
                     )}
                     {/* Player-held strategy cards */}
                     {p.cards?.length > 0 && (
@@ -181,13 +207,13 @@ export default function BrokerOverview() {
                       ))}</div>
                     )}
                   </td>
-                  <td className="px-2 text-right font-bold text-sky-300">
+                  <td className="px-2 text-right font-bold text-broker-cash">
                     <InlineEdit value={p.cash} enabled={su}                      onSave={v => doAction({ type: 'SET_CASH', entityId: p.id, entityType: 'player', value: v })}>
                       {fmt(p.cash)}
                     </InlineEdit>
                     {p.debt > 0 && <div className="text-red-400 text-[10px] font-bold">debt {fmt(p.debt)}</div>}
                   </td>
-                  <td className="px-2 text-right text-sky-300/60 text-xs">{fmt(playerNetWorth(game, p.id))}</td>
+                  <td className="px-2 text-right text-broker-cash/60 text-xs">{fmt(playerNetWorth(game, p.id))}</td>
                   <td className={`px-2 text-center ${playerCertCount(p) > game.certLimit ? 'text-red-400 font-bold' : 'text-broker-text-muted'}`}>{playerCertCount(p)}/{game.certLimit}</td>
                   {game.title.taxThresholds && (() => {
                     let totalTax = 0
@@ -235,7 +261,7 @@ export default function BrokerOverview() {
               </InlineEdit>} />
             <BRow extraCols={game.title.taxThresholds ? 1 : 0} l="Treasury" highlight corps={corps} cc={curCol} r={c => !c.ipoed ? '' :
               <InlineEdit value={c.cash} enabled={su}                onSave={v => doAction({ type: 'SET_CASH', entityId: c.sym, entityType: 'corporation', value: v })}>
-                <span className={c.cash < 0 ? 'text-red-400' : 'text-sky-300 font-bold'}>{fmt(c.cash)}</span>
+                <span className={c.cash < 0 ? 'text-red-400' : 'text-broker-cash font-bold'}>{fmt(c.cash)}</span>
               </InlineEdit>} />
             <BRow extraCols={game.title.taxThresholds ? 1 : 0} l="IPO" corps={corps} cc={curCol} r={c => c.ipoShares < 100 ?
               <InlineEdit value={c.ipoShares} enabled={su}                onSave={v => doAction({ type: 'SET_CORP_FIELD', corpSym: c.sym, field: 'ipoShares', value: v })}>
@@ -280,7 +306,7 @@ export default function BrokerOverview() {
             {game.companies?.some(co => co.ownerType === 'corporation' && !co.closed) && (
               <BRow extraCols={game.title.taxThresholds ? 1 : 0} l="Privates" corps={corps} cc={curCol} r={c => {
                 const owned = (corpPrivates[c.sym] || [])
-                return owned.length > 0 ? <span className="text-purple-300 text-[9px]">{owned.join(' ')}</span> : ''
+                return owned.length > 0 ? <span className="text-broker-gold text-[9px]">{owned.join(' ')}</span> : ''
               }} />
             )}
             {/* Cards attached to corp trains */}
@@ -339,7 +365,7 @@ export default function BrokerOverview() {
           <Bb t="Next" o={() => curIdx < fullLog.length - 1 && replayTo(curIdx + 1)} />
           <Bb t="Start" o={() => replayTo(-1)} />
           <Bb t="End" o={() => replayTo(fullLog.length - 1)} />
-          <Bb t="What-if" v="purple" o={() => { exitReplay(); enterWhatIf() }} />
+          <Bb t="What-if" v="amber" o={() => { exitReplay(); enterWhatIf() }} />
           <Bb t="Exit" v="red" o={() => exitReplay()} />
           <span className="text-broker-text-muted text-xs truncate ml-1 flex-1">{curIdx < 0 ? 'Game start' : `${curIdx + 1}/${fullLog.length} — ${lastAction?.description || ''}`}</span>
         </div>
@@ -355,7 +381,7 @@ export default function BrokerOverview() {
 function BRow({ l, corps, cc, r, onClick, extraCols = 0, highlight, labelStyle }) {
   return (
     <tr className={`border-t border-broker-border/20 ${highlight ? 'bg-broker-surface-hover/10' : ''}`}>
-      <td colSpan={4 + extraCols} className={`px-2 py-0.5 sticky left-0 z-10 text-xs bg-broker-bg ${highlight ? 'text-sky-300 font-medium' : 'text-broker-text-muted'}`}>
+      <td colSpan={4 + extraCols} className={`px-2 py-0.5 sticky left-0 z-10 text-xs bg-broker-bg ${highlight ? 'text-broker-cash font-medium' : 'text-broker-text-muted'}`}>
         {labelStyle ? <span className="px-1 rounded font-bold" style={labelStyle}>{l}</span> : l}
       </td>
       {corps.map((c, ci) => (
@@ -373,7 +399,7 @@ function Bb({ t, v, o }) {
   const styles = {
     undefined: 'bg-broker-surface-hover text-white hover:bg-broker-gold/20',
     red: 'bg-red-900/50 text-red-300 hover:bg-red-800',
-    purple: 'bg-purple-900/50 text-purple-300 hover:bg-purple-800',
+    amber: 'bg-amber-900/50 text-amber-300 hover:bg-amber-800',
     muted: 'bg-broker-surface-hover/50 text-broker-text-muted hover:text-white hover:bg-broker-surface-hover',
   }
   return <button onClick={o} className={`px-2 py-1 rounded text-xs font-medium ${styles[v] || styles[undefined]}`}>{t}</button>

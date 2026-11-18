@@ -19,7 +19,7 @@ const savedTheme = (() => {
 })()
 
 export const themes = {
-  broker: { id: 'broker', label: 'Classic', desc: 'Teal & orange' },
+  broker: { id: 'broker', label: 'Laytrack', desc: 'Gold & teal' },
   dark:   { id: 'dark',   label: 'Dark',   desc: 'Classic dark mode' },
   light:  { id: 'light',  label: 'Light',  desc: 'Light mode' },
 }

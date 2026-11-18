@@ -189,7 +189,7 @@ function PanelContent({ panel, game, player, corp, unfloated, fmt, revenueInput,
               <span className={`flex-1 text-sm font-medium ${p.id === game.priorityDeal ? 'text-broker-gold' : 'text-white'}`}>
                 {p.name} {p.id === game.priorityDeal && '★'}
               </span>
-              <span className="text-xs text-sky-300">{fmt(p.cash)}</span>
+              <span className="text-xs text-broker-cash">{fmt(p.cash)}</span>
               <div className="flex gap-1">
                 {i > 0 && <Btn v="blue" o={() => {
                   const order = game.players.map(pl => pl.id)
@@ -1096,8 +1096,8 @@ function SettingsPanel({ game, doAction: _doAction }) {
     { key: 'superUmpire', label: 'Edit mode: show all actions + click values to edit' },
   ]
   const onColor = 'bg-green-700/30 text-green-300'
-  const offColor = 'bg-gray-800/50 text-gray-400'
-  const labelColor = 'text-gray-400 text-xs mb-1'
+  const offColor = 'bg-broker-surface-hover/50 text-broker-text-muted'
+  const labelColor = 'text-broker-text-muted text-xs mb-1'
 
   return (
     <div>

@@ -49,7 +49,7 @@ export function PositionMeter({ game }) {
               <div className="h-full rounded flex" style={{ width: barWidth + '%' }}>
                 <div className="bg-green-700 h-full" style={{ width: p.cash > 0 ? Math.round((p.cash / p.total) * 100) + '%' : '0' }} title={`Cash: ${fmt(p.cash)}`} />
                 <div className="bg-blue-700 h-full" style={{ width: p.shareValue > 0 ? Math.round((p.shareValue / p.total) * 100) + '%' : '0' }} title={`Shares: ${fmt(p.shareValue)}`} />
-                <div className="bg-purple-700 h-full" style={{ width: p.privateValue > 0 ? Math.round((p.privateValue / p.total) * 100) + '%' : '0' }} title={`Privates: ${fmt(p.privateValue)}`} />
+                <div className="bg-broker-gold-dim h-full" style={{ width: p.privateValue > 0 ? Math.round((p.privateValue / p.total) * 100) + '%' : '0' }} title={`Privates: ${fmt(p.privateValue)}`} />
               </div>
             </div>
             <span className={`w-16 text-right font-medium ${leading ? 'text-white' : 'text-broker-text'}`}>{fmt(p.total)}</span>
@@ -60,7 +60,7 @@ export function PositionMeter({ game }) {
       <div className="flex gap-3 mt-1 text-[10px] text-broker-text-muted">
         <span><span className="inline-block w-2 h-2 bg-green-700 rounded-sm mr-0.5" />Cash</span>
         <span><span className="inline-block w-2 h-2 bg-blue-700 rounded-sm mr-0.5" />Shares</span>
-        <span><span className="inline-block w-2 h-2 bg-purple-700 rounded-sm mr-0.5" />Privates</span>
+        <span><span className="inline-block w-2 h-2 bg-broker-gold-dim rounded-sm mr-0.5" />Privates</span>
         <span className="ml-auto">Avg: {fmt(Math.round(avgTotal))}</span>
       </div>
     </div>

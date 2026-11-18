@@ -293,7 +293,7 @@ export default function PlayersTab() {
                   )}
                   {!p.closed && isConcession && targetCorp && !targetCorp.ipoed && (
                     <button onClick={() => dispatch({ type: 'CONVERT_CONCESSION', playerId: selected.id, companySym: p.sym, corpSym: targetCorp.sym })}
-                      className="text-sm bg-purple-800 hover:bg-purple-700 text-white px-3 py-2 rounded">
+                      className="text-sm bg-broker-green hover:bg-broker-green-light text-white px-3 py-2 rounded">
                       Convert
                     </button>
                   )}
@@ -872,7 +872,7 @@ function CorpOps({ game, corp, dispatch, fmt, isSub }) {
               {targets.map(t => (
                 <button key={t.sym}
                   onClick={() => dispatch({ type: 'MERGE_CORPS', topCorpSym: corp.sym, bottomCorpSym: t.sym })}
-                  className="text-sm bg-purple-900/50 text-purple-300 hover:bg-purple-800 rounded px-3 py-2">
+                  className="text-sm bg-broker-green/30 text-broker-accent hover:bg-broker-green rounded px-3 py-2">
                   + <span style={{ color: t.color }} className="font-bold">{t.sym}</span>
                 </button>
               ))}
@@ -892,7 +892,7 @@ function CorpOps({ game, corp, dispatch, fmt, isSub }) {
               {nationals.map(n => (
                 <button key={n.sym}
                   onClick={() => dispatch({ type: 'NATIONALIZE_CORP', corpSym: corp.sym, nationalSym: n.sym })}
-                  className="text-sm bg-purple-900/50 text-purple-300 hover:bg-purple-800 rounded px-3 py-2">
+                  className="text-sm bg-broker-green/30 text-broker-accent hover:bg-broker-green rounded px-3 py-2">
                   → {n.sym}
                 </button>
               ))}
@@ -921,13 +921,13 @@ function CorpOps({ game, corp, dispatch, fmt, isSub }) {
           <div className="flex gap-2 mt-1">
             {canTo5 && (
               <button onClick={() => dispatch({ type: 'CONVERT_CORP', corpSym: corp.sym, targetSize: '5share' })}
-                className="flex-1 text-sm bg-purple-900/50 text-purple-300 hover:bg-purple-800 rounded px-3 py-2">
+                className="flex-1 text-sm bg-broker-green/30 text-broker-accent hover:bg-broker-green rounded px-3 py-2">
                 → 5-share
               </button>
             )}
             {canTo10 && (
               <button onClick={() => dispatch({ type: 'CONVERT_CORP', corpSym: corp.sym, targetSize: '10share' })}
-                className="flex-1 text-sm bg-purple-900/50 text-purple-300 hover:bg-purple-800 rounded px-3 py-2">
+                className="flex-1 text-sm bg-broker-green/30 text-broker-accent hover:bg-broker-green rounded px-3 py-2">
                 → 10-share
               </button>
             )}

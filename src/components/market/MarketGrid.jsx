@@ -7,7 +7,7 @@ const ZONE_COLORS = {
   brown: 'bg-red-900/40 text-red-400',
   close: 'bg-broker-bg text-broker-gold-dim',
   endgame: 'bg-broker-green/40 text-broker-gold',
-  initial: 'bg-purple-900/40 text-purple-300',
+  initial: 'bg-broker-accent/20 text-broker-accent',
   reserved: 'bg-green-900/40 text-green-300',
   bonus: 'bg-cyan-900/40 text-cyan-300',
   normal: 'bg-broker-surface text-broker-text',

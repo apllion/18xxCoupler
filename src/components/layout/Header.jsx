@@ -51,7 +51,7 @@ export default function Header() {
                 const colors = active
                   ? rType === 'SR' ? 'bg-broker-green text-broker-gold'
                     : rType === 'OR' ? 'bg-amber-900 text-amber-200'
-                    : rType === 'Pregame' ? 'bg-purple-800 text-purple-200'
+                    : rType === 'Pregame' ? 'bg-broker-green text-white'
                     : 'bg-blue-800 text-blue-200'
                   : 'bg-broker-surface-hover text-broker-text-muted hover:text-white'
                 return (
@@ -77,7 +77,7 @@ export default function Header() {
                 onClick={() => isWhatIf ? exitWhatIf(true) : enterWhatIf()}
                 className={`text-xs px-2.5 py-0.5 rounded transition-colors ${
                   isWhatIf
-                    ? 'bg-purple-700 text-purple-100 ring-1 ring-purple-400'
+                    ? 'bg-amber-700 text-amber-100 ring-1 ring-amber-400'
                     : 'bg-broker-surface-hover text-broker-text-muted hover:text-broker-text'
                 }`}
               >
@@ -107,18 +107,18 @@ export default function Header() {
 
       {/* What-if mode banner */}
       {isWhatIf && (
-        <div className="bg-purple-900/80 border-b border-purple-600 px-3 py-2 flex items-center justify-between">
-          <span className="text-sm text-purple-200 font-medium">What-if mode — changes are local only</span>
+        <div className="bg-amber-900/80 border-b border-amber-600 px-3 py-2 flex items-center justify-between">
+          <span className="text-sm text-amber-200 font-medium">What-if mode — changes are local only</span>
           <div className="flex gap-2">
             <button
               onClick={() => exitWhatIf(true)}
-              className="bg-purple-700 hover:bg-purple-600 text-white px-3 py-1 rounded text-xs font-medium"
+              className="bg-amber-700 hover:bg-amber-600 text-white px-3 py-1 rounded text-xs font-medium"
             >
               Discard
             </button>
             <button
               onClick={() => exitWhatIf(false)}
-              className="text-purple-300 hover:text-purple-100 text-xs px-2"
+              className="text-amber-300 hover:text-amber-100 text-xs px-2"
             >
               Keep
             </button>
@@ -138,7 +138,7 @@ export default function Header() {
               {!isWhatIf && (
                 <button
                   onClick={() => { exitReplay(); enterWhatIf() }}
-                  className="text-xs bg-purple-800 hover:bg-purple-700 text-purple-200 px-2 py-1 rounded"
+                  className="text-xs bg-amber-700 hover:bg-amber-600 text-amber-200 px-2 py-1 rounded"
                 >
                   What-if
                 </button>

@@ -66,7 +66,7 @@ export default function RoundTrackerTab() {
             const colors = active
               ? rType === 'SR' ? 'bg-broker-green text-broker-gold'
                 : rType === 'OR' ? 'bg-amber-900 text-amber-200'
-                : rType === 'Pregame' ? 'bg-purple-800 text-purple-200'
+                : rType === 'Pregame' ? 'bg-broker-green text-white'
                 : 'bg-blue-800 text-blue-200'
               : 'bg-broker-surface-hover text-broker-text-muted hover:text-white'
             return (

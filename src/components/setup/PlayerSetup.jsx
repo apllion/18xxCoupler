@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { getTitle } from '../../titles/index.js'
 import { useGameStore } from '../../store/gameStore.js'
+import { useRoleStore } from '../../store/roleStore.js'
 import { formatCurrency } from '../../utils/currency.js'
 import { IconBack, IconClose } from '../shared/Icons.jsx'
 import { getSelectableVariants, getAutoVariants } from '../../engine/variants.js'
@@ -69,6 +70,7 @@ export default function PlayerSetup() {
   function handleStart() {
     const names = playerNames.filter((n) => n.trim()).map((n) => n.trim())
     if (names.length < title.minPlayers) return
+    useRoleStore.getState().reset()
     startGame(titleId, names, selectedVariant)
     navigate('/')
   }
@@ -76,7 +78,7 @@ export default function PlayerSetup() {
   return (
     <div className="min-h-screen flex flex-col items-center p-6">
       <button
-        onClick={() => navigate('/')}
+        onClick={() => navigate(-1)}
         className="self-start text-broker-text-muted hover:text-broker-gold mb-4"
       >
         <IconBack className="w-3 h-3 inline" /> Back
@@ -93,7 +95,7 @@ export default function PlayerSetup() {
               value={name}
               onChange={(e) => updateName(idx, e.target.value)}
               placeholder={`Player ${idx + 1}`}
-              className="flex-1 bg-broker-surface border border-broker-border rounded px-3 py-2 text-white placeholder-broker-text-muted focus:outline-none focus:border-gray-500"
+              className="flex-1 bg-broker-surface border border-broker-border rounded px-3 py-2 text-white placeholder-broker-text-muted focus:outline-none focus:border-broker-gold"
             />
             {playerNames.length > 2 && (
               <button

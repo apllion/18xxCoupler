@@ -42,7 +42,7 @@ export default function ShareHoldings() {
           {activeCorp.map((corp) => {
             const price = corpPrice(game.stockMarket, corp.sym)
             return (
-              <tr key={corp.sym} className="border-t border-gray-800">
+              <tr key={corp.sym} className="border-t border-broker-border">
                 <td className="py-1 px-2">
                   <span
                     className="inline-block w-3 h-3 rounded-full mr-1 align-middle"

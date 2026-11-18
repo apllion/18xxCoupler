@@ -70,7 +70,7 @@ export default function SRView({ game, fmt, me, myPlayerId, corps, dispatch }) {
       {/* Header with cash + F value */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <span className="text-2xl font-bold text-sky-300">{fmt(me.cash)}</span>
+          <span className="text-2xl font-bold text-broker-cash">{fmt(me.cash)}</span>
           <span className="text-xs text-broker-text-muted">Shares {fmt(totalShareValue)}</span>
           <span className="text-xs text-broker-text-muted">Net {fmt(me.cash + totalShareValue)}</span>
         </div>
@@ -315,11 +315,11 @@ export default function SRView({ game, fmt, me, myPlayerId, corps, dispatch }) {
             {/* Convert concession */}
             {concessions.length > 0 && (
               <div>
-                <div className="text-xs text-broker-text-muted mb-1 border-l-2 border-purple-500 pl-2">Convert Concession</div>
+                <div className="text-xs text-broker-text-muted mb-1 border-l-2 border-broker-accent pl-2">Convert Concession</div>
                 <div className="flex gap-2 flex-wrap">
                   {concessions.map(sym => (
                     <button key={sym} onClick={() => dispatch({ type: 'CONVERT_CONCESSION', playerId: myPlayerId, companySym: sym })}
-                      className="text-sm bg-purple-800 hover:bg-purple-700 text-purple-200 px-4 py-3 rounded-lg font-medium min-h-[44px]">
+                      className="text-sm bg-broker-green hover:bg-broker-green-light text-white px-4 py-3 rounded-lg font-medium min-h-[44px]">
                       {sym}
                     </button>
                   ))}

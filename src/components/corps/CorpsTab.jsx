@@ -388,7 +388,7 @@ function CorpDetail({ game, corp, dispatch, fmt, onNext, plusPlus }) {
           value={revenue}
           onChange={(e) => setRevenue(e.target.value)}
           placeholder="Enter revenue"
-          className="w-full bg-broker-bg border border-broker-border rounded px-3 py-2 text-white text-lg text-center mb-2 focus:outline-none focus:border-gray-500"
+          className="w-full bg-broker-bg border border-broker-border rounded px-3 py-2 text-white text-lg text-center mb-2 focus:outline-none focus:border-broker-gold"
         />
 
         <div className="flex flex-wrap gap-1 mb-3">
@@ -558,7 +558,7 @@ function CorpDetail({ game, corp, dispatch, fmt, onNext, plusPlus }) {
               {nationals.map(n => (
                 <button key={n.sym}
                   onClick={() => dispatch({ type: 'NATIONALIZE_CORP', corpSym: corp.sym, nationalSym: n.sym })}
-                  className="text-sm bg-purple-800 hover:bg-purple-700 text-white px-3 py-2 rounded"
+                  className="text-sm bg-broker-green hover:bg-broker-green-light text-white px-3 py-2 rounded"
                 >
                   → {n.sym}
                 </button>
@@ -895,7 +895,7 @@ function MergerPanel({ game, corp, dispatch, fmt }) {
                 {(mergerType === 'ptg_combine') && (
                   <button
                     onClick={() => handlePTGMerge(t.sym)}
-                    className="ml-auto text-sm bg-purple-800 hover:bg-purple-700 px-3 py-2 rounded text-purple-200"
+                    className="ml-auto text-sm bg-broker-green hover:bg-broker-green-light px-3 py-2 rounded text-white"
                   >
                     Merge
                   </button>
@@ -903,7 +903,7 @@ function MergerPanel({ game, corp, dispatch, fmt }) {
                 {(mergerType === '1862_peer') && (
                   <button
                     onClick={() => handle1862Merge(t.sym)}
-                    className="ml-auto text-sm bg-purple-800 hover:bg-purple-700 px-3 py-2 rounded text-purple-200"
+                    className="ml-auto text-sm bg-broker-green hover:bg-broker-green-light px-3 py-2 rounded text-white"
                   >
                     Merge (absorb)
                   </button>
@@ -911,7 +911,7 @@ function MergerPanel({ game, corp, dispatch, fmt }) {
                 {(mergerType === '1822_acquire') && (
                   <button
                     onClick={() => setMergeTarget(t.sym)}
-                    className="ml-auto text-sm bg-purple-800 hover:bg-purple-700 px-3 py-2 rounded text-purple-200"
+                    className="ml-auto text-sm bg-broker-green hover:bg-broker-green-light px-3 py-2 rounded text-white"
                   >
                     Acquire
                   </button>
@@ -919,7 +919,7 @@ function MergerPanel({ game, corp, dispatch, fmt }) {
                 {(mergerType === '1867_minor_major') && (
                   <button
                     onClick={() => handle1867Convert(t.sym)}
-                    className="ml-auto text-sm bg-purple-800 hover:bg-purple-700 px-3 py-2 rounded text-purple-200"
+                    className="ml-auto text-sm bg-broker-green hover:bg-broker-green-light px-3 py-2 rounded text-white"
                   >
                     Convert
                   </button>
@@ -927,7 +927,7 @@ function MergerPanel({ game, corp, dispatch, fmt }) {
                 {(mergerType === '1867_merge_minors') && (
                   <button
                     onClick={() => setMergeTarget(t.sym)}
-                    className="ml-auto text-sm bg-purple-800 hover:bg-purple-700 px-3 py-2 rounded text-purple-200"
+                    className="ml-auto text-sm bg-broker-green hover:bg-broker-green-light px-3 py-2 rounded text-white"
                   >
                     Merge
                   </button>
@@ -935,7 +935,7 @@ function MergerPanel({ game, corp, dispatch, fmt }) {
                 {(mergerType === 'rla_merge') && (
                   <button
                     onClick={() => setMergeTarget(t.sym)}
-                    className="ml-auto text-sm bg-purple-800 hover:bg-purple-700 px-3 py-2 rounded text-purple-200"
+                    className="ml-auto text-sm bg-broker-green hover:bg-broker-green-light px-3 py-2 rounded text-white"
                   >
                     Merge
                   </button>
@@ -960,7 +960,7 @@ function MergerPanel({ game, corp, dispatch, fmt }) {
                 onClick={() => setPaymentShares(n)}
                 className={`text-sm px-3 py-2 rounded ${
                   paymentShares === n
-                    ? 'bg-purple-700 text-white'
+                    ? 'bg-broker-green-light text-white'
                     : 'bg-broker-surface-hover text-broker-text-muted'
                 }`}
               >
@@ -981,7 +981,7 @@ function MergerPanel({ game, corp, dispatch, fmt }) {
           <div className="flex gap-2">
             <button
               onClick={handle1822Acquire}
-              className="text-sm bg-purple-800 hover:bg-purple-700 px-3 py-2 rounded text-white"
+              className="text-sm bg-broker-green hover:bg-broker-green-light px-3 py-2 rounded text-white"
             >
               Confirm Acquisition
             </button>
@@ -1013,7 +1013,7 @@ function MergerPanel({ game, corp, dispatch, fmt }) {
                   onClick={() => setSelectedMajor(c.sym)}
                   className={`w-full text-left text-sm px-3 py-2 rounded flex items-center gap-2 ${
                     selectedMajor === c.sym
-                      ? 'bg-purple-700 text-white'
+                      ? 'bg-broker-green-light text-white'
                       : 'bg-broker-surface-hover text-broker-text-muted hover:text-white'
                   }`}
                   style={{ borderLeft: `3px solid ${c.color}` }}
@@ -1039,7 +1039,7 @@ function MergerPanel({ game, corp, dispatch, fmt }) {
                 setSelectedMajor(null)
               }}
               disabled={!selectedMajor}
-              className="text-sm bg-purple-800 hover:bg-purple-700 disabled:opacity-30 px-3 py-2 rounded text-white"
+              className="text-sm bg-broker-green hover:bg-broker-green-light disabled:opacity-30 px-3 py-2 rounded text-white"
             >
               Confirm Merger
             </button>
@@ -1071,7 +1071,7 @@ function MergerPanel({ game, corp, dispatch, fmt }) {
                   onClick={() => { setSelectedMajor(c.sym); setSelectedIdentity(null) }}
                   className={`w-full text-left text-sm px-3 py-2 rounded flex items-center gap-2 ${
                     selectedMajor === c.sym
-                      ? 'bg-purple-700 text-white'
+                      ? 'bg-broker-green-light text-white'
                       : 'bg-broker-surface-hover text-broker-text-muted hover:text-white'
                   }`}
                   style={{ borderLeft: `3px solid ${c.color}` }}
@@ -1098,7 +1098,7 @@ function MergerPanel({ game, corp, dispatch, fmt }) {
                       onClick={() => setSelectedIdentity(name)}
                       className={`text-sm px-3 py-2 rounded ${
                         selectedIdentity === name
-                          ? 'bg-purple-700 text-white'
+                          ? 'bg-broker-green-light text-white'
                           : 'bg-broker-surface-hover text-broker-text-muted hover:text-white'
                       }`}
                     >
@@ -1127,7 +1127,7 @@ function MergerPanel({ game, corp, dispatch, fmt }) {
                 setSelectedIdentity(null)
               }}
               disabled={!selectedMajor}
-              className="text-sm bg-purple-800 hover:bg-purple-700 disabled:opacity-30 px-3 py-2 rounded text-white"
+              className="text-sm bg-broker-green hover:bg-broker-green-light disabled:opacity-30 px-3 py-2 rounded text-white"
             >
               Confirm Merger
             </button>
@@ -1238,7 +1238,7 @@ function ConversionPanel({ game, corp, dispatch }) {
         {canConvertTo5 && (
           <button
             onClick={() => dispatch({ type: 'CONVERT_CORP', corpSym: corp.sym, targetSize: '5share' })}
-            className="text-sm bg-purple-800 hover:bg-purple-700 text-white px-3 py-2 rounded"
+            className="text-sm bg-broker-green hover:bg-broker-green-light text-white px-3 py-2 rounded"
           >
             Convert to 5-share
           </button>
@@ -1246,7 +1246,7 @@ function ConversionPanel({ game, corp, dispatch }) {
         {canConvertTo10 && (
           <button
             onClick={() => dispatch({ type: 'CONVERT_CORP', corpSym: corp.sym, targetSize: '10share' })}
-            className="text-sm bg-purple-800 hover:bg-purple-700 text-white px-3 py-2 rounded"
+            className="text-sm bg-broker-green hover:bg-broker-green-light text-white px-3 py-2 rounded"
           >
             Convert to 10-share
           </button>

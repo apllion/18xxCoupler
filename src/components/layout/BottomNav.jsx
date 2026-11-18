@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useGameStore } from '../../store/gameStore.js'
 import { useUIStore } from '../../store/uiStore.js'
+import { useRoleStore } from '../../store/roleStore.js'
 import { IconClose } from '../shared/Icons.jsx'
 
 const PP = !!import.meta.env.VITE_PLUSPLUS || import.meta.env.DEV
@@ -46,6 +47,7 @@ export default function BottomNav() {
     { id: 'endgame', label: 'Endgame Calculator' },
     { id: 'log', label: 'Action Log' },
     ...(PP ? [{ id: 'analysis', label: '++ Analysis' }] : []),
+    { id: '_changeRole', label: 'Change Role' },
   ]
 
   const isMore = moreItems.some(m => m.id === activeTab)
@@ -64,11 +66,16 @@ export default function BottomNav() {
             <div className="py-1">
               {moreItems.map(item => (
                 <button key={item.id}
-                  onClick={() => { setActiveTab(item.id); setMenuOpen(false) }}
+                  onClick={() => {
+                    if (item.id === '_changeRole') { useRoleStore.getState().reset(); return }
+                    setActiveTab(item.id); setMenuOpen(false)
+                  }}
                   className={`w-full text-left px-4 py-3 text-sm transition-colors ${
-                    activeTab === item.id
-                      ? 'text-white bg-broker-surface-hover font-medium'
-                      : 'text-broker-text-muted hover:text-broker-text hover:bg-broker-surface-hover/50'
+                    item.id === '_changeRole'
+                      ? 'text-broker-text-muted hover:text-broker-gold hover:bg-broker-surface-hover/50 border-t border-broker-border mt-1'
+                      : activeTab === item.id
+                        ? 'text-white bg-broker-surface-hover font-medium'
+                        : 'text-broker-text-muted hover:text-broker-text hover:bg-broker-surface-hover/50'
                   }`}>
                   {item.label}
                 </button>

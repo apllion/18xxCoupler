@@ -67,7 +67,7 @@ export default function DisplayShell() {
           <span className="text-2xl font-bold tracking-wide">{game.title.title}</span>
           {rt && (
             <span className={`text-sm font-medium px-3 py-1 rounded ${
-              isSR ? 'bg-green-800 text-green-200' : isOR ? 'bg-amber-800 text-amber-200' : 'bg-purple-800 text-purple-200'
+              isSR ? 'bg-green-800 text-green-200' : isOR ? 'bg-amber-800 text-amber-200' : 'bg-broker-green text-broker-text'
             }`}>{rt.roundType}</span>
           )}
           <span className="text-sm text-broker-text-muted">{VIEW_LABELS[VIEWS[activeView]]}</span>
@@ -215,7 +215,7 @@ function MarketView({ game }) {
     brown: 'bg-red-900/40 text-red-400 border-red-800/50',
     close: 'bg-broker-bg text-broker-gold-dim border-broker-border',
     endgame: 'bg-broker-green/40 text-broker-gold border-broker-green',
-    initial: 'bg-purple-900/40 text-purple-300 border-purple-800/50',
+    initial: 'bg-broker-accent/20 text-broker-accent border-broker-accent/30',
     reserved: 'bg-green-900/40 text-green-300 border-green-800/50',
     bonus: 'bg-cyan-900/40 text-cyan-300 border-cyan-800/50',
     normal: 'bg-broker-surface text-broker-text border-broker-border',
@@ -338,7 +338,7 @@ function CorpSummaryView({ game }) {
               <div className="grid grid-cols-2 gap-2 text-sm">
                 <div>
                   <span className="text-broker-text-muted">Treasury: </span>
-                  <span className={c.cash < 0 ? 'text-red-400 font-bold' : 'text-sky-300 font-bold'}>{fmt(c.cash)}</span>
+                  <span className={c.cash < 0 ? 'text-red-400 font-bold' : 'text-broker-cash font-bold'}>{fmt(c.cash)}</span>
                 </div>
                 <div>
                   <span className="text-broker-text-muted">President: </span>
