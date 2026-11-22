@@ -57,7 +57,7 @@ export function ContextBar({ game, selPlayer, selCorp, setPanel, doAction, revRe
       <span className="text-broker-border">|</span>
       {main.map(a => (
         <button key={a.id} onClick={handlers[a.id] || (() => {})}
-          className={`px-2 py-1.5 min-h-[36px] rounded text-xs font-medium transition-colors ${a.id === 'sell' ? 'bg-red-900/30 text-red-300/70 hover:bg-red-800 hover:text-red-200' : 'bg-broker-surface-hover text-white hover:bg-broker-gold/20'}`}>
+          className={`px-2 py-1.5 min-h-[36px] rounded text-xs font-medium transition-colors ${a.id === 'sell' ? 'bg-red-900/30 text-red-300/70 hover:bg-red-800 hover:text-red-200' : 'bg-broker-surface-hover text-white hover:bg-broker-border'}`}>
           {a.label}
         </button>
       ))}

@@ -1,6 +1,6 @@
 import { useGameStore } from '../../store/gameStore.js'
 import { useDispatch } from '../../hooks/useDispatch.js'
-import { currentPhase } from '../../engine/phase.js'
+import { currentPhase, trainLimit } from '../../engine/phase.js'
 import { getEventInfo } from '../../engine/events.js'
 import { formatCurrency } from '../../utils/currency.js'
 import { IconUndo, IconRedo } from '../shared/Icons.jsx'
@@ -50,13 +50,13 @@ export default function Header() {
                 : 'bg-broker-surface-hover text-broker-text-muted'
               return (
                 <span key={rType}
-                  className={`text-xs font-medium px-1.5 py-0.5 first:rounded-l last:rounded-r border-r border-broker-border last:border-r-0 ${colors}`}
+                  className={`text-sm font-medium px-2 py-1 min-h-[32px] flex items-center first:rounded-l last:rounded-r border-r border-broker-border last:border-r-0 ${colors}`}
                 >{rType}</span>
               )
             })}
           </div>
-          <span className="text-xs text-broker-text-muted whitespace-nowrap">Ph{phase.name} L{game.title.trainLimit?.[phase.name] || '?'}</span>
-          <span className={`text-xs font-medium whitespace-nowrap ${game.bank.cash <= 0 ? 'text-red-400' : 'text-broker-text'}`}>
+          <span className="text-xs text-broker-text-muted whitespace-nowrap">Ph{phase.name} L{trainLimit(game.phaseManager)}</span>
+          <span className={`text-xs font-medium whitespace-nowrap ${game.bank.cash <= 0 ? 'text-red-400' : 'text-broker-cash'}`}>
             Bank {fmt(game.bank.cash)}
           </span>
           <div className="flex items-center gap-1 ml-auto">

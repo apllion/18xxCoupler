@@ -180,7 +180,7 @@ function StepCard({ active, done, disabled, num, label, detail, children }) {
 function HubButton({ onClick, icon, label, sub }) {
   return (
     <button onClick={onClick}
-      className="bg-broker-surface-hover hover:bg-broker-gold/15 border border-broker-border hover:border-broker-gold/40 rounded-lg p-3 text-center transition-all group">
+      className="bg-broker-surface-hover hover:bg-broker-border/60 border border-broker-border hover:border-broker-gold/40 rounded-lg p-3 text-center transition-all group">
       <div className="w-10 h-10 mx-auto mb-1.5 flex items-center justify-center text-broker-text-muted group-hover:text-broker-gold transition-colors">
         {icon}
       </div>
@@ -726,7 +726,7 @@ function RolePicker({ step2Done, game }) {
           <div className="text-xs text-broker-text-muted mb-1">Which player are you?</div>
           {game.players.map(p => (
             <button key={p.id} onClick={() => confirmPlayer(p.id)}
-              className="w-full bg-broker-surface-hover hover:bg-broker-gold/15 border border-broker-border hover:border-broker-gold/40 rounded-lg p-3 text-left transition-all">
+              className="w-full bg-broker-surface-hover hover:bg-broker-border/60 border border-broker-border hover:border-broker-gold/40 rounded-lg p-3 text-left transition-all">
               <span className="text-sm font-bold text-white">{p.name}</span>
             </button>
           ))}
@@ -738,8 +738,8 @@ function RolePicker({ step2Done, game }) {
           {ROLES.map(r => (
             <button key={r.id} onClick={() => pickRole(r.id)}
               disabled={!step2Done}
-              className="bg-broker-surface-hover hover:bg-broker-gold/15 border border-broker-border hover:border-broker-gold/40 disabled:opacity-30 disabled:cursor-not-allowed rounded-lg p-3 text-center transition-all group">
-              <div className="w-8 h-8 mx-auto mb-1 rounded-full bg-broker-border/50 group-hover:bg-broker-gold/20 flex items-center justify-center text-xs font-bold text-broker-text-muted group-hover:text-broker-gold transition-colors">{r.icon}</div>
+              className="bg-broker-surface-hover hover:bg-broker-border/60 border border-broker-border hover:border-broker-gold/40 disabled:opacity-30 disabled:cursor-not-allowed rounded-lg p-3 text-center transition-all group">
+              <div className="w-8 h-8 mx-auto mb-1 rounded-full bg-broker-border/50 group-hover:bg-broker-border flex items-center justify-center text-xs font-bold text-broker-text-muted group-hover:text-broker-gold transition-colors">{r.icon}</div>
               <div className="text-xs font-bold text-white">{r.label}</div>
               <div className="text-[10px] text-broker-text-muted">{r.desc}</div>
             </button>

@@ -80,7 +80,7 @@ export default function BrokerOverview() {
           </div>
           )})()}
         <span className="text-xs text-broker-text-muted whitespace-nowrap">Ph{phase.name} L{limit}</span>
-        <span className={`text-xs font-medium whitespace-nowrap ${game.bank.cash <= 0 ? 'text-red-400' : 'text-broker-text'}`}>Bank <InlineEdit value={game.bank.cash} enabled={su} onSave={v => doAction({ type: 'SET_CASH', entityId: 'bank', entityType: 'bank', value: v })}>{fmt(game.bank.cash)}</InlineEdit></span>
+        <span className={`text-xs font-medium whitespace-nowrap ${game.bank.cash <= 0 ? 'text-red-400' : 'text-broker-cash'}`}>Bank <InlineEdit value={game.bank.cash} enabled={su} onSave={v => doAction({ type: 'SET_CASH', entityId: 'bank', entityType: 'bank', value: v })}>{fmt(game.bank.cash)}</InlineEdit></span>
         {inReplay && <span className="text-[10px] font-medium text-amber-300 bg-amber-900/40 px-1.5 py-0.5 rounded whitespace-nowrap">{curIdx + 1}/{fullLog.length}</span>}
         <div className="flex items-center gap-1 ml-auto">
           <button onClick={() => canUndo() && undo()} className="text-broker-text-muted hover:text-white p-1.5 min-h-[36px] min-w-[36px] flex items-center justify-center" title="Undo"><IconUndo className="w-4 h-4" /></button>
@@ -233,7 +233,7 @@ export default function BrokerOverview() {
                     const isCursor = pi === curRow && ci === curCol
                     return (
                       <td key={c.sym} ref={isCursor ? cursorRef : undefined}
-                        className={`px-2 text-center cursor-pointer ${isCursor ? 'bg-broker-gold/20 ring-1 ring-broker-gold/50' : ci === curCol ? 'bg-broker-surface-hover/20' : ''} ${su && pct > 0 ? 'hover:ring-1 hover:ring-orange-400/50' : ''}`}
+                        className={`px-2 text-center cursor-pointer ${isCursor ? 'bg-broker-surface-hover ring-1 ring-broker-gold/50' : ci === curCol ? 'bg-broker-surface-hover/20' : ''} ${su && pct > 0 ? 'hover:ring-1 hover:ring-orange-400/50' : ''}`}
                         onClick={() => {
                           setCurRow(pi); setCurCol(ci)
                           if (su) setPanel('movecert')
@@ -397,7 +397,7 @@ function BRow({ l, corps, cc, r, onClick, extraCols = 0, highlight, labelStyle }
 
 function Bb({ t, v, o }) {
   const styles = {
-    undefined: 'bg-broker-surface-hover text-white hover:bg-broker-gold/20',
+    undefined: 'bg-broker-surface-hover text-white hover:bg-broker-border',
     red: 'bg-red-900/50 text-red-300 hover:bg-red-800',
     amber: 'bg-amber-900/50 text-amber-300 hover:bg-amber-800',
     muted: 'bg-broker-surface-hover/50 text-broker-text-muted hover:text-white hover:bg-broker-surface-hover',

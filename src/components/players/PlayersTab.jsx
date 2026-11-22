@@ -160,9 +160,9 @@ export default function PlayersTab() {
           <span className="text-xl font-bold text-broker-cash">{fmt(selected.cash)}</span>
         </div>
         <div className="flex justify-between text-sm text-broker-text-muted">
-          <span>Shares: {fmt(totalShareValue)}</span>
-          {totalPrivateValue > 0 && <span>Privates: {fmt(totalPrivateValue)}</span>}
-          <span className="text-broker-text font-medium">Net: {fmt(netWorth)}</span>
+          <span>Shares: <span className="text-broker-cash/70">{fmt(totalShareValue)}</span></span>
+          {totalPrivateValue > 0 && <span>Privates: <span className="text-broker-cash/70">{fmt(totalPrivateValue)}</span></span>}
+          <span className="font-medium">Net: <span className="text-broker-cash">{fmt(netWorth)}</span></span>
         </div>
       </div>
 

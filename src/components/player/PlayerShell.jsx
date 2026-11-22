@@ -124,24 +124,22 @@ function PlayerShellInner() {
 
 function TopBar({ game, fmt, rt, isSR, isOR, me, onChangePlayer }) {
   return (
-    <div className="flex items-center justify-between px-3 py-2 bg-broker-surface border-b border-broker-border flex-shrink-0">
-      <div className="flex items-center gap-2">
-        <button onClick={() => useRoleStore.getState().reset()}
-          className="text-broker-text-muted hover:text-white p-1 min-h-[44px] min-w-[44px] flex items-center justify-center">
-          <IconBack />
-        </button>
-        <span className="text-sm font-bold">{game.title.title}</span>
-        <span className="text-xs text-broker-text-muted">Ph{game.phaseManager?.currentPhase?.name || '1'}</span>
-      </div>
-      <div className="flex items-center gap-2">
-        {rt && (
-          <span className={`text-xs font-medium px-2 py-0.5 rounded ${
-            isSR ? 'bg-green-800 text-green-200' : isOR ? 'bg-amber-800 text-amber-200' : 'bg-broker-green text-white'
-          }`}>{rt.roundType}</span>
-        )}
-        {me && <span className="text-xs text-broker-cash font-bold">{fmt(me.cash)}</span>}
+    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 px-3 py-1.5 bg-broker-surface border-b border-broker-border flex-shrink-0">
+      <button onClick={() => useRoleStore.getState().reset()}
+        className="text-broker-text-muted hover:text-white p-1 min-h-[36px] min-w-[36px] flex items-center justify-center">
+        <IconBack />
+      </button>
+      <span className="text-sm font-bold">{game.title.title}</span>
+      {rt && (
+        <span className={`text-xs font-medium px-1.5 py-0.5 rounded ${
+          isSR ? 'bg-green-800 text-green-200' : isOR ? 'bg-amber-800 text-amber-200' : 'bg-broker-green text-white'
+        }`}>{rt.roundType}</span>
+      )}
+      <span className="text-xs text-broker-text-muted whitespace-nowrap">Ph{game.phaseManager?.phases?.[game.phaseManager.currentIndex]?.name || '1'}</span>
+      {me && <span className="text-xs text-broker-cash font-bold whitespace-nowrap">{fmt(me.cash)}</span>}
+      <div className="flex items-center gap-1 ml-auto">
         <button onClick={() => { const s = useGameStore.getState(); if (s.canUndo()) s.undo() }}
-          className="text-broker-text-muted hover:text-white p-1 min-h-[44px] min-w-[44px] flex items-center justify-center"
+          className="text-broker-text-muted hover:text-white p-1.5 min-h-[36px] min-w-[36px] flex items-center justify-center"
           title="Undo">
           <IconUndo className="w-4 h-4" />
         </button>
