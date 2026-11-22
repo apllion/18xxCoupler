@@ -297,7 +297,7 @@ export default function PlayersTab() {
                       Convert
                     </button>
                   )}
-                  <span className="font-medium w-14 text-right">{fmt(p.value)}</span>
+                  <span className="font-medium w-14 text-right text-broker-cash/70">{fmt(p.value)}</span>
                 </div>
               )
             })}
@@ -414,7 +414,7 @@ function PlayerActions({ game, player, dispatch, fmt, goToCorp }) {
                   )}
                   {canSell && (!isPres || canPresSell) && (
                     <button onClick={() => dispatch({ type: 'SELL_SHARES', playerId: player.id, corpSym: c.sym, percent: regPct })}
-                      className="text-sm bg-red-800 hover:bg-red-700 text-white px-3 py-2 rounded">
+                      className="text-sm bg-red-900/60 hover:bg-red-800 text-red-200 px-3 py-2 rounded">
                       Sell {regPct}%
                     </button>
                   )}
@@ -437,7 +437,7 @@ function PlayerActions({ game, player, dispatch, fmt, goToCorp }) {
           if (v > 0) { dispatch({ type: 'ADJUST_CASH', entityId: player.id, entityType: 'player', amount: -v }); setPayAmount('') }
         }}
           disabled={!(parseInt(payAmount) > 0)}
-          className="text-sm bg-amber-800 hover:bg-amber-700 disabled:opacity-30 text-white px-3 py-2 rounded">
+          className="text-sm bg-broker-green hover:bg-broker-green-light disabled:opacity-30 text-white px-3 py-2 rounded">
           Pay {parseInt(payAmount) > 0 ? fmt(parseInt(payAmount)) : ''}
         </button>
       </div>
@@ -536,7 +536,7 @@ function PlayerActions({ game, player, dispatch, fmt, goToCorp }) {
                   <span className="text-[10px] text-broker-text-muted w-10 text-right">{fmt(price)}</span>
                   <button
                     onClick={() => dispatch({ type: 'SHORT_SELL', playerId: player.id, corpSym: c.sym })}
-                    className="text-sm bg-red-800 hover:bg-red-700 text-white px-3 py-2 rounded"
+                    className="text-sm bg-red-900/60 hover:bg-red-800 text-red-200 px-3 py-2 rounded"
                   >
                     Short
                   </button>

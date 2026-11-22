@@ -106,7 +106,7 @@ export default function CorpsTab() {
           {game.companies?.length > 0 && (
             <button
               onClick={handleCollectAll}
-              className="text-sm bg-green-900 hover:bg-green-800 text-green-200 px-3 py-2 rounded"
+              className="text-sm bg-broker-green/60 hover:bg-broker-green text-green-200 px-3 py-2 rounded"
             >
               Collect Privates
             </button>
@@ -366,7 +366,7 @@ function CorpDetail({ game, corp, dispatch, fmt, onNext, plusPlus }) {
             {lastRev > 0 && (
               <button
                 onClick={() => setRevenue(String(lastRev))}
-                className="bg-green-900 hover:bg-green-800 text-green-200 px-3 py-2 rounded-lg text-sm font-medium"
+                className="bg-broker-green/60 hover:bg-broker-green text-green-200 px-3 py-2 rounded-lg text-sm font-medium"
               >
                 Use {fmt(lastRev)}
               </button>
@@ -412,7 +412,7 @@ function CorpDetail({ game, corp, dispatch, fmt, onNext, plusPlus }) {
           <button
             onClick={handlePay}
             disabled={revNum <= 0}
-            className="flex-1 bg-green-800 hover:bg-green-700 disabled:opacity-30 disabled:cursor-not-allowed text-white py-3 rounded-lg font-medium transition-colors"
+            className="flex-1 bg-broker-green hover:bg-broker-green-light disabled:opacity-30 disabled:cursor-not-allowed text-white py-3 rounded-lg font-medium transition-colors"
           >
             <div>Pay {revNum > 0 ? fmt(revNum) : ''}</div>
             <div className="text-xs opacity-70">
@@ -715,7 +715,7 @@ function CorpSharePanel({ game, corp, dispatch, fmt }) {
                         <button key={pp.price}
                           onClick={() => ok && dispatch({ type: 'CORP_PAR', buyerCorpSym: corp.sym, targetCorpSym: c.sym, parPrice: pp.price, row: pp.row, col: pp.col })}
                           disabled={!ok}
-                          className={`text-sm px-3 py-2 rounded ${ok ? 'bg-green-800 hover:bg-green-700 text-white' : 'bg-broker-surface-hover text-broker-text-muted cursor-not-allowed'}`}
+                          className={`text-sm px-3 py-2 rounded ${ok ? 'bg-broker-green hover:bg-broker-green-light text-white' : 'bg-broker-surface-hover text-broker-text-muted cursor-not-allowed'}`}
                         >
                           @{fmt(pp.price)}
                         </button>
@@ -1162,7 +1162,7 @@ function LoanPanel({ game, corp, dispatch, fmt }) {
         </div>
         <button onClick={() => dispatch({ type: 'PAY_DEBT_TOKEN', corpSym: corp.sym })}
           disabled={corp.cash < debtPrice}
-          className="text-sm bg-green-800 hover:bg-green-700 disabled:opacity-30 text-white px-3 py-2 rounded">
+          className="text-sm bg-broker-green hover:bg-broker-green-light disabled:opacity-30 text-white px-3 py-2 rounded">
           Pay Debt Token ({fmt(debtPrice)})
         </button>
       </div>
@@ -1202,7 +1202,7 @@ function LoanPanel({ game, corp, dispatch, fmt }) {
         </button>
         <button onClick={() => dispatch({ type: 'REPAY_LOAN', corpSym: corp.sym })}
           disabled={!canRepay}
-          className="text-sm bg-green-800 hover:bg-green-700 disabled:opacity-30 text-white px-3 py-2 rounded">
+          className="text-sm bg-broker-green hover:bg-broker-green-light disabled:opacity-30 text-white px-3 py-2 rounded">
           Repay (-{fmt(loanValue)})
         </button>
         {interest > 0 && (
@@ -1485,7 +1485,7 @@ function IssueRedeemPanel({ game, corp, dispatch, fmt }) {
         {maxRedeem > 0 && Array.from({ length: maxRedeem }, (_, i) => i + 1).map(n => (
           <button key={`r${n}`}
             onClick={() => dispatch({ type: 'REDEEM_SHARES', corpSym: corp.sym, count: n })}
-            className="text-sm bg-green-800 hover:bg-green-700 text-white px-3 py-2 rounded">
+            className="text-sm bg-broker-green hover:bg-broker-green-light text-white px-3 py-2 rounded">
             Redeem {n} (−{fmt(redeemPrice * n)})
           </button>
         ))}

@@ -119,7 +119,7 @@ export function NumPad({ onSubmit, onCancel, presets = [], recents = [], initial
   const OpBtn = ({ label, onTap, variant = 'op' }) => {
     const colors = {
       op: 'bg-broker-green text-white active:bg-broker-green-light',
-      done: 'bg-green-700 text-white active:bg-green-600',
+      done: 'bg-broker-gold text-broker-bg active:bg-broker-gold-dim',
       clear: 'bg-red-800/60 text-red-300 active:bg-red-700',
     }
     return (

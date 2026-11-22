@@ -193,7 +193,7 @@ function CorpCard({ game, fmt, me, myPlayerId, corps, dispatch, corp, isMyPres, 
                 {rev > 0 && (
                   <div className="flex gap-2 mt-2">
                     <button onClick={() => { dispatch({ type: 'PAY_DIVIDEND', corpSym: corp.sym, totalRevenue: rev }); setRevInput('') }}
-                      className="text-sm bg-green-700 text-white px-4 py-3 rounded-lg font-medium flex-1 min-h-[44px]">
+                      className="text-sm bg-broker-green text-white px-4 py-3 rounded-lg font-medium flex-1 min-h-[44px]">
                       Pay {fmt(rev)}
                     </button>
                     <button onClick={() => { dispatch({ type: 'WITHHOLD_DIVIDEND', corpSym: corp.sym, totalRevenue: rev }); setRevInput('') }}
@@ -307,7 +307,7 @@ function CorpCard({ game, fmt, me, myPlayerId, corps, dispatch, corp, isMyPres, 
                   <div className="text-xs text-broker-text-muted mb-1 border-l-2 border-amber-500 pl-2">Place Token</div>
                   <div className="flex gap-2 flex-wrap">
                     <button onClick={() => dispatch({ type: 'PLACE_TOKEN', corpSym: corp.sym, price: corp.tokens[corp.tokensPlaced] || 0 })}
-                      className="text-sm bg-green-700 text-white px-3 py-2 rounded-lg min-h-[44px]">
+                      className="text-sm bg-broker-green text-white px-3 py-2 rounded-lg min-h-[44px]">
                       Place {fmt(corp.tokens[corp.tokensPlaced] || 0)}
                     </button>
                     {(game.title.terrainCosts || []).map(tc => (
@@ -374,7 +374,7 @@ function CorpCard({ game, fmt, me, myPlayerId, corps, dispatch, corp, isMyPres, 
                       ))}
                       {Array.from({ length: maxRedeem }, (_, i) => i + 1).map(n => (
                         <button key={`r${n}`} onClick={() => dispatch({ type: 'REDEEM_SHARES', corpSym: corp.sym, count: n })}
-                          className="text-sm bg-green-800 text-white px-3 py-2 rounded-lg min-h-[44px]">Redeem {n} -{fmt(rp * n)}</button>
+                          className="text-sm bg-broker-green text-white px-3 py-2 rounded-lg min-h-[44px]">Redeem {n} -{fmt(rp * n)}</button>
                       ))}
                     </div>
                   </div>
@@ -405,7 +405,7 @@ function CorpCard({ game, fmt, me, myPlayerId, corps, dispatch, corp, isMyPres, 
                             </div>
                             <button onClick={() => dispatch({ type: 'PAY_DEBT_TOKEN', corpSym: corp.sym })}
                               disabled={corp.cash < dp}
-                              className="text-sm bg-green-800 disabled:opacity-30 text-white px-3 py-2 rounded-lg min-h-[44px]">
+                              className="text-sm bg-broker-green disabled:opacity-30 text-white px-3 py-2 rounded-lg min-h-[44px]">
                               Pay Debt Token ({fmt(dp)})
                             </button>
                           </div>
@@ -423,7 +423,7 @@ function CorpCard({ game, fmt, me, myPlayerId, corps, dispatch, corp, isMyPres, 
                             {corp.loans > 0 && (
                               <>
                                 <button onClick={() => dispatch({ type: 'REPAY_LOAN', corpSym: corp.sym })}
-                                  className="text-sm bg-green-800 text-white px-3 py-2 rounded-lg flex-1 min-h-[44px]">
+                                  className="text-sm bg-broker-green text-white px-3 py-2 rounded-lg flex-1 min-h-[44px]">
                                   Repay {label}
                                 </button>
                                 <button onClick={() => dispatch({ type: 'PAY_INTEREST', corpSym: corp.sym })}
@@ -449,7 +449,7 @@ function CorpCard({ game, fmt, me, myPlayerId, corps, dispatch, corp, isMyPres, 
                                 {target.ipoShares > 0 && (
                                   <button onClick={() => dispatch({ type: 'CORP_BUY_SHARE', buyerCorpSym: corp.sym, targetCorpSym: target.sym, source: 'ipo', percent: shareSize })}
                                     disabled={corp.cash < tp}
-                                    className="text-xs bg-green-800 disabled:opacity-30 text-white px-2 py-1 rounded min-h-[36px]">
+                                    className="text-xs bg-broker-green disabled:opacity-30 text-white px-2 py-1 rounded min-h-[36px]">
                                     <CorpBadge sym={target.sym} color={target.color} textColor={target.textColor} /> IPO
                                   </button>
                                 )}

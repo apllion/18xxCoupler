@@ -75,7 +75,7 @@ export default function SRView({ game, fmt, me, myPlayerId, corps, dispatch }) {
           <span className="text-xs text-broker-text-muted">Net {fmt(me.cash + totalShareValue)}</span>
         </div>
         {fValue > 0 && (
-          <span className="bg-green-800 text-green-200 text-xs font-bold px-2 py-1 rounded-lg">
+          <span className="bg-broker-green text-white text-xs font-bold px-2 py-1 rounded-lg">
             F {fmt(fValue)}
           </span>
         )}
@@ -90,7 +90,7 @@ export default function SRView({ game, fmt, me, myPlayerId, corps, dispatch }) {
 
       {/* Holdings */}
       <div>
-        <div className="text-xs font-medium text-broker-text-muted mb-1 border-l-2 border-green-500 pl-2">Holdings</div>
+        <div className="text-xs font-medium text-broker-text-muted mb-1 border-l-2 border-broker-accent pl-2">Holdings</div>
         <div className="space-y-1">
           {holdings.map(h => (
             <div key={h.corp.sym} className="flex items-center justify-between bg-broker-surface rounded-lg px-3 py-2">
@@ -102,12 +102,12 @@ export default function SRView({ game, fmt, me, myPlayerId, corps, dispatch }) {
               </div>
               <div className="flex items-center gap-1">
                 <button onClick={() => dispatch({ type: 'SELL_SHARES', playerId: myPlayerId, corpSym: h.corp.sym, percent: shareSize })}
-                  className="text-sm bg-red-800 hover:bg-red-700 text-white px-3 py-2 rounded-lg font-medium min-h-[44px]">
+                  className="text-sm bg-red-900/60 hover:bg-red-800 text-red-200 px-3 py-2 rounded-lg font-medium min-h-[44px]">
                   Sell
                 </button>
                 {h.pct > shareSize && (
                   <button onClick={() => dispatch({ type: 'SELL_SHARES', playerId: myPlayerId, corpSym: h.corp.sym, percent: h.pct })}
-                    className="text-xs bg-red-900 hover:bg-red-800 text-red-300 px-2 py-2 rounded-lg min-h-[44px]">
+                    className="text-xs bg-red-900/40 hover:bg-red-900 text-red-300 px-2 py-2 rounded-lg min-h-[44px]">
                     All
                   </button>
                 )}
@@ -131,7 +131,7 @@ export default function SRView({ game, fmt, me, myPlayerId, corps, dispatch }) {
                   <span className="text-sm text-red-300">{sh.percent}% short</span>
                 </div>
                 <button onClick={() => dispatch({ type: 'CLOSE_SHORT', playerId: myPlayerId, corpSym: sh.corpSym, percent: sh.percent })}
-                  className="text-sm bg-green-800 hover:bg-green-700 text-white px-3 py-2 rounded-lg font-medium min-h-[44px]">
+                  className="text-sm bg-broker-green hover:bg-broker-green-light text-white px-3 py-2 rounded-lg font-medium min-h-[44px]">
                   Close
                 </button>
               </div>
@@ -142,7 +142,7 @@ export default function SRView({ game, fmt, me, myPlayerId, corps, dispatch }) {
 
       {/* Buy share */}
       <div>
-        <div className="text-xs font-medium text-broker-text-muted mb-1 border-l-2 border-green-500 pl-2">Buy Share</div>
+        <div className="text-xs font-medium text-broker-text-muted mb-1 border-l-2 border-broker-accent pl-2">Buy Share</div>
         {buyCorpSym && buyTarget ? (
           <div className="bg-broker-surface rounded-lg p-3">
             <div className="flex items-center gap-2 mb-2">
@@ -153,7 +153,7 @@ export default function SRView({ game, fmt, me, myPlayerId, corps, dispatch }) {
             <div className="flex gap-2">
               {buyTarget.ipoShares > 0 && (
                 <button onClick={() => { dispatch({ type: 'BUY_SHARE', playerId: myPlayerId, corpSym: buyCorpSym, source: 'ipo', percent: shareSize }); setBuyCorpSym(null) }}
-                  className="text-sm bg-green-700 hover:bg-green-600 text-white px-4 py-3 rounded-lg font-medium flex-1 min-h-[44px]">
+                  className="text-sm bg-broker-green hover:bg-broker-green-light text-white px-4 py-3 rounded-lg font-medium flex-1 min-h-[44px]">
                   IPO {fmt(buyTarget.parPrice || corpPrice(game.stockMarket, buyCorpSym))}
                 </button>
               )}
@@ -191,7 +191,7 @@ export default function SRView({ game, fmt, me, myPlayerId, corps, dispatch }) {
       {/* Par — two-step: pick corp, then pick price */}
       {unfloated.length > 0 && (
         <div>
-          <div className="text-xs font-medium text-broker-text-muted mb-1 border-l-2 border-green-500 pl-2">Par</div>
+          <div className="text-xs font-medium text-broker-text-muted mb-1 border-l-2 border-broker-accent pl-2">Par</div>
           {parCorpSym && parCorp ? (
             <div className="bg-broker-surface rounded-lg p-3">
               <div className="flex items-center gap-2 mb-2">
@@ -208,7 +208,7 @@ export default function SRView({ game, fmt, me, myPlayerId, corps, dispatch }) {
                       onClick={() => { dispatch({ type: 'PAR_SHARE', playerId: myPlayerId, corpSym: parCorpSym, parPrice: p.price, row: p.row, col: p.col }); setParCorpSym(null); setParPrice(null) }}
                       disabled={!canAfford}
                       className={`text-sm px-4 py-3 rounded-lg font-medium min-h-[44px] ${
-                        canAfford ? 'bg-green-700 hover:bg-green-600 text-white' : 'bg-broker-surface-hover text-broker-text-muted opacity-40'
+                        canAfford ? 'bg-broker-green hover:bg-broker-green-light text-white' : 'bg-broker-surface-hover text-broker-text-muted opacity-40'
                       }`}>
                       {fmt(p.price)}
                       <span className="block text-[10px] opacity-70">cost {fmt(cost)}</span>
@@ -261,7 +261,7 @@ export default function SRView({ game, fmt, me, myPlayerId, corps, dispatch }) {
               ))}
               {Array.from({ length: maxRedeem }, (_, i) => i + 1).map(n => (
                 <button key={`r${n}`} onClick={() => dispatch({ type: 'REDEEM_SHARES', corpSym: c.sym, count: n })}
-                  className="text-sm bg-green-800 text-white px-3 py-2 rounded-lg min-h-[44px]">Redeem {n} -{fmt(rp * n)}</button>
+                  className="text-sm bg-broker-green text-white px-3 py-2 rounded-lg min-h-[44px]">Redeem {n} -{fmt(rp * n)}</button>
               ))}
             </div>
           </div>
@@ -285,7 +285,7 @@ export default function SRView({ game, fmt, me, myPlayerId, corps, dispatch }) {
                 <div className="flex gap-2 flex-wrap">
                   {corps.filter(c => c.floated).map(c => (
                     <button key={c.sym} onClick={() => dispatch({ type: 'SHORT_SELL', playerId: myPlayerId, corpSym: c.sym, percent: shareSize })}
-                      className="text-sm bg-red-900 hover:bg-red-800 text-red-300 px-3 py-2 rounded-lg min-h-[44px]">
+                      className="text-sm bg-red-900/40 hover:bg-red-900 text-red-300 px-3 py-2 rounded-lg min-h-[44px]">
                       <CorpBadge sym={c.sym} color={c.color} textColor={c.textColor} />
                     </button>
                   ))}
@@ -299,12 +299,12 @@ export default function SRView({ game, fmt, me, myPlayerId, corps, dispatch }) {
                 <div className="text-xs text-broker-text-muted mb-1 border-l-2 border-amber-500 pl-2">Player Loans</div>
                 <div className="flex gap-2">
                   <button onClick={() => dispatch({ type: 'PLAYER_BORROW', playerId: myPlayerId })}
-                    className="text-sm bg-red-800 hover:bg-red-700 text-white px-4 py-3 rounded-lg font-medium flex-1 min-h-[44px]">
+                    className="text-sm bg-red-900/60 hover:bg-red-800 text-red-200 px-4 py-3 rounded-lg font-medium flex-1 min-h-[44px]">
                     Borrow
                   </button>
                   {debt > 0 && (
                     <button onClick={() => dispatch({ type: 'PLAYER_REPAY', playerId: myPlayerId })}
-                      className="text-sm bg-green-800 hover:bg-green-700 text-white px-4 py-3 rounded-lg font-medium flex-1 min-h-[44px]">
+                      className="text-sm bg-broker-green hover:bg-broker-green-light text-white px-4 py-3 rounded-lg font-medium flex-1 min-h-[44px]">
                       Repay
                     </button>
                   )}

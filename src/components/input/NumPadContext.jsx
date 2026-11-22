@@ -101,7 +101,7 @@ export function NumPadProvider({ children }) {
                 Cancel
               </button>
               <button onClick={confirm}
-                className="flex-1 py-3 rounded-xl bg-green-700 text-white font-bold">
+                className="flex-1 py-3 rounded-xl bg-broker-gold text-broker-bg font-bold">
                 OK
               </button>
             </div>

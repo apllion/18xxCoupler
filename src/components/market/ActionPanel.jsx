@@ -138,7 +138,7 @@ function BuySection({ game, player, dispatch, fmt }) {
                   disabled={!canAfford}
                   className={`text-xs px-2 py-1 rounded ${
                     canAfford
-                      ? 'bg-green-800 hover:bg-green-700 text-green-200'
+                      ? 'bg-broker-green hover:bg-broker-green-light text-white'
                       : 'bg-broker-surface-hover text-broker-text-muted cursor-not-allowed'
                   }`}
                 >
@@ -151,7 +151,7 @@ function BuySection({ game, player, dispatch, fmt }) {
                   disabled={!canAfford}
                   className={`text-xs px-2 py-1 rounded ${
                     canAfford
-                      ? 'bg-green-800 hover:bg-green-700 text-green-200'
+                      ? 'bg-broker-green hover:bg-broker-green-light text-white'
                       : 'bg-broker-surface-hover text-broker-text-muted cursor-not-allowed'
                   }`}
                 >
@@ -283,7 +283,7 @@ function ShortSection({ game, player, dispatch, fmt }) {
                   <button
                     onClick={() => dispatch({ type: 'CLOSE_SHORT', playerId: player.id, corpSym })}
                     disabled={player.cash < (price || 0)}
-                    className="text-xs px-2 py-1 rounded bg-green-900 hover:bg-green-800 disabled:opacity-30 text-green-200"
+                    className="text-xs px-2 py-1 rounded bg-broker-green/60 hover:bg-broker-green disabled:opacity-30 text-white"
                   >
                     Close → -{fmt(price)}
                   </button>

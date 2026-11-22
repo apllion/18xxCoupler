@@ -211,7 +211,7 @@ function BreweryIncomePanel({ game, dispatch, fmt }) {
           />
           <button
             onClick={handleCollect}
-            className="text-xs bg-green-800 hover:bg-green-700 text-white px-3 py-1 rounded"
+            className="text-xs bg-broker-green hover:bg-broker-green-light text-white px-3 py-1 rounded"
           >
             Collect to Treasury
           </button>

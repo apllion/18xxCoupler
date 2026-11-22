@@ -8,6 +8,7 @@ import { useGameStore } from '../../store/gameStore.js'
 import { NumPadProvider, usePhysicalKeyboard } from '../input/NumPadContext.jsx'
 import { IconBack, IconUndo } from '../shared/Icons.jsx'
 import CorpBadge from '../shared/CorpBadge.jsx'
+import { playerNetWorth } from '../../engine/rules/netWorth.js'
 import SRView from './SRView.jsx'
 import ORView from './ORView.jsx'
 
@@ -82,7 +83,9 @@ function PlayerShellInner() {
       ? <PregameView game={game} me={me} fmt={fmt} />
       : <ORView {...data} />
 
-  const modeColor = isSR ? 'green' : isOR ? 'amber' : 'teal'
+  const modeBorder = isSR ? 'border-broker-accent' : isOR ? 'border-amber-500' : 'border-broker-accent'
+  const modeText = isSR ? 'text-broker-accent' : isOR ? 'text-amber-300' : 'text-broker-accent'
+  const modeLabel = isSR ? 'Stock Round' : isOR ? 'Operating Round' : rt?.roundType || 'Round'
 
   return (
     <div className="min-h-screen bg-broker-bg text-white flex flex-col">
@@ -94,13 +97,13 @@ function PlayerShellInner() {
         <div className="flex-1 flex overflow-hidden">
           {/* Left panel: compact holdings */}
           <div className="w-[40%] border-r border-broker-border overflow-y-auto p-3">
-            <PlayerHoldings me={me} fmt={fmt} holdings={holdings} corps={corps} shareSize={shareSize}
+            <PlayerHoldings game={game} me={me} fmt={fmt} holdings={holdings} corps={corps} shareSize={shareSize}
               certLimit={certLimit} playerCertCount={baseData.playerCertCount} />
           </div>
           {/* Right panel: active input area */}
           <div className="w-[60%] overflow-y-auto p-4">
-            <div className={`border-l-2 border-${modeColor}-500 pl-3 mb-2`}>
-              <span className={`text-xs font-bold text-${modeColor}-300`}>{isSR ? 'Stock Round' : isOR ? 'Operating Round' : rt?.roundType || 'Round'}</span>
+            <div className={`border-l-2 ${modeBorder} pl-3 mb-2`}>
+              <span className={`text-xs font-bold ${modeText}`}>{modeLabel}</span>
             </div>
             {activeView}
           </div>
@@ -112,8 +115,8 @@ function PlayerShellInner() {
           <PlayerHoldings me={me} fmt={fmt} holdings={holdings} corps={corps} shareSize={shareSize}
             certLimit={certLimit} playerCertCount={baseData.playerCertCount} compact />
           {/* Mode indicator */}
-          <div className={`border-l-2 border-${modeColor}-500 pl-3 mb-3 mt-3`}>
-            <span className={`text-xs font-bold text-${modeColor}-300`}>{isSR ? 'Stock Round' : isOR ? 'Operating Round' : rt?.roundType || 'Round'}</span>
+          <div className={`border-l-2 ${modeBorder} pl-3 mb-3 mt-3`}>
+            <span className={`text-xs font-bold ${modeText}`}>{modeLabel}</span>
           </div>
           {activeView}
         </div>
@@ -152,7 +155,7 @@ function TopBar({ game, fmt, rt, isSR, isOR, me, onChangePlayer }) {
   )
 }
 
-function PlayerHoldings({ me, fmt, holdings, corps, shareSize, certLimit, playerCertCount, compact }) {
+function PlayerHoldings({ game, me, fmt, holdings, corps, shareSize, certLimit, playerCertCount, compact }) {
   const totalShareValue = holdings.reduce((s, h) => {
     const price = h.corp.price || 0
     return s + price * (h.pct / shareSize)
@@ -165,7 +168,7 @@ function PlayerHoldings({ me, fmt, holdings, corps, shareSize, certLimit, player
         <div className="flex items-center gap-3">
           <span className="text-lg font-bold">{me.name}</span>
           <span className="text-broker-cash font-bold">{fmt(me.cash)}</span>
-          <span className="text-xs text-broker-text-muted">Net {fmt(me.cash + totalShareValue)}</span>
+          <span className="text-xs text-broker-text-muted">Net <span className="text-broker-cash">{fmt(playerNetWorth(game, me.id))}</span></span>
           <span className="text-xs text-broker-text-muted">Certs {certs}/{certLimit}</span>
         </div>
         {holdings.length > 0 && (
@@ -191,8 +194,8 @@ function PlayerHoldings({ me, fmt, holdings, corps, shareSize, certLimit, player
         <div className="flex items-center gap-3 mt-1">
           <span className="text-2xl font-bold text-broker-cash">{fmt(me.cash)}</span>
           <div className="text-xs text-broker-text-muted space-y-0.5">
-            <div>Shares: {fmt(totalShareValue)}</div>
-            <div>Net: {fmt(me.cash + totalShareValue)}</div>
+            <div>Shares: <span className="text-broker-cash/70">{fmt(totalShareValue)}</span></div>
+            <div>Net: <span className="text-broker-cash">{fmt(playerNetWorth(game, me.id))}</span></div>
             <div>Certs: {certs}/{certLimit}</div>
           </div>
         </div>
