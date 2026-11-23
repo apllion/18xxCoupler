@@ -1079,9 +1079,10 @@ function handleHalfDividend(state, { corpSym, totalRevenue }) {
   corp.cash += treasuryHalf
   state.bank.cash -= treasuryHalf
 
-  // Half pay: no price movement (or move right once depending on title)
-  // Most titles: no movement. Some: move right if > 0.
-  // Default: no movement for half pay
+  // Half pay price movement: use the half-pay perShare for the movement strategy.
+  // Titles like 1846 have thresholds (e.g., >= 0.5x price → stay, >= price → right).
+  // The perShare here is the half-pay amount per share, so the strategy can decide.
+  moveDividend(state.stockMarket, corpSym, perShare, state.title.dividendMovement, totalRevenue)
 }
 
 function handleBuyTrain(state, { corpSym, trainName, price, fromCorpSym }) {

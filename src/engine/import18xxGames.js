@@ -86,6 +86,7 @@ function inferShareSource(state, corpSym, _shareIndex) {
   if (!corp) return 'ipo'
   if (corp.ipoShares > 0 && corp.marketShares <= 0) return 'ipo'
   if (corp.ipoShares <= 0 && corp.marketShares > 0) return 'market'
+  if (corp.ipoShares <= 0) return 'market' // IPO empty, must be market
   if (corp.ipoShares > 0) return 'ipo' // prefer IPO when both available
   return 'ipo'
 }
@@ -487,6 +488,14 @@ export function importGame(gameJson) {
     errors: [],
   }
 
+  // Detect SR/OR boundaries for sold-out adjustments
+  const SR_ACTIONS = new Set(['par', 'buy_shares', 'sell_shares', 'pass', 'bid',
+    'program_share_pass', 'program_buy_shares', 'program_merger_pass'])
+  const OR_ACTIONS = new Set(['run_routes', 'dividend', 'buy_train', 'lay_tile', 'place_token',
+    'buy_company', 'sell_company', 'payoff', 'take_loan', 'scrap_train', 'assign',
+    'convert', 'merge', 'choose'])
+  let lastPhase = null // 'sr' | 'or'
+
   // Replay each action
   for (let actionIdx = 0; actionIdx <= actions.length; actionIdx++) {
     // Inject implicit withhold $0 for corp turns that had no dividend
@@ -505,6 +514,20 @@ export function importGame(gameJson) {
 
     if (actionIdx >= actions.length) break
     const action = actions[actionIdx]
+
+    // Detect SR→OR transition → inject sold-out adjustment
+    let currentPhase = lastPhase
+    if (SR_ACTIONS.has(action.type)) currentPhase = 'sr'
+    else if (OR_ACTIONS.has(action.type)) currentPhase = 'or'
+
+    if (currentPhase === 'or' && lastPhase === 'sr') {
+      // End of SR: apply sold-out adjustment (corps with 0 IPO + 0 market shares move up)
+      try {
+        applyAction(state, { type: 'SOLD_OUT_ADJUST' })
+        stats.applied++
+      } catch { /* no-op */ }
+    }
+    if (currentPhase) lastPhase = currentPhase
 
     const converted = convertAction(action, state, playerMap, revenueMap, variantToBase)
     if (!converted) {
