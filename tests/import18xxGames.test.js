@@ -60,8 +60,9 @@ describe('import18xxGames — 1889', () => {
   })
 })
 
-// Batch tests for all supported titles
+// Batch tests for all titles with local game data
 const ALL_TITLES = [
+  { dir: '1817', count: 50 },
   { dir: '1830', count: 50 },
   { dir: '1846', count: 100 },
   { dir: '1849', count: 50 },
@@ -72,6 +73,7 @@ const ALL_TITLES = [
   { dir: '18Chesapeake', count: 50 },
   { dir: '18MEX', count: 50 },
   { dir: '18MS', count: 50 },
+  { dir: '21Moon', count: 50 },
 ]
 
 describe.each(ALL_TITLES)('import batch — $dir ($count games)', ({ dir, count }) => {
