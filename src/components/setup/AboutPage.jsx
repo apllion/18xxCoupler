@@ -65,22 +65,7 @@ export default function AboutPage({ onEnter }) {
           </p>
         </div>
 
-        <div>
-          <h2 className="text-lg font-bold text-white mb-2">18xx.games Integration</h2>
-          <p>
-            Laytrack can import game data from{' '}
-            <a href="https://18xx.games" className="text-broker-gold hover:underline" target="_blank" rel="noopener">18xx.games</a>,
-            an open-source platform by Toby Mao (MIT License). Game import replays financial
-            actions only — no map, tile, or route data is used. This feature requires an
-            internet connection and is subject to 18xx.games API availability.
-          </p>
-          <p className="mt-2">
-            API requests are routed through a CORS proxy hosted on{' '}
-            <a href="https://www.cloudflare.com" className="text-broker-gold hover:underline" target="_blank" rel="noopener">Cloudflare Workers</a>{' '}
-            (Cloudflare, Inc., USA). The proxy forwards requests to 18xx.games and does not
-            store, log, or process any data beyond what is necessary to relay the request.
-          </p>
-        </div>
+
 
         <div>
           <h2 className="text-lg font-bold text-white mb-2">Datenschutzerklärung / Privacy Policy</h2>
@@ -121,28 +106,7 @@ export default function AboutPage({ onEnter }) {
             Legal basis: Art. 6(1)(a) GDPR (consent — you initiate the connection).
           </p>
 
-          <p className="font-medium mt-3">5. 18xx.games API</p>
-          <p>
-            When you browse or import games from 18xx.games, your browser makes requests
-            through a CORS proxy hosted on Cloudflare Workers (Cloudflare, Inc., 101 Townsend St,
-            San Francisco, CA 94107, USA). The proxy forwards the request to the 18xx.games API
-            (operated by Toby Mao). This transmits your <strong>IP address</strong> to Cloudflare
-            and to 18xx.games servers. The proxy does not store, log, or process any data beyond
-            what is necessary to relay the request. Only publicly available game data is retrieved.
-            This connection is only made when you explicitly request it (clicking Browse or Import).
-            Legal basis: Art. 6(1)(a) GDPR (consent — you initiate the request).
-          </p>
-          <p className="mt-1">
-            Cloudflare may process metadata (IP addresses, request headers) as part of their
-            infrastructure. See{' '}
-            <a href="https://www.cloudflare.com/privacypolicy/"
-              className="text-broker-gold hover:underline" target="_blank" rel="noopener">
-              Cloudflare's Privacy Policy
-            </a>.
-            Transfer to USA under EU-US Data Privacy Framework.
-          </p>
-
-          <p className="font-medium mt-3">6. GitHub Pages Hosting</p>
+          <p className="font-medium mt-3">5. GitHub Pages Hosting</p>
           <p>
             This site is hosted on GitHub Pages (GitHub, Inc. / Microsoft Corp., USA).
             GitHub may process IP addresses in server logs as part of providing the hosting

@@ -19,13 +19,4 @@ export default defineConfig({
     ...(process.env.NO_SSL ? [] : [basicSsl()]),
   ],
   base: '/laytrack/',
-  server: {
-    proxy: {
-      '/18xx-games-api': {
-        target: 'https://18xx.games',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/18xx-games-api/, '/api'),
-      },
-    },
-  },
 })

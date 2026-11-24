@@ -12,7 +12,6 @@ export default function GameSelector() {
   const navigate = useNavigate()
   const location = useLocation()
   const loadGame = useGameStore((s) => s.loadGame)
-  const importFrom18xxGames = useGameStore((s) => s.importFrom18xxGames)
   const sync = useSyncContext()
   const titles = allTitles()
   const [savedGames, setSavedGames] = useState(() => loadAllGames())
@@ -141,7 +140,7 @@ export default function GameSelector() {
   // ===== DEPOT VIEW (load, save, import, export) =====
   if (view === 'depot') {
     return <DepotView navigate={navigate} onBack={() => setView('hub')}
-      loadGame={loadGame} importFrom18xxGames={importFrom18xxGames}
+      loadGame={loadGame}
       savedGames={savedGames} setSavedGames={setSavedGames} />
   }
 
@@ -366,11 +365,8 @@ function TitlesView({ titles, navigate, onBack, showLegend, setShowLegend, showI
 }
 
 // ===== DEPOT VIEW (saved games, load/save/import/export) =====
-function DepotView({ navigate, onBack, loadGame, importFrom18xxGames, savedGames, setSavedGames }) {
+function DepotView({ navigate, onBack, loadGame, savedGames, setSavedGames }) {
   const fileRef = useRef(null)
-  const [importId, setImportId] = useState('')
-  const [importError, setImportError] = useState(null)
-  const [importing, setImporting] = useState(false)
   const savedList = Object.entries(savedGames)
     .map(([key, game]) => ({ key, game }))
     .sort((a, b) => (b.game.createdAt || 0) - (a.game.createdAt || 0))
@@ -443,36 +439,6 @@ function DepotView({ navigate, onBack, loadGame, importFrom18xxGames, savedGames
           Load from JSON file
         </button>
         <input ref={fileRef} type="file" accept=".json" onChange={handleImport} className="hidden" />
-
-        {/* 18xx.games import */}
-        <div className="bg-broker-surface border border-broker-border rounded-lg p-3 mb-2">
-          <div className="text-xs text-broker-text-muted mb-2">From 18xx.games</div>
-          <div className="flex gap-2">
-            <input type="text" value={importId}
-              onChange={(e) => { setImportId(e.target.value.replace(/\D/g, '')); setImportError(null) }}
-              placeholder="Game ID"
-              className="flex-1 bg-broker-bg border border-broker-border rounded px-3 py-2 text-sm text-white placeholder-broker-text-muted font-mono focus:outline-none focus:border-broker-gold transition-colors" />
-            <button
-              onClick={async () => {
-                if (!importId || importing) return
-                setImporting(true); setImportError(null)
-                try { await importFrom18xxGames(parseInt(importId, 10)); navigate('/') }
-                catch (err) { setImportError(err.message) }
-                finally { setImporting(false) }
-              }}
-              disabled={!importId || importing}
-              className="bg-broker-green hover:bg-broker-green-light text-white px-4 py-2 rounded text-sm disabled:opacity-40 transition-colors">
-              {importing ? '...' : 'Import'}
-            </button>
-          </div>
-          {importError && <div className="text-xs text-red-400 mt-2">{importError}</div>}
-          <LiveGames onImport={async (id) => {
-            setImporting(true); setImportError(null)
-            try { await importFrom18xxGames(id); navigate('/') }
-            catch (err) { setImportError(err.message) }
-            finally { setImporting(false) }
-          }} importing={importing} />
-        </div>
 
         <button onClick={onBack} className="mt-4 text-xs text-broker-text-muted hover:text-white w-full text-center"><IconBack className="w-3 h-3 inline" /> Back</button>
       </div>
@@ -685,15 +651,6 @@ function TitleButton({ t, onClick, onShowLegend, onShowInfo }) {
   )
 }
 
-const SUPPORTED_TITLES = new Set([
-  '1817', '1822', '1822CA', '1822MX', '1830', '1846', '1847 AE', '1849', '1858', '1860',
-  '1861', '1862', '1867', '1871', '1880', '1889',
-  '18Chesapeake', '18GB', '18India', '18Ireland', '18MEX', '18MS', '18RHL', '18 Royal Gorge', '18SJ', '18USA',
-  '21Moon', '22Mars',
-])
-
-const SORTED_TITLES = [...SUPPORTED_TITLES].sort()
-
 // ===== ROLE PICKER =====
 const ROLES = [
   { id: 'umpire',   label: 'Umpire',   desc: 'Full control. Desktop/laptop.',    icon: 'U' },
@@ -750,67 +707,3 @@ function RolePicker({ step2Done, game }) {
   )
 }
 
-function LiveGames({ onImport, importing }) {
-  const [games, setGames] = useState(null)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
-  const [tab, setTab] = useState('active')
-  const [titleFilter, setTitleFilter] = useState('')
-
-  function fetchGames(status, title) {
-    setLoading(true); setError(null); setTab(status)
-    const base = import.meta.env.VITE_18XX_API || '/18xx-games-api'
-    const url = title
-      ? `${base}/game?title=${encodeURIComponent(title)}&status=${status}&page=1`
-      : `${base}/game?status=${status}&page=1`
-    fetch(url)
-      .then(r => { if (!r.ok) throw new Error('Failed'); return r.json() })
-      .then(data => {
-        const supported = (data.games || []).filter(g => SUPPORTED_TITLES.has(g.title))
-        setGames(supported.slice(0, 30))
-      })
-      .catch(() => setError('Could not reach 18xx.games'))
-      .finally(() => setLoading(false))
-  }
-
-  return (
-    <div className="mt-3">
-      <div className="flex items-center gap-2 mb-2 flex-wrap">
-        <select value={titleFilter} onChange={e => setTitleFilter(e.target.value)}
-          className="text-xs bg-broker-bg border border-broker-border rounded px-2 py-1 text-white">
-          <option value="">All titles</option>
-          {SORTED_TITLES.map(t => <option key={t} value={t}>{t}</option>)}
-        </select>
-        <button onClick={() => fetchGames('active', titleFilter)}
-          className={`text-xs px-2 py-0.5 rounded transition-colors ${tab === 'active' && games ? 'bg-broker-green text-white' : 'bg-broker-surface-hover text-broker-text-muted hover:text-white'}`}>
-          Active
-        </button>
-        <button onClick={() => fetchGames('finished', titleFilter)}
-          className={`text-xs px-2 py-0.5 rounded transition-colors ${tab === 'finished' && games ? 'bg-broker-green text-white' : 'bg-broker-surface-hover text-broker-text-muted hover:text-white'}`}>
-          Finished
-        </button>
-        {loading && <span className="text-xs text-broker-text-muted animate-pulse">Loading...</span>}
-      </div>
-      {error && <div className="text-xs text-red-400">{error}</div>}
-      {games && games.length > 0 && (
-        <div className="space-y-1 max-h-48 overflow-y-auto">
-          {games.map(g => (
-            <div key={g.id} className="flex items-center justify-between bg-broker-bg rounded px-2 py-1.5 text-xs hover:bg-broker-surface-hover/50">
-              <div className="flex-1 min-w-0">
-                <span className="font-bold text-white">{g.title}</span>
-                <span className="text-broker-text-muted ml-1">#{g.id}</span>
-                <span className="text-broker-text-muted ml-1">{g.players.length}p</span>
-                <span className="text-broker-text-muted ml-1 truncate">{g.players.map(p => p.name).join(', ')}</span>
-              </div>
-              <button onClick={() => onImport(g.id)} disabled={importing}
-                className="text-xs bg-broker-green hover:bg-broker-green-light text-white px-2 py-0.5 rounded ml-2 disabled:opacity-40 flex-shrink-0 transition-colors">
-                Load
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
-      {games && games.length === 0 && <div className="text-xs text-broker-text-muted">No supported games found</div>}
-    </div>
-  )
-}
